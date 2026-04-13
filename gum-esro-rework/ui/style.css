@@ -1,0 +1,551 @@
+:root {
+    --bg: #05030a;
+    --bg-alt: #0d0815;
+    --panel: rgba(12, 8, 19, 0.94);
+    --panel-soft: rgba(18, 11, 28, 0.82);
+    --border: rgba(154, 84, 255, 0.42);
+    --text: #efe6ff;
+    --muted: #a791c7;
+    --accent: #a45dff;
+    --accent-strong: #bb81ff;
+    --danger: #ff4d8d;
+    --shadow: 0 0 22px rgba(125, 52, 234, 0.24);
+    --embedded-scale: 1;
+    --app-scale: 0.92;
+    --font-main: "Fixedsys Excelsior 3.01", Fixedsys, "Lucida Console", "Courier New", Courier, monospace;
+    --font-mono: "Fixedsys Excelsior 3.01", Fixedsys, "Lucida Console", "Courier New", Courier, monospace;
+    --app-logo-url: url("assets/esro-logo.png");
+}
+
+* {
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92);
+}
+
+*::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(18, 11, 28, 0.92);
+    border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(187, 129, 255, 0.78), rgba(111, 43, 231, 0.9));
+    border-radius: 999px;
+    border: 1px solid rgba(12, 8, 19, 0.7);
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+html {
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    color: var(--text);
+    background: transparent;
+    overflow: hidden;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+}
+
+body.lb-embedded {
+    background: linear-gradient(180deg, #08080a, #010102);
+}
+
+#phone-shell {
+    position: fixed;
+    right: 3.8vh;
+    bottom: 2.4vh;
+    width: 32.2vh;
+    height: 65.8vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+#phone-shell.hidden {
+    display: none;
+}
+
+body.lb-embedded #phone-shell {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#phone-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#phone-app {
+    position: absolute;
+    inset: 1.65vh 0.92vh 1.95vh;
+    width: auto;
+    height: auto;
+    border-radius: 2.65vh;
+    overflow: hidden;
+    background: linear-gradient(180deg, #040406, #010102);
+    z-index: 1;
+}
+
+#phone-ui {
+    position: relative;
+    width: calc(100% / var(--app-scale));
+    height: calc(100% / var(--app-scale));
+    transform: scale(var(--app-scale));
+    transform-origin: top left;
+}
+
+body.lb-embedded #phone-app {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    background: linear-gradient(180deg, #08080a, #010102);
+}
+
+body.lb-embedded #phone-ui {
+    width: calc(100% / var(--embedded-scale));
+    height: calc(100% / var(--embedded-scale));
+    transform: scale(var(--embedded-scale));
+    transform-origin: top left;
+}
+
+body.lb-embedded #phone-frame {
+    display: none;
+}
+
+.boot-splash {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: linear-gradient(180deg, #05030a 0%, #090611 100%);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    z-index: 4;
+}
+
+.boot-logo {
+    width: 10.8vh;
+    height: 10.8vh;
+    object-fit: contain;
+    filter: drop-shadow(0 0 16px rgba(125, 52, 234, 0.32));
+    animation: pulseLogo 2s ease-in-out infinite;
+}
+
+.boot-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f7efff;
+}
+
+.boot-subtitle {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.boot-scan {
+    width: 78%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(187, 129, 255, 0.9), transparent);
+    box-shadow: 0 0 16px rgba(125, 52, 234, 0.35);
+    animation: scan 2.1s ease-in-out infinite;
+}
+
+.app {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 12px 11px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    background:
+        var(--app-logo-url) center 38%/20vh no-repeat,
+        radial-gradient(circle at top left, rgba(187, 129, 255, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(125, 52, 234, 0.12), transparent 35%),
+        linear-gradient(180deg, rgba(13, 8, 21, 0.96), rgba(5, 3, 10, 0.98));
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+.hidden {
+    display: none;
+}
+
+.app__header,
+.header__actions,
+.top-nav,
+.tab-row,
+.terminal__header,
+.compose,
+.profile-grid,
+.summary-grid,
+.list-card__meta,
+.quick-actions {
+    display: flex;
+}
+
+.app__header,
+.terminal__header,
+.compose,
+.list-card__meta {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.app__header {
+    gap: 12px;
+}
+
+.eyebrow {
+    margin: 0 0 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+h1 {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+}
+
+h2 {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+}
+
+h3 {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+.header__actions,
+.quick-actions,
+.top-nav,
+.tab-row,
+.summary-grid,
+.profile-grid {
+    gap: 6px;
+}
+
+.chip,
+.nav-button,
+.channel-tab,
+.ghost-button,
+.primary-button,
+.tag,
+.nav-badge {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text);
+}
+
+.chip,
+.tag,
+.nav-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+}
+
+.chip--status {
+    color: var(--accent-strong);
+}
+
+.ghost-button,
+.primary-button,
+.nav-button,
+.channel-tab {
+    padding: 6px 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 11px;
+}
+
+.primary-button,
+.nav-button.is-active,
+.channel-tab.is-active {
+    background: linear-gradient(135deg, rgba(164, 93, 255, 0.22), rgba(111, 43, 231, 0.18));
+}
+
+.nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    margin-left: 6px;
+    padding: 2px 7px;
+    background: rgba(187, 129, 255, 0.18);
+    color: var(--accent-strong);
+}
+
+.quick-actions,
+.top-nav,
+.tab-row {
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.quick-card,
+.panel,
+.message,
+.list-card,
+.empty-state {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.quick-card,
+.list-card,
+.empty-state,
+.panel {
+    padding: 10px;
+}
+
+.screen {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+}
+
+.panel {
+    width: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+.channel-row,
+.messages,
+.list-grid {
+    display: grid;
+    gap: 6px;
+}
+
+.channel-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.messages {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.message {
+    padding: 8px 10px;
+}
+
+.message__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 10px;
+    margin-bottom: 6px;
+}
+
+.message__body {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.compose {
+    gap: 6px;
+}
+
+.compose input,
+input,
+select,
+textarea {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    background: linear-gradient(180deg, rgba(26, 18, 38, 0.96), rgba(11, 7, 17, 0.96));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 11px;
+    outline: none;
+    box-shadow: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+select {
+    padding-right: 28px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+        linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position:
+        calc(100% - 14px) calc(50% - 2px),
+        calc(100% - 9px) calc(50% - 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: rgba(187, 129, 255, 0.86);
+    box-shadow: 0 0 0 1px rgba(187, 129, 255, 0.28);
+}
+
+.list-grid,
+.summary-grid,
+.profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-grid,
+.profile-grid {
+    display: grid;
+}
+
+.metric {
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--panel-soft);
+}
+
+.metric__label {
+    color: var(--muted);
+    font-size: 10px;
+    margin-bottom: 6px;
+}
+
+.metric__value {
+    font-size: 13px;
+}
+
+.list-card__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.list-card__meta,
+.subtle {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.list-card.is-focused {
+    border-color: rgba(187, 129, 255, 0.46);
+    background: linear-gradient(180deg, rgba(24, 13, 39, 0.96), rgba(12, 8, 19, 0.92));
+}
+
+.list-card--receipt {
+    border-style: dashed;
+    background: linear-gradient(180deg, rgba(28, 16, 44, 0.9), rgba(12, 8, 19, 0.92));
+}
+
+.empty-state {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    min-height: 88px;
+    color: var(--muted);
+}
+
+@keyframes pulseLogo {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: scale(1.04);
+        opacity: 1;
+    }
+}
+
+@keyframes scan {
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.35;
+    }
+
+    50% {
+        transform: translateY(8px);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 560px) {
+    #phone-shell,
+    #phone-app,
+    .app {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        padding: 14px;
+    }
+
+    .channel-row,
+    .summary-grid,
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}

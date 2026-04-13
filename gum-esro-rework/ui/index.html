@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESRO Rework</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="phone-shell" class="hidden">
+        <img id="phone-frame" src="assets/phone-frame.png" alt="phone frame">
+        <div id="phone-app">
+            <div id="phone-ui">
+                <div id="bootSplash" class="boot-splash hidden">
+                    <img src="assets/esro-logo.png" alt="ESRO logo" class="boot-logo">
+                    <div class="boot-title">ESRO TERMINAL</div>
+                    <div class="boot-subtitle">linking relay</div>
+                    <div class="boot-scan"></div>
+                </div>
+                <div id="app" class="app hidden">
+                    <header class="app__header">
+                        <div>
+                            <p class="eyebrow">Enchanted Star Realms Online</p>
+                            <h1>ESRO</h1>
+                        </div>
+                        <div class="header__actions">
+                            <div id="statusChip" class="chip chip--status">offline</div>
+                            <button id="closeButton" class="ghost-button" type="button">Close</button>
+                        </div>
+                    </header>
+
+                    <section id="quickActions" class="quick-actions"></section>
+
+                    <nav id="topNav" class="top-nav"></nav>
+
+                    <main id="screen" class="screen"></main>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
