@@ -10,7 +10,7 @@ const items: { id: ScreenId; label: string; icon: string }[] = [
   { id: "skills", label: "skills", icon: "✦" },
   { id: "inventory", label: "inv.", icon: "▦" },
   { id: "party", label: "party", icon: "◈" },
-  { id: "archive", label: "arch.", icon: "∷" },
+  { id: "profile", label: "profile", icon: "◉" },
 ]
 
 export function BottomNav() {

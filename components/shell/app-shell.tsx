@@ -12,6 +12,7 @@ import { SkillsScreen } from "@/components/skills/skills-screen"
 import { InventoryScreen } from "@/components/inventory/inventory-screen"
 import { PartyScreen } from "@/components/party/party-screen"
 import { ArchiveScreen } from "@/components/archive/archive-screen"
+import { ProfileScreen } from "@/components/profile/profile-screen"
 
 export function AppShell() {
   const screen = useEsroStore((s) => s.screen)

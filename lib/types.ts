@@ -13,6 +13,7 @@ export type ScreenId =
   | "inventory"
   | "party"
   | "archive"
+  | "profile"
 
 export type MessageKind = "player" | "system" | "whisper"
 
@@ -120,4 +121,53 @@ export interface Identity {
   title: string
   titleRarity: Rarity
   established: boolean
+}
+
+export interface OwnedTitle {
+  id: string
+  label: string
+  rarity: Rarity
+  equipped: boolean
+}
+
+export interface ProfileBadge {
+  id: string
+  label: string
+  description: string
+  earnedAt: number
+}
+
+export interface ProfileNotification {
+  id: number
+  title: string
+  body: string
+  priority: "low" | "normal" | "high"
+  state: "unread" | "read"
+  deeplink?: {
+    screen?: ScreenId
+    tab?: string
+    channel?: ChannelId
+    contractId?: string
+  }
+  createdAt: number
+}
+
+export interface Faction {
+  id: string
+  label: string
+  rank: number
+  standing: number
+  maxStanding: number
+}
+
+export interface Profile {
+  handle: string
+  title: OwnedTitle | null
+  faction: Faction | null
+  level: number
+  xp: number
+  xpToNext: number
+  ownedTitles: OwnedTitle[]
+  badges: ProfileBadge[]
+  notifications: ProfileNotification[]
 }

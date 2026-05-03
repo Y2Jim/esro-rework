@@ -4,6 +4,8 @@ import { create } from "zustand"
 import type {
   ChannelId,
   ChatMessage,
+  Profile,
+  ProfileNotification,
   RecoveryResult,
   ScreenId,
   Rarity,
@@ -12,6 +14,7 @@ import {
   channels as seedChannels,
   identity as seedIdentity,
   messages as seedMessages,
+  profile as seedProfile,
   recoveryResults as seedRecovery,
   shards as seedShards,
 } from "@/lib/mock-data"
@@ -53,6 +56,14 @@ interface EsroState {
   identity: typeof seedIdentity
   unread: Record<ChannelId, number>
   markRead: (c: ChannelId) => void
+
+  // Profile
+  profile: Profile
+  profileTab: "summary" | "notifications"
+  setProfileTab: (tab: "summary" | "notifications") => void
+  setActiveTitle: (titleId: string) => void
+  markNotificationRead: (id: number) => void
+  openNotification: (notification: ProfileNotification) => void
 }
 
 function rollRarity(focused: boolean): Rarity {
@@ -189,4 +200,42 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   ),
   markRead: (c) =>
     set((s) => ({ unread: { ...s.unread, [c]: 0 } })),
+
+  // Profile
+  profile: seedProfile,
+  profileTab: "summary",
+  setProfileTab: (tab) => set({ profileTab: tab }),
+  setActiveTitle: (titleId) =>
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        ownedTitles: s.profile.ownedTitles.map((t) => ({
+          ...t,
+          equipped: t.id === titleId,
+        })),
+        title: s.profile.ownedTitles.find((t) => t.id === titleId) || s.profile.title,
+      },
+    })),
+  markNotificationRead: (id) =>
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        notifications: s.profile.notifications.map((n) =>
+          n.id === id ? { ...n, state: "read" as const } : n
+        ),
+      },
+    })),
+  openNotification: (notification) => {
+    const { markNotificationRead, setScreen, setChannel, setProfileTab } = get()
+    markNotificationRead(notification.id)
+    if (notification.deeplink?.screen) {
+      setScreen(notification.deeplink.screen)
+      if (notification.deeplink.channel) {
+        setChannel(notification.deeplink.channel)
+      }
+      if (notification.deeplink.screen === "profile" && notification.deeplink.tab) {
+        setProfileTab(notification.deeplink.tab as "summary" | "notifications")
+      }
+    }
+  },
 }))

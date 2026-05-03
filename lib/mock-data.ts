@@ -6,6 +6,7 @@ import type {
   Identity,
   InventoryItem,
   PartyMember,
+  Profile,
   RecoveryResult,
   Skill,
 } from "./types"
@@ -613,4 +614,107 @@ export const shards = {
   relay_tokens: 14,
   deep_signals: 2,
   signal_salvage: 6,
+}
+
+export const profile: Profile = {
+  handle: "@routetender.07",
+  title: {
+    id: "route_tender",
+    label: "Route Tender",
+    rarity: "common",
+    equipped: true,
+  },
+  faction: {
+    id: "waykeepers",
+    label: "Waykeepers",
+    rank: 2,
+    standing: 340,
+    maxStanding: 500,
+  },
+  level: 14,
+  xp: 2840,
+  xpToNext: 3200,
+  ownedTitles: [
+    {
+      id: "route_tender",
+      label: "Route Tender",
+      rarity: "common",
+      equipped: true,
+    },
+    {
+      id: "signal_keeper",
+      label: "Signal Keeper",
+      rarity: "uncommon",
+      equipped: false,
+    },
+    {
+      id: "archive_listener",
+      label: "Archive Listener",
+      rarity: "rare",
+      equipped: false,
+    },
+    {
+      id: "relay_initiate",
+      label: "Relay Initiate",
+      rarity: "common",
+      equipped: false,
+    },
+  ],
+  badges: [
+    {
+      id: "first_expedition",
+      label: "First Steps",
+      description: "Completed your first expedition.",
+      earnedAt: now - 1000 * 60 * 60 * 24 * 14,
+    },
+    {
+      id: "archive_recovered",
+      label: "Archive Touched",
+      description: "Recovered your first archive fragment.",
+      earnedAt: now - 1000 * 60 * 60 * 24 * 10,
+    },
+    {
+      id: "faction_joined",
+      label: "Aligned",
+      description: "Joined a faction.",
+      earnedAt: now - 1000 * 60 * 60 * 24 * 7,
+    },
+  ],
+  notifications: [
+    {
+      id: 1,
+      title: "Expedition Complete",
+      body: "Your Archive Dive has finished. Rewards are ready to claim.",
+      priority: "high",
+      state: "unread",
+      deeplink: { screen: "expedition" },
+      createdAt: now - 1000 * 60 * 12,
+    },
+    {
+      id: 2,
+      title: "Faction Standing",
+      body: "Your standing with the Waykeepers increased by 45.",
+      priority: "normal",
+      state: "unread",
+      createdAt: now - 1000 * 60 * 38,
+    },
+    {
+      id: 3,
+      title: "New Title Unlocked",
+      body: "You earned the Signal Keeper title from signal recovery.",
+      priority: "normal",
+      state: "read",
+      deeplink: { screen: "profile" },
+      createdAt: now - 1000 * 60 * 60 * 2,
+    },
+    {
+      id: 4,
+      title: "Party Invite",
+      body: "@palesignal invited you to join their party.",
+      priority: "high",
+      state: "read",
+      deeplink: { screen: "party" },
+      createdAt: now - 1000 * 60 * 60 * 4,
+    },
+  ],
 }
