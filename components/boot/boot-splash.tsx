@@ -72,7 +72,7 @@ export function BootSplash() {
             }}
           />
           <div className="flicker">
-            <EsroLogo size={104} />
+            <EsroLogo size={120} />
           </div>
         </motion.div>
 

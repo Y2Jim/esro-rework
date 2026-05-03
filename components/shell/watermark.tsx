@@ -10,7 +10,7 @@ export function Watermark() {
       aria-hidden
       className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center opacity-[0.05]"
     >
-      <EsroLogo size={280} muted />
+      <EsroLogo size={280} variant="pixel" muted />
     </div>
   )
 }
