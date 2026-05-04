@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
-import { rarityClass, rarityLabel } from "@/lib/rarity"
+import { rarityColor, rarityLabel } from "@/lib/rarity"
 
 export function ProfileScreen() {
   const profile = useEsroStore((s) => s.profile)
@@ -98,7 +98,7 @@ function SummaryTab({
         <MetricCard
           label="Title"
           value={profile.title?.label || "Relay Initiate"}
-          valueClass={profile.title ? rarityClass(profile.title.rarity) : undefined}
+          valueClass={profile.title ? rarityColor[profile.title.rarity] : undefined}
         />
         <MetricCard
           label="Faction"
@@ -162,7 +162,7 @@ function SummaryTab({
               className="rounded-lg border border-[color:var(--color-border-soft)] bg-[color:var(--color-bg-soft)] p-2.5"
             >
               <div className="mb-1 flex items-start justify-between gap-2">
-                <span className={cn("text-[11px] font-medium", rarityClass(title.rarity))}>
+                <span className={cn("text-[11px] font-medium", rarityColor[title.rarity])}>
                   {title.label}
                 </span>
                 <button
@@ -180,7 +180,7 @@ function SummaryTab({
                 </button>
               </div>
               <span className="text-[9px] text-[color:var(--color-muted)]">
-                {rarityLabel(title.rarity)}
+                {rarityLabel[title.rarity]}
               </span>
             </div>
           ))}
