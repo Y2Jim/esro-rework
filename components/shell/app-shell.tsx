@@ -42,6 +42,7 @@ export function AppShell() {
             {screen === "inventory" && <InventoryScreen />}
             {screen === "party" && <PartyScreen />}
             {screen === "archive" && <ArchiveScreen />}
+            {screen === "profile" && <ProfileScreen />}
           </motion.div>
         </AnimatePresence>
       </div>

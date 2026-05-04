@@ -16,6 +16,8 @@ const items: { id: ScreenId; label: string; icon: string }[] = [
 export function BottomNav() {
   const screen = useEsroStore((s) => s.screen)
   const setScreen = useEsroStore((s) => s.setScreen)
+  const profile = useEsroStore((s) => s.profile)
+  const unreadNotifications = profile.notifications.filter((n) => n.state === "unread").length
 
   return (
     <nav
@@ -41,11 +43,16 @@ export function BottomNav() {
               >
                 <span
                   className={cn(
-                    "text-[14px] leading-none transition-all",
+                    "relative text-[14px] leading-none transition-all",
                     active && "text-glow",
                   )}
                 >
                   {it.icon}
+                  {it.id === "profile" && unreadNotifications > 0 && (
+                    <span className="absolute -right-1.5 -top-1 flex h-3 min-w-3 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)] px-0.5 text-[7px] font-semibold text-[color:var(--color-bg)]">
+                      {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                    </span>
+                  )}
                 </span>
                 <span className="text-[8.5px] uppercase tracking-[0.18em]">
                   {it.label}
