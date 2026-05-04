@@ -291,8 +291,10 @@ function NotificationsTab({
                   className={cn(
                     "rounded-full border px-1.5 py-0.5 uppercase tracking-wider",
                     notification.priority === "high"
-                      ? "border-[color:var(--color-violet-bright)]/30 text-[color:var(--color-violet-bright)]"
-                      : "border-[color:var(--color-border-soft)]"
+                      ? "border-[color:var(--color-danger)]/40 text-[color:var(--color-danger)]"
+                      : notification.priority === "normal"
+                      ? "border-[color:var(--color-cyan)]/30 text-[color:var(--color-cyan-muted)]"
+                      : "border-[color:var(--color-border-soft)] text-[color:var(--color-muted)]"
                   )}
                 >
                   {notification.priority}

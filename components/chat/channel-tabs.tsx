@@ -3,6 +3,40 @@
 import { channels } from "@/lib/mock-data"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
+import type { ChannelId } from "@/lib/types"
+
+const channelColor: Record<ChannelId, { active: string; dot: string; underline: string }> = {
+  PUBLIC: {
+    active: "text-[color:var(--color-foreground)]",
+    dot: "bg-[color:var(--color-foreground)]",
+    underline: "bg-[color:var(--color-foreground)]",
+  },
+  TRADE: {
+    active: "text-[color:var(--color-amber)]",
+    dot: "bg-[color:var(--color-amber)]",
+    underline: "bg-[color:var(--color-amber)]",
+  },
+  HELP: {
+    active: "text-[color:var(--color-cyan)]",
+    dot: "bg-[color:var(--color-cyan)]",
+    underline: "bg-[color:var(--color-cyan)]",
+  },
+  LORE: {
+    active: "text-[color:var(--color-violet-bright)]",
+    dot: "bg-[color:var(--color-violet-bright)]",
+    underline: "bg-[color:var(--color-violet-bright)]",
+  },
+  UNDERCHAT: {
+    active: "text-[color:var(--color-danger)]",
+    dot: "bg-[color:var(--color-danger)]",
+    underline: "bg-[color:var(--color-danger)]",
+  },
+  GAME: {
+    active: "text-[color:var(--color-green)]",
+    dot: "bg-[color:var(--color-green)]",
+    underline: "bg-[color:var(--color-green)]",
+  },
+}
 
 export function ChannelTabs() {
   const current = useEsroStore((s) => s.channel)
@@ -20,6 +54,7 @@ export function ChannelTabs() {
           const active = current === c.id
           const hidden = c.restricted
           const u = unread[c.id] ?? 0
+          const colors = channelColor[c.id]
           return (
             <button
               key={c.id}
@@ -29,7 +64,7 @@ export function ChannelTabs() {
               className={cn(
                 "relative shrink-0 rounded-md px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] transition-colors",
                 active
-                  ? "text-[color:var(--color-foreground)]"
+                  ? colors.active
                   : "text-[color:var(--color-muted)] hover:text-[color:var(--color-lilac)]",
               )}
             >
@@ -40,9 +75,7 @@ export function ChannelTabs() {
                     aria-hidden
                     className={cn(
                       "inline-block h-[5px] w-[5px] rounded-full",
-                      active
-                        ? "bg-[color:var(--color-violet-bright)] text-glow"
-                        : "bg-[color:var(--color-violet)]",
+                      active ? colors.dot : "bg-[color:var(--color-muted-2)]",
                     )}
                   />
                 )}
@@ -52,9 +85,7 @@ export function ChannelTabs() {
                     className={cn(
                       "ml-0.5 inline-flex min-w-[14px] items-center justify-center rounded-sm px-1 text-[8.5px] leading-[12px]",
                       "border text-[color:var(--color-foreground)]",
-                      hidden
-                        ? "border-[color:color-mix(in_oklab,var(--color-violet-bright)_50%,transparent)] bg-[color:color-mix(in_oklab,var(--color-violet)_20%,transparent)]"
-                        : "border-[color:var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-violet)_15%,transparent)]",
+                      "border-[color:var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-panel)_80%,transparent)]",
                     )}
                   >
                     {u}
@@ -66,9 +97,7 @@ export function ChannelTabs() {
                 aria-hidden
                 className={cn(
                   "absolute -bottom-[1px] left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-full transition-all",
-                  active
-                    ? "bg-[color:var(--color-violet-bright)] opacity-100 text-glow"
-                    : "opacity-0",
+                  active ? `${colors.underline} opacity-100` : "opacity-0",
                 )}
               />
             </button>

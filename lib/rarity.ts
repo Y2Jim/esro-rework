@@ -22,17 +22,17 @@ export const rarityOrder: Rarity[] = [
 
 export const rarityColor: Record<Rarity, string> = {
   common: "text-[color:var(--color-muted)]",
-  uncommon: "text-[color:var(--color-lilac)]",
+  uncommon: "text-[color:var(--color-cyan)]",
   rare: "text-[color:var(--color-violet-bright)]",
-  epic: "text-[color:var(--color-violet-bright)]",
+  epic: "text-[color:var(--color-amber)]",
   legendary: "text-[color:var(--color-prismatic)]",
 }
 
 export const rarityBorder: Record<Rarity, string> = {
   common: "border-[color:var(--color-border-soft)]",
-  uncommon: "border-[color:var(--color-border)]",
+  uncommon: "border-[color:color-mix(in_oklab,var(--color-cyan)_40%,transparent)]",
   rare: "border-[color:color-mix(in_oklab,var(--color-violet)_55%,transparent)]",
-  epic: "border-[color:color-mix(in_oklab,var(--color-violet)_70%,transparent)]",
+  epic: "border-[color:color-mix(in_oklab,var(--color-amber)_55%,transparent)]",
   legendary:
     "border-[color:color-mix(in_oklab,var(--color-prismatic)_60%,transparent)]",
 }

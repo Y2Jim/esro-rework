@@ -4,13 +4,13 @@ import type { ScreenId } from "@/lib/types"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 
-const items: { id: ScreenId; label: string; icon: string }[] = [
-  { id: "chat", label: "chat", icon: "▤" },
-  { id: "expedition", label: "exped.", icon: "◇" },
-  { id: "skills", label: "skills", icon: "✦" },
-  { id: "inventory", label: "inv.", icon: "▦" },
-  { id: "party", label: "party", icon: "◈" },
-  { id: "profile", label: "profile", icon: "◉" },
+const items: { id: ScreenId; label: string; icon: string; color: string; glow: string }[] = [
+  { id: "chat", label: "chat", icon: "▤", color: "text-[color:var(--color-foreground)]", glow: "text-glow-soft" },
+  { id: "expedition", label: "exped.", icon: "◇", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan" },
+  { id: "skills", label: "skills", icon: "✦", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow" },
+  { id: "inventory", label: "inv.", icon: "▦", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber" },
+  { id: "party", label: "party", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green" },
+  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft" },
 ]
 
 export function BottomNav() {
@@ -36,7 +36,7 @@ export function BottomNav() {
                 className={cn(
                   "group relative flex w-full flex-col items-center gap-0.5 py-1 transition-colors",
                   active
-                    ? "text-[color:var(--color-violet-bright)]"
+                    ? it.color
                     : "text-[color:var(--color-muted)] hover:text-[color:var(--color-lilac)]",
                 )}
                 aria-current={active ? "page" : undefined}
@@ -44,7 +44,7 @@ export function BottomNav() {
                 <span
                   className={cn(
                     "relative text-[14px] leading-none transition-all",
-                    active && "text-glow",
+                    active && it.glow,
                   )}
                 >
                   {it.icon}
@@ -60,7 +60,15 @@ export function BottomNav() {
                 {active && (
                   <span
                     aria-hidden
-                    className="absolute -top-[9px] left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full bg-[color:var(--color-violet-bright)] text-glow"
+                    className={cn(
+                      "absolute -top-[9px] left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full",
+                      it.id === "chat" && "bg-[color:var(--color-foreground)]",
+                      it.id === "expedition" && "bg-[color:var(--color-cyan)]",
+                      it.id === "skills" && "bg-[color:var(--color-violet-bright)]",
+                      it.id === "inventory" && "bg-[color:var(--color-amber)]",
+                      it.id === "party" && "bg-[color:var(--color-green)]",
+                      it.id === "profile" && "bg-[color:var(--color-lilac)]",
+                    )}
                   />
                 )}
               </button>

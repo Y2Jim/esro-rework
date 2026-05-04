@@ -1,25 +1,50 @@
 @import "tailwindcss";
 
 @theme {
-  /* Core palette — 5 colors total:
-     1. near-black purple-tinted background
-     2. rich violet primary
-     3. pale lavender foreground
-     4. muted lilac border / secondary accent
-     5. prismatic gold-violet (rare reward accent)
+  /* Core palette — DOS terminal with functional accents
+     Primary: violet (brand, active states)
+     Secondary: cyan (info, links, secondary actions)
+     Accent: amber/gold (highlights, warnings, rare)
+     Success: green (confirmations, positive)
+     Danger: rose (errors, destructive)
   */
   --color-bg: #08060d;
   --color-panel: #120c1d;
   --color-panel-2: #1a1128;
   --color-border: #2a1f44;
   --color-border-soft: #1f1733;
+  
+  /* Primary - violet */
   --color-violet: #a87bff;
   --color-violet-bright: #c9a7ff;
   --color-lilac: #d8c7ff;
+  
+  /* Secondary - cyan (DOS blue-green) */
+  --color-cyan: #5de4c7;
+  --color-cyan-bright: #89f7e2;
+  --color-cyan-muted: #3a9a85;
+  
+  /* Accent - amber/gold (highlights, rare) */
+  --color-amber: #f5c542;
+  --color-amber-bright: #ffe175;
+  --color-amber-muted: #a68520;
+  
+  /* Success - green */
+  --color-green: #7ee787;
+  --color-green-bright: #a5f3ab;
+  --color-green-muted: #4d8b52;
+  
+  /* Danger - rose */
+  --color-danger: #f47a8e;
+  --color-danger-bright: #ffa0ae;
+  --color-danger-muted: #a65060;
+  
+  /* Neutral text */
   --color-foreground: #e6dcff;
   --color-muted: #7a6fa0;
   --color-muted-2: #554a78;
-  --color-danger: #e07a95;
+  
+  /* Special */
   --color-prismatic: #f3d58a;
 
   --radius-phone: 2.25rem;
@@ -120,6 +145,22 @@
 
 .text-glow-soft {
   text-shadow: 0 0 6px color-mix(in oklab, var(--color-violet) 25%, transparent);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px color-mix(in oklab, var(--color-cyan) 50%, transparent);
+}
+
+.text-glow-amber {
+  text-shadow: 0 0 8px color-mix(in oklab, var(--color-amber) 50%, transparent);
+}
+
+.text-glow-green {
+  text-shadow: 0 0 8px color-mix(in oklab, var(--color-green) 50%, transparent);
+}
+
+.text-glow-danger {
+  text-shadow: 0 0 8px color-mix(in oklab, var(--color-danger) 50%, transparent);
 }
 
 /* Blinking caret */
