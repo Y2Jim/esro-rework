@@ -58,7 +58,7 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
         </div>
         <button
           type="button"
-          className="shrink-0 rounded-sm border border-[color:color-mix(in_oklab,var(--color-violet)_50%,transparent)] px-2 py-[3px] text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-violet-bright)] transition-all hover:text-glow hover:border-[color:var(--color-violet-bright)]"
+          className="shrink-0 rounded-sm border border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 px-2 py-[3px] text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-cyan)] transition-all hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
         >
           begin
         </button>
@@ -66,15 +66,15 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
 
       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9.5px] text-[color:var(--color-muted)]">
         <span className="uppercase tracking-[0.2em]">rewards</span>
-        <span className="text-[color:var(--color-foreground)]/80">
+        <span className="text-[color:var(--color-green)]">
           +{exp.rewards.xp} xp
         </span>
         <span className="text-[color:var(--color-muted-2)]">·</span>
-        <span className="text-[color:var(--color-foreground)]/80">
+        <span className="text-[color:var(--color-amber)]">
           {exp.rewards.tokens} tokens
         </span>
         <span className="text-[color:var(--color-muted-2)]">·</span>
-        <span className="truncate text-[color:var(--color-lilac)]/80">
+        <span className="truncate text-[color:var(--color-cyan)]/80">
           {exp.rewards.materials.join(", ")}
         </span>
       </div>

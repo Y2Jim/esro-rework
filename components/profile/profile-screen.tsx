@@ -34,8 +34,8 @@ export function ProfileScreen() {
           className={cn(
             "rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wider transition-colors",
             profileTab === "summary"
-              ? "border-[color:var(--color-violet-bright)] bg-[color:var(--color-violet-bright)]/15 text-[color:var(--color-violet-bright)]"
-              : "border-[color:var(--color-border-soft)] text-[color:var(--color-muted)] hover:border-[color:var(--color-lilac)] hover:text-[color:var(--color-lilac)]"
+              ? "border-[color:var(--color-lilac)]/60 bg-[color:var(--color-lilac)]/15 text-[color:var(--color-lilac)]"
+              : "border-[color:var(--color-border-soft)] text-[color:var(--color-muted)] hover:border-[color:var(--color-lilac)]/40 hover:text-[color:var(--color-lilac)]"
           )}
         >
           Summary
@@ -46,13 +46,13 @@ export function ProfileScreen() {
           className={cn(
             "relative rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-wider transition-colors",
             profileTab === "notifications"
-              ? "border-[color:var(--color-violet-bright)] bg-[color:var(--color-violet-bright)]/15 text-[color:var(--color-violet-bright)]"
-              : "border-[color:var(--color-border-soft)] text-[color:var(--color-muted)] hover:border-[color:var(--color-lilac)] hover:text-[color:var(--color-lilac)]"
+              ? "border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 text-[color:var(--color-danger)]"
+              : "border-[color:var(--color-border-soft)] text-[color:var(--color-muted)] hover:border-[color:var(--color-danger)]/30 hover:text-[color:var(--color-danger-muted)]"
           )}
         >
           Notices
           {unreadCount > 0 && (
-            <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)]/25 px-1 text-[9px] text-[color:var(--color-violet-bright)]">
+            <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[color:var(--color-danger)]/25 px-1 text-[9px] text-[color:var(--color-danger)]">
               {unreadCount}
             </span>
           )}
@@ -113,17 +113,18 @@ function SummaryTab({
       </div>
 
       {/* XP bar */}
-      <div className="rounded-lg border border-[color:var(--color-border-soft)] bg-[color:var(--color-bg-soft)] p-3">
+      <div className="rounded-lg border border-[color:var(--color-cyan-muted)]/30 bg-[color:var(--color-bg-soft)] p-3">
         <div className="mb-2 flex items-center justify-between text-[10px]">
-          <span className="text-[color:var(--color-muted)]">Experience</span>
-          <span className="text-[color:var(--color-foreground)]">{xpPercent}%</span>
+          <span className="text-[color:var(--color-cyan-muted)]">Experience</span>
+          <span className="text-[color:var(--color-cyan)]">{xpPercent}%</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border-soft)]">
           <motion.div
-            className="h-full rounded-full bg-[color:var(--color-violet-bright)]"
+            className="h-full rounded-full bg-gradient-to-r from-[color:var(--color-cyan-muted)] to-[color:var(--color-cyan)]"
             initial={{ width: 0 }}
             animate={{ width: `${xpPercent}%` }}
             transition={{ duration: 0.6, ease: "easeOut" }}
+            style={{ boxShadow: "0 0 8px rgba(93,228,199,0.4)" }}
           />
         </div>
       </div>

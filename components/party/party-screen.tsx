@@ -36,13 +36,13 @@ export function PartyScreen() {
           <div className="mt-2 flex gap-1.5">
             <button
               type="button"
-              className="flex-1 rounded-sm border border-[color:color-mix(in_oklab,var(--color-violet)_50%,transparent)] px-2 py-1 text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--color-violet-bright)] transition-colors hover:text-glow"
+              className="flex-1 rounded-sm border border-[color:var(--color-green-muted)]/50 bg-[color:var(--color-green)]/10 px-2 py-1 text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--color-green)] transition-colors hover:text-glow-green hover:border-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/20"
             >
               share relay
             </button>
             <button
               type="button"
-              className="flex-1 rounded-sm border border-[color:var(--color-border-soft)] px-2 py-1 text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-border)] hover:text-[color:var(--color-lilac)]"
+              className="flex-1 rounded-sm border border-[color:var(--color-danger-muted)]/40 px-2 py-1 text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--color-danger-muted)] transition-colors hover:border-[color:var(--color-danger)] hover:text-[color:var(--color-danger)]"
             >
               leave party
             </button>

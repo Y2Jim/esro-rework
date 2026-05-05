@@ -5,10 +5,10 @@ import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
 const statusTone: Record<PartyMember["status"], string> = {
-  ready: "text-[color:var(--color-violet-bright)]",
-  idle: "text-[color:var(--color-lilac)]",
+  ready: "text-[color:var(--color-green)]",
+  idle: "text-[color:var(--color-cyan)]",
   offline: "text-[color:var(--color-muted)]",
-  deployed: "text-[color:var(--color-prismatic)]",
+  deployed: "text-[color:var(--color-amber)]",
 }
 
 export function PartySlot({
@@ -37,7 +37,7 @@ export function PartySlot({
             </div>
           </div>
         </div>
-        <span className="text-[9.5px] uppercase tracking-[0.25em] text-[color:var(--color-violet-bright)]">
+        <span className="text-[9.5px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
           invite
         </span>
       </button>
@@ -56,7 +56,7 @@ export function PartySlot({
       className={cn(
         "flex w-full items-center gap-2.5 rounded-md border bg-[color:var(--color-panel)]/50 px-3 py-2",
         member.leader
-          ? "border-[color:color-mix(in_oklab,var(--color-violet)_45%,transparent)]"
+          ? "border-[color:var(--color-green-muted)]/50"
           : "border-[color:var(--color-border-soft)]",
       )}
     >
@@ -64,8 +64,8 @@ export function PartySlot({
         className={cn(
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border text-[13px]",
           member.leader
-            ? "border-[color:var(--color-violet-bright)] text-[color:var(--color-violet-bright)] text-glow"
-            : "border-[color:var(--color-border)] text-[color:var(--color-lilac)]",
+            ? "border-[color:var(--color-green)] text-[color:var(--color-green)] text-glow-green"
+            : "border-[color:var(--color-border)] text-[color:var(--color-green-muted)]",
         )}
       >
         {member.leader ? "✦" : "◈"}
@@ -78,7 +78,7 @@ export function PartySlot({
               {member.handle}
             </span>
             {member.leader && (
-              <span className="text-[8.5px] uppercase tracking-[0.25em] text-[color:var(--color-violet-bright)]">
+              <span className="text-[8.5px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
                 lead
               </span>
             )}

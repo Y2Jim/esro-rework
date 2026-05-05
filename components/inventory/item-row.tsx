@@ -30,7 +30,7 @@ export function ItemRow({
       className={cn(
         "flex w-full items-center gap-2.5 rounded-md border px-2 py-1.5 text-left transition-all",
         active
-          ? "border-[color:color-mix(in_oklab,var(--color-violet)_55%,transparent)] bg-[color:var(--color-panel-2)]/70"
+          ? "border-[color:var(--color-amber-muted)]/60 bg-[color:var(--color-amber)]/5"
           : "border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/50 hover:border-[color:var(--color-border)]",
       )}
     >
