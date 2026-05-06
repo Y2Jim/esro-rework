@@ -12,11 +12,11 @@ function formatClock(ts: number) {
 export function MessageRow({ msg }: { msg: ChatMessage }) {
   if (msg.kind === "system") {
     return (
-      <div className="flex items-baseline gap-2 px-3 py-0.5 text-[11px] leading-snug text-[color:var(--color-muted)]">
+      <div className="flex items-baseline gap-2 px-3 py-0.5 text-[11px] leading-snug text-[color:var(--color-cyan-muted)]">
         <span className="shrink-0 text-[9px] tabular-nums text-[color:var(--color-muted-2)]">
           {formatClock(msg.at)}
         </span>
-        <span className="uppercase tracking-[0.22em] text-[color:color-mix(in_oklab,var(--color-violet)_70%,var(--color-muted))]">
+        <span className="uppercase tracking-[0.22em] text-[color:var(--color-cyan)]">
           ::
         </span>
         <span className="italic">{msg.body}</span>

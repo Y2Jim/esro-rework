@@ -27,13 +27,13 @@ export function ChatInput() {
     >
       <div
         className={cn(
-          "flex items-center gap-2 rounded-md border bg-[color:var(--color-panel)]/70 px-2.5 py-1.5",
-          "border-[color:var(--color-border-soft)] focus-within:border-[color:color-mix(in_oklab,var(--color-violet)_55%,transparent)]",
-          "focus-within:shadow-[0_0_0_1px_color-mix(in_oklab,var(--color-violet)_40%,transparent)]",
+          "flex items-center gap-2 rounded-md border bg-[color:var(--color-panel-2)]/60 px-2.5 py-1.5",
+          "border-[color:var(--color-border)] focus-within:border-[color:var(--color-cyan-muted)]",
+          "focus-within:shadow-[0_0_0_1px_color-mix(in_oklab,var(--color-cyan)_30%,transparent)]",
           readOnly && "opacity-60",
         )}
       >
-        <span className="select-none text-[12px] text-[color:var(--color-violet-bright)]">
+        <span className="select-none text-[12px] text-[color:var(--color-cyan)]">
           &gt;
         </span>
         <input
@@ -59,9 +59,9 @@ export function ChatInput() {
           disabled={readOnly || !value.trim()}
           className={cn(
             "rounded-sm border px-2 py-[3px] text-[9.5px] uppercase tracking-[0.25em] transition-all",
-            "border-[color:var(--color-border)] text-[color:var(--color-lilac)]",
-            "hover:border-[color:color-mix(in_oklab,var(--color-violet)_60%,transparent)] hover:text-[color:var(--color-foreground)] hover:text-glow",
-            "disabled:opacity-30 disabled:hover:border-[color:var(--color-border)] disabled:hover:text-[color:var(--color-lilac)]",
+            "border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)]",
+            "hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20 hover:text-glow-cyan",
+            "disabled:opacity-30 disabled:bg-transparent disabled:hover:border-[color:var(--color-border)] disabled:hover:text-[color:var(--color-muted)]",
           )}
         >
           send

@@ -35,21 +35,21 @@ export function LoadoutSlots({ loadout }: { loadout: string[] }) {
             type="button"
             onClick={() => toggle(s.id)}
             className={cn(
-              "relative flex aspect-square flex-col items-center justify-center rounded-md border bg-[color:var(--color-panel-2)]/70 p-1.5 text-center transition-all",
-              "border-[color:color-mix(in_oklab,var(--color-violet)_50%,transparent)] hover:border-[color:var(--color-violet-bright)]",
+              "relative flex aspect-square flex-col items-center justify-center rounded-md border bg-[color:var(--color-violet)]/10 p-1.5 text-center transition-all",
+              "border-[color:var(--color-violet)]/50 hover:border-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet)]/15",
             )}
             aria-label={`unequip ${s.label}`}
           >
             {s.variant && (
               <span
                 aria-hidden
-                className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[color:var(--color-lilac)]"
+                className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[color:var(--color-violet-bright)]"
               />
             )}
-            <span className="text-[9.5px] uppercase tracking-[0.18em] text-[color:var(--color-foreground)] text-glow-soft">
+            <span className="text-[9.5px] uppercase tracking-[0.18em] text-[color:var(--color-violet-bright)] text-glow">
               {s.label.slice(0, 7)}
             </span>
-            <span className="mt-0.5 text-[9px] text-[color:var(--color-muted)]">
+            <span className="mt-0.5 text-[9px] text-[color:var(--color-lilac)]">
               lv {s.level}
             </span>
           </button>

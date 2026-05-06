@@ -15,7 +15,7 @@ export function RecoveryPanel() {
         cost="1 relay"
         canPull={shards.relay_tokens >= 1}
         onPull={() => run("standard")}
-        tone="violet"
+        tone="amber"
       />
       <PullRow
         title="focused reconstruction"
@@ -23,7 +23,7 @@ export function RecoveryPanel() {
         cost="2 deep"
         canPull={shards.deep_signals >= 2}
         onPull={() => run("focused")}
-        tone="prismatic"
+        tone="cyan"
       />
     </div>
   )
@@ -42,27 +42,33 @@ function PullRow({
   cost: string
   canPull: boolean
   onPull: () => void
-  tone: "violet" | "prismatic"
+  tone: "amber" | "cyan"
 }) {
   return (
     <div
       className={cn(
         "rounded-md border bg-[color:var(--color-panel)]/50 p-2.5",
-        tone === "prismatic"
-          ? "border-[color:color-mix(in_oklab,var(--color-prismatic)_25%,var(--color-border))]"
-          : "border-[color:var(--color-border-soft)]",
+        tone === "cyan"
+          ? "border-[color:var(--color-cyan-muted)]/40"
+          : "border-[color:var(--color-amber-muted)]/40",
       )}
     >
       <div className="flex items-baseline justify-between gap-2">
         <div className="min-w-0">
-          <h4 className="truncate text-[12px] text-[color:var(--color-foreground)]">
+          <h4 className={cn(
+            "truncate text-[12px]",
+            tone === "cyan" ? "text-[color:var(--color-cyan)]" : "text-[color:var(--color-amber)]"
+          )}>
             {title}
           </h4>
           <p className="mt-0.5 text-[10px] leading-snug text-[color:var(--color-foreground)]/70">
             {detail}
           </p>
         </div>
-        <span className="shrink-0 text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+        <span className={cn(
+          "shrink-0 text-[9px] uppercase tracking-[0.22em]",
+          tone === "cyan" ? "text-[color:var(--color-cyan-muted)]" : "text-[color:var(--color-amber-muted)]"
+        )}>
           cost · {cost}
         </span>
       </div>
@@ -72,11 +78,11 @@ function PullRow({
         disabled={!canPull}
         className={cn(
           "mt-2 w-full rounded-sm border px-2 py-1.5 text-[10px] uppercase tracking-[0.28em] transition-all",
-          tone === "prismatic"
-            ? "border-[color:color-mix(in_oklab,var(--color-prismatic)_45%,transparent)] text-[color:var(--color-prismatic)] hover:text-glow"
-            : "border-[color:color-mix(in_oklab,var(--color-violet)_50%,transparent)] text-[color:var(--color-violet-bright)] hover:text-glow",
+          tone === "cyan"
+            ? "border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)] hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
+            : "border-[color:var(--color-amber-muted)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:text-glow-amber hover:border-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20",
           !canPull &&
-            "cursor-not-allowed opacity-40 hover:text-[color:var(--color-muted)]",
+            "cursor-not-allowed opacity-40 hover:bg-transparent hover:border-[color:var(--color-border-soft)]",
         )}
       >
         {canPull ? "reconstruct packet" : "insufficient shards"}

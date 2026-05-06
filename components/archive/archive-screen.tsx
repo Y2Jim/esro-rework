@@ -29,16 +29,16 @@ export function ArchiveScreen() {
         {/* shards */}
         <ScreenSection title="signal shards">
           <div className="grid grid-cols-3 gap-1.5">
-            <ShardTile label="relay" value={shards.relay_tokens} tone="lilac" />
+            <ShardTile label="relay" value={shards.relay_tokens} tone="amber" />
             <ShardTile
               label="deep"
               value={shards.deep_signals}
-              tone="violet"
+              tone="cyan"
             />
             <ShardTile
               label="salvage"
               value={shards.signal_salvage}
-              tone="muted"
+              tone="violet"
             />
           </div>
         </ScreenSection>
@@ -110,16 +110,22 @@ function ShardTile({
 }: {
   label: string
   value: number
-  tone: "lilac" | "violet" | "muted"
+  tone: "amber" | "cyan" | "violet"
 }) {
   const toneClass =
-    tone === "violet"
-      ? "text-[color:var(--color-violet-bright)] text-glow"
-      : tone === "lilac"
-        ? "text-[color:var(--color-lilac)]"
-        : "text-[color:var(--color-muted)]"
+    tone === "amber"
+      ? "text-[color:var(--color-amber)] text-glow-amber"
+      : tone === "cyan"
+        ? "text-[color:var(--color-cyan)] text-glow-cyan"
+        : "text-[color:var(--color-violet-bright)] text-glow"
+  const borderClass =
+    tone === "amber"
+      ? "border-[color:var(--color-amber-muted)]/40"
+      : tone === "cyan"
+        ? "border-[color:var(--color-cyan-muted)]/40"
+        : "border-[color:var(--color-violet)]/30"
   return (
-    <div className="rounded-md border border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/50 px-2 py-1.5 text-center">
+    <div className={cn("rounded-md border bg-[color:var(--color-panel)]/50 px-2 py-1.5 text-center", borderClass)}>
       <div className={cn("text-[15px] tabular-nums", toneClass)}>{value}</div>
       <div className="text-[8.5px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
         {label}
