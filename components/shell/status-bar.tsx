@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react"
 
 export function StatusBar() {
-  const [time, setTime] = useState(() => formatTime(new Date()))
+  const [time, setTime] = useState("--:--")
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const tick = () => setTime(formatTime(new Date()))
     tick()
     const id = setInterval(tick, 15_000)

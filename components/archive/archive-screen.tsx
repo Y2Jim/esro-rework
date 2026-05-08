@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { ScreenScroll, ScreenSection } from "@/components/ui/screen-section"
 import { useEsroStore } from "@/store/use-esro-store"
 import { RecoveryPanel } from "./recovery-panel"
@@ -7,8 +8,8 @@ import { ResultReveal } from "./result-reveal"
 import { rarityColor, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
-function formatAgo(ts: number) {
-  const delta = Date.now() - ts
+function formatAgo(ts: number, now: number) {
+  const delta = now - ts
   const h = Math.floor(delta / 3_600_000)
   if (h < 1) {
     const m = Math.max(1, Math.floor(delta / 60_000))
@@ -19,9 +20,18 @@ function formatAgo(ts: number) {
   return `${d}d ago`
 }
 
+function useNow() {
+  const [now, setNow] = useState<number | null>(null)
+  useEffect(() => {
+    setNow(Date.now())
+  }, [])
+  return now
+}
+
 export function ArchiveScreen() {
   const shards = useEsroStore((s) => s.shards)
   const recovery = useEsroStore((s) => s.recovery)
+  const now = useNow()
 
   return (
     <>
@@ -90,7 +100,7 @@ export function ArchiveScreen() {
                   </div>
                 </div>
                 <span className="shrink-0 text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
-                  {formatAgo(r.recoveredAt)}
+                  {now ? formatAgo(r.recoveredAt, now) : "--"}
                 </span>
               </li>
             ))}
