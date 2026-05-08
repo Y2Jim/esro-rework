@@ -2,7 +2,7 @@ export type ChannelId =
   | "PUBLIC"
   | "TRADE"
   | "HELP"
-  | "LORE"
+  | "LOG"
   | "UNDERCHAT"
   | "GAME"
 

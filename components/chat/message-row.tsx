@@ -9,7 +9,40 @@ function formatClock(ts: number) {
   return `${h}:${m}`
 }
 
-export function MessageRow({ msg }: { msg: ChatMessage }) {
+const logTypeStyles: Record<string, { tag: string; color: string }> = {
+  expedition: { tag: "text-[color:var(--color-cyan)]", color: "text-[color:var(--color-cyan)]/80" },
+  party: { tag: "text-[color:var(--color-green)]", color: "text-[color:var(--color-green)]/80" },
+  skill: { tag: "text-[color:var(--color-violet-bright)]", color: "text-[color:var(--color-violet-bright)]/80" },
+  recovery: { tag: "text-[color:var(--color-amber)]", color: "text-[color:var(--color-amber)]/80" },
+  system: { tag: "text-[color:var(--color-muted)]", color: "text-[color:var(--color-foreground)]/70" },
+}
+
+function parseLogType(body: string): { type: string; content: string } {
+  const match = body.match(/^\[(\w+)\]\s*(.*)$/)
+  if (match) {
+    return { type: match[1].toLowerCase(), content: match[2] }
+  }
+  return { type: "system", content: body }
+}
+
+export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChannel?: boolean }) {
+  // Special LOG channel rendering
+  if (isLogChannel && msg.kind === "system") {
+    const { type, content } = parseLogType(msg.body)
+    const style = logTypeStyles[type] || logTypeStyles.system
+    return (
+      <div className="flex items-start gap-2 px-3 py-1.5 text-[11px] leading-snug">
+        <span className="shrink-0 text-[9px] tabular-nums text-[color:var(--color-muted-2)]">
+          {formatClock(msg.at)}
+        </span>
+        <span className={cn("shrink-0 text-[9px] uppercase tracking-[0.2em] font-medium", style.tag)}>
+          [{type}]
+        </span>
+        <span className={style.color}>{content}</span>
+      </div>
+    )
+  }
+
   if (msg.kind === "system") {
     return (
       <div className="flex items-baseline gap-2 px-3 py-0.5 text-[11px] leading-snug text-[color:var(--color-cyan-muted)]">

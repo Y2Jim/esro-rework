@@ -11,6 +11,7 @@ export function MessageLog() {
   const all = useEsroStore((s) => s.messages)
   const pageOffset = useEsroStore((s) => s.pageOffset)
   const logRef = useRef<HTMLDivElement>(null)
+  const isLogChannel = channel === "LOG"
 
   const list = useMemo(() => {
     const filtered = all
@@ -44,7 +45,7 @@ export function MessageLog() {
       ) : (
         <div className="divide-y divide-[color:var(--color-border-soft)]/50 py-1.5">
           {list.map((m) => (
-            <MessageRow key={m.id} msg={m} />
+            <MessageRow key={m.id} msg={m} isLogChannel={isLogChannel} />
           ))}
         </div>
       )}

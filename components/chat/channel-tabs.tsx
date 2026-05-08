@@ -5,36 +5,54 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import type { ChannelId } from "@/lib/types"
 
-const channelColor: Record<ChannelId, { active: string; dot: string; underline: string }> = {
+const channelStyle: Record<ChannelId, { 
+  text: string
+  activeBg: string
+  activeBorder: string
+  inactiveBorder: string
+  icon: string
+}> = {
   PUBLIC: {
-    active: "text-[color:var(--color-foreground)]",
-    dot: "bg-[color:var(--color-foreground)]",
-    underline: "bg-[color:var(--color-foreground)]",
+    text: "text-[color:var(--color-foreground)]",
+    activeBg: "bg-[color:var(--color-foreground)]/10",
+    activeBorder: "border-[color:var(--color-foreground)]/50",
+    inactiveBorder: "border-[color:var(--color-border-soft)]",
+    icon: "▣",
   },
   TRADE: {
-    active: "text-[color:var(--color-amber)]",
-    dot: "bg-[color:var(--color-amber)]",
-    underline: "bg-[color:var(--color-amber)]",
+    text: "text-[color:var(--color-amber)]",
+    activeBg: "bg-[color:var(--color-amber)]/10",
+    activeBorder: "border-[color:var(--color-amber)]/50",
+    inactiveBorder: "border-[color:var(--color-amber-muted)]/30",
+    icon: "◈",
   },
   HELP: {
-    active: "text-[color:var(--color-cyan)]",
-    dot: "bg-[color:var(--color-cyan)]",
-    underline: "bg-[color:var(--color-cyan)]",
+    text: "text-[color:var(--color-cyan)]",
+    activeBg: "bg-[color:var(--color-cyan)]/10",
+    activeBorder: "border-[color:var(--color-cyan)]/50",
+    inactiveBorder: "border-[color:var(--color-cyan-muted)]/30",
+    icon: "?",
   },
-  LORE: {
-    active: "text-[color:var(--color-violet-bright)]",
-    dot: "bg-[color:var(--color-violet-bright)]",
-    underline: "bg-[color:var(--color-violet-bright)]",
+  LOG: {
+    text: "text-[color:var(--color-violet-bright)]",
+    activeBg: "bg-[color:var(--color-violet)]/10",
+    activeBorder: "border-[color:var(--color-violet)]/50",
+    inactiveBorder: "border-[color:var(--color-violet)]/20",
+    icon: "▤",
   },
   UNDERCHAT: {
-    active: "text-[color:var(--color-danger)]",
-    dot: "bg-[color:var(--color-danger)]",
-    underline: "bg-[color:var(--color-danger)]",
+    text: "text-[color:var(--color-danger)]",
+    activeBg: "bg-[color:var(--color-danger)]/10",
+    activeBorder: "border-[color:var(--color-danger)]/50",
+    inactiveBorder: "border-[color:var(--color-danger-muted)]/30",
+    icon: "◉",
   },
   GAME: {
-    active: "text-[color:var(--color-green)]",
-    dot: "bg-[color:var(--color-green)]",
-    underline: "bg-[color:var(--color-green)]",
+    text: "text-[color:var(--color-green)]",
+    activeBg: "bg-[color:var(--color-green)]/10",
+    activeBorder: "border-[color:var(--color-green)]/50",
+    inactiveBorder: "border-[color:var(--color-green-muted)]/30",
+    icon: "✦",
   },
 }
 
@@ -44,9 +62,9 @@ export function ChannelTabs() {
   const unread = useEsroStore((s) => s.unread)
 
   return (
-    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 backdrop-blur">
+    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 px-2 pb-2 pt-2 backdrop-blur">
       <div
-        className="no-scrollbar flex gap-1 overflow-x-auto px-2 pb-2 pt-2"
+        className="no-scrollbar flex gap-1.5 overflow-x-auto"
         role="tablist"
         aria-label="channels"
       >
@@ -54,7 +72,7 @@ export function ChannelTabs() {
           const active = current === c.id
           const hidden = c.restricted
           const u = unread[c.id] ?? 0
-          const colors = channelColor[c.id]
+          const style = channelStyle[c.id]
           return (
             <button
               key={c.id}
@@ -62,44 +80,50 @@ export function ChannelTabs() {
               aria-selected={active}
               onClick={() => setChannel(c.id)}
               className={cn(
-                "relative shrink-0 rounded-md px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] transition-colors",
+                "relative flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[10px] uppercase tracking-[0.15em] transition-all",
                 active
-                  ? colors.active
-                  : "text-[color:var(--color-muted)] hover:text-[color:var(--color-lilac)]",
+                  ? cn(style.text, style.activeBg, style.activeBorder)
+                  : cn("text-[color:var(--color-muted)]", style.inactiveBorder, "hover:text-[color:var(--color-lilac)] hover:bg-[color:var(--color-panel)]/50"),
               )}
             >
-              {/* hidden channel subtle prefix */}
-              <span className="inline-flex items-center gap-1">
-                {hidden && (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "inline-block h-[5px] w-[5px] rounded-full",
-                      active ? colors.dot : "bg-[color:var(--color-muted-2)]",
-                    )}
-                  />
-                )}
-                {c.label}
-                {u > 0 && (
-                  <span
-                    className={cn(
-                      "ml-0.5 inline-flex min-w-[14px] items-center justify-center rounded-sm px-1 text-[8.5px] leading-[12px]",
-                      "border text-[color:var(--color-foreground)]",
-                      "border-[color:var(--color-border)] bg-[color:color-mix(in_oklab,var(--color-panel)_80%,transparent)]",
-                    )}
-                  >
-                    {u}
-                  </span>
-                )}
-              </span>
-              {/* underline */}
+              {/* icon */}
               <span
                 aria-hidden
                 className={cn(
-                  "absolute -bottom-[1px] left-1/2 h-[2px] w-8 -translate-x-1/2 rounded-full transition-all",
-                  active ? `${colors.underline} opacity-100` : "opacity-0",
+                  "text-[11px] leading-none",
+                  active ? style.text : "text-[color:var(--color-muted-2)]",
                 )}
-              />
+              >
+                {style.icon}
+              </span>
+              
+              {/* label */}
+              <span>{c.label}</span>
+              
+              {/* hidden indicator */}
+              {hidden && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    "inline-block h-[5px] w-[5px] rounded-full",
+                    active ? "bg-current" : "bg-[color:var(--color-muted-2)]",
+                  )}
+                />
+              )}
+              
+              {/* unread badge */}
+              {u > 0 && (
+                <span
+                  className={cn(
+                    "inline-flex min-w-[16px] items-center justify-center rounded-full px-1 text-[8px] font-medium leading-[14px]",
+                    active
+                      ? "bg-current/20 text-current"
+                      : "bg-[color:var(--color-panel-2)] text-[color:var(--color-foreground)]",
+                  )}
+                >
+                  {u}
+                </span>
+              )}
             </button>
           )
         })}
