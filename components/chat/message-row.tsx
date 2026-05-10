@@ -59,17 +59,17 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
 
   if (msg.kind === "whisper") {
     return (
-      <div className="px-3 py-0.5 text-[11.5px] leading-snug">
+      <div className="px-3 py-1.5 text-[12px] leading-relaxed">
         <div className="flex items-baseline gap-2">
-          <span className="shrink-0 text-[9px] tabular-nums text-[color:var(--color-muted-2)]">
+          <span className="shrink-0 text-[10px] tabular-nums text-[color:var(--color-muted)]">
             {formatClock(msg.at)}
           </span>
-          <span className="text-[color:var(--color-danger)]">{msg.handle}</span>
-          <span className="text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+          <span className="font-semibold text-[color:var(--color-danger)]">{msg.handle}</span>
+          <span className="rounded-sm border border-[color:var(--color-danger-muted)]/40 bg-[color:var(--color-danger)]/10 px-1.5 py-[1px] text-[9px] uppercase tracking-[0.15em] text-[color:var(--color-danger-muted)]">
             whisper
           </span>
         </div>
-        <div className="pl-[34px] text-[color:var(--color-danger)]/90">{msg.body}</div>
+        <div className="mt-0.5 pl-[42px] text-[color:var(--color-foreground)]/85">{msg.body}</div>
       </div>
     )
   }
@@ -82,18 +82,18 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
         : "text-[color:var(--color-muted)]"
 
   return (
-    <div className="px-3 py-0.5 text-[11.5px] leading-snug">
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-        <span className="shrink-0 text-[9px] tabular-nums text-[color:var(--color-muted-2)]">
+    <div className="px-3 py-1.5 text-[12px] leading-relaxed">
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <span className="shrink-0 text-[10px] tabular-nums text-[color:var(--color-muted)]">
           {formatClock(msg.at)}
         </span>
-        <span className="font-medium text-[color:var(--color-foreground)] text-glow-soft">
+        <span className="font-semibold text-[color:var(--color-cyan-bright)]">
           {msg.handle}
         </span>
         {msg.title && (
           <span
             className={cn(
-              "rounded-sm border border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/60 px-1 py-[1px] text-[8.5px] uppercase tracking-[0.2em]",
+              "rounded-sm border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)]/80 px-1.5 py-[2px] text-[9px] uppercase tracking-[0.15em] font-medium",
               titleClass,
             )}
           >
@@ -101,7 +101,7 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
           </span>
         )}
       </div>
-      <div className="pl-[34px] text-[color:var(--color-foreground)]/90">
+      <div className="mt-0.5 pl-[42px] text-[color:var(--color-foreground)]/85">
         {msg.body}
       </div>
     </div>
