@@ -8,11 +8,11 @@ import { SkillsTab } from "./skills-tab"
 import { CraftingTab } from "./crafting-tab"
 import { RollingTab } from "./rolling-tab"
 
-const tabs: { id: OpsTab; label: string }[] = [
-  { id: "expeditions", label: "Expeditions" },
-  { id: "skills", label: "Skills" },
-  { id: "crafting", label: "Crafting" },
-  { id: "rolling", label: "Rolling" },
+const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: string }[] = [
+  { id: "expeditions", label: "Expeditions", icon: "🗺", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15" },
+  { id: "skills", label: "Skills", icon: "📊", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15" },
+  { id: "crafting", label: "Crafting", icon: "🔧", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
+  { id: "rolling", label: "Rolling", icon: "🎲", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15" },
 ]
 
 export function OpsScreen() {
@@ -29,12 +29,13 @@ export function OpsScreen() {
             type="button"
             onClick={() => setOpsTab(tab.id)}
             className={cn(
-              "rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              "flex items-center gap-1.5 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
               opsTab === tab.id
-                ? "bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)]"
+                ? cn(tab.bgColor, tab.color)
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
           >
+            <span className="text-[11px]">{tab.icon}</span>
             {tab.label}
           </button>
         ))}

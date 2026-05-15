@@ -8,6 +8,13 @@ import { cn } from "@/lib/cn"
 
 type ProfileTab = "summary" | "titles" | "cosmetics" | "notifications"
 
+const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string }[] = [
+  { id: "summary", label: "Summary", icon: "📋", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15" },
+  { id: "titles", label: "Titles", icon: "🏷", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
+  { id: "cosmetics", label: "Cosmetics", icon: "✨", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15" },
+  { id: "notifications", label: "Alerts", icon: "🔔", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15" },
+]
+
 export function ProfileScreen() {
   const [tab, setTab] = useState<ProfileTab>("summary")
   const profile = useEsroStore((s) => s.profile)
@@ -21,20 +28,21 @@ export function ProfileScreen() {
     <div className="flex h-full flex-col">
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-[color:var(--color-border)] px-2 py-1.5">
-        {(["summary", "titles", "cosmetics", "notifications"] as ProfileTab[]).map((t) => (
+        {profileTabs.map((t) => (
           <button
-            key={t}
+            key={t.id}
             type="button"
-            onClick={() => setTab(t)}
+            onClick={() => setTab(t.id)}
             className={cn(
-              "relative rounded px-2.5 py-1 text-[10px] uppercase tracking-wider transition-colors",
-              tab === t
-                ? "bg-[color:var(--color-accent)]/20 text-[color:var(--color-accent)]"
+              "relative flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              tab === t.id
+                ? cn(t.bgColor, t.color)
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
           >
-            {t}
-            {t === "notifications" && unreadCount > 0 && (
+            <span className="text-[10px]">{t.icon}</span>
+            {t.label}
+            {t.id === "notifications" && unreadCount > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-[color:var(--color-danger)] text-[7px] text-white">
                 {unreadCount}
               </span>

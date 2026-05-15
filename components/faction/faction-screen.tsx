@@ -9,6 +9,12 @@ import { cn } from "@/lib/cn"
 
 type FactionTab = "party" | "projects" | "ranks"
 
+const factionTabs: { id: FactionTab; label: string; icon: string; color: string; bgColor: string }[] = [
+  { id: "party", label: "Party", icon: "👥", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15" },
+  { id: "projects", label: "Projects", icon: "📦", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
+  { id: "ranks", label: "Ranks", icon: "⭐", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15" },
+]
+
 export function FactionScreen() {
   const [tab, setTab] = useState<FactionTab>("party")
   const profile = useEsroStore((s) => s.profile)
@@ -42,19 +48,20 @@ export function FactionScreen() {
 
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-[color:var(--color-border)] px-2 py-1.5">
-        {(["party", "projects", "ranks"] as FactionTab[]).map((t) => (
+        {factionTabs.map((t) => (
           <button
-            key={t}
+            key={t.id}
             type="button"
-            onClick={() => setTab(t)}
+            onClick={() => setTab(t.id)}
             className={cn(
-              "rounded px-2.5 py-1 text-[10px] uppercase tracking-wider transition-colors",
-              tab === t
-                ? "bg-[color:var(--color-accent)]/20 text-[color:var(--color-accent)]"
+              "flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              tab === t.id
+                ? cn(t.bgColor, t.color)
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
           >
-            {t}
+            <span className="text-[10px]">{t.icon}</span>
+            {t.label}
           </button>
         ))}
       </div>

@@ -5,11 +5,11 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 
 const items: { id: ScreenId; label: string; icon: string; color: string; glow: string }[] = [
-  { id: "terminal", label: "terminal", icon: "▤", color: "text-[color:var(--color-foreground)]", glow: "text-glow-soft" },
-  { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan" },
-  { id: "contracts", label: "contracts", icon: "✦", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber" },
-  { id: "faction", label: "faction", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green" },
-  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft" },
+  { id: "terminal", label: "terminal", icon: "⌘", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan" },
+  { id: "ops", label: "ops", icon: "⚙", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber" },
+  { id: "contracts", label: "contracts", icon: "📜", color: "text-[color:var(--color-green)]", glow: "text-glow-green" },
+  { id: "faction", label: "faction", icon: "⚔", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft" },
+  { id: "profile", label: "profile", icon: "👤", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft" },
 ]
 
 export function BottomNav() {
@@ -61,10 +61,10 @@ export function BottomNav() {
                     aria-hidden
                     className={cn(
                       "absolute -top-[9px] left-1/2 h-[2px] w-5 -translate-x-1/2 rounded-full",
-                      it.id === "terminal" && "bg-[color:var(--color-foreground)]",
-                      it.id === "ops" && "bg-[color:var(--color-cyan)]",
-                      it.id === "contracts" && "bg-[color:var(--color-amber)]",
-                      it.id === "faction" && "bg-[color:var(--color-green)]",
+                      it.id === "terminal" && "bg-[color:var(--color-cyan)]",
+                      it.id === "ops" && "bg-[color:var(--color-amber)]",
+                      it.id === "contracts" && "bg-[color:var(--color-green)]",
+                      it.id === "faction" && "bg-[color:var(--color-violet-bright)]",
                       it.id === "profile" && "bg-[color:var(--color-lilac)]",
                     )}
                   />
