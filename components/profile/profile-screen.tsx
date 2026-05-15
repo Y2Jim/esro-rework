@@ -208,6 +208,7 @@ function TitlesTab() {
 
 function CosmeticsTab() {
   const profile = useEsroStore((s) => s.profile)
+  const identity = useEsroStore((s) => s.identity)
   const equipVanity = useEsroStore((s) => s.equipVanity)
   const unequipVanity = useEsroStore((s) => s.unequipVanity)
 
@@ -224,8 +225,28 @@ function CosmeticsTab() {
 
   const layerOrder = ["hair", "eyes", "mouth", "accessory", "hat", "flair"]
 
+  // Get currently equipped items
+  const equipped = vanityItems.filter(v => v.equipped)
+
   return (
     <div className="space-y-4">
+      {/* Avatar Preview */}
+      <div className="flex flex-col items-center rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-4">
+        <PixelAvatar config={identity.avatar} size="lg" />
+        <div className="mt-2 text-[11px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
+        {equipped.length > 0 ? (
+          <div className="mt-1 flex flex-wrap justify-center gap-1">
+            {equipped.map(e => (
+              <span key={e.id} className={cn("rounded px-1.5 py-0.5 text-[8px]", rarityColor[e.rarity])}>
+                {e.label}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">No cosmetics equipped</div>
+        )}
+      </div>
+
       <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Cosmetics ({unlocked.length} unlocked)
       </div>
