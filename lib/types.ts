@@ -7,13 +7,43 @@ export type ChannelId =
   | "GAME"
 
 export type ScreenId =
-  | "chat"
-  | "expedition"
-  | "skills"
-  | "inventory"
-  | "party"
-  | "archive"
+  | "terminal"
+  | "ops"
+  | "contracts"
+  | "faction"
   | "profile"
+
+export type OpsTab = "expeditions" | "skills" | "crafting" | "rolling"
+
+export interface QuickAction {
+  id: string
+  label: string
+  description: string
+  priority: "urgent" | "normal"
+  deeplink: {
+    screen: ScreenId
+    tab?: OpsTab
+  }
+}
+
+export interface Contract {
+  id: string
+  label: string
+  issuer: string
+  description: string
+  reward: string
+  deadline?: string
+  status: "available" | "active" | "completed"
+}
+
+export interface FactionProject {
+  id: string
+  label: string
+  description: string
+  progress: number
+  goal: number
+  contributors: number
+}
 
 export type MessageKind = "player" | "system" | "whisper"
 

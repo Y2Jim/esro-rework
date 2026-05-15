@@ -1,58 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  /* Core palette — DOS terminal with functional accents
-     Primary: violet (brand, active states)
-     Secondary: cyan (info, links, secondary actions)
-     Accent: amber/gold (highlights, warnings, rare)
-     Success: green (confirmations, positive)
-     Danger: rose (errors, destructive)
-  */
-  --color-bg: #08060d;
-  --color-bg-soft: #0e0b15;
-  --color-panel: #120c1d;
-  --color-panel-2: #1a1128;
-  --color-border: #2a1f44;
-  --color-border-soft: #1f1733;
+  /* ESRO Color Palette - Original Identity */
+  --color-bg: #05030a;
+  --color-bg-alt: #0d0815;
+  --color-panel: rgba(12, 8, 19, 0.94);
+  --color-panel-soft: rgba(18, 11, 28, 0.82);
+  --color-panel-gradient: linear-gradient(180deg, rgba(24, 13, 39, 0.96), rgba(12, 8, 19, 0.92));
   
-  /* Primary - violet */
-  --color-violet: #a87bff;
-  --color-violet-bright: #c9a7ff;
-  --color-lilac: #d8c7ff;
+  /* Borders */
+  --color-border: rgba(154, 84, 255, 0.42);
+  --color-border-soft: rgba(154, 84, 255, 0.25);
+  --color-border-strong: rgba(187, 129, 255, 0.46);
   
-  /* Secondary - cyan (DOS blue-green) */
-  --color-cyan: #5de4c7;
-  --color-cyan-bright: #89f7e2;
-  --color-cyan-muted: #3a9a85;
+  /* Primary - Violet */
+  --color-accent: #a45dff;
+  --color-accent-strong: #bb81ff;
+  --color-accent-glow: rgba(125, 52, 234, 0.24);
   
-  /* Accent - amber/gold (highlights, rare) */
-  --color-amber: #f5c542;
-  --color-amber-bright: #ffe175;
-  --color-amber-muted: #a68520;
+  /* Text Colors */
+  --color-text: #efe6ff;
+  --color-muted: #a791c7;
+  --color-muted-2: #7a6699;
   
-  /* Success - green */
-  --color-green: #7ee787;
-  --color-green-bright: #a5f3ab;
-  --color-green-muted: #4d8b52;
-  
-  /* Danger - rose */
-  --color-danger: #f47a8e;
-  --color-danger-bright: #ffa0ae;
-  --color-danger-muted: #a65060;
-  
-  /* Neutral text */
-  --color-foreground: #e6dcff;
-  --color-muted: #7a6fa0;
-  --color-muted-2: #554a78;
+  /* Functional */
+  --color-danger: #ff4d8d;
+  --color-success: #5dff9a;
+  --color-warning: #ffb347;
   
   /* Special */
   --color-prismatic: #f3d58a;
 
-  --radius-phone: 2.25rem;
-  --radius-panel: 0.625rem;
+  --radius-panel: 14px;
+  --radius-button: 999px;
+  --radius-input: 10px;
 
-  --font-mono: var(--font-jetbrains, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-sans: var(--font-jetbrains, ui-monospace), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --shadow-glow: 0 0 22px rgba(125, 52, 234, 0.24);
+  --shadow-accent: 0 0 16px rgba(125, 52, 234, 0.35);
+
+  --font-mono: "Fixedsys Excelsior 3.01", Fixedsys, "Lucida Console", ui-monospace, monospace;
+  --font-sans: "Fixedsys Excelsior 3.01", Fixedsys, "Lucida Console", ui-monospace, monospace;
 }
 
 @layer base {
@@ -60,108 +47,202 @@
     color-scheme: dark;
   }
 
+  * {
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92);
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(18, 11, 28, 0.92);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(187, 129, 255, 0.78), rgba(111, 43, 231, 0.9));
+    border-radius: 999px;
+    border: 1px solid rgba(12, 8, 19, 0.7);
+  }
+
   html,
   body {
     height: 100%;
     background: var(--color-bg);
-    color: var(--color-foreground);
+    color: var(--color-text);
     font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-feature-settings: "ss01", "cv02";
     -webkit-font-smoothing: antialiased;
-  }
-
-  * {
-    box-sizing: border-box;
+    text-rendering: geometricPrecision;
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--color-violet) 40%, transparent);
-    color: var(--color-foreground);
-  }
-
-  /* Small scrollbar inside the phone */
-  .esro-scroll::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  .esro-scroll::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--color-violet) 35%, transparent);
-    border-radius: 2px;
-  }
-  .esro-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .esro-scroll {
-    scrollbar-color: color-mix(in oklab, var(--color-violet) 35%, transparent) transparent;
-    scrollbar-width: thin;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    scrollbar-width: none;
+    background: rgba(164, 93, 255, 0.4);
+    color: var(--color-text);
   }
 }
 
-/* Scanline + CRT overlays */
-.scanlines::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(216, 199, 255, 0.035) 0px,
-    rgba(216, 199, 255, 0.035) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: screen;
-  opacity: 0.6;
-  z-index: 2;
+/* Panel component base */
+.esro-panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
 }
 
-.vignette::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    120% 80% at 50% 50%,
-    transparent 55%,
-    rgba(0, 0, 0, 0.6) 100%
-  );
-  z-index: 3;
+.esro-panel-soft {
+  background: var(--color-panel-soft);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-panel);
 }
 
-.glow-violet {
-  box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--color-violet) 40%, transparent),
-    0 0 24px -6px color-mix(in oklab, var(--color-violet) 70%, transparent);
+.esro-panel-focused {
+  border-color: var(--color-border-strong);
+  background: var(--color-panel-gradient);
 }
 
+/* Button styles */
+.esro-button {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.esro-button:hover {
+  border-color: var(--color-accent);
+  background: rgba(164, 93, 255, 0.12);
+}
+
+.esro-button-active,
+.esro-button.is-active {
+  background: linear-gradient(135deg, rgba(164, 93, 255, 0.22), rgba(111, 43, 231, 0.18));
+  border-color: var(--color-border-strong);
+}
+
+.esro-button-primary {
+  background: linear-gradient(135deg, rgba(164, 93, 255, 0.22), rgba(111, 43, 231, 0.18));
+  border-color: var(--color-border-strong);
+}
+
+.esro-button-primary:hover {
+  background: linear-gradient(135deg, rgba(164, 93, 255, 0.32), rgba(111, 43, 231, 0.28));
+}
+
+/* Chip/Tag styles */
+.esro-chip {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text);
+  font-size: 10px;
+}
+
+.esro-chip-status {
+  color: var(--color-accent-strong);
+}
+
+.esro-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 7px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: rgba(187, 129, 255, 0.18);
+  color: var(--color-accent-strong);
+  font-size: 10px;
+}
+
+/* Input styles */
+.esro-input {
+  appearance: none;
+  background: linear-gradient(180deg, rgba(26, 18, 38, 0.96), rgba(11, 7, 17, 0.96));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  color: var(--color-text);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.esro-input::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+.esro-input:focus {
+  border-color: rgba(187, 129, 255, 0.86);
+  box-shadow: 0 0 0 1px rgba(187, 129, 255, 0.28);
+}
+
+/* Metric card */
+.esro-metric {
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-panel-soft);
+}
+
+/* List card */
+.esro-list-card {
+  padding: 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+.esro-list-card.is-focused {
+  border-color: var(--color-border-strong);
+  background: var(--color-panel-gradient);
+}
+
+/* Quick action card */
+.esro-quick-card {
+  padding: 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  flex-shrink: 0;
+}
+
+/* Message styles */
+.esro-message {
+  padding: 8px 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+/* App background with logo watermark */
+.esro-app-bg {
+  background:
+    radial-gradient(circle at top left, rgba(187, 129, 255, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(125, 52, 234, 0.12), transparent 35%),
+    linear-gradient(180deg, rgba(13, 8, 21, 0.96), rgba(5, 3, 10, 0.98));
+}
+
+/* Glow effects */
 .text-glow {
-  text-shadow: 0 0 8px color-mix(in oklab, var(--color-violet) 45%, transparent);
+  text-shadow: 0 0 8px rgba(164, 93, 255, 0.5);
 }
 
 .text-glow-soft {
-  text-shadow: 0 0 6px color-mix(in oklab, var(--color-violet) 25%, transparent);
+  text-shadow: 0 0 6px rgba(164, 93, 255, 0.3);
 }
 
-.text-glow-cyan {
-  text-shadow: 0 0 8px color-mix(in oklab, var(--color-cyan) 50%, transparent);
-}
-
-.text-glow-amber {
-  text-shadow: 0 0 8px color-mix(in oklab, var(--color-amber) 50%, transparent);
-}
-
-.text-glow-green {
-  text-shadow: 0 0 8px color-mix(in oklab, var(--color-green) 50%, transparent);
-}
-
-.text-glow-danger {
-  text-shadow: 0 0 8px color-mix(in oklab, var(--color-danger) 50%, transparent);
+.box-glow {
+  box-shadow: var(--shadow-glow);
 }
 
 /* Blinking caret */
@@ -178,30 +259,37 @@
   animation: blink 1.05s steps(1) infinite;
 }
 
-/* Subtle flicker for boot logo */
-@keyframes logo-flicker {
-  0%, 100% { opacity: 1; }
-  45% { opacity: 0.92; }
-  47% { opacity: 0.78; }
-  48% { opacity: 0.96; }
-  60% { opacity: 0.88; }
-  61% { opacity: 1; }
-}
-.flicker {
-  animation: logo-flicker 3.5s infinite;
+/* Boot animations */
+@keyframes pulseLogo {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.04); opacity: 1; }
 }
 
-/* Prismatic shimmer (rare rewards only) */
+@keyframes scan {
+  0%, 100% { transform: translateY(0); opacity: 0.35; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+
+.pulse-logo {
+  animation: pulseLogo 2s ease-in-out infinite;
+}
+
+.scan-line {
+  animation: scan 2.1s ease-in-out infinite;
+}
+
+/* Prismatic shimmer */
 @keyframes prismatic-shift {
-  0%   { background-position: 0% 50%; }
+  0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }
 }
+
 .prismatic-text {
   background: linear-gradient(
     90deg,
     var(--color-prismatic) 0%,
-    var(--color-violet-bright) 30%,
-    var(--color-lilac) 55%,
+    var(--color-accent-strong) 30%,
+    var(--color-text) 55%,
     var(--color-prismatic) 100%
   );
   background-size: 200% 100%;
@@ -211,27 +299,15 @@
   animation: prismatic-shift 4s linear infinite;
 }
 
-/* Pixel dot pattern for subtle backgrounds */
-.pixel-grid {
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(168, 123, 255, 0.12) 1px, transparent 0);
-  background-size: 6px 6px;
-}
-
-/* Dashed horizontal terminal rule */
-.hr-dashed {
-  height: 1px;
-  background-image: linear-gradient(
-    to right,
-    transparent 0,
-    transparent 3px,
-    color-mix(in oklab, var(--color-violet) 45%, transparent) 3px,
-    color-mix(in oklab, var(--color-violet) 45%, transparent) 6px
-  );
-  background-size: 6px 1px;
-}
-
-/* Typewriter reveal utility */
-@keyframes type-caret {
-  50% { border-right-color: transparent; }
+/* Empty state */
+.esro-empty {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 88px;
+  padding: 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  color: var(--color-muted);
 }

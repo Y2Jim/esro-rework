@@ -2,11 +2,14 @@ import type {
   ActiveExpedition,
   Channel,
   ChatMessage,
+  Contract,
   Expedition,
+  FactionProject,
   Identity,
   InventoryItem,
   PartyMember,
   Profile,
+  QuickAction,
   RecoveryResult,
   Skill,
 } from "./types"
@@ -635,6 +638,95 @@ export const shards = {
   deep_signals: 2,
   signal_salvage: 6,
 }
+
+export const quickActions: QuickAction[] = [
+  {
+    id: "qa1",
+    label: "Claim Rewards",
+    description: "Archive Dive complete",
+    priority: "urgent",
+    deeplink: { screen: "ops", tab: "expeditions" },
+  },
+  {
+    id: "qa2",
+    label: "Contract Deadline",
+    description: "Salvage Run expires in 2h",
+    priority: "urgent",
+    deeplink: { screen: "contracts" },
+  },
+  {
+    id: "qa3",
+    label: "Faction Event",
+    description: "Supply Drive active",
+    priority: "normal",
+    deeplink: { screen: "faction" },
+  },
+]
+
+export const contracts: Contract[] = [
+  {
+    id: "c1",
+    label: "Salvage Run",
+    issuer: "Waykeepers",
+    description: "Recover 3 salvage plates from the western depot.",
+    reward: "45 XP, 2 Relay Tokens",
+    deadline: "2h",
+    status: "active",
+  },
+  {
+    id: "c2",
+    label: "Signal Survey",
+    issuer: "Archive Collective",
+    description: "Map signal nodes in sector 7-alpha.",
+    reward: "60 XP, Archive Fragment",
+    deadline: "8h",
+    status: "available",
+  },
+  {
+    id: "c3",
+    label: "Courier Escort",
+    issuer: "Route Guild",
+    description: "Accompany a courier on the northern route.",
+    reward: "35 XP, 1 Relay Token",
+    status: "available",
+  },
+  {
+    id: "c4",
+    label: "Archive Recovery",
+    issuer: "Archive Collective",
+    description: "Retrieve unstable data packets from a corrupted node.",
+    reward: "80 XP, Deep Signal",
+    deadline: "12h",
+    status: "available",
+  },
+]
+
+export const factionProjects: FactionProject[] = [
+  {
+    id: "fp1",
+    label: "Supply Drive",
+    description: "Collect supplies for the western outpost reconstruction.",
+    progress: 847,
+    goal: 1000,
+    contributors: 23,
+  },
+  {
+    id: "fp2",
+    label: "Signal Network",
+    description: "Extend relay coverage to sector 9.",
+    progress: 312,
+    goal: 500,
+    contributors: 15,
+  },
+  {
+    id: "fp3",
+    label: "Archive Index",
+    description: "Catalog recovered fragments from the deep archive.",
+    progress: 156,
+    goal: 400,
+    contributors: 8,
+  },
+]
 
 export const profile: Profile = {
   handle: "@routetender.07",

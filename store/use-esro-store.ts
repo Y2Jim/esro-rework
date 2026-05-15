@@ -3,61 +3,90 @@
 import { create } from "zustand"
 import type {
   ChannelId,
+  Channel,
   ChatMessage,
+  Contract,
+  Expedition,
+  ActiveExpedition,
+  FactionProject,
+  InventoryItem,
+  OpsTab,
+  PartyMember,
   Profile,
   ProfileNotification,
+  QuickAction,
   RecoveryResult,
   ScreenId,
+  Skill,
   Rarity,
 } from "@/lib/types"
 import {
   channels as seedChannels,
+  contracts as seedContracts,
+  expeditions as seedExpeditions,
+  activeExpedition as seedActiveExpedition,
+  factionProjects as seedFactionProjects,
   identity as seedIdentity,
+  inventory as seedInventory,
   messages as seedMessages,
+  party as seedParty,
   profile as seedProfile,
+  quickActions as seedQuickActions,
   recoveryResults as seedRecovery,
   shards as seedShards,
+  skills as seedSkills,
 } from "@/lib/mock-data"
 
 interface EsroState {
   booted: boolean
   setBooted: (v: boolean) => void
 
-  identityRevealed: boolean
-  revealIdentity: () => void
-
+  // Navigation
   screen: ScreenId
   setScreen: (s: ScreenId) => void
+  opsTab: OpsTab
+  setOpsTab: (t: OpsTab) => void
 
+  // Terminal (Chat)
   channel: ChannelId
   setChannel: (c: ChannelId) => void
-
+  channels: Channel[]
   messages: ChatMessage[]
-  sendMessage: (body: string) => void
+  sendMessage: (channel: ChannelId, body: string) => void
+  unread: Record<ChannelId, number>
+  markRead: (c: ChannelId) => void
 
-  /** 0 = newest page, N = older pages */
-  pageOffset: number
-  nudgePage: (delta: number) => void
-  resetPage: () => void
+  // Quick Actions
+  quickActions: QuickAction[]
 
-  /** Skill loadout: up to 4 skill ids */
+  // Ops - Expeditions
+  expeditions: Expedition[]
+  activeExpedition: ActiveExpedition | null
+  startExpedition: (id: string) => void
+
+  // Ops - Skills
+  skills: Skill[]
   loadout: string[]
-  toggleLoadoutSkill: (id: string) => void
+  toggleLoadout: (id: string) => void
 
-  /** Archive shard currencies */
+  // Ops - Crafting/Rolling
+  inventory: InventoryItem[]
   shards: typeof seedShards
-  /** Archive recent results */
   recovery: RecoveryResult[]
-  /** Latest revealed result, used for reveal animation */
   lastRecovered: RecoveryResult | null
   runRecovery: (mode: "standard" | "focused") => void
   clearLastRecovered: () => void
 
-  identity: typeof seedIdentity
-  unread: Record<ChannelId, number>
-  markRead: (c: ChannelId) => void
+  // Contracts
+  contracts: Contract[]
+  acceptContract: (id: string) => void
+
+  // Faction
+  party: PartyMember[]
+  factionProjects: FactionProject[]
 
   // Profile
+  identity: typeof seedIdentity
   profile: Profile
   profileTab: "summary" | "notifications"
   setProfileTab: (tab: "summary" | "notifications") => void
@@ -108,28 +137,25 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
   setBooted: (v) => set({ booted: v }),
 
-  identityRevealed: true, // already established in mock
-  revealIdentity: () => set({ identityRevealed: true }),
+  // Navigation
+  screen: "terminal",
+  setScreen: (s) => set({ screen: s }),
+  opsTab: "expeditions",
+  setOpsTab: (t) => set({ opsTab: t }),
 
-  screen: "chat",
-  setScreen: (s) => {
-    // reset chat paging when returning to chat
-    if (s === "chat") set({ pageOffset: 0 })
-    set({ screen: s })
-  },
-
+  // Terminal
   channel: "PUBLIC",
   setChannel: (c) => {
-    set({ channel: c, pageOffset: 0 })
+    set({ channel: c })
     get().markRead(c)
   },
-
+  channels: seedChannels,
   messages: seedMessages,
-  sendMessage: (body) => {
+  sendMessage: (channel, body) => {
     const trimmed = body.trim()
     if (!trimmed) return
-    const { channel, identity, messages } = get()
-    const channelDef = seedChannels.find((ch) => ch.id === channel)
+    const { identity, messages, channels } = get()
+    const channelDef = channels.find((ch) => ch.id === channel)
     if (channelDef?.readOnly) return
     const next: ChatMessage = {
       id: `local-${Date.now()}`,
@@ -143,14 +169,40 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
     set({ messages: [...messages, next] })
   },
+  unread: seedChannels.reduce(
+    (acc, c) => {
+      acc[c.id] = c.unread ?? 0
+      return acc
+    },
+    {} as Record<ChannelId, number>,
+  ),
+  markRead: (c) =>
+    set((s) => ({ unread: { ...s.unread, [c]: 0 } })),
 
-  pageOffset: 0,
-  nudgePage: (delta) =>
-    set((s) => ({ pageOffset: Math.max(0, s.pageOffset + delta) })),
-  resetPage: () => set({ pageOffset: 0 }),
+  // Quick Actions
+  quickActions: seedQuickActions,
 
+  // Expeditions
+  expeditions: seedExpeditions,
+  activeExpedition: seedActiveExpedition,
+  startExpedition: (id) => {
+    const exp = get().expeditions.find((e) => e.id === id)
+    if (!exp || get().activeExpedition) return
+    set({
+      activeExpedition: {
+        id: exp.id,
+        label: exp.label,
+        progress: 0,
+        etaSeconds: exp.duration,
+        log: ["Expedition started..."],
+      },
+    })
+  },
+
+  // Skills
+  skills: seedSkills,
   loadout: ["analysis", "surveying", "logistics", "scavenging"],
-  toggleLoadoutSkill: (id) =>
+  toggleLoadout: (id) =>
     set((s) => {
       if (s.loadout.includes(id)) {
         return { loadout: s.loadout.filter((x) => x !== id) }
@@ -159,10 +211,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return { loadout: [...s.loadout, id] }
     }),
 
+  // Inventory & Recovery
+  inventory: seedInventory,
   shards: { ...seedShards },
   recovery: seedRecovery,
   lastRecovered: null,
-
   runRecovery: (mode) => {
     const cost = mode === "focused" ? 2 : 1
     const currencyKey = mode === "focused" ? "deep_signals" : "relay_tokens"
@@ -189,19 +242,23 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   },
   clearLastRecovered: () => set({ lastRecovered: null }),
 
-  identity: seedIdentity,
+  // Contracts
+  contracts: seedContracts,
+  acceptContract: (id) =>
+    set((s) => ({
+      contracts: s.contracts.map((c) =>
+        c.id === id && c.status === "available"
+          ? { ...c, status: "active" as const }
+          : c
+      ),
+    })),
 
-  unread: seedChannels.reduce(
-    (acc, c) => {
-      acc[c.id] = c.unread ?? 0
-      return acc
-    },
-    {} as Record<ChannelId, number>,
-  ),
-  markRead: (c) =>
-    set((s) => ({ unread: { ...s.unread, [c]: 0 } })),
+  // Faction
+  party: seedParty,
+  factionProjects: seedFactionProjects,
 
   // Profile
+  identity: seedIdentity,
   profile: seedProfile,
   profileTab: "summary",
   setProfileTab: (tab) => set({ profileTab: tab }),
@@ -226,15 +283,36 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
     })),
   openNotification: (notification) => {
-    const { markNotificationRead, setScreen, setChannel, setProfileTab } = get()
+    const { markNotificationRead, setScreen, setChannel, setProfileTab, setOpsTab } = get()
     markNotificationRead(notification.id)
     if (notification.deeplink?.screen) {
-      setScreen(notification.deeplink.screen)
+      // Map old screen names to new ones
+      const screenMap: Record<string, ScreenId> = {
+        chat: "terminal",
+        expedition: "ops",
+        skills: "ops",
+        inventory: "ops",
+        party: "faction",
+        archive: "ops",
+      }
+      const targetScreen = screenMap[notification.deeplink.screen] || notification.deeplink.screen as ScreenId
+      setScreen(targetScreen)
+      
       if (notification.deeplink.channel) {
         setChannel(notification.deeplink.channel)
       }
-      if (notification.deeplink.screen === "profile" && notification.deeplink.tab) {
+      if (targetScreen === "profile" && notification.deeplink.tab) {
         setProfileTab(notification.deeplink.tab as "summary" | "notifications")
+      }
+      if (targetScreen === "ops") {
+        // Default to expeditions for expedition-related notifications
+        if (notification.deeplink.screen === "expedition") {
+          setOpsTab("expeditions")
+        } else if (notification.deeplink.screen === "skills") {
+          setOpsTab("skills")
+        } else if (notification.deeplink.screen === "archive") {
+          setOpsTab("rolling")
+        }
       }
     }
   },
