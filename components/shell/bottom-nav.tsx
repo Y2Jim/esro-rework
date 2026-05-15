@@ -4,12 +4,12 @@ import type { ScreenId } from "@/lib/types"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 
-const items: { id: ScreenId; label: string; icon: string; color: string; glow: string; bg: string }[] = [
-  { id: "terminal", label: "terminal", icon: "▣", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan", bg: "bg-[color:var(--color-cyan)]/15" },
-  { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber", bg: "bg-[color:var(--color-amber)]/15" },
-  { id: "contracts", label: "contracts", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green", bg: "bg-[color:var(--color-green)]/15" },
-  { id: "social", label: "social", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15" },
-  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-lilac)]/15" },
+const items: { id: ScreenId; label: string; icon: string; color: string; glow: string; bg: string; hover: string }[] = [
+  { id: "terminal", label: "terminal", icon: "▣", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan", bg: "bg-[color:var(--color-cyan)]/15", hover: "hover:text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/10" },
+  { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber", bg: "bg-[color:var(--color-amber)]/15", hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/10" },
+  { id: "contracts", label: "contracts", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green", bg: "bg-[color:var(--color-green)]/15", hover: "hover:text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/10" },
+  { id: "social", label: "social", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15", hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/10" },
+  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-lilac)]/15", hover: "hover:text-[color:var(--color-lilac)] hover:bg-[color:var(--color-lilac)]/10" },
 ]
 
 export function BottomNav() {
@@ -36,7 +36,7 @@ export function BottomNav() {
                   "group relative flex w-full flex-col items-center gap-0.5 rounded-md py-1.5 px-1 transition-all",
                   active
                     ? cn(it.color, it.bg)
-                    : "text-[color:var(--color-muted)] hover:text-[color:var(--color-lilac)]",
+                    : cn("text-[color:var(--color-muted)]", it.hover),
                 )}
                 aria-current={active ? "page" : undefined}
               >

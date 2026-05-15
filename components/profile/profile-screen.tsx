@@ -8,11 +8,11 @@ import { cn } from "@/lib/cn"
 
 type ProfileTab = "summary" | "titles" | "cosmetics" | "notifications"
 
-const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string }[] = [
-  { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15" },
-  { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
-  { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15" },
-  { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15" },
+const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
+  { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15", hover: "hover:text-[color:var(--color-lilac)] hover:bg-[color:var(--color-lilac)]/10" },
+  { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/10" },
+  { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/10" },
+  { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15", hover: "hover:text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/10" },
 ]
 
 export function ProfileScreen() {
@@ -37,7 +37,7 @@ export function ProfileScreen() {
               "relative flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
               tab === t.id
                 ? cn(t.bgColor, t.color)
-                : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+                : cn("text-[color:var(--color-muted)]", t.hover)
             )}
           >
             <span className="text-[10px]">{t.icon}</span>

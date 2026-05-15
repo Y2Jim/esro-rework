@@ -8,11 +8,11 @@ import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import type { SocialTab } from "@/lib/types"
 
-const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string }[] = [
-  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15" },
-  { id: "faction", label: "Faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15" },
-  { id: "friends", label: "Friends", icon: "◇", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15" },
-  { id: "trade", label: "Trade", icon: "⇄", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
+const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
+  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover:text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/10" },
+  { id: "faction", label: "Faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/10" },
+  { id: "friends", label: "Friends", icon: "◇", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover:text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/10" },
+  { id: "trade", label: "Trade", icon: "⇄", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/10" },
 ]
 
 export function SocialScreen() {
@@ -38,7 +38,7 @@ export function SocialScreen() {
               "flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
               tab === t.id
                 ? cn(t.bgColor, t.color)
-                : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+                : cn("text-[color:var(--color-muted)]", t.hover)
             )}
           >
             <span className="text-[10px]">{t.icon}</span>
