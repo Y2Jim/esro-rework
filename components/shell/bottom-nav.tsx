@@ -8,7 +8,7 @@ const items: { id: ScreenId; label: string; icon: string; color: string; glow: s
   { id: "terminal", label: "terminal", icon: "▣", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan", bg: "bg-[color:var(--color-cyan)]/15" },
   { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber", bg: "bg-[color:var(--color-amber)]/15" },
   { id: "contracts", label: "contracts", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green", bg: "bg-[color:var(--color-green)]/15" },
-  { id: "faction", label: "faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15" },
+  { id: "social", label: "social", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15" },
   { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-lilac)]/15" },
 ]
 
@@ -64,7 +64,7 @@ export function BottomNav() {
                       it.id === "terminal" && "bg-[color:var(--color-cyan)]",
                       it.id === "ops" && "bg-[color:var(--color-amber)]",
                       it.id === "contracts" && "bg-[color:var(--color-green)]",
-                      it.id === "faction" && "bg-[color:var(--color-violet-bright)]",
+                      it.id === "social" && "bg-[color:var(--color-violet-bright)]",
                       it.id === "profile" && "bg-[color:var(--color-lilac)]",
                     )}
                   />

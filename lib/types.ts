@@ -12,8 +12,10 @@ export type ScreenId =
   | "terminal"
   | "ops"
   | "contracts"
-  | "faction"
+  | "social"
   | "profile"
+
+export type SocialTab = "party" | "faction" | "friends" | "trade"
 
 export type OpsTab = "expeditions" | "skills" | "crafting" | "rolling"
 
@@ -218,6 +220,50 @@ export interface PartySettings {
   isPublic: boolean
   autoAccept: boolean
   maxMembers: number
+}
+
+export interface Friend {
+  handle: string
+  title?: string
+  titleRarity?: Rarity
+  status: "online" | "away" | "offline"
+  avatar?: AvatarConfig
+  faction?: string
+  lastSeen?: number
+  note?: string
+}
+
+export interface FriendRequest {
+  id: string
+  fromHandle: string
+  toHandle: string
+  sentAt: number
+  message?: string
+  status: "pending" | "accepted" | "declined"
+}
+
+export interface TradeOffer {
+  id: string
+  fromHandle: string
+  toHandle: string
+  fromItems: { itemId: string; qty: number }[]
+  toItems: { itemId: string; qty: number }[]
+  fromTokens: number
+  toTokens: number
+  status: "pending" | "accepted" | "declined" | "cancelled" | "completed"
+  createdAt: number
+  expiresAt: number
+  message?: string
+}
+
+export interface TradeHistoryEntry {
+  id: string
+  withHandle: string
+  itemsGiven: { label: string; qty: number }[]
+  itemsReceived: { label: string; qty: number }[]
+  tokensGiven: number
+  tokensReceived: number
+  completedAt: number
 }
 
 export interface RecoveryResult {

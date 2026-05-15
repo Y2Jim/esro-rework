@@ -9,7 +9,7 @@ import { Watermark } from "./watermark"
 import { ChatScreen } from "@/components/chat/chat-screen"
 import { OpsScreen } from "@/components/ops/ops-screen"
 import { ContractsScreen } from "@/components/contracts/contracts-screen"
-import { FactionScreen } from "@/components/faction/faction-screen"
+import { SocialScreen } from "@/components/social/social-screen"
 import { ProfileScreen } from "@/components/profile/profile-screen"
 
 export function AppShell() {
@@ -42,7 +42,7 @@ export function AppShell() {
             {screen === "terminal" && <ChatScreen />}
             {screen === "ops" && <OpsScreen />}
             {screen === "contracts" && <ContractsScreen />}
-            {screen === "faction" && <FactionScreen />}
+            {screen === "social" && <SocialScreen />}
             {screen === "profile" && <ProfileScreen />}
           </motion.div>
         </AnimatePresence>

@@ -11,6 +11,7 @@ import type {
   Expedition,
   ActiveExpedition,
   FactionProject,
+  Friend,
   InventoryItem,
   OpsTab,
   PartyMember,
@@ -21,6 +22,7 @@ import type {
   ScreenId,
   Skill,
   Rarity,
+  TradeOffer,
   VanityItem,
 } from "@/lib/types"
 import {
@@ -84,9 +86,17 @@ interface EsroState {
   contracts: Contract[]
   acceptContract: (id: string) => void
 
-  // Faction
+  // Social - Party
   party: PartyMember[]
+  
+  // Social - Faction
   factionProjects: FactionProject[]
+  
+  // Social - Friends
+  friends: Friend[]
+  
+  // Social - Trade
+  tradeOffers: TradeOffer[]
 
   // Profile
   identity: typeof seedIdentity
@@ -389,6 +399,53 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   party: seedParty,
   factionProjects: seedFactionProjects,
 
+  // Friends
+  friends: [
+    {
+      handle: "@signalwatcher",
+      title: "Signal Keeper",
+      titleRarity: "uncommon" as const,
+      status: "online" as const,
+      faction: "Waykeepers",
+    },
+    {
+      handle: "@archivesoul",
+      title: "Archive Listener",
+      titleRarity: "rare" as const,
+      status: "online" as const,
+      faction: "Archive Collective",
+    },
+    {
+      handle: "@dustrunner",
+      status: "away" as const,
+      faction: "Waykeepers",
+    },
+    {
+      handle: "@relaykeeper",
+      title: "Route Tender",
+      titleRarity: "common" as const,
+      status: "offline" as const,
+      faction: "Signal Corps",
+    },
+  ] as Friend[],
+
+  // Trade
+  tradeOffers: [
+    {
+      id: "trade-1",
+      fromHandle: "@signalwatcher",
+      toHandle: "@you",
+      fromItems: [{ itemId: "relay_scrap", qty: 5 }],
+      toItems: [{ itemId: "archive_core", qty: 1 }],
+      fromTokens: 2,
+      toTokens: 0,
+      status: "pending" as const,
+      createdAt: Date.now() - 1000 * 60 * 30,
+      expiresAt: Date.now() + 1000 * 60 * 90,
+      message: "Fair trade? Let me know!",
+    },
+  ] as TradeOffer[],
+
   // Profile
   identity: seedIdentity,
   profile: seedProfile,
@@ -424,7 +481,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         expedition: "ops",
         skills: "ops",
         inventory: "ops",
-        party: "faction",
+        party: "social",
+        faction: "social",
         archive: "ops",
       }
       const targetScreen = screenMap[notification.deeplink.screen] || notification.deeplink.screen as ScreenId
