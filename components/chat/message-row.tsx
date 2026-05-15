@@ -84,10 +84,10 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
   return (
     <div className="px-3 py-1.5 text-[12px] leading-relaxed">
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-        <span className="shrink-0 text-[10px] tabular-nums text-[color:var(--color-muted)]">
+        <span className="shrink-0 text-[10px] tabular-nums text-[color:var(--color-muted-2)]">
           {formatClock(msg.at)}
         </span>
-        <span className="font-medium text-[color:var(--color-lilac)]">
+        <span className="font-semibold text-[color:var(--color-violet-bright)]">
           {msg.handle}
         </span>
         {msg.title && (
@@ -101,7 +101,7 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
           </span>
         )}
       </div>
-      <div className="mt-0.5 pl-[42px] text-[color:var(--color-foreground)]/85">
+      <div className="mt-1 pl-[42px] text-[color:var(--color-muted)]">
         {msg.body}
       </div>
     </div>
