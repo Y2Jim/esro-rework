@@ -561,6 +561,15 @@ export const inventory: InventoryItem[] = [
   },
 ]
 
+// Generate avatar from player handle (must be before party array)
+const playerAvatar = generateAvatarFromSeed("@routetender.07")
+// Apply some unlocked vanity items
+playerAvatar.layers = playerAvatar.layers.map(l => {
+  if (l.type === "accessory") return { ...l, variant: 1 } // glasses
+  if (l.type === "hat") return { ...l, variant: 0 } // none by default
+  return l
+})
+
 export const party: PartyMember[] = [
   {
     slot: 1,
@@ -630,15 +639,6 @@ export const recoveryResults: RecoveryResult[] = [
     recoveredAt: now - 1000 * 60 * 60 * 40,
   },
 ]
-
-// Generate avatar from player handle
-const playerAvatar = generateAvatarFromSeed("@routetender.07")
-// Apply some unlocked vanity items
-playerAvatar.layers = playerAvatar.layers.map(l => {
-  if (l.type === "accessory") return { ...l, variant: 1 } // glasses
-  if (l.type === "hat") return { ...l, variant: 0 } // none by default
-  return l
-})
 
 export const identity: Identity = {
   handle: "@routetender.07",
