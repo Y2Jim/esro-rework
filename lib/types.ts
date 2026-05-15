@@ -5,6 +5,8 @@ export type ChannelId =
   | "LOG"
   | "UNDERCHAT"
   | "GAME"
+  | "FACTION"
+  | "PARTY"
 
 export type ScreenId =
   | "terminal"
@@ -57,6 +59,18 @@ export interface ChatMessage {
   body: string
   /** unix ms */
   at: number
+  pinned?: boolean
+  replyTo?: string // message id
+  reactions?: { emoji: string; count: number }[]
+}
+
+export interface DirectMessage {
+  id: string
+  fromHandle: string
+  toHandle: string
+  body: string
+  at: number
+  read: boolean
 }
 
 export interface Channel {
@@ -66,6 +80,9 @@ export interface Channel {
   readOnly?: boolean
   restricted?: boolean
   unread?: number
+  pinnedCount?: number
+  memberCount?: number
+  slowMode?: number // seconds between messages
 }
 
 export type Rarity =
@@ -109,19 +126,35 @@ export interface Skill {
   variant?: string
 }
 
+export interface ExpeditionStage {
+  id: string
+  label: string
+  description: string
+  duration: number // seconds
+  skillCheck?: string
+  risk: "Low" | "Medium" | "High"
+}
+
 export interface Expedition {
   id: string
   label: string
+  description: string
   /** seconds */
   duration: number
   risk: "Low" | "Medium" | "High"
   tags: string[]
   requiredSkill: string
   suggestedParty: number
+  minLevel?: number
+  stages?: ExpeditionStage[]
+  factionAttunement?: string // faction id for bonus standing
   rewards: {
     xp: number
     tokens: number
     materials: string[]
+    skillXp?: { skill: string; amount: number }[]
+    factionStanding?: number
+    possibleDrops?: { label: string; rarity: Rarity; chance: number }[]
   }
 }
 
@@ -132,6 +165,11 @@ export interface ActiveExpedition {
   progress: number
   etaSeconds: number
   log: string[]
+  currentStage?: number
+  totalStages?: number
+  partyMembers?: string[] // handles
+  startedAt: number
+  skillGains?: { skill: string; xp: number }[]
 }
 
 export type ItemAspect =
@@ -161,6 +199,25 @@ export interface PartyMember {
   status: "ready" | "idle" | "offline" | "deployed"
   leader?: boolean
   avatar?: AvatarConfig
+  joinedAt?: number
+  contribution?: number // XP contributed to party
+  expeditionsCompleted?: number
+}
+
+export interface PartyInvite {
+  id: string
+  fromHandle: string
+  toHandle: string
+  partyName?: string
+  sentAt: number
+  status: "pending" | "accepted" | "declined" | "expired"
+}
+
+export interface PartySettings {
+  name?: string
+  isPublic: boolean
+  autoAccept: boolean
+  maxMembers: number
 }
 
 export interface RecoveryResult {
@@ -188,6 +245,7 @@ export interface OwnedTitle {
   label: string
   rarity: Rarity
   equipped: boolean
+  source?: string // How it was obtained (e.g., "Archive Recovery", "Waykeepers Rank 3", "Achievement")
 }
 
 export interface ProfileBadge {

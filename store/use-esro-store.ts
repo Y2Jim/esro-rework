@@ -131,6 +131,9 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Calm Route", type: "modifier" },
     { label: "Signal Glasses", type: "cosmetic", vanityData: { layerType: "accessory", variant: 1 } },
     { label: "Route Cap", type: "cosmetic", vanityData: { layerType: "hat", variant: 1 } },
+    { label: "Drifter", type: "title" },
+    { label: "Relay Initiate", type: "title" },
+    { label: "Path Follower", type: "title" },
   ],
   uncommon: [
     { label: "Signal Keeper", type: "title" },
@@ -139,6 +142,10 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Eyepatch", type: "cosmetic", vanityData: { layerType: "accessory", variant: 2 } },
     { label: "Signal Antenna", type: "cosmetic", vanityData: { layerType: "hat", variant: 3 } },
     { label: "Scar Mark", type: "cosmetic", vanityData: { layerType: "accessory", variant: 3 } },
+    { label: "Pale Wanderer", type: "title" },
+    { label: "Circuit Speaker", type: "title" },
+    { label: "Dust Walker", type: "title" },
+    { label: "Signal Chaser", type: "title" },
   ],
   rare: [
     { label: "Archive Listener", type: "title" },
@@ -146,6 +153,10 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Archive Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 4 } },
     { label: "Relay Horns", type: "cosmetic", vanityData: { layerType: "hat", variant: 4 } },
     { label: "Sparkle Effect", type: "cosmetic", vanityData: { layerType: "flair", variant: 3 } },
+    { label: "Waystone Keeper", type: "title" },
+    { label: "Deep Touched", type: "title" },
+    { label: "Echo Finder", type: "title" },
+    { label: "Rift Walker", type: "title" },
   ],
   epic: [
     { label: "Relay Warden", type: "title" },
@@ -153,10 +164,17 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Archive Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 5 } },
     { label: "Static Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 2 } },
     { label: "Pulse Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 1 } },
+    { label: "Depth Touched", type: "title" },
+    { label: "Void Speaker", type: "title" },
+    { label: "Rift Sovereign", type: "title" },
+    { label: "Archive Seeker", type: "title" },
   ],
   legendary: [
     { label: "Deep Pull Regent", type: "title" },
     { label: "Crown of Routes", type: "cosmetic", vanityData: { layerType: "hat", variant: 6 } },
+    { label: "Primordial Echo", type: "title" },
+    { label: "The Returned", type: "title" },
+    { label: "Signal Sovereign", type: "title" },
   ],
 }
 

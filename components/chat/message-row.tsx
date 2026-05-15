@@ -82,11 +82,19 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
         : "text-[color:var(--color-muted)]"
 
   return (
-    <div className="px-3 py-1.5 text-[12px] leading-relaxed">
+    <div className={cn(
+      "px-3 py-1.5 text-[12px] leading-relaxed",
+      msg.pinned && "border-l-2 border-[color:var(--color-amber)] bg-[color:var(--color-amber)]/5"
+    )}>
       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
         <span className="shrink-0 text-[10px] tabular-nums text-[color:var(--color-muted-2)]">
           {formatClock(msg.at)}
         </span>
+        {msg.pinned && (
+          <span className="text-[8px] uppercase tracking-wider text-[color:var(--color-amber)]">
+            pinned
+          </span>
+        )}
         <span className="font-semibold text-[color:var(--color-violet-bright)]">
           {msg.handle}
         </span>
