@@ -18,182 +18,50 @@ function seededRandom(seed: string) {
 
 // Color palettes
 export const SKIN_COLORS = [
-  "#e8c4a0", // warm light
-  "#d4a574", // warm medium
-  "#8b6f5c", // warm dark
-  "#c9b8a8", // cool light
-  "#a08878", // cool medium
-  "#6b5b50", // cool dark
+  "#f4d4b8", // light warm
+  "#e8c4a0", // medium warm
+  "#d4a574", // tan
+  "#c49468", // medium
+  "#8b6f5c", // dark warm
+  "#6b5548", // dark
 ]
 
 export const HAIR_COLORS = [
-  "#2a2a2a", // black
+  "#1a1a1a", // black
+  "#3d2314", // dark brown
   "#5c4033", // brown
+  "#8b6914", // golden brown
   "#c4a35a", // blonde
-  "#8b3a3a", // red
+  "#e8d8a0", // light blonde
+  "#8b3a3a", // auburn
+  "#5a2a2a", // dark red
   "#6b4f8a", // purple
-  "#4a8b8b", // teal
+  "#4a6b8b", // blue
   "#8a8a8a", // grey
-  "#e8e0d0", // white
+  "#e8e8e8", // white
 ]
 
 export const EYE_COLORS = [
-  "#4a6b8a", // blue
+  "#2a4a6a", // dark blue
+  "#4a7090", // blue
+  "#3a5a3a", // dark green
   "#5a8a5a", // green
-  "#6b5a4a", // brown
-  "#8a6b8a", // purple
-  "#8a8a5a", // amber
-]
-
-// Pixel patterns for each layer type (16x16 grid, 1 = filled, 0 = empty)
-// Each pattern is stored as an array of row strings where '#' = filled
-
-const BASE_SHAPES = [
-  // Round
-  `
-    ....####....
-    ..########..
-    .##########.
-    ############
-    ############
-    ############
-    ############
-    ############
-    ############
-    .##########.
-    ..########..
-    ....####....
-  `,
-  // Square
-  `
-    ..##########..
-    .############.
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    .############.
-    ..##########..
-  `,
-  // Oval
-  `
-    ....######....
-    ..##########..
-    .############.
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    ##############
-    ..##########..
-    ....######....
-  `,
-]
-
-const EYES_PATTERNS = [
-  // Neutral dots
-  { left: [4, 4], right: [9, 4], style: "dot" },
-  // Wide
-  { left: [3, 4], right: [10, 4], style: "dot" },
-  // Close
-  { left: [5, 4], right: [8, 4], style: "dot" },
-  // Happy (curved)
-  { left: [4, 5], right: [9, 5], style: "arc" },
-  // Tired (lines)
-  { left: [4, 4], right: [9, 4], style: "line" },
-  // Alert (tall)
-  { left: [4, 3], right: [9, 3], style: "tall" },
-]
-
-const MOUTH_PATTERNS = [
-  // Neutral line
-  { y: 8, width: 4, style: "line" },
-  // Smile
-  { y: 8, width: 4, style: "smile" },
-  // Small
-  { y: 8, width: 2, style: "line" },
-  // Open
-  { y: 8, width: 3, style: "open" },
-]
-
-const HAIR_PATTERNS = [
-  // None
-  null,
-  // Short top
-  { rows: [0, 1], fullWidth: false },
-  // Full short
-  { rows: [0, 1, 2], fullWidth: true },
-  // Spiky
-  { rows: [0, 1], spiky: true },
-  // Side parts
-  { rows: [0, 1, 2], sides: true },
-  // Long
-  { rows: [0, 1, 2], long: true },
-]
-
-const ACCESSORY_PATTERNS = [
-  // None
-  null,
-  // Glasses
-  { type: "glasses", y: 4 },
-  // Eyepatch
-  { type: "eyepatch", side: "left" },
-  // Scar
-  { type: "scar", y: 5 },
-  // Visor
-  { type: "visor", y: 3 },
-  // Mask
-  { type: "mask", y: 6 },
-]
-
-const HAT_PATTERNS = [
-  // None
-  null,
-  // Cap
-  { type: "cap", height: 2 },
-  // Hood
-  { type: "hood", height: 3 },
-  // Antenna
-  { type: "antenna" },
-  // Horns
-  { type: "horns" },
-  // Halo
-  { type: "halo" },
-  // Crown
-  { type: "crown" },
-  // Beanie
-  { type: "beanie" },
-  // Headset
-  { type: "headset" },
-]
-
-const FLAIR_PATTERNS = [
-  // None
-  null,
-  // Glow
-  { type: "glow" },
-  // Static
-  { type: "static" },
-  // Sparkle
-  { type: "sparkle" },
+  "#5a4a3a", // brown
+  "#3a3030", // dark brown
+  "#6a5a7a", // purple
+  "#7a6a4a", // amber
 ]
 
 // Layer variant counts
 export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
-  base: BASE_SHAPES.length,
+  base: 3,
   skin: SKIN_COLORS.length,
-  eyes: EYES_PATTERNS.length,
-  mouth: MOUTH_PATTERNS.length,
-  hair: HAIR_PATTERNS.length,
-  accessory: ACCESSORY_PATTERNS.length,
-  hat: HAT_PATTERNS.length,
-  flair: FLAIR_PATTERNS.length,
+  eyes: 6,
+  mouth: 5,
+  hair: 8,
+  accessory: 6,
+  hat: 7,
+  flair: 4,
 }
 
 // Generate avatar config from seed
@@ -206,7 +74,6 @@ export function generateAvatarFromSeed(seed: string): AvatarConfig {
     { type: "eyes", variant: Math.floor(rand() * LAYER_VARIANTS.eyes), color: Math.floor(rand() * EYE_COLORS.length) },
     { type: "mouth", variant: Math.floor(rand() * LAYER_VARIANTS.mouth) },
     { type: "hair", variant: Math.floor(rand() * LAYER_VARIANTS.hair), color: Math.floor(rand() * HAIR_COLORS.length) },
-    // Accessories/hats/flair start with "none" variant (0) by default
     { type: "accessory", variant: 0 },
     { type: "hat", variant: 0 },
     { type: "flair", variant: 0 },
@@ -228,6 +95,13 @@ export function updateLayer(config: AvatarConfig, layer: AvatarLayer): AvatarCon
   }
 }
 
+// Helper to set pixel with bounds checking
+function setPixel(grid: string[][], x: number, y: number, color: string) {
+  if (y >= 0 && y < grid.length && x >= 0 && x < grid[0].length) {
+    grid[y][x] = color
+  }
+}
+
 // Render avatar to a 2D pixel grid (14x14)
 export function renderAvatarPixels(config: AvatarConfig): string[][] {
   const size = 14
@@ -242,153 +116,349 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
   const hatLayer = getLayer(config, "hat")
   
   const skinColor = SKIN_COLORS[skinLayer?.variant ?? 0]
+  const skinShadow = darkenColor(skinColor, 0.15)
   const hairColor = HAIR_COLORS[hairLayer?.color ?? 0]
   const eyeColor = EYE_COLORS[eyesLayer?.color ?? 0]
+  const eyeWhite = "#f0f0f0"
+  const mouthColor = "#4a2a2a"
+  const outlineColor = "#1a1a1a"
   
-  // Draw base head shape
-  const basePattern = BASE_SHAPES[baseLayer?.variant ?? 0]
-  const baseRows = basePattern.trim().split("\n").map(r => r.trim())
+  const baseVariant = baseLayer?.variant ?? 0
+  const eyesVariant = eyesLayer?.variant ?? 0
+  const mouthVariant = mouthLayer?.variant ?? 0
+  const hairVariant = hairLayer?.variant ?? 0
+  const accVariant = accessoryLayer?.variant ?? 0
+  const hatVariant = hatLayer?.variant ?? 0
   
-  for (let y = 0; y < Math.min(baseRows.length, size); y++) {
-    const row = baseRows[y]
-    for (let x = 0; x < Math.min(row.length, size); x++) {
-      if (row[x] === "#") {
-        grid[y + 1][x + 1] = skinColor
+  // Draw base head shape (centered, clear face area)
+  // Base shapes: 0 = round, 1 = square, 2 = oval
+  if (baseVariant === 0) {
+    // Round face
+    for (let y = 2; y < 12; y++) {
+      for (let x = 2; x < 12; x++) {
+        const dx = x - 6.5
+        const dy = y - 6.5
+        if (dx * dx + dy * dy < 22) {
+          setPixel(grid, x, y, skinColor)
+        }
+      }
+    }
+  } else if (baseVariant === 1) {
+    // Square face
+    for (let y = 2; y < 12; y++) {
+      for (let x = 3; x < 11; x++) {
+        setPixel(grid, x, y, skinColor)
+      }
+    }
+    // Round corners
+    setPixel(grid, 3, 2, "transparent")
+    setPixel(grid, 10, 2, "transparent")
+    setPixel(grid, 3, 11, "transparent")
+    setPixel(grid, 10, 11, "transparent")
+  } else {
+    // Oval face
+    for (let y = 1; y < 13; y++) {
+      const width = y < 3 || y > 10 ? 3 : (y < 5 || y > 8 ? 4 : 5)
+      const start = 7 - width
+      const end = 7 + width
+      for (let x = start; x < end; x++) {
+        setPixel(grid, x, y, skinColor)
       }
     }
   }
   
-  // Draw eyes
-  const eyePattern = EYES_PATTERNS[eyesLayer?.variant ?? 0]
-  if (eyePattern) {
-    // Left eye
-    grid[eyePattern.left[1] + 1][eyePattern.left[0]] = eyeColor
-    if (eyePattern.style === "tall") {
-      grid[eyePattern.left[1] + 2][eyePattern.left[0]] = eyeColor
-    }
-    // Right eye
-    grid[eyePattern.right[1] + 1][eyePattern.right[0]] = eyeColor
-    if (eyePattern.style === "tall") {
-      grid[eyePattern.right[1] + 2][eyePattern.right[0]] = eyeColor
-    }
+  // Add subtle shading on sides
+  for (let y = 4; y < 10; y++) {
+    if (grid[y][3] === skinColor) setPixel(grid, 3, y, skinShadow)
+    if (grid[y][10] === skinColor) setPixel(grid, 10, y, skinShadow)
   }
   
-  // Draw mouth
-  const mouthPattern = MOUTH_PATTERNS[mouthLayer?.variant ?? 0]
-  if (mouthPattern) {
-    const startX = 7 - Math.floor(mouthPattern.width / 2)
-    for (let i = 0; i < mouthPattern.width; i++) {
-      const mouthColor = "#4a3a3a"
-      if (mouthPattern.style === "smile" && i > 0 && i < mouthPattern.width - 1) {
-        grid[mouthPattern.y + 1][startX + i] = mouthColor
-      } else {
-        grid[mouthPattern.y][startX + i] = mouthColor
-      }
-    }
+  // Draw eyes - clear 2x2 or 2x1 eyes with visible pupils
+  // Eye variants: 0=normal, 1=wide, 2=narrow, 3=happy, 4=tired, 5=big
+  const eyeY = 5
+  const leftEyeX = 4
+  const rightEyeX = 8
+  
+  if (eyesVariant === 0) {
+    // Normal eyes - 2 wide with pupil
+    setPixel(grid, leftEyeX, eyeY, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
+    setPixel(grid, rightEyeX, eyeY, eyeColor)
+    setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
+  } else if (eyesVariant === 1) {
+    // Wide eyes - larger whites
+    setPixel(grid, leftEyeX, eyeY, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
+    setPixel(grid, rightEyeX, eyeY, eyeWhite)
+    setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
+    setPixel(grid, rightEyeX, eyeY, eyeColor)
+  } else if (eyesVariant === 2) {
+    // Narrow/squinting eyes - single pixel
+    setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
+    setPixel(grid, rightEyeX, eyeY, eyeColor)
+  } else if (eyesVariant === 3) {
+    // Happy eyes - curved/closed
+    setPixel(grid, leftEyeX, eyeY, eyeColor)
+    setPixel(grid, leftEyeX + 1, eyeY - 1, eyeColor)
+    setPixel(grid, rightEyeX, eyeY - 1, eyeColor)
+    setPixel(grid, rightEyeX + 1, eyeY, eyeColor)
+  } else if (eyesVariant === 4) {
+    // Tired eyes - half-lidded
+    setPixel(grid, leftEyeX, eyeY, skinShadow)
+    setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
+    setPixel(grid, rightEyeX, eyeY, eyeColor)
+    setPixel(grid, rightEyeX + 1, eyeY, skinShadow)
+  } else {
+    // Big eyes - 2x2
+    setPixel(grid, leftEyeX, eyeY - 1, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY - 1, eyeWhite)
+    setPixel(grid, leftEyeX, eyeY, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
+    setPixel(grid, rightEyeX, eyeY - 1, eyeWhite)
+    setPixel(grid, rightEyeX + 1, eyeY - 1, eyeWhite)
+    setPixel(grid, rightEyeX, eyeY, eyeColor)
+    setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
+  }
+  
+  // Draw mouth - clear shapes
+  // Mouth variants: 0=neutral, 1=smile, 2=small, 3=open, 4=frown
+  const mouthY = 8
+  
+  if (mouthVariant === 0) {
+    // Neutral line
+    setPixel(grid, 5, mouthY, mouthColor)
+    setPixel(grid, 6, mouthY, mouthColor)
+    setPixel(grid, 7, mouthY, mouthColor)
+    setPixel(grid, 8, mouthY, mouthColor)
+  } else if (mouthVariant === 1) {
+    // Smile - curved up
+    setPixel(grid, 5, mouthY, mouthColor)
+    setPixel(grid, 6, mouthY + 1, mouthColor)
+    setPixel(grid, 7, mouthY + 1, mouthColor)
+    setPixel(grid, 8, mouthY, mouthColor)
+  } else if (mouthVariant === 2) {
+    // Small/pursed
+    setPixel(grid, 6, mouthY, mouthColor)
+    setPixel(grid, 7, mouthY, mouthColor)
+  } else if (mouthVariant === 3) {
+    // Open mouth
+    setPixel(grid, 5, mouthY, mouthColor)
+    setPixel(grid, 6, mouthY, "#2a1a1a")
+    setPixel(grid, 7, mouthY, "#2a1a1a")
+    setPixel(grid, 8, mouthY, mouthColor)
+    setPixel(grid, 6, mouthY + 1, mouthColor)
+    setPixel(grid, 7, mouthY + 1, mouthColor)
+  } else {
+    // Frown - curved down
+    setPixel(grid, 5, mouthY + 1, mouthColor)
+    setPixel(grid, 6, mouthY, mouthColor)
+    setPixel(grid, 7, mouthY, mouthColor)
+    setPixel(grid, 8, mouthY + 1, mouthColor)
   }
   
   // Draw hair
-  const hairVariant = hairLayer?.variant ?? 0
-  if (hairVariant > 0) {
-    const pattern = HAIR_PATTERNS[hairVariant]
-    if (pattern && "rows" in pattern) {
-      for (const rowIdx of pattern.rows) {
-        for (let x = 2; x < size - 2; x++) {
-          // Check if base has pixel here or above
-          if (rowIdx < 3) {
-            grid[rowIdx][x] = hairColor
-          }
-        }
-      }
-      // Spiky hair adds extra pixels
-      if (pattern.spiky) {
-        grid[0][4] = hairColor
-        grid[0][9] = hairColor
-      }
-      // Long hair adds side pixels
-      if (pattern.long) {
-        for (let y = 3; y < 10; y++) {
-          grid[y][1] = hairColor
-          grid[y][12] = hairColor
-        }
-      }
+  // Hair variants: 0=none, 1=short, 2=spiky, 3=side part, 4=long, 5=mohawk, 6=bangs, 7=curly
+  if (hairVariant === 1) {
+    // Short hair - top coverage
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 1, hairColor)
+      setPixel(grid, x, 2, hairColor)
     }
+    setPixel(grid, 3, 2, hairColor)
+    setPixel(grid, 10, 2, hairColor)
+  } else if (hairVariant === 2) {
+    // Spiky hair
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 2, hairColor)
+    }
+    setPixel(grid, 4, 1, hairColor)
+    setPixel(grid, 6, 0, hairColor)
+    setPixel(grid, 7, 1, hairColor)
+    setPixel(grid, 9, 0, hairColor)
+  } else if (hairVariant === 3) {
+    // Side part
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, hairColor)
+      setPixel(grid, x, 2, hairColor)
+    }
+    setPixel(grid, 3, 3, hairColor)
+    setPixel(grid, 3, 4, hairColor)
+  } else if (hairVariant === 4) {
+    // Long hair
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, hairColor)
+      setPixel(grid, x, 2, hairColor)
+    }
+    for (let y = 2; y < 11; y++) {
+      setPixel(grid, 2, y, hairColor)
+      setPixel(grid, 11, y, hairColor)
+    }
+  } else if (hairVariant === 5) {
+    // Mohawk
+    setPixel(grid, 6, 0, hairColor)
+    setPixel(grid, 7, 0, hairColor)
+    setPixel(grid, 6, 1, hairColor)
+    setPixel(grid, 7, 1, hairColor)
+    setPixel(grid, 6, 2, hairColor)
+    setPixel(grid, 7, 2, hairColor)
+  } else if (hairVariant === 6) {
+    // Bangs
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, hairColor)
+      setPixel(grid, x, 2, hairColor)
+    }
+    setPixel(grid, 4, 3, hairColor)
+    setPixel(grid, 5, 3, hairColor)
+    setPixel(grid, 6, 4, hairColor)
+  } else if (hairVariant === 7) {
+    // Curly/afro
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 0, hairColor)
+      setPixel(grid, x, 1, hairColor)
+    }
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 2, hairColor)
+    }
+    setPixel(grid, 2, 2, hairColor)
+    setPixel(grid, 11, 2, hairColor)
+    setPixel(grid, 2, 3, hairColor)
+    setPixel(grid, 11, 3, hairColor)
   }
   
   // Draw accessory
-  const accVariant = accessoryLayer?.variant ?? 0
-  if (accVariant > 0) {
-    const pattern = ACCESSORY_PATTERNS[accVariant]
-    if (pattern) {
-      if (pattern.type === "glasses") {
-        // Draw simple glasses
-        const glassColor = "#2a2a2a"
-        grid[pattern.y][3] = glassColor
-        grid[pattern.y][4] = glassColor
-        grid[pattern.y][5] = glassColor
-        grid[pattern.y][6] = glassColor
-        grid[pattern.y][7] = glassColor
-        grid[pattern.y][8] = glassColor
-        grid[pattern.y][9] = glassColor
-        grid[pattern.y][10] = glassColor
-      } else if (pattern.type === "eyepatch") {
-        const patchColor = "#2a2a2a"
-        grid[4][3] = patchColor
-        grid[4][4] = patchColor
-        grid[5][3] = patchColor
-        grid[5][4] = patchColor
-      } else if (pattern.type === "scar") {
-        const scarColor = "#8a5a5a"
-        grid[pattern.y][8] = scarColor
-        grid[pattern.y + 1][9] = scarColor
-        grid[pattern.y + 2][10] = scarColor
-      } else if (pattern.type === "visor") {
-        const visorColor = "#4a8b8b"
-        for (let x = 2; x < 12; x++) {
-          grid[pattern.y][x] = visorColor
-          grid[pattern.y + 1][x] = visorColor
-        }
-      }
+  // Variants: 0=none, 1=glasses, 2=eyepatch, 3=scar, 4=visor, 5=mask
+  if (accVariant === 1) {
+    // Glasses
+    const glassColor = "#1a1a1a"
+    const lensColor = "#8ab8d8"
+    // Left lens
+    setPixel(grid, 3, 5, glassColor)
+    setPixel(grid, 4, 4, glassColor)
+    setPixel(grid, 5, 4, glassColor)
+    setPixel(grid, 6, 5, glassColor)
+    setPixel(grid, 4, 5, lensColor)
+    setPixel(grid, 5, 5, lensColor)
+    // Bridge
+    setPixel(grid, 6, 5, glassColor)
+    setPixel(grid, 7, 5, glassColor)
+    // Right lens
+    setPixel(grid, 8, 4, glassColor)
+    setPixel(grid, 9, 4, glassColor)
+    setPixel(grid, 7, 5, glassColor)
+    setPixel(grid, 10, 5, glassColor)
+    setPixel(grid, 8, 5, lensColor)
+    setPixel(grid, 9, 5, lensColor)
+  } else if (accVariant === 2) {
+    // Eyepatch
+    const patchColor = "#2a2020"
+    setPixel(grid, 3, 4, patchColor)
+    setPixel(grid, 4, 4, patchColor)
+    setPixel(grid, 5, 4, patchColor)
+    setPixel(grid, 3, 5, patchColor)
+    setPixel(grid, 4, 5, patchColor)
+    setPixel(grid, 5, 5, patchColor)
+    setPixel(grid, 3, 6, patchColor)
+    // Strap
+    setPixel(grid, 2, 3, patchColor)
+    setPixel(grid, 11, 3, patchColor)
+  } else if (accVariant === 3) {
+    // Scar
+    const scarColor = "#c08080"
+    setPixel(grid, 9, 4, scarColor)
+    setPixel(grid, 8, 5, scarColor)
+    setPixel(grid, 9, 6, scarColor)
+    setPixel(grid, 8, 7, scarColor)
+  } else if (accVariant === 4) {
+    // Visor
+    const visorColor = "#60a0c0"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 4, visorColor)
+      setPixel(grid, x, 5, visorColor)
+    }
+  } else if (accVariant === 5) {
+    // Face mask
+    const maskColor = "#404050"
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 7, maskColor)
+      setPixel(grid, x, 8, maskColor)
+      setPixel(grid, x, 9, maskColor)
     }
   }
   
   // Draw hat
-  const hatVariant = hatLayer?.variant ?? 0
-  if (hatVariant > 0) {
-    const pattern = HAT_PATTERNS[hatVariant]
-    if (pattern) {
-      const hatColor = "#4a3a5a"
-      if (pattern.type === "cap") {
-        for (let x = 2; x < 12; x++) {
-          grid[0][x] = hatColor
-        }
-        for (let x = 1; x < 13; x++) {
-          grid[1][x] = hatColor
-        }
-      } else if (pattern.type === "antenna") {
-        grid[0][7] = "#8a8a8a"
-        grid[1][7] = "#8a8a8a"
-      } else if (pattern.type === "horns") {
-        grid[0][3] = hatColor
-        grid[1][3] = hatColor
-        grid[0][10] = hatColor
-        grid[1][10] = hatColor
-      } else if (pattern.type === "halo") {
-        const haloColor = "#e8d080"
-        for (let x = 4; x < 10; x++) {
-          grid[0][x] = haloColor
-        }
-      } else if (pattern.type === "crown") {
-        const crownColor = "#d4a030"
-        for (let x = 3; x < 11; x++) {
-          grid[1][x] = crownColor
-        }
-        grid[0][4] = crownColor
-        grid[0][7] = crownColor
-        grid[0][10] = crownColor
-      }
+  // Variants: 0=none, 1=cap, 2=hood, 3=antenna, 4=horns, 5=halo, 6=crown
+  if (hatVariant === 1) {
+    // Cap
+    const capColor = "#4050a0"
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 0, capColor)
+      setPixel(grid, x, 1, capColor)
     }
+    // Brim
+    for (let x = 1; x < 8; x++) {
+      setPixel(grid, x, 2, capColor)
+    }
+  } else if (hatVariant === 2) {
+    // Hood
+    const hoodColor = "#505060"
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 0, hoodColor)
+      setPixel(grid, x, 1, hoodColor)
+    }
+    setPixel(grid, 1, 1, hoodColor)
+    setPixel(grid, 12, 1, hoodColor)
+    setPixel(grid, 1, 2, hoodColor)
+    setPixel(grid, 12, 2, hoodColor)
+    setPixel(grid, 1, 3, hoodColor)
+    setPixel(grid, 12, 3, hoodColor)
+  } else if (hatVariant === 3) {
+    // Antenna
+    const antennaColor = "#808080"
+    const tipColor = "#ff6060"
+    setPixel(grid, 7, 0, tipColor)
+    setPixel(grid, 7, 1, antennaColor)
+  } else if (hatVariant === 4) {
+    // Horns
+    const hornColor = "#a06040"
+    setPixel(grid, 3, 0, hornColor)
+    setPixel(grid, 3, 1, hornColor)
+    setPixel(grid, 2, 0, hornColor)
+    setPixel(grid, 10, 0, hornColor)
+    setPixel(grid, 10, 1, hornColor)
+    setPixel(grid, 11, 0, hornColor)
+  } else if (hatVariant === 5) {
+    // Halo
+    const haloColor = "#f0d860"
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 0, haloColor)
+    }
+    setPixel(grid, 3, 1, haloColor)
+    setPixel(grid, 10, 1, haloColor)
+  } else if (hatVariant === 6) {
+    // Crown
+    const crownColor = "#d4a030"
+    const gemColor = "#e04040"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, crownColor)
+    }
+    setPixel(grid, 4, 0, crownColor)
+    setPixel(grid, 7, 0, gemColor)
+    setPixel(grid, 10, 0, crownColor)
   }
   
   return grid
+}
+
+// Darken a hex color by a factor
+function darkenColor(hex: string, factor: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  
+  const newR = Math.floor(r * (1 - factor))
+  const newG = Math.floor(g * (1 - factor))
+  const newB = Math.floor(b * (1 - factor))
+  
+  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`
 }
