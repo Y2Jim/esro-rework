@@ -241,6 +241,59 @@
   text-shadow: 0 0 6px rgba(164, 93, 255, 0.3);
 }
 
+.text-glow-cyan {
+  text-shadow: 0 0 6px rgba(93, 208, 255, 0.4);
+}
+
+.text-glow-amber {
+  text-shadow: 0 0 6px rgba(255, 179, 71, 0.4);
+}
+
+.text-glow-green {
+  text-shadow: 0 0 6px rgba(93, 255, 154, 0.4);
+}
+
+/* Tab hover utilities */
+.hover-cyan:hover {
+  color: #5dd0ff !important;
+  background-color: rgba(93, 208, 255, 0.1) !important;
+}
+
+.hover-amber:hover {
+  color: #ffb347 !important;
+  background-color: rgba(255, 179, 71, 0.1) !important;
+}
+
+.hover-green:hover {
+  color: #5dff9a !important;
+  background-color: rgba(93, 255, 154, 0.1) !important;
+}
+
+.hover-violet:hover {
+  color: #bb81ff !important;
+  background-color: rgba(187, 129, 255, 0.1) !important;
+}
+
+.hover-lilac:hover {
+  color: #d4a5ff !important;
+  background-color: rgba(212, 165, 255, 0.1) !important;
+}
+
+.hover-danger:hover {
+  color: #ff4d8d !important;
+  background-color: rgba(255, 77, 141, 0.1) !important;
+}
+
+.hover-muted:hover {
+  color: #efe6ff !important;
+  background-color: rgba(167, 145, 199, 0.1) !important;
+}
+
+.hover-foreground:hover {
+  color: #efe6ff !important;
+  background-color: rgba(239, 230, 255, 0.08) !important;
+}
+
 .box-glow {
   box-shadow: var(--shadow-glow);
 }

@@ -5,11 +5,11 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 
 const items: { id: ScreenId; label: string; icon: string; color: string; glow: string; bg: string; hover: string }[] = [
-  { id: "terminal", label: "terminal", icon: "▣", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan", bg: "bg-[color:var(--color-cyan)]/15", hover: "hover:text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/10" },
-  { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber", bg: "bg-[color:var(--color-amber)]/15", hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/10" },
-  { id: "contracts", label: "contracts", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green", bg: "bg-[color:var(--color-green)]/15", hover: "hover:text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/10" },
-  { id: "social", label: "social", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15", hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/10" },
-  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-lilac)]/15", hover: "hover:text-[color:var(--color-lilac)] hover:bg-[color:var(--color-lilac)]/10" },
+  { id: "terminal", label: "terminal", icon: "▣", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan", bg: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
+  { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber", bg: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+  { id: "contracts", label: "contracts", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green", bg: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
+  { id: "social", label: "social", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
+  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-lilac)]/15", hover: "hover-lilac" },
 ]
 
 export function BottomNav() {

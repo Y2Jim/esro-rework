@@ -9,10 +9,10 @@ import { cn } from "@/lib/cn"
 import type { SocialTab } from "@/lib/types"
 
 const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
-  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover:text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/10" },
-  { id: "faction", label: "Faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/10" },
-  { id: "friends", label: "Friends", icon: "◇", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover:text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/10" },
-  { id: "trade", label: "Trade", icon: "⇄", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/10" },
+  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
+  { id: "faction", label: "Faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
+  { id: "friends", label: "Friends", icon: "◇", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
+  { id: "trade", label: "Trade", icon: "⇄", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
 ]
 
 export function SocialScreen() {

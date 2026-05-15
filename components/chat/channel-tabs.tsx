@@ -19,7 +19,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-foreground)]/50",
     inactiveBorder: "border-[color:var(--color-border-soft)]",
     icon: "◫",
-    hover: "hover:text-[color:var(--color-foreground)] hover:bg-[color:var(--color-foreground)]/5 hover:border-[color:var(--color-foreground)]/30",
+    hover: "hover-foreground",
   },
   TRADE: {
     text: "text-[color:var(--color-amber)]",
@@ -27,7 +27,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-amber)]/50",
     inactiveBorder: "border-[color:var(--color-amber-muted)]/30",
     icon: "⇄",
-    hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/5 hover:border-[color:var(--color-amber)]/40",
+    hover: "hover-amber",
   },
   PARTY: {
     text: "text-[color:var(--color-cyan)]",
@@ -35,7 +35,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-cyan)]/50",
     inactiveBorder: "border-[color:var(--color-cyan-muted)]/30",
     icon: "⋈",
-    hover: "hover:text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/5 hover:border-[color:var(--color-cyan)]/40",
+    hover: "hover-cyan",
   },
   FACTION: {
     text: "text-[color:var(--color-lilac)]",
@@ -43,7 +43,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-lilac)]/50",
     inactiveBorder: "border-[color:var(--color-lilac)]/20",
     icon: "⬡",
-    hover: "hover:text-[color:var(--color-lilac)] hover:bg-[color:var(--color-lilac)]/5 hover:border-[color:var(--color-lilac)]/40",
+    hover: "hover-lilac",
   },
   GAME: {
     text: "text-[color:var(--color-green)]",
@@ -51,7 +51,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-green)]/50",
     inactiveBorder: "border-[color:var(--color-green-muted)]/30",
     icon: "▸",
-    hover: "hover:text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/5 hover:border-[color:var(--color-green)]/40",
+    hover: "hover-green",
   },
   HELP: {
     text: "text-[color:var(--color-violet-bright)]",
@@ -59,7 +59,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-violet)]/50",
     inactiveBorder: "border-[color:var(--color-violet)]/20",
     icon: "?",
-    hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet)]/5 hover:border-[color:var(--color-violet)]/40",
+    hover: "hover-violet",
   },
   LOG: {
     text: "text-[color:var(--color-muted)]",
@@ -67,7 +67,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-muted)]/50",
     inactiveBorder: "border-[color:var(--color-muted)]/20",
     icon: "▤",
-    hover: "hover:text-[color:var(--color-text)] hover:bg-[color:var(--color-muted)]/5 hover:border-[color:var(--color-muted)]/40",
+    hover: "hover-muted",
   },
   UNDERCHAT: {
     text: "text-[color:var(--color-danger)]",
@@ -75,7 +75,7 @@ const channelStyle: Record<ChannelId, {
     activeBorder: "border-[color:var(--color-danger)]/50",
     inactiveBorder: "border-[color:var(--color-danger-muted)]/30",
     icon: "◎",
-    hover: "hover:text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/5 hover:border-[color:var(--color-danger)]/40",
+    hover: "hover-danger",
   },
 }
 

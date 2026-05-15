@@ -9,10 +9,10 @@ import { CraftingTab } from "./crafting-tab"
 import { RollingTab } from "./rolling-tab"
 
 const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
-  { id: "expeditions", label: "Expeditions", icon: "▷", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover:text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/10" },
-  { id: "skills", label: "Skills", icon: "◆", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover:text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/10" },
-  { id: "crafting", label: "Crafting", icon: "⬢", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover:text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/10" },
-  { id: "rolling", label: "Rolling", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover:text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/10" },
+  { id: "expeditions", label: "Expeditions", icon: "▷", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
+  { id: "skills", label: "Skills", icon: "◆", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
+  { id: "crafting", label: "Crafting", icon: "⬢", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+  { id: "rolling", label: "Rolling", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
 ]
 
 export function OpsScreen() {
