@@ -5,14 +5,17 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
+import { RACES } from "@/lib/game-data"
+import type { ThemeId } from "@/lib/types"
 
-type ProfileTab = "summary" | "titles" | "cosmetics" | "notifications"
+type ProfileTab = "summary" | "titles" | "cosmetics" | "notifications" | "settings"
 
 const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15", hover: "hover-lilac" },
   { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
-  { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
+  { id: "cosmetics", label: "Vanity", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
   { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15", hover: "hover-danger" },
+  { id: "settings", label: "Config", icon: "⚙", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
 ]
 
 export function ProfileScreen() {
@@ -57,6 +60,7 @@ export function ProfileScreen() {
         {tab === "titles" && <TitlesTab />}
         {tab === "cosmetics" && <CosmeticsTab />}
         {tab === "notifications" && <NotificationsTab />}
+        {tab === "settings" && <SettingsTab />}
       </div>
     </div>
   )
@@ -65,16 +69,47 @@ export function ProfileScreen() {
 function SummaryTab() {
   const profile = useEsroStore((s) => s.profile)
   const identity = useEsroStore((s) => s.identity)
+  const playerRace = useEsroStore((s) => s.playerRace)
+  const playerLevel = useEsroStore((s) => s.playerLevel)
 
   const xpPercent = (profile.xp / profile.xpToNext) * 100
 
   return (
     <div className="space-y-4">
-      {/* Identity with Avatar */}
+      {/* Identity with Avatar and Faction Badge */}
       <div className="flex items-center gap-4">
-        <PixelAvatar config={identity.avatar} size="lg" />
+        <div className="relative">
+          <PixelAvatar config={identity.avatar} size="lg" />
+          {/* Faction badge overlay */}
+          {playerRace && (
+            <div 
+              className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[color:var(--color-bg)]"
+              style={{ 
+                backgroundColor: `${playerRace.color}20`,
+                boxShadow: `0 0 8px ${playerRace.glow}`
+              }}
+            >
+              <span 
+                className="text-[11px]" 
+                style={{ color: playerRace.color }}
+              >
+                {playerRace.emblem}
+              </span>
+            </div>
+          )}
+        </div>
         <div className="flex-1">
-          <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
+            {playerRace && (
+              <span 
+                className="rounded px-1.5 py-0.5 text-[8px] uppercase tracking-wider"
+                style={{ backgroundColor: `${playerRace.color}20`, color: playerRace.color }}
+              >
+                {playerRace.icon}
+              </span>
+            )}
+          </div>
           {identity.title && (
             <div className={cn("text-[11px]", rarityColor[identity.titleRarity])}>{identity.title}</div>
           )}
@@ -87,7 +122,7 @@ function SummaryTab() {
       {/* Level + XP */}
       <div>
         <div className="flex items-baseline justify-between">
-          <span className="text-[11px] text-[color:var(--color-muted)]">Level {profile.level}</span>
+          <span className="text-[11px] text-[color:var(--color-muted)]">Level {playerLevel}</span>
           <span className="text-[10px] text-[color:var(--color-muted)]">{profile.xp}/{profile.xpToNext} XP</span>
         </div>
         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
@@ -98,21 +133,62 @@ function SummaryTab() {
         </div>
       </div>
 
-      {/* Faction */}
-      {profile.faction && (
-        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-          <div className="flex items-baseline justify-between">
-            <span className="text-[11px] text-[color:var(--color-muted)]">{profile.faction.label}</span>
-            <span className="text-[10px] text-[color:var(--color-accent)]">Rank {profile.faction.rank}</span>
-          </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
-            <div
-              className="h-full bg-[color:var(--color-accent)]/60"
-              style={{ width: `${(profile.faction.standing / profile.faction.maxStanding) * 100}%` }}
-            />
-          </div>
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
-            {profile.faction.standing}/{profile.faction.maxStanding} standing
+      {/* Faction Badge - Large Display */}
+      {playerRace && (
+        <div 
+          className="rounded-lg border p-4"
+          style={{ 
+            borderColor: `${playerRace.color}30`,
+            backgroundColor: `${playerRace.color}08`
+          }}
+        >
+          <div className="flex items-center gap-3">
+            {/* Large emblem */}
+            <div 
+              className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full"
+              style={{ 
+                backgroundColor: `${playerRace.color}15`,
+                border: `1px solid ${playerRace.color}30`,
+                boxShadow: `0 0 20px ${playerRace.glow}`
+              }}
+            >
+              <span 
+                className="text-3xl"
+                style={{ color: playerRace.color, textShadow: `0 0 10px ${playerRace.glow}` }}
+              >
+                {playerRace.emblem}
+              </span>
+            </div>
+            
+            <div className="flex-1">
+              <div 
+                className="text-[13px] font-medium"
+                style={{ color: playerRace.color }}
+              >
+                {playerRace.name}
+              </div>
+              <div className="text-[10px] text-[color:var(--color-muted)]">
+                {playerRace.role}
+              </div>
+              {/* Standing bar - uses profile.faction if available */}
+              {profile.faction && (
+                <div className="mt-2">
+                  <div className="flex items-center justify-between text-[9px]">
+                    <span className="text-[color:var(--color-muted)]">Rank {profile.faction.rank}</span>
+                    <span style={{ color: playerRace.color }}>{profile.faction.standing}/{profile.faction.maxStanding}</span>
+                  </div>
+                  <div className="mt-1 h-1 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+                    <div
+                      className="h-full transition-all"
+                      style={{ 
+                        width: `${(profile.faction.standing / profile.faction.maxStanding) * 100}%`,
+                        backgroundColor: playerRace.color
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -368,6 +444,142 @@ function NotificationsTab() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function SettingsTab() {
+  const theme = useEsroStore((s) => s.theme)
+  const setTheme = useEsroStore((s) => s.setTheme)
+  const playerRace = useEsroStore((s) => s.playerRace)
+
+  const themeOptions: { id: ThemeId; label: string; color: string; emblem?: string }[] = [
+    { id: "default", label: "Default", color: "#a45dff" },
+    ...RACES.map(r => ({ id: r.id as ThemeId, label: r.name, color: r.color, emblem: r.emblem }))
+  ]
+
+  return (
+    <div className="space-y-4">
+      {/* UI Theme */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          UI Theme
+        </div>
+        <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+          Customize your interface colors
+        </div>
+        
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {themeOptions.map((opt) => {
+            const isActive = theme === opt.id
+            const isLocked = opt.id !== "default" && playerRace?.id !== opt.id
+            
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => !isLocked && setTheme(opt.id)}
+                disabled={isLocked}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg border p-2.5 text-left transition-all",
+                  isActive 
+                    ? "border-[color:var(--color-accent)]" 
+                    : isLocked 
+                      ? "cursor-not-allowed border-[color:var(--color-border-soft)] opacity-40"
+                      : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
+                )}
+                style={isActive ? { 
+                  borderColor: opt.color,
+                  backgroundColor: `${opt.color}10`
+                } : undefined}
+              >
+                {/* Theme color preview */}
+                <div 
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+                  style={{ 
+                    backgroundColor: `${opt.color}20`,
+                    border: `1px solid ${opt.color}40`
+                  }}
+                >
+                  {opt.emblem ? (
+                    <span style={{ color: opt.color }}>{opt.emblem}</span>
+                  ) : (
+                    <span className="text-[10px]" style={{ color: opt.color }}>◈</span>
+                  )}
+                </div>
+                
+                <div className="flex-1">
+                  <div 
+                    className="text-[11px] font-medium"
+                    style={{ color: isActive ? opt.color : "var(--color-text)" }}
+                  >
+                    {opt.label}
+                  </div>
+                  {isLocked && (
+                    <div className="text-[8px] text-[color:var(--color-muted)]">
+                      Join faction to unlock
+                    </div>
+                  )}
+                </div>
+                
+                {isActive && (
+                  <span 
+                    className="rounded px-1.5 py-0.5 text-[8px] uppercase"
+                    style={{ backgroundColor: `${opt.color}20`, color: opt.color }}
+                  >
+                    active
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+        
+        {playerRace && theme !== playerRace.id && (
+          <button
+            type="button"
+            onClick={() => setTheme(playerRace.id as ThemeId)}
+            className="mt-3 w-full rounded border px-3 py-2 text-[10px] transition-colors"
+            style={{ 
+              borderColor: `${playerRace.color}40`,
+              color: playerRace.color
+            }}
+          >
+            Reset to Faction Theme ({playerRace.name})
+          </button>
+        )}
+      </div>
+
+      {/* Interface Info */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Interface
+        </div>
+        <div className="mt-2 space-y-2 text-[10px] text-[color:var(--color-muted)]">
+          <div className="flex items-center justify-between">
+            <span>Sound Effects</span>
+            <span className="text-[color:var(--color-accent)]">On</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Notifications</span>
+            <span className="text-[color:var(--color-accent)]">Enabled</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Compact Mode</span>
+            <span className="text-[color:var(--color-muted)]">Off</span>
+          </div>
+        </div>
+      </div>
+
+      {/* About */}
+      <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3 text-center">
+        <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          ESRO Terminal
+        </div>
+        <div className="mt-1 text-[8px] text-[color:var(--color-muted-2)]">
+          Enchanted Star Realms Online v0.1.0
+        </div>
+      </div>
     </div>
   )
 }
