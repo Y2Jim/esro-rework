@@ -54,6 +54,20 @@ const channelStyle: Record<ChannelId, {
     inactiveBorder: "border-[color:var(--color-green-muted)]/30",
     icon: "✦",
   },
+  FACTION: {
+    text: "text-[color:var(--color-lilac)]",
+    activeBg: "bg-[color:var(--color-lilac)]/10",
+    activeBorder: "border-[color:var(--color-lilac)]/50",
+    inactiveBorder: "border-[color:var(--color-lilac)]/20",
+    icon: "◆",
+  },
+  PARTY: {
+    text: "text-[color:var(--color-accent)]",
+    activeBg: "bg-[color:var(--color-accent)]/10",
+    activeBorder: "border-[color:var(--color-accent)]/50",
+    inactiveBorder: "border-[color:var(--color-accent)]/20",
+    icon: "◈",
+  },
 }
 
 export function ChannelTabs() {
