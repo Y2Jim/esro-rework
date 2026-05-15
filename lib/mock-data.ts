@@ -852,16 +852,68 @@ export const factionProjects: FactionProject[] = [
 
 // Unlocked vanity items
 export const vanityItems: VanityItem[] = [
+  // Accessories - Common
   { id: "v1", label: "Signal Glasses", layerType: "accessory", variant: 1, rarity: "common", unlocked: true, equipped: true },
-  { id: "v2", label: "Route Cap", layerType: "hat", variant: 1, rarity: "common", unlocked: true, equipped: false },
+  { id: "v11", label: "Basic Shades", layerType: "accessory", variant: 5, rarity: "common", unlocked: true, equipped: false },
+  { id: "v12", label: "Dust Goggles", layerType: "accessory", variant: 6, rarity: "common", unlocked: false, equipped: false },
+  { id: "v13", label: "Worn Bandana", layerType: "accessory", variant: 7, rarity: "common", unlocked: false, equipped: false },
+  // Accessories - Uncommon
   { id: "v3", label: "Eyepatch", layerType: "accessory", variant: 2, rarity: "uncommon", unlocked: true, equipped: false },
+  { id: "v14", label: "Scar Mark", layerType: "accessory", variant: 3, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v15", label: "Relay Earpiece", layerType: "accessory", variant: 8, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v16", label: "Signal Monocle", layerType: "accessory", variant: 9, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v17", label: "Route Mask", layerType: "accessory", variant: 10, rarity: "uncommon", unlocked: false, equipped: false },
+  // Accessories - Rare
   { id: "v4", label: "Archive Visor", layerType: "accessory", variant: 4, rarity: "rare", unlocked: true, equipped: false },
+  { id: "v18", label: "Deep Scanner", layerType: "accessory", variant: 11, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v19", label: "Rift Lens", layerType: "accessory", variant: 12, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v20", label: "Echo Mask", layerType: "accessory", variant: 13, rarity: "rare", unlocked: false, equipped: false },
+  // Accessories - Epic
+  { id: "v21", label: "Void Visor", layerType: "accessory", variant: 14, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v22", label: "Prismatic Lens", layerType: "accessory", variant: 15, rarity: "epic", unlocked: false, equipped: false },
+  // Accessories - Legendary
+  { id: "v23", label: "All-Seeing Eye", layerType: "accessory", variant: 16, rarity: "legendary", unlocked: false, equipped: false },
+
+  // Hats - Common
+  { id: "v2", label: "Route Cap", layerType: "hat", variant: 1, rarity: "common", unlocked: true, equipped: false },
+  { id: "v24", label: "Dust Hood", layerType: "hat", variant: 7, rarity: "common", unlocked: false, equipped: false },
+  { id: "v25", label: "Signal Beanie", layerType: "hat", variant: 8, rarity: "common", unlocked: false, equipped: false },
+  { id: "v26", label: "Worn Helmet", layerType: "hat", variant: 9, rarity: "common", unlocked: false, equipped: false },
+  // Hats - Uncommon
   { id: "v5", label: "Signal Antenna", layerType: "hat", variant: 3, rarity: "uncommon", unlocked: true, equipped: false },
+  { id: "v27", label: "Relay Headset", layerType: "hat", variant: 10, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v28", label: "Archive Hood", layerType: "hat", variant: 11, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v29", label: "Scout Helm", layerType: "hat", variant: 12, rarity: "uncommon", unlocked: false, equipped: false },
+  // Hats - Rare
   { id: "v6", label: "Relay Horns", layerType: "hat", variant: 4, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v30", label: "Drift Crown", layerType: "hat", variant: 13, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v31", label: "Echo Circlet", layerType: "hat", variant: 14, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v32", label: "Signal Crest", layerType: "hat", variant: 15, rarity: "rare", unlocked: false, equipped: false },
+  // Hats - Epic
   { id: "v7", label: "Archive Halo", layerType: "hat", variant: 5, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v33", label: "Void Helm", layerType: "hat", variant: 16, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v34", label: "Rift Diadem", layerType: "hat", variant: 17, rarity: "epic", unlocked: false, equipped: false },
+  // Hats - Legendary
   { id: "v8", label: "Crown of Routes", layerType: "hat", variant: 6, rarity: "legendary", unlocked: false, equipped: false },
-  { id: "v9", label: "Static Aura", layerType: "flair", variant: 2, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v35", label: "Primordial Antlers", layerType: "hat", variant: 18, rarity: "legendary", unlocked: false, equipped: false },
+
+  // Flair - Common
+  { id: "v36", label: "Soft Glow", layerType: "flair", variant: 4, rarity: "common", unlocked: false, equipped: false },
+  { id: "v37", label: "Dust Motes", layerType: "flair", variant: 5, rarity: "common", unlocked: false, equipped: false },
+  // Flair - Uncommon
+  { id: "v38", label: "Signal Flicker", layerType: "flair", variant: 6, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v39", label: "Route Trails", layerType: "flair", variant: 7, rarity: "uncommon", unlocked: false, equipped: false },
+  // Flair - Rare
   { id: "v10", label: "Sparkle Effect", layerType: "flair", variant: 3, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v40", label: "Echo Ripples", layerType: "flair", variant: 8, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v41", label: "Data Stream", layerType: "flair", variant: 9, rarity: "rare", unlocked: false, equipped: false },
+  // Flair - Epic
+  { id: "v9", label: "Static Aura", layerType: "flair", variant: 2, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v42", label: "Pulse Glow", layerType: "flair", variant: 1, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v43", label: "Void Shimmer", layerType: "flair", variant: 10, rarity: "epic", unlocked: false, equipped: false },
+  // Flair - Legendary
+  { id: "v44", label: "Prismatic Aura", layerType: "flair", variant: 11, rarity: "legendary", unlocked: false, equipped: false },
+  { id: "v45", label: "Celestial Flame", layerType: "flair", variant: 12, rarity: "legendary", unlocked: false, equipped: false },
 ]
 
 export const profile: Profile = {

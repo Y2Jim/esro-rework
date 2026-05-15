@@ -126,55 +126,107 @@ interface PoolItem {
 
 const POOL: Record<Rarity, PoolItem[]> = {
   common: [
+    // Non-cosmetics
     { label: "Relay Flair", type: "chat_flair" },
     { label: "Field Kit Schematic", type: "schematic" },
     { label: "Calm Route", type: "modifier" },
-    { label: "Signal Glasses", type: "cosmetic", vanityData: { layerType: "accessory", variant: 1 } },
-    { label: "Route Cap", type: "cosmetic", vanityData: { layerType: "hat", variant: 1 } },
     { label: "Drifter", type: "title" },
     { label: "Relay Initiate", type: "title" },
     { label: "Path Follower", type: "title" },
+    // Accessories
+    { label: "Signal Glasses", type: "cosmetic", vanityData: { layerType: "accessory", variant: 1 } },
+    { label: "Basic Shades", type: "cosmetic", vanityData: { layerType: "accessory", variant: 5 } },
+    { label: "Dust Goggles", type: "cosmetic", vanityData: { layerType: "accessory", variant: 6 } },
+    { label: "Worn Bandana", type: "cosmetic", vanityData: { layerType: "accessory", variant: 7 } },
+    // Hats
+    { label: "Route Cap", type: "cosmetic", vanityData: { layerType: "hat", variant: 1 } },
+    { label: "Dust Hood", type: "cosmetic", vanityData: { layerType: "hat", variant: 7 } },
+    { label: "Signal Beanie", type: "cosmetic", vanityData: { layerType: "hat", variant: 8 } },
+    { label: "Worn Helmet", type: "cosmetic", vanityData: { layerType: "hat", variant: 9 } },
+    // Flair
+    { label: "Soft Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 4 } },
+    { label: "Dust Motes", type: "cosmetic", vanityData: { layerType: "flair", variant: 5 } },
   ],
   uncommon: [
+    // Non-cosmetics
     { label: "Signal Keeper", type: "title" },
     { label: "Signal Beacon Schematic", type: "schematic" },
     { label: "Clean Entry", type: "modifier" },
-    { label: "Eyepatch", type: "cosmetic", vanityData: { layerType: "accessory", variant: 2 } },
-    { label: "Signal Antenna", type: "cosmetic", vanityData: { layerType: "hat", variant: 3 } },
-    { label: "Scar Mark", type: "cosmetic", vanityData: { layerType: "accessory", variant: 3 } },
     { label: "Pale Wanderer", type: "title" },
     { label: "Circuit Speaker", type: "title" },
     { label: "Dust Walker", type: "title" },
     { label: "Signal Chaser", type: "title" },
+    // Accessories
+    { label: "Eyepatch", type: "cosmetic", vanityData: { layerType: "accessory", variant: 2 } },
+    { label: "Scar Mark", type: "cosmetic", vanityData: { layerType: "accessory", variant: 3 } },
+    { label: "Relay Earpiece", type: "cosmetic", vanityData: { layerType: "accessory", variant: 8 } },
+    { label: "Signal Monocle", type: "cosmetic", vanityData: { layerType: "accessory", variant: 9 } },
+    { label: "Route Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 10 } },
+    // Hats
+    { label: "Signal Antenna", type: "cosmetic", vanityData: { layerType: "hat", variant: 3 } },
+    { label: "Relay Headset", type: "cosmetic", vanityData: { layerType: "hat", variant: 10 } },
+    { label: "Archive Hood", type: "cosmetic", vanityData: { layerType: "hat", variant: 11 } },
+    { label: "Scout Helm", type: "cosmetic", vanityData: { layerType: "hat", variant: 12 } },
+    // Flair
+    { label: "Signal Flicker", type: "cosmetic", vanityData: { layerType: "flair", variant: 6 } },
+    { label: "Route Trails", type: "cosmetic", vanityData: { layerType: "flair", variant: 7 } },
   ],
   rare: [
+    // Non-cosmetics
     { label: "Archive Listener", type: "title" },
     { label: "Support Crate Blueprint", type: "blueprint" },
-    { label: "Archive Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 4 } },
-    { label: "Relay Horns", type: "cosmetic", vanityData: { layerType: "hat", variant: 4 } },
-    { label: "Sparkle Effect", type: "cosmetic", vanityData: { layerType: "flair", variant: 3 } },
     { label: "Waystone Keeper", type: "title" },
     { label: "Deep Touched", type: "title" },
     { label: "Echo Finder", type: "title" },
     { label: "Rift Walker", type: "title" },
+    // Accessories
+    { label: "Archive Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 4 } },
+    { label: "Deep Scanner", type: "cosmetic", vanityData: { layerType: "accessory", variant: 11 } },
+    { label: "Rift Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 12 } },
+    { label: "Echo Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 13 } },
+    // Hats
+    { label: "Relay Horns", type: "cosmetic", vanityData: { layerType: "hat", variant: 4 } },
+    { label: "Drift Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 13 } },
+    { label: "Echo Circlet", type: "cosmetic", vanityData: { layerType: "hat", variant: 14 } },
+    { label: "Signal Crest", type: "cosmetic", vanityData: { layerType: "hat", variant: 15 } },
+    // Flair
+    { label: "Sparkle Effect", type: "cosmetic", vanityData: { layerType: "flair", variant: 3 } },
+    { label: "Echo Ripples", type: "cosmetic", vanityData: { layerType: "flair", variant: 8 } },
+    { label: "Data Stream", type: "cosmetic", vanityData: { layerType: "flair", variant: 9 } },
   ],
   epic: [
+    // Non-cosmetics
     { label: "Relay Warden", type: "title" },
-    { label: "Glass Signal", type: "cosmetic" },
-    { label: "Archive Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 5 } },
-    { label: "Static Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 2 } },
-    { label: "Pulse Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 1 } },
     { label: "Depth Touched", type: "title" },
     { label: "Void Speaker", type: "title" },
     { label: "Rift Sovereign", type: "title" },
     { label: "Archive Seeker", type: "title" },
+    // Accessories
+    { label: "Void Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 14 } },
+    { label: "Prismatic Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 15 } },
+    // Hats
+    { label: "Archive Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 5 } },
+    { label: "Void Helm", type: "cosmetic", vanityData: { layerType: "hat", variant: 16 } },
+    { label: "Rift Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 17 } },
+    // Flair
+    { label: "Static Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 2 } },
+    { label: "Pulse Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 1 } },
+    { label: "Void Shimmer", type: "cosmetic", vanityData: { layerType: "flair", variant: 10 } },
   ],
   legendary: [
+    // Non-cosmetics
     { label: "Deep Pull Regent", type: "title" },
-    { label: "Crown of Routes", type: "cosmetic", vanityData: { layerType: "hat", variant: 6 } },
     { label: "Primordial Echo", type: "title" },
     { label: "The Returned", type: "title" },
     { label: "Signal Sovereign", type: "title" },
+    // Accessories
+    { label: "All-Seeing Eye", type: "cosmetic", vanityData: { layerType: "accessory", variant: 16 } },
+    // Hats
+    { label: "Crown of Routes", type: "cosmetic", vanityData: { layerType: "hat", variant: 6 } },
+    { label: "Primordial Antlers", type: "cosmetic", vanityData: { layerType: "hat", variant: 18 } },
+    // Flair
+    { label: "Prismatic Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 11 } },
+    { label: "Celestial Flame", type: "cosmetic", vanityData: { layerType: "flair", variant: 12 } },
   ],
 }
 
