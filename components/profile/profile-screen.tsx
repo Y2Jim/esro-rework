@@ -40,21 +40,24 @@ export function ProfileScreen() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div className="text-[14px] font-medium text-[color:var(--color-text)]">{profile.stats.expeditions}</div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">Expeditions</div>
+        {/* Faction */}
+        {profile.faction && (
+          <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[11px] text-[color:var(--color-muted)]">{profile.faction.label}</span>
+              <span className="text-[10px] text-[color:var(--color-accent)]">Rank {profile.faction.rank}</span>
+            </div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+              <div
+                className="h-full bg-[color:var(--color-accent)]/60"
+                style={{ width: `${(profile.faction.standing / profile.faction.maxStanding) * 100}%` }}
+              />
+            </div>
+            <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+              {profile.faction.standing}/{profile.faction.maxStanding} standing
+            </div>
           </div>
-          <div>
-            <div className="text-[14px] font-medium text-[color:var(--color-text)]">{profile.stats.contracts}</div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">Contracts</div>
-          </div>
-          <div>
-            <div className="text-[14px] font-medium text-[color:var(--color-text)]">{profile.stats.recovered}</div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">Recovered</div>
-          </div>
-        </div>
+        )}
 
         {/* Notifications */}
         {profile.notifications && profile.notifications.length > 0 && (
