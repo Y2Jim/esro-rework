@@ -95,7 +95,7 @@ export function ResultReveal() {
                   className="mt-2.5 rounded-sm border border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/60 p-2.5 text-center"
                 >
                   <div className="text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
-                    variant recovered
+                    {last.vanityData ? "cosmetic unlocked" : "variant recovered"}
                   </div>
                   <div
                     className={cn(
@@ -109,7 +109,7 @@ export function ResultReveal() {
                   </div>
                   <div className="mt-1 flex items-center justify-center gap-2 text-[9px] uppercase tracking-[0.25em]">
                     <span className="text-[color:var(--color-muted)]">
-                      {last.type.replace("_", " ")}
+                      {last.vanityData ? last.vanityData.layerType : last.type.replace("_", " ")}
                     </span>
                     <span className="text-[color:var(--color-muted-2)]">·</span>
                     <span
@@ -122,6 +122,11 @@ export function ResultReveal() {
                       {rarityLabel[last.rarity]}
                     </span>
                   </div>
+                  {last.vanityData && (
+                    <div className="mt-2 text-[8px] text-[color:var(--color-accent)]">
+                      Equip in Profile &gt; Cosmetics
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>

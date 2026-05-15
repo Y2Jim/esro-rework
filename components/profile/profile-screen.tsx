@@ -1,6 +1,9 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
+import { PixelAvatar } from "@/components/avatar/pixel-avatar"
+import { rarityColor } from "@/lib/rarity"
+import { cn } from "@/lib/cn"
 
 export function ProfileScreen() {
   const profile = useEsroStore((s) => s.profile)
@@ -13,16 +16,17 @@ export function ProfileScreen() {
   return (
     <div className="flex h-full flex-col overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
       <div className="space-y-4">
-        {/* Identity */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[color:var(--color-accent)]/20 text-[16px] font-bold text-[color:var(--color-accent)]">
-            {identity.handle[0].toUpperCase()}
-          </div>
-          <div>
+        {/* Identity with Avatar */}
+        <div className="flex items-center gap-4">
+          <PixelAvatar config={identity.avatar} size="lg" />
+          <div className="flex-1">
             <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
             {identity.title && (
-              <div className="text-[10px] text-[color:var(--color-accent)]">{identity.title}</div>
+              <div className={cn("text-[11px]", rarityColor(identity.titleRarity))}>{identity.title}</div>
             )}
+            <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+              {identity.established ? "Established identity" : "New arrival"}
+            </div>
           </div>
         </div>
 
@@ -59,6 +63,11 @@ export function ProfileScreen() {
           </div>
         )}
 
+        {/* Vanity Items */}
+        {profile.vanityItems && profile.vanityItems.length > 0 && (
+          <VanitySection />
+        )}
+
         {/* Notifications */}
         {profile.notifications && profile.notifications.length > 0 && (
           <div>
@@ -84,6 +93,53 @@ export function ProfileScreen() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function VanitySection() {
+  const profile = useEsroStore((s) => s.profile)
+  const equipVanity = useEsroStore((s) => s.equipVanity)
+  const unequipVanity = useEsroStore((s) => s.unequipVanity)
+  
+  const unlocked = profile.vanityItems.filter(v => v.unlocked)
+  const locked = profile.vanityItems.filter(v => !v.unlocked)
+  
+  if (unlocked.length === 0) return null
+  
+  return (
+    <div>
+      <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        Cosmetics ({unlocked.length} unlocked)
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {unlocked.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            onClick={() => v.equipped ? unequipVanity(v.layerType) : equipVanity(v.id)}
+            className={cn(
+              "flex flex-col items-start rounded-lg border p-2 text-left transition-all",
+              v.equipped
+                ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
+                : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
+            )}
+          >
+            <div className="flex w-full items-center justify-between">
+              <span className={cn("text-[10px]", rarityColor(v.rarity))}>{v.label}</span>
+              {v.equipped && (
+                <span className="text-[8px] uppercase text-[color:var(--color-accent)]">worn</span>
+              )}
+            </div>
+            <span className="text-[8px] text-[color:var(--color-muted)]">{v.layerType}</span>
+          </button>
+        ))}
+      </div>
+      {locked.length > 0 && (
+        <div className="mt-2 text-[9px] text-[color:var(--color-muted)]">
+          {locked.length} more locked - recover from archive
+        </div>
+      )}
     </div>
   )
 }

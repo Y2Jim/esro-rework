@@ -2,6 +2,8 @@
 
 import { create } from "zustand"
 import type {
+  AvatarConfig,
+  AvatarLayerType,
   ChannelId,
   Channel,
   ChatMessage,
@@ -19,6 +21,7 @@ import type {
   ScreenId,
   Skill,
   Rarity,
+  VanityItem,
 } from "@/lib/types"
 import {
   channels as seedChannels,
@@ -93,6 +96,10 @@ interface EsroState {
   setActiveTitle: (titleId: string) => void
   markNotificationRead: (id: number) => void
   openNotification: (notification: ProfileNotification) => void
+  
+  // Avatar & Vanity
+  equipVanity: (vanityId: string) => void
+  unequipVanity: (layerType: AvatarLayerType) => void
 }
 
 function rollRarity(focused: boolean): Rarity {
@@ -111,26 +118,46 @@ function rollRarity(focused: boolean): Rarity {
   return "common"
 }
 
-const POOL: Record<Rarity, { label: string; type: RecoveryResult["type"] }[]> = {
+interface PoolItem {
+  label: string
+  type: RecoveryResult["type"]
+  vanityData?: { layerType: AvatarLayerType; variant: number }
+}
+
+const POOL: Record<Rarity, PoolItem[]> = {
   common: [
     { label: "Relay Flair", type: "chat_flair" },
     { label: "Field Kit Schematic", type: "schematic" },
     { label: "Calm Route", type: "modifier" },
+    { label: "Signal Glasses", type: "cosmetic", vanityData: { layerType: "accessory", variant: 1 } },
+    { label: "Route Cap", type: "cosmetic", vanityData: { layerType: "hat", variant: 1 } },
   ],
   uncommon: [
     { label: "Signal Keeper", type: "title" },
     { label: "Signal Beacon Schematic", type: "schematic" },
     { label: "Clean Entry", type: "modifier" },
+    { label: "Eyepatch", type: "cosmetic", vanityData: { layerType: "accessory", variant: 2 } },
+    { label: "Signal Antenna", type: "cosmetic", vanityData: { layerType: "hat", variant: 3 } },
+    { label: "Scar Mark", type: "cosmetic", vanityData: { layerType: "accessory", variant: 3 } },
   ],
   rare: [
     { label: "Archive Listener", type: "title" },
     { label: "Support Crate Blueprint", type: "blueprint" },
+    { label: "Archive Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 4 } },
+    { label: "Relay Horns", type: "cosmetic", vanityData: { layerType: "hat", variant: 4 } },
+    { label: "Sparkle Effect", type: "cosmetic", vanityData: { layerType: "flair", variant: 3 } },
   ],
   epic: [
     { label: "Relay Warden", type: "title" },
     { label: "Glass Signal", type: "cosmetic" },
+    { label: "Archive Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 5 } },
+    { label: "Static Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 2 } },
+    { label: "Pulse Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 1 } },
   ],
-  legendary: [{ label: "Deep Pull Regent", type: "title" }],
+  legendary: [
+    { label: "Deep Pull Regent", type: "title" },
+    { label: "Crown of Routes", type: "cosmetic", vanityData: { layerType: "hat", variant: 6 } },
+  ],
 }
 
 export const useEsroStore = create<EsroState>((set, get) => ({
@@ -219,7 +246,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   runRecovery: (mode) => {
     const cost = mode === "focused" ? 2 : 1
     const currencyKey = mode === "focused" ? "deep_signals" : "relay_tokens"
-    const { shards, recovery } = get()
+    const { shards, recovery, profile } = get()
     if ((shards as any)[currencyKey] < cost) return
     const rarity = rollRarity(mode === "focused")
     const pool = POOL[rarity]
@@ -230,7 +257,41 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       type: pick.type,
       rarity,
       recoveredAt: Date.now(),
+      vanityData: pick.vanityData,
     }
+    
+    // If this is a cosmetic with vanity data, unlock it in profile
+    let updatedProfile = profile
+    if (pick.vanityData && pick.type === "cosmetic") {
+      const existingVanity = profile.vanityItems.find(
+        v => v.layerType === pick.vanityData!.layerType && v.variant === pick.vanityData!.variant
+      )
+      if (!existingVanity) {
+        // Add new vanity item
+        const newVanity: VanityItem = {
+          id: `vanity-${Date.now()}`,
+          label: pick.label,
+          layerType: pick.vanityData.layerType,
+          variant: pick.vanityData.variant,
+          rarity,
+          unlocked: true,
+          equipped: false,
+        }
+        updatedProfile = {
+          ...profile,
+          vanityItems: [...profile.vanityItems, newVanity],
+        }
+      } else if (!existingVanity.unlocked) {
+        // Unlock existing item
+        updatedProfile = {
+          ...profile,
+          vanityItems: profile.vanityItems.map(v =>
+            v.id === existingVanity.id ? { ...v, unlocked: true } : v
+          ),
+        }
+      }
+    }
+    
     set({
       shards: {
         ...shards,
@@ -238,6 +299,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       } as typeof seedShards,
       recovery: [result, ...recovery].slice(0, 8),
       lastRecovered: result,
+      profile: updatedProfile,
     })
   },
   clearLastRecovered: () => set({ lastRecovered: null }),
@@ -315,5 +377,54 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         }
       }
     }
+  },
+  
+  // Avatar & Vanity
+  equipVanity: (vanityId) => {
+    const { profile, identity } = get()
+    const vanity = profile.vanityItems.find(v => v.id === vanityId)
+    if (!vanity || !vanity.unlocked) return
+    
+    // Unequip any existing item of the same layer type
+    const updatedItems = profile.vanityItems.map(v => ({
+      ...v,
+      equipped: v.id === vanityId ? true : (v.layerType === vanity.layerType ? false : v.equipped)
+    }))
+    
+    // Update avatar config
+    const updatedAvatar: AvatarConfig = {
+      ...identity.avatar,
+      layers: identity.avatar.layers.map(l =>
+        l.type === vanity.layerType ? { ...l, variant: vanity.variant } : l
+      )
+    }
+    
+    set({
+      profile: { ...profile, vanityItems: updatedItems },
+      identity: { ...identity, avatar: updatedAvatar },
+    })
+  },
+  
+  unequipVanity: (layerType) => {
+    const { profile, identity } = get()
+    
+    // Unequip all items of this layer type
+    const updatedItems = profile.vanityItems.map(v => ({
+      ...v,
+      equipped: v.layerType === layerType ? false : v.equipped
+    }))
+    
+    // Reset avatar layer to variant 0 (none)
+    const updatedAvatar: AvatarConfig = {
+      ...identity.avatar,
+      layers: identity.avatar.layers.map(l =>
+        l.type === layerType ? { ...l, variant: 0 } : l
+      )
+    }
+    
+    set({
+      profile: { ...profile, vanityItems: updatedItems },
+      identity: { ...identity, avatar: updatedAvatar },
+    })
   },
 }))

@@ -75,6 +75,30 @@ export type Rarity =
   | "epic"
   | "legendary"
 
+// Avatar system
+export type AvatarLayerType = "base" | "skin" | "eyes" | "mouth" | "hair" | "accessory" | "hat" | "flair"
+
+export interface AvatarLayer {
+  type: AvatarLayerType
+  variant: number
+  color?: number // index into color palette
+}
+
+export interface AvatarConfig {
+  seed: string
+  layers: AvatarLayer[]
+}
+
+export interface VanityItem {
+  id: string
+  label: string
+  layerType: AvatarLayerType
+  variant: number
+  rarity: Rarity
+  unlocked: boolean
+  equipped: boolean
+}
+
 export interface Skill {
   id: string
   label: string
@@ -136,6 +160,7 @@ export interface PartyMember {
   role: string
   status: "ready" | "idle" | "offline" | "deployed"
   leader?: boolean
+  avatar?: AvatarConfig
 }
 
 export interface RecoveryResult {
@@ -144,6 +169,10 @@ export interface RecoveryResult {
   type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair"
   rarity: Rarity
   recoveredAt: number
+  vanityData?: {
+    layerType: AvatarLayerType
+    variant: number
+  }
 }
 
 export interface Identity {
@@ -151,6 +180,7 @@ export interface Identity {
   title: string
   titleRarity: Rarity
   established: boolean
+  avatar: AvatarConfig
 }
 
 export interface OwnedTitle {
@@ -200,4 +230,5 @@ export interface Profile {
   ownedTitles: OwnedTitle[]
   badges: ProfileBadge[]
   notifications: ProfileNotification[]
+  vanityItems: VanityItem[]
 }

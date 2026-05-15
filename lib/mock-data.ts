@@ -1,5 +1,6 @@
 import type {
   ActiveExpedition,
+  AvatarConfig,
   Channel,
   ChatMessage,
   Contract,
@@ -12,7 +13,9 @@ import type {
   QuickAction,
   RecoveryResult,
   Skill,
+  VanityItem,
 } from "./types"
+import { generateAvatarFromSeed } from "./avatar-generator"
 
 export const channels: Channel[] = [
   {
@@ -567,6 +570,7 @@ export const party: PartyMember[] = [
     role: "Logistics",
     status: "ready",
     leader: true,
+    avatar: playerAvatar,
   },
   {
     slot: 2,
@@ -575,6 +579,7 @@ export const party: PartyMember[] = [
     titleRarity: "uncommon",
     role: "Surveying",
     status: "ready",
+    avatar: generateAvatarFromSeed("@palesignal"),
   },
   {
     slot: 3,
@@ -583,6 +588,7 @@ export const party: PartyMember[] = [
     titleRarity: "rare",
     role: "Analysis",
     status: "idle",
+    avatar: generateAvatarFromSeed("@archivist.mm"),
   },
   // slot 4 is empty (invite slot)
 ]
@@ -625,11 +631,21 @@ export const recoveryResults: RecoveryResult[] = [
   },
 ]
 
+// Generate avatar from player handle
+const playerAvatar = generateAvatarFromSeed("@routetender.07")
+// Apply some unlocked vanity items
+playerAvatar.layers = playerAvatar.layers.map(l => {
+  if (l.type === "accessory") return { ...l, variant: 1 } // glasses
+  if (l.type === "hat") return { ...l, variant: 0 } // none by default
+  return l
+})
+
 export const identity: Identity = {
   handle: "@routetender.07",
   title: "Route Tender",
   titleRarity: "common",
   established: true,
+  avatar: playerAvatar,
 }
 
 /** Shard currencies surfaced on the Archive page. */
@@ -728,6 +744,20 @@ export const factionProjects: FactionProject[] = [
   },
 ]
 
+// Unlocked vanity items
+export const vanityItems: VanityItem[] = [
+  { id: "v1", label: "Signal Glasses", layerType: "accessory", variant: 1, rarity: "common", unlocked: true, equipped: true },
+  { id: "v2", label: "Route Cap", layerType: "hat", variant: 1, rarity: "common", unlocked: true, equipped: false },
+  { id: "v3", label: "Eyepatch", layerType: "accessory", variant: 2, rarity: "uncommon", unlocked: true, equipped: false },
+  { id: "v4", label: "Archive Visor", layerType: "accessory", variant: 4, rarity: "rare", unlocked: true, equipped: false },
+  { id: "v5", label: "Signal Antenna", layerType: "hat", variant: 3, rarity: "uncommon", unlocked: true, equipped: false },
+  { id: "v6", label: "Relay Horns", layerType: "hat", variant: 4, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v7", label: "Archive Halo", layerType: "hat", variant: 5, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v8", label: "Crown of Routes", layerType: "hat", variant: 6, rarity: "legendary", unlocked: false, equipped: false },
+  { id: "v9", label: "Static Aura", layerType: "flair", variant: 2, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v10", label: "Sparkle Effect", layerType: "flair", variant: 3, rarity: "rare", unlocked: false, equipped: false },
+]
+
 export const profile: Profile = {
   handle: "@routetender.07",
   title: {
@@ -746,6 +776,7 @@ export const profile: Profile = {
   level: 14,
   xp: 2840,
   xpToNext: 3200,
+  vanityItems: vanityItems,
   ownedTitles: [
     {
       id: "route_tender",

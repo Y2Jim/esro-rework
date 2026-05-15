@@ -1,6 +1,8 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
+import { PartyAvatar } from "@/components/avatar/pixel-avatar"
+import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 
 export function FactionScreen() {
   const profile = useEsroStore((s) => s.profile)
@@ -40,21 +42,27 @@ export function FactionScreen() {
           {party.length === 0 ? (
             <div className="text-[11px] text-[color:var(--color-muted)]">No party members</div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {party.map((m) => (
                 <div
                   key={m.slot}
-                  className="flex items-center justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-[color:var(--color-border)] px-3 py-2"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-[color:var(--color-text)]">{m.handle}</span>
-                    {m.leader && (
-                      <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[8px] text-[color:var(--color-accent)]">
-                        Leader
-                      </span>
-                    )}
+                  <PartyAvatar config={m.avatar || generateAvatarFromSeed(m.handle)} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-[color:var(--color-text)]">{m.handle}</span>
+                      {m.leader && (
+                        <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[8px] text-[color:var(--color-accent)]">
+                          Leader
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[9px]">
+                      <span className="text-[color:var(--color-muted)]">{m.role}</span>
+                      <span className="text-[color:var(--color-accent)]">{m.status}</span>
+                    </div>
                   </div>
-                  <span className="text-[10px] capitalize text-[color:var(--color-muted)]">{m.status}</span>
                 </div>
               ))}
             </div>
