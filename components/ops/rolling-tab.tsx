@@ -1,18 +1,14 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
-import { Panel, PanelBody, PanelHeader } from "@/components/ui/panel"
-import { ListCard, ListCardTitle, ListCardMeta, ListGrid } from "@/components/ui/list-card"
-import { MetricCard, MetricGrid } from "@/components/ui/metric-card"
-import { EmptyState } from "@/components/ui/empty-state"
 import { cn } from "@/lib/cn"
 
 const rarityColors: Record<string, string> = {
   common: "text-[color:var(--color-muted)]",
-  uncommon: "text-[color:var(--color-success)]",
+  uncommon: "text-green-400",
   rare: "text-[color:var(--color-accent)]",
   epic: "text-[color:var(--color-accent-strong)]",
-  legendary: "prismatic-text",
+  legendary: "text-amber-400",
 }
 
 export function RollingTab() {
@@ -24,88 +20,76 @@ export function RollingTab() {
   const canFocused = shards.deep_signals >= 2
 
   return (
-    <div
-      className="flex h-full flex-col gap-2 overflow-y-auto"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92)",
-      }}
-    >
-      {/* Resources */}
-      <Panel>
-        <PanelHeader title="Signal Shards" />
-        <PanelBody>
-          <MetricGrid columns={3}>
-            <MetricCard label="Relay" value={shards.relay_tokens} />
-            <MetricCard label="Deep" value={shards.deep_signals} />
-            <MetricCard label="Salvage" value={shards.signal_salvage} />
-          </MetricGrid>
-        </PanelBody>
-      </Panel>
+    <div className="space-y-4">
+      {/* Resources inline */}
+      <div className="flex gap-4 text-[11px]">
+        <span className="text-[color:var(--color-muted)]">
+          Relay <span className="text-[color:var(--color-text)]">{shards.relay_tokens}</span>
+        </span>
+        <span className="text-[color:var(--color-muted)]">
+          Deep <span className="text-[color:var(--color-text)]">{shards.deep_signals}</span>
+        </span>
+      </div>
 
-      {/* Recovery Options */}
-      <Panel>
-        <PanelHeader title="Packet Recovery" />
-        <PanelBody>
-          <div className="space-y-2">
-            <ListCard
-              onClick={canStandard ? () => runRecovery("standard") : undefined}
-              className={cn(!canStandard && "opacity-50")}
-            >
-              <ListCardTitle>
-                Standard Recovery
-                <span className="esro-chip text-[8px]">1 Relay</span>
-              </ListCardTitle>
-              <ListCardMeta>
-                <span>Common routing</span>
-                <span>Normal odds</span>
-              </ListCardMeta>
-            </ListCard>
-
-            <ListCard
-              onClick={canFocused ? () => runRecovery("focused") : undefined}
-              className={cn(!canFocused && "opacity-50")}
-            >
-              <ListCardTitle>
-                Focused Recovery
-                <span className="esro-chip text-[8px]">2 Deep</span>
-              </ListCardTitle>
-              <ListCardMeta>
-                <span>Deep index pass</span>
-                <span>Higher odds</span>
-              </ListCardMeta>
-            </ListCard>
-          </div>
-        </PanelBody>
-      </Panel>
-
-      {/* Recent Recoveries */}
-      <Panel className="min-h-0 flex-1">
-        <PanelHeader title="Recent Recoveries" />
-        <PanelBody scroll>
-          {recovery.length === 0 ? (
-            <EmptyState message="No recovered packets yet" />
-          ) : (
-            <ListGrid>
-              {recovery.slice(0, 10).map((item) => (
-                <ListCard key={item.id} dashed>
-                  <ListCardTitle>
-                    <span className={rarityColors[item.rarity]}>
-                      {item.label}
-                    </span>
-                    <span className="esro-chip text-[8px] capitalize">
-                      {item.type.replace("_", " ")}
-                    </span>
-                  </ListCardTitle>
-                  <ListCardMeta>
-                    <span className="capitalize">{item.rarity}</span>
-                  </ListCardMeta>
-                </ListCard>
-              ))}
-            </ListGrid>
+      {/* Recovery buttons */}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => runRecovery("standard")}
+          disabled={!canStandard}
+          className={cn(
+            "flex-1 rounded-lg border px-3 py-3 text-center transition-colors",
+            canStandard
+              ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 hover:bg-[color:var(--color-accent)]/20"
+              : "border-[color:var(--color-border)] opacity-50"
           )}
-        </PanelBody>
-      </Panel>
+        >
+          <div className="text-[11px] font-medium text-[color:var(--color-text)]">Standard</div>
+          <div className="text-[9px] text-[color:var(--color-muted)]">1 Relay</div>
+        </button>
+        
+        <button
+          type="button"
+          onClick={() => runRecovery("focused")}
+          disabled={!canFocused}
+          className={cn(
+            "flex-1 rounded-lg border px-3 py-3 text-center transition-colors",
+            canFocused
+              ? "border-[color:var(--color-accent-strong)]/50 bg-[color:var(--color-accent-strong)]/10 hover:bg-[color:var(--color-accent-strong)]/20"
+              : "border-[color:var(--color-border)] opacity-50"
+          )}
+        >
+          <div className="text-[11px] font-medium text-[color:var(--color-text)]">Focused</div>
+          <div className="text-[9px] text-[color:var(--color-muted)]">2 Deep</div>
+        </button>
+      </div>
+
+      {/* Recent */}
+      <div>
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Recent
+        </div>
+        
+        {recovery.length === 0 ? (
+          <div className="text-[11px] text-[color:var(--color-muted)]">No recoveries yet</div>
+        ) : (
+          <div className="space-y-1">
+            {recovery.slice(0, 5).map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2"
+              >
+                <span className={cn("text-[11px]", rarityColors[item.rarity])}>
+                  {item.label}
+                </span>
+                <span className="text-[9px] capitalize text-[color:var(--color-muted)]">
+                  {item.rarity}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

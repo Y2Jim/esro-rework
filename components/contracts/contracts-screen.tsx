@@ -1,16 +1,7 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
-import { Panel, PanelBody, PanelHeader } from "@/components/ui/panel"
-import { ListCard, ListCardTitle, ListCardMeta, ListCardDescription, ListGrid } from "@/components/ui/list-card"
-import { EmptyState } from "@/components/ui/empty-state"
 import { cn } from "@/lib/cn"
-
-const statusColors: Record<string, string> = {
-  available: "text-[color:var(--color-success)]",
-  active: "text-[color:var(--color-accent-strong)]",
-  completed: "text-[color:var(--color-muted)]",
-}
 
 export function ContractsScreen() {
   const contracts = useEsroStore((s) => s.contracts)
@@ -20,79 +11,72 @@ export function ContractsScreen() {
   const active = contracts.filter((c) => c.status === "active")
 
   return (
-    <div
-      className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92)",
-      }}
-    >
-      {/* Active Contracts */}
-      {active.length > 0 && (
-        <Panel variant="focused">
-          <PanelHeader title="Active Contracts" />
-          <PanelBody>
-            <ListGrid>
-              {active.map((contract) => (
-                <ListCard key={contract.id}>
-                  <ListCardTitle>
-                    {contract.label}
-                    <span className={cn("text-[9px] uppercase", statusColors[contract.status])}>
-                      {contract.status}
-                    </span>
-                  </ListCardTitle>
-                  <ListCardMeta>
-                    <span>{contract.issuer}</span>
-                    {contract.deadline && <span>Due: {contract.deadline}</span>}
-                  </ListCardMeta>
-                  <ListCardDescription>
-                    {contract.description}
-                  </ListCardDescription>
-                  <div className="mt-1 text-[10px] text-[color:var(--color-accent-strong)]">
-                    Reward: {contract.reward}
-                  </div>
-                </ListCard>
-              ))}
-            </ListGrid>
-          </PanelBody>
-        </Panel>
-      )}
-
-      {/* Contract Board */}
-      <Panel className="min-h-0 flex-1">
-        <PanelHeader title="Contract Board" />
-        <PanelBody scroll>
-          {available.length === 0 ? (
-            <EmptyState message="No contracts available" />
-          ) : (
-            <ListGrid>
-              {available.map((contract) => (
-                <ListCard
-                  key={contract.id}
-                  onClick={() => acceptContract(contract.id)}
+    <div className="flex h-full flex-col overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+      <div className="space-y-4">
+        {/* Active */}
+        {active.length > 0 && (
+          <div>
+            <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-accent)]">
+              Active ({active.length})
+            </div>
+            
+            <div className="space-y-2">
+              {active.map((c) => (
+                <div
+                  key={c.id}
+                  className="rounded-lg border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/5 p-3"
                 >
-                  <ListCardTitle>
-                    {contract.label}
-                    <span className={cn("text-[9px] uppercase", statusColors[contract.status])}>
-                      {contract.status}
-                    </span>
-                  </ListCardTitle>
-                  <ListCardMeta>
-                    <span>{contract.issuer}</span>
-                    {contract.deadline && <span>Due: {contract.deadline}</span>}
-                  </ListCardMeta>
-                  <ListCardDescription>
-                    {contract.description}
-                  </ListCardDescription>
-                  <div className="mt-1 text-[10px] text-[color:var(--color-accent-strong)]">
-                    Reward: {contract.reward}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-[12px] font-medium text-[color:var(--color-text)]">{c.label}</div>
+                    {c.deadline && (
+                      <span className="shrink-0 text-[9px] text-[color:var(--color-danger)]">
+                        {c.deadline}
+                      </span>
+                    )}
                   </div>
-                </ListCard>
+                  <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">{c.issuer}</div>
+                  <div className="mt-2 text-[11px] text-[color:var(--color-text)]/80">{c.description}</div>
+                  <div className="mt-2 text-[10px] text-[color:var(--color-accent)]">{c.reward}</div>
+                </div>
               ))}
-            </ListGrid>
+            </div>
+          </div>
+        )}
+
+        {/* Available */}
+        <div>
+          <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Available
+          </div>
+          
+          {available.length === 0 ? (
+            <div className="text-[11px] text-[color:var(--color-muted)]">No contracts</div>
+          ) : (
+            <div className="space-y-2">
+              {available.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => acceptContract(c.id)}
+                  className="w-full rounded-lg border border-[color:var(--color-border)] p-3 text-left transition-colors hover:border-[color:var(--color-accent)]/50"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-[12px] font-medium text-[color:var(--color-text)]">{c.label}</div>
+                    {c.deadline && (
+                      <span className="shrink-0 text-[9px] text-[color:var(--color-muted)]">
+                        {c.deadline}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">{c.issuer}</div>
+                  <div className="mt-2 text-[11px] text-[color:var(--color-text)]/70">{c.description}</div>
+                  <div className="mt-2 text-[10px] text-[color:var(--color-accent)]">{c.reward}</div>
+                </button>
+              ))}
+            </div>
           )}
-        </PanelBody>
-      </Panel>
+        </div>
+      </div>
     </div>
   )
 }

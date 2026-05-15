@@ -1,9 +1,6 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
-import { Panel, PanelBody, PanelHeader } from "@/components/ui/panel"
-import { ListCard, ListCardTitle, ListCardMeta, ListCardDescription, ListGrid } from "@/components/ui/list-card"
-import { EmptyState } from "@/components/ui/empty-state"
 import { cn } from "@/lib/cn"
 
 export function SkillsTab() {
@@ -11,76 +8,80 @@ export function SkillsTab() {
   const loadout = useEsroStore((s) => s.loadout)
   const toggleLoadout = useEsroStore((s) => s.toggleLoadout)
 
-  const equippedSkills = skills.filter((s) => loadout.includes(s.id))
-  const availableSkills = skills.filter((s) => !loadout.includes(s.id) && !s.locked)
+  const equipped = skills.filter((s) => loadout.includes(s.id))
+  const available = skills.filter((s) => !loadout.includes(s.id) && !s.locked)
 
   return (
-    <div
-      className="flex h-full flex-col gap-2 overflow-y-auto"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92)",
-      }}
-    >
+    <div className="space-y-4">
       {/* Loadout */}
-      <Panel variant="focused">
-        <PanelHeader title="Active Loadout" />
-        <PanelBody>
-          {equippedSkills.length === 0 ? (
-            <div className="text-[10px] text-[color:var(--color-muted)]">
-              No skills equipped
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-1.5">
-              {equippedSkills.map((skill) => (
-                <button
-                  key={skill.id}
-                  type="button"
-                  onClick={() => toggleLoadout(skill.id)}
-                  className="esro-metric flex flex-col items-center gap-1 text-center transition-all hover:border-[color:var(--color-border-strong)]"
-                >
-                  <span className="text-[10px] text-[color:var(--color-text)]">
-                    {skill.label.slice(0, 8)}
+      <div>
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Loadout ({equipped.length}/4)
+        </div>
+        
+        <div className="grid grid-cols-4 gap-2">
+          {[0, 1, 2, 3].map((i) => {
+            const skill = equipped[i]
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => skill && toggleLoadout(skill.id)}
+                className={cn(
+                  "flex aspect-square flex-col items-center justify-center rounded-lg border p-2 text-center transition-colors",
+                  skill
+                    ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 hover:bg-[color:var(--color-accent)]/20"
+                    : "border-dashed border-[color:var(--color-border)]"
+                )}
+              >
+                {skill ? (
+                  <>
+                    <span className="text-[10px] font-medium text-[color:var(--color-text)]">
+                      {skill.label.slice(0, 6)}
+                    </span>
+                    <span className="text-[9px] text-[color:var(--color-muted)]">
+                      Lv {skill.level}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-[9px] text-[color:var(--color-muted)]">—</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Available */}
+      {available.length > 0 && (
+        <div>
+          <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Available
+          </div>
+          
+          <div className="space-y-1">
+            {available.map((skill) => (
+              <button
+                key={skill.id}
+                type="button"
+                onClick={() => toggleLoadout(skill.id)}
+                disabled={loadout.length >= 4}
+                className="flex w-full items-center justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2 text-left transition-colors hover:border-[color:var(--color-accent)]/50 disabled:opacity-50"
+              >
+                <div>
+                  <span className="text-[11px] font-medium text-[color:var(--color-text)]">
+                    {skill.label}
                   </span>
-                  <span className="text-[9px] text-[color:var(--color-muted)]">
+                  <span className="ml-2 text-[10px] text-[color:var(--color-muted)]">
                     Lv {skill.level}
                   </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </PanelBody>
-      </Panel>
-
-      {/* All Skills */}
-      <Panel className="min-h-0 flex-1">
-        <PanelHeader title="Skills" />
-        <PanelBody scroll>
-          {availableSkills.length === 0 ? (
-            <EmptyState message="All skills equipped or locked" />
-          ) : (
-            <ListGrid columns={2}>
-              {availableSkills.map((skill) => (
-                <ListCard
-                  key={skill.id}
-                  onClick={() => toggleLoadout(skill.id)}
-                >
-                  <ListCardTitle>
-                    {skill.label}
-                  </ListCardTitle>
-                  <ListCardMeta>
-                    <span>Lv {skill.level}/{skill.maxLevel}</span>
-                    {skill.variant && <span className="esro-chip text-[8px]">{skill.variant}</span>}
-                  </ListCardMeta>
-                  <ListCardDescription>
-                    {skill.summary}
-                  </ListCardDescription>
-                </ListCard>
-              ))}
-            </ListGrid>
-          )}
-        </PanelBody>
-      </Panel>
+                </div>
+                <span className="text-[9px] text-[color:var(--color-accent)]">+</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

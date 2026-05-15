@@ -20,23 +20,19 @@ export function OpsScreen() {
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
-      {/* Tab row */}
-      <div
-        className="flex gap-1.5 overflow-x-auto pb-1"
-        style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92)",
-        }}
-      >
+    <div className="flex h-full flex-col">
+      {/* Inline sub-tabs */}
+      <div className="flex gap-1 border-b border-[color:var(--color-border)] px-3 py-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setOpsTab(tab.id)}
             className={cn(
-              "esro-button shrink-0 whitespace-nowrap text-[10px]",
-              opsTab === tab.id && "esro-button-active"
+              "rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              opsTab === tab.id
+                ? "bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)]"
+                : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
           >
             {tab.label}
@@ -45,7 +41,7 @@ export function OpsScreen() {
       </div>
 
       {/* Tab content */}
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         {opsTab === "expeditions" && <ExpeditionsTab />}
         {opsTab === "skills" && <SkillsTab />}
         {opsTab === "crafting" && <CraftingTab />}
