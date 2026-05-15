@@ -22,7 +22,7 @@ export function ProfileScreen() {
           <div className="flex-1">
             <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
             {identity.title && (
-              <div className={cn("text-[11px]", rarityColor(identity.titleRarity))}>{identity.title}</div>
+              <div className={cn("text-[11px]", rarityColor[identity.titleRarity])}>{identity.title}</div>
             )}
             <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
               {identity.established ? "Established identity" : "New arrival"}
@@ -126,7 +126,7 @@ function VanitySection() {
             )}
           >
             <div className="flex w-full items-center justify-between">
-              <span className={cn("text-[10px]", rarityColor(v.rarity))}>{v.label}</span>
+              <span className={cn("text-[10px]", rarityColor[v.rarity])}>{v.label}</span>
               {v.equipped && (
                 <span className="text-[8px] uppercase text-[color:var(--color-accent)]">worn</span>
               )}
