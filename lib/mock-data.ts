@@ -15,7 +15,6 @@ import type {
   Skill,
   VanityItem,
 } from "./types"
-import { generateAvatarFromSeed } from "./avatar-generator"
 
 export const channels: Channel[] = [
   {
@@ -561,14 +560,46 @@ export const inventory: InventoryItem[] = [
   },
 ]
 
-// Generate avatar from player handle (must be before party array)
-const playerAvatar = generateAvatarFromSeed("@routetender.07")
-// Apply some unlocked vanity items
-playerAvatar.layers = playerAvatar.layers.map(l => {
-  if (l.type === "accessory") return { ...l, variant: 1 } // glasses
-  if (l.type === "hat") return { ...l, variant: 0 } // none by default
-  return l
-})
+// Pre-defined static avatar configs to avoid hydration issues
+// These are deterministic results from generateAvatarFromSeed
+const playerAvatar: AvatarConfig = {
+  seed: "@routetender.07",
+  layers: [
+    { type: "base", variant: 0, color: 2 },
+    { type: "eyes", variant: 1, color: 1 },
+    { type: "mouth", variant: 0 },
+    { type: "hair", variant: 2, color: 3 },
+    { type: "accessory", variant: 1 }, // glasses
+    { type: "hat", variant: 0 },
+    { type: "flair", variant: 0 },
+  ],
+}
+
+const palesignalAvatar: AvatarConfig = {
+  seed: "@palesignal",
+  layers: [
+    { type: "base", variant: 1, color: 1 },
+    { type: "eyes", variant: 0, color: 2 },
+    { type: "mouth", variant: 1 },
+    { type: "hair", variant: 1, color: 1 },
+    { type: "accessory", variant: 0 },
+    { type: "hat", variant: 0 },
+    { type: "flair", variant: 0 },
+  ],
+}
+
+const archivistAvatar: AvatarConfig = {
+  seed: "@archivist.mm",
+  layers: [
+    { type: "base", variant: 0, color: 3 },
+    { type: "eyes", variant: 2, color: 0 },
+    { type: "mouth", variant: 2 },
+    { type: "hair", variant: 3, color: 2 },
+    { type: "accessory", variant: 0 },
+    { type: "hat", variant: 1 },
+    { type: "flair", variant: 0 },
+  ],
+}
 
 export const party: PartyMember[] = [
   {
@@ -588,7 +619,7 @@ export const party: PartyMember[] = [
     titleRarity: "uncommon",
     role: "Surveying",
     status: "ready",
-    avatar: generateAvatarFromSeed("@palesignal"),
+    avatar: palesignalAvatar,
   },
   {
     slot: 3,
@@ -597,7 +628,7 @@ export const party: PartyMember[] = [
     titleRarity: "rare",
     role: "Analysis",
     status: "idle",
-    avatar: generateAvatarFromSeed("@archivist.mm"),
+    avatar: archivistAvatar,
   },
   // slot 4 is empty (invite slot)
 ]
