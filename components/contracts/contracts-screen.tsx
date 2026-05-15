@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn"
 export function ContractsScreen() {
   const contracts = useEsroStore((s) => s.contracts)
   const acceptContract = useEsroStore((s) => s.acceptContract)
+  const cancelContract = useEsroStore((s) => s.cancelContract)
 
   const available = contracts.filter((c) => c.status === "available")
   const active = contracts.filter((c) => c.status === "active")
@@ -36,7 +37,16 @@ export function ContractsScreen() {
                   </div>
                   <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">{c.issuer}</div>
                   <div className="mt-2 text-[11px] text-[color:var(--color-text)]/80">{c.description}</div>
-                  <div className="mt-2 text-[10px] text-[color:var(--color-accent)]">{c.reward}</div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="text-[10px] text-[color:var(--color-accent)]">{c.reward}</div>
+                    <button
+                      type="button"
+                      onClick={() => cancelContract(c.id)}
+                      className="rounded border border-[color:var(--color-danger)]/40 px-2 py-0.5 text-[9px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/10"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

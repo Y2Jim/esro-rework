@@ -85,7 +85,8 @@ interface EsroState {
   // Contracts
   contracts: Contract[]
   acceptContract: (id: string) => void
-
+  cancelContract: (id: string) => void
+  
   // Social - Party
   party: PartyMember[]
   
@@ -391,6 +392,14 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       contracts: s.contracts.map((c) =>
         c.id === id && c.status === "available"
           ? { ...c, status: "active" as const }
+          : c
+      ),
+    })),
+  cancelContract: (id) =>
+    set((s) => ({
+      contracts: s.contracts.map((c) =>
+        c.id === id && c.status === "active"
+          ? { ...c, status: "available" as const }
           : c
       ),
     })),
