@@ -9,10 +9,10 @@ import { cn } from "@/lib/cn"
 type ProfileTab = "summary" | "titles" | "cosmetics" | "notifications"
 
 const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string }[] = [
-  { id: "summary", label: "Summary", icon: "📋", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15" },
-  { id: "titles", label: "Titles", icon: "🏷", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
-  { id: "cosmetics", label: "Cosmetics", icon: "✨", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15" },
-  { id: "notifications", label: "Alerts", icon: "🔔", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15" },
+  { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15" },
+  { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
+  { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15" },
+  { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15" },
 ]
 
 export function ProfileScreen() {

@@ -17,27 +17,48 @@ const channelStyle: Record<ChannelId, {
     activeBg: "bg-[color:var(--color-foreground)]/10",
     activeBorder: "border-[color:var(--color-foreground)]/50",
     inactiveBorder: "border-[color:var(--color-border-soft)]",
-    icon: "▣",
+    icon: "◫",
   },
   TRADE: {
     text: "text-[color:var(--color-amber)]",
     activeBg: "bg-[color:var(--color-amber)]/10",
     activeBorder: "border-[color:var(--color-amber)]/50",
     inactiveBorder: "border-[color:var(--color-amber-muted)]/30",
-    icon: "◈",
+    icon: "⇄",
   },
-  HELP: {
+  PARTY: {
     text: "text-[color:var(--color-cyan)]",
     activeBg: "bg-[color:var(--color-cyan)]/10",
     activeBorder: "border-[color:var(--color-cyan)]/50",
     inactiveBorder: "border-[color:var(--color-cyan-muted)]/30",
-    icon: "?",
+    icon: "⋈",
   },
-  LOG: {
+  FACTION: {
+    text: "text-[color:var(--color-lilac)]",
+    activeBg: "bg-[color:var(--color-lilac)]/10",
+    activeBorder: "border-[color:var(--color-lilac)]/50",
+    inactiveBorder: "border-[color:var(--color-lilac)]/20",
+    icon: "⬡",
+  },
+  GAME: {
+    text: "text-[color:var(--color-green)]",
+    activeBg: "bg-[color:var(--color-green)]/10",
+    activeBorder: "border-[color:var(--color-green)]/50",
+    inactiveBorder: "border-[color:var(--color-green-muted)]/30",
+    icon: "▸",
+  },
+  HELP: {
     text: "text-[color:var(--color-violet-bright)]",
     activeBg: "bg-[color:var(--color-violet)]/10",
     activeBorder: "border-[color:var(--color-violet)]/50",
     inactiveBorder: "border-[color:var(--color-violet)]/20",
+    icon: "?",
+  },
+  LOG: {
+    text: "text-[color:var(--color-muted)]",
+    activeBg: "bg-[color:var(--color-muted)]/10",
+    activeBorder: "border-[color:var(--color-muted)]/50",
+    inactiveBorder: "border-[color:var(--color-muted)]/20",
     icon: "▤",
   },
   UNDERCHAT: {
@@ -45,28 +66,7 @@ const channelStyle: Record<ChannelId, {
     activeBg: "bg-[color:var(--color-danger)]/10",
     activeBorder: "border-[color:var(--color-danger)]/50",
     inactiveBorder: "border-[color:var(--color-danger-muted)]/30",
-    icon: "◉",
-  },
-  GAME: {
-    text: "text-[color:var(--color-green)]",
-    activeBg: "bg-[color:var(--color-green)]/10",
-    activeBorder: "border-[color:var(--color-green)]/50",
-    inactiveBorder: "border-[color:var(--color-green-muted)]/30",
-    icon: "✦",
-  },
-  FACTION: {
-    text: "text-[color:var(--color-lilac)]",
-    activeBg: "bg-[color:var(--color-lilac)]/10",
-    activeBorder: "border-[color:var(--color-lilac)]/50",
-    inactiveBorder: "border-[color:var(--color-lilac)]/20",
-    icon: "◆",
-  },
-  PARTY: {
-    text: "text-[color:var(--color-accent)]",
-    activeBg: "bg-[color:var(--color-accent)]/10",
-    activeBorder: "border-[color:var(--color-accent)]/50",
-    inactiveBorder: "border-[color:var(--color-accent)]/20",
-    icon: "◈",
+    icon: "◎",
   },
 }
 

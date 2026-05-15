@@ -4,12 +4,12 @@ import type { ScreenId } from "@/lib/types"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 
-const items: { id: ScreenId; label: string; icon: string; color: string; glow: string }[] = [
-  { id: "terminal", label: "terminal", icon: "⌘", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan" },
-  { id: "ops", label: "ops", icon: "⚙", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber" },
-  { id: "contracts", label: "contracts", icon: "📜", color: "text-[color:var(--color-green)]", glow: "text-glow-green" },
-  { id: "faction", label: "faction", icon: "⚔", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft" },
-  { id: "profile", label: "profile", icon: "👤", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft" },
+const items: { id: ScreenId; label: string; icon: string; color: string; glow: string; bg: string }[] = [
+  { id: "terminal", label: "terminal", icon: "▣", color: "text-[color:var(--color-cyan)]", glow: "text-glow-cyan", bg: "bg-[color:var(--color-cyan)]/15" },
+  { id: "ops", label: "ops", icon: "◇", color: "text-[color:var(--color-amber)]", glow: "text-glow-amber", bg: "bg-[color:var(--color-amber)]/15" },
+  { id: "contracts", label: "contracts", icon: "◈", color: "text-[color:var(--color-green)]", glow: "text-glow-green", bg: "bg-[color:var(--color-green)]/15" },
+  { id: "faction", label: "faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-violet-bright)]/15" },
+  { id: "profile", label: "profile", icon: "◉", color: "text-[color:var(--color-lilac)]", glow: "text-glow-soft", bg: "bg-[color:var(--color-lilac)]/15" },
 ]
 
 export function BottomNav() {
@@ -33,9 +33,9 @@ export function BottomNav() {
                 type="button"
                 onClick={() => setScreen(it.id)}
                 className={cn(
-                  "group relative flex w-full flex-col items-center gap-0.5 py-1 transition-colors",
+                  "group relative flex w-full flex-col items-center gap-0.5 rounded-md py-1.5 px-1 transition-all",
                   active
-                    ? it.color
+                    ? cn(it.color, it.bg)
                     : "text-[color:var(--color-muted)] hover:text-[color:var(--color-lilac)]",
                 )}
                 aria-current={active ? "page" : undefined}

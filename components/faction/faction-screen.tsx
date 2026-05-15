@@ -10,9 +10,9 @@ import { cn } from "@/lib/cn"
 type FactionTab = "party" | "projects" | "ranks"
 
 const factionTabs: { id: FactionTab; label: string; icon: string; color: string; bgColor: string }[] = [
-  { id: "party", label: "Party", icon: "👥", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15" },
-  { id: "projects", label: "Projects", icon: "📦", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
-  { id: "ranks", label: "Ranks", icon: "⭐", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15" },
+  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15" },
+  { id: "projects", label: "Projects", icon: "▤", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15" },
+  { id: "ranks", label: "Ranks", icon: "△", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15" },
 ]
 
 export function FactionScreen() {
