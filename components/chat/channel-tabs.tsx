@@ -62,11 +62,15 @@ export function ChannelTabs() {
   const unread = useEsroStore((s) => s.unread)
 
   return (
-    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 px-2 pb-2 pt-2 backdrop-blur">
+    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 px-2 pb-1 pt-2 backdrop-blur">
       <div
-        className="no-scrollbar flex gap-1.5 overflow-x-auto"
+        className="flex gap-1.5 overflow-x-auto pb-1"
         role="tablist"
         aria-label="channels"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--color-violet) transparent",
+        }}
       >
         {channels.map((c) => {
           const active = current === c.id
