@@ -87,7 +87,7 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
         <span className="shrink-0 text-[10px] tabular-nums text-[color:var(--color-muted)]">
           {formatClock(msg.at)}
         </span>
-        <span className="font-semibold text-[color:var(--color-cyan-bright)]">
+        <span className="font-medium text-[color:var(--color-lilac)]">
           {msg.handle}
         </span>
         {msg.title && (
