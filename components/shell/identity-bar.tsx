@@ -6,12 +6,11 @@ import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
 const screenLabel: Record<string, string> = {
-  chat: "relay · channels",
-  expedition: "expedition ledger",
-  skills: "loadout",
-  inventory: "inventory",
-  party: "party",
-  archive: "archive · recovery",
+  terminal: "relay · channels",
+  ops: "operations",
+  contracts: "contract board",
+  faction: "faction hub",
+  profile: "profile",
 }
 
 export function IdentityBar() {
