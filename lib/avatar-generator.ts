@@ -66,7 +66,8 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
 
 // Generate avatar config from seed
 export function generateAvatarFromSeed(seed: string): AvatarConfig {
-  const rand = seededRandom(seed)
+  const safeSeed = seed || "default"
+  const rand = seededRandom(safeSeed)
   
   const layers: AvatarLayer[] = [
     { type: "base", variant: Math.floor(rand() * LAYER_VARIANTS.base) },
@@ -79,7 +80,7 @@ export function generateAvatarFromSeed(seed: string): AvatarConfig {
     { type: "flair", variant: 0 },
   ]
   
-  return { seed, layers }
+  return { seed: safeSeed, layers }
 }
 
 // Get a specific layer from config
