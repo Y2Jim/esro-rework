@@ -101,7 +101,7 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
           </span>
         )}
       </div>
-      <div className="mt-1 pl-[42px] text-[color:var(--color-muted)]">
+      <div className="mt-1 pl-[42px] text-[color:var(--color-lilac)]">
         {msg.body}
       </div>
     </div>
