@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESRO Terminal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="phone-app">
+    <div id="app" class="hidden">
+    <div class="scanlines"></div>
+    <div class="noise"></div>
+
+    <div id="terminal-shell">
+      <div class="topbar">
+        <div class="brand-wrap">
+          <div class="brand">ENCHANTED STAR REALMS ONLINE</div>
+          <div class="subbrand">Expedition Terminal</div>
+        </div>
+        <div class="version">v0.1</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="boot-screen" class="panel active">
+        <div class="panel-title">BOOT SEQUENCE</div>
+        <div id="boot-log" class="log-window"></div>
+        <div id="boot-prompt" class="boot-prompt hidden">
+          PRESS ENTER TO CONTINUE
+        </div>
+      </div>
+
+      <div id="main-screen" class="panel">
+        <div class="panel-title">MAIN MENU</div>
+
+        <div class="main-grid">
+          <div class="left-column">
+            <div id="log" class="log-window compact"></div>
+          </div>
+
+          <div class="right-column">
+            <button class="menu-btn" data-menu="expedition">EXPEDITION</button>
+            <button class="menu-btn" data-menu="inventory">INVENTORY</button>
+            <button class="menu-btn" data-menu="party">PARTY</button>
+            <button class="menu-btn" data-menu="skills">SKILLS</button>
+            <button class="menu-btn" data-menu="logs">LOGS</button>
+            <button class="menu-btn danger" data-menu="close">CLOSE</button>
+          </div>
+        </div>
+
+        <div class="statusbar">
+          <span>STATUS:</span>
+          <span id="status-text">idle</span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

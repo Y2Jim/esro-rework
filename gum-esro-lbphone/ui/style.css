@@ -1,0 +1,59 @@
+/* ESRO Terminal Styles */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background-color: #000;
+    color: #00ff00;
+    overflow: hidden;
+}
+
+#terminal-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#terminal {
+    width: 80%;
+    height: 80%;
+    background-color: #000;
+    border: 2px solid #00ff00;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+#boot-screen {
+    text-align: center;
+}
+
+#boot-screen h1 {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+}
+
+#boot-screen p {
+    margin: 10px 0;
+}
+
+#boot-button {
+    background-color: #00ff00;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#boot-button:hover {
+    background-color: #00cc00;
+}
+
+#main-terminal {
+    /* Styles for main terminal */
+}
