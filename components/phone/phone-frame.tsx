@@ -44,12 +44,15 @@ export function PhoneFrame({
           />
           
           {/* Theme effect layers - dedicated elements for each effect type */}
+          {/* Background effects (behind HUD, z-0) */}
+          {/* Epic/Legendary shimmer sweep - background layer */}
+          <div aria-hidden className="theme-effect-shimmer-layer pointer-events-none absolute inset-0 z-0" />
+          {/* Legendary scan lines - background layer */}
+          <div aria-hidden className="theme-effect-scanlines pointer-events-none absolute inset-0 z-0" />
+          
+          {/* Overlay effects (above content but subtle, z-40) */}
           {/* Epic pulse corners */}
           <div aria-hidden className="theme-effect-corners pointer-events-none absolute inset-0 z-40" />
-          {/* Epic/Legendary shimmer sweep */}
-          <div aria-hidden className="theme-effect-shimmer-layer pointer-events-none absolute inset-0 z-40" />
-          {/* Legendary scan lines */}
-          <div aria-hidden className="theme-effect-scanlines pointer-events-none absolute inset-0 z-40" />
           {/* Legendary edge glow */}
           <div aria-hidden className="theme-effect-edge-glow pointer-events-none absolute inset-0 z-40" />
           {/* Mythic particles */}
