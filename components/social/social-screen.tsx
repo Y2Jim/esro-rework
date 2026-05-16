@@ -814,8 +814,24 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
 }
 
 function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>["tradeOffers"][0]; type: "incoming" | "outgoing" }) {
+  const [showCounterOffer, setShowCounterOffer] = useState(false)
+  const [counterTokensOffered, setCounterTokensOffered] = useState(offer.toTokens)
+  const [counterTokensRequested, setCounterTokensRequested] = useState(offer.fromTokens)
+  const [counterMessage, setCounterMessage] = useState("")
+  
   const timeLeft = Math.max(0, Math.floor((offer.expiresAt - Date.now()) / 1000 / 60))
   const otherHandle = type === "incoming" ? offer.fromHandle : offer.toHandle
+
+  const handleSendCounter = () => {
+    // In production this would send the counter-offer to the server
+    console.log("[v0] Sending counter-offer:", {
+      originalOfferId: offer.id,
+      counterTokensOffered,
+      counterTokensRequested,
+      counterMessage,
+    })
+    setShowCounterOffer(false)
+  }
 
   return (
     <div className={cn(
@@ -875,23 +891,101 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
 
       {offer.message && (
         <div className="mt-2 rounded bg-[color:var(--color-panel)]/30 px-2 py-1.5 text-[9px] text-[color:var(--color-muted)] italic">
-          "{offer.message}"
+          &quot;{offer.message}&quot;
         </div>
       )}
 
-      {type === "incoming" && (
-        <div className="mt-2 grid grid-cols-2 gap-2">
+      {/* Counter-offer panel */}
+      {showCounterOffer && type === "incoming" && (
+        <div className="mt-3 space-y-3 rounded-lg border border-[color:var(--color-violet-bright)]/30 bg-[color:var(--color-violet-bright)]/5 p-3">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-medium text-[color:var(--color-violet-bright)]">
+              Counter-Offer
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCounterOffer(false)}
+              className="text-[10px] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+            >
+              Cancel
+            </button>
+          </div>
+          
+          {/* Adjust tokens */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                You Offer (Tokens)
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={counterTokensOffered}
+                onChange={(e) => setCounterTokensOffered(Math.max(0, parseInt(e.target.value) || 0))}
+                className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[11px] text-[color:var(--color-text)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                Request (Tokens)
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={counterTokensRequested}
+                onChange={(e) => setCounterTokensRequested(Math.max(0, parseInt(e.target.value) || 0))}
+                className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[11px] text-[color:var(--color-text)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
+              />
+            </div>
+          </div>
+          
+          {/* Counter message */}
+          <div>
+            <label className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Message (optional)
+            </label>
+            <input
+              type="text"
+              value={counterMessage}
+              onChange={(e) => setCounterMessage(e.target.value)}
+              placeholder="Add a note..."
+              maxLength={100}
+              className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[10px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted-2)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
+            />
+          </div>
+          
           <button
             type="button"
-            className="rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
+            onClick={handleSendCounter}
+            className="w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/15 px-3 py-1.5 text-[10px] font-medium text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/25"
           >
-            Accept
+            Send Counter-Offer
           </button>
+        </div>
+      )}
+
+      {type === "incoming" && !showCounterOffer && (
+        <div className="mt-2 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              className="rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              className="rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
+            >
+              Decline
+            </button>
+          </div>
           <button
             type="button"
-            className="rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
+            onClick={() => setShowCounterOffer(true)}
+            className="w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/20"
           >
-            Decline
+            Counter-Offer
           </button>
         </div>
       )}
