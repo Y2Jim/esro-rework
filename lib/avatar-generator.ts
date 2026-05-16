@@ -59,9 +59,9 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   eyes: 6,
   mouth: 5,
   hair: 8,
-  accessory: 7,  // 0=none, 1=glasses, 2=eyepatch, 3=scar, 4=visor, 5=shades, 6=mask
-  hat: 7,
-  flair: 4,
+  accessory: 17,  // 0=none, 1-16 various accessories
+  hat: 19,        // 0=none, 1-18 various hats
+  flair: 13,      // 0=none, 1-12 various flairs
 }
 
 // Generate avatar config from seed
@@ -410,6 +410,143 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
       setPixel(grid, x, 8, maskColor)
       setPixel(grid, x, 9, maskColor)
     }
+  } else if (accVariant === 7) {
+    // Worn Bandana (covers lower face)
+    const bandanaColor = "#8b6b4a"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 7, bandanaColor)
+      setPixel(grid, x, 8, bandanaColor)
+    }
+    setPixel(grid, 4, 9, bandanaColor)
+    setPixel(grid, 9, 9, bandanaColor)
+  } else if (accVariant === 8) {
+    // Relay Earpiece (small device on side)
+    const deviceColor = "#606080"
+    const glowColor = "#60c0ff"
+    setPixel(grid, 2, 5, deviceColor)
+    setPixel(grid, 2, 6, deviceColor)
+    setPixel(grid, 1, 5, glowColor)
+  } else if (accVariant === 9) {
+    // Signal Monocle (single eye lens)
+    const frameColor = "#d4a030"
+    const lensColor = "#a0d0e0"
+    setPixel(grid, 8, 4, frameColor)
+    setPixel(grid, 9, 4, frameColor)
+    setPixel(grid, 10, 4, frameColor)
+    setPixel(grid, 8, 5, frameColor)
+    setPixel(grid, 9, 5, lensColor)
+    setPixel(grid, 10, 5, frameColor)
+    setPixel(grid, 8, 6, frameColor)
+    setPixel(grid, 9, 6, frameColor)
+    setPixel(grid, 10, 6, frameColor)
+    // Chain
+    setPixel(grid, 11, 5, frameColor)
+    setPixel(grid, 11, 6, frameColor)
+  } else if (accVariant === 10) {
+    // Route Mask (half face mask)
+    const maskColor = "#505060"
+    const ventColor = "#303040"
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 6, maskColor)
+      setPixel(grid, x, 7, maskColor)
+      setPixel(grid, x, 8, maskColor)
+    }
+    setPixel(grid, 5, 7, ventColor)
+    setPixel(grid, 6, 7, ventColor)
+    setPixel(grid, 7, 7, ventColor)
+    setPixel(grid, 8, 7, ventColor)
+  } else if (accVariant === 11) {
+    // Deep Scanner (tech visor with lights)
+    const visorColor = "#303050"
+    const scanColor = "#40ff80"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 4, visorColor)
+      setPixel(grid, x, 5, visorColor)
+    }
+    setPixel(grid, 4, 5, scanColor)
+    setPixel(grid, 6, 5, scanColor)
+    setPixel(grid, 8, 5, scanColor)
+    setPixel(grid, 10, 5, scanColor)
+  } else if (accVariant === 12) {
+    // Rift Lens (glowing eye piece)
+    const frameColor = "#4a3060"
+    const lensColor = "#a060ff"
+    const glowColor = "#d0a0ff"
+    // Left lens with glow
+    setPixel(grid, 3, 4, frameColor)
+    setPixel(grid, 4, 4, glowColor)
+    setPixel(grid, 5, 4, glowColor)
+    setPixel(grid, 6, 4, frameColor)
+    setPixel(grid, 3, 5, frameColor)
+    setPixel(grid, 4, 5, lensColor)
+    setPixel(grid, 5, 5, lensColor)
+    setPixel(grid, 6, 5, frameColor)
+    // Right lens with glow
+    setPixel(grid, 7, 4, frameColor)
+    setPixel(grid, 8, 4, glowColor)
+    setPixel(grid, 9, 4, glowColor)
+    setPixel(grid, 10, 4, frameColor)
+    setPixel(grid, 7, 5, frameColor)
+    setPixel(grid, 8, 5, lensColor)
+    setPixel(grid, 9, 5, lensColor)
+    setPixel(grid, 10, 5, frameColor)
+  } else if (accVariant === 13) {
+    // Echo Mask (full face with pattern)
+    const maskColor = "#404050"
+    const patternColor = "#6080a0"
+    for (let x = 4; x < 10; x++) {
+      for (let y = 4; y < 10; y++) {
+        setPixel(grid, x, y, maskColor)
+      }
+    }
+    // Pattern lines
+    setPixel(grid, 5, 5, patternColor)
+    setPixel(grid, 8, 5, patternColor)
+    setPixel(grid, 6, 7, patternColor)
+    setPixel(grid, 7, 7, patternColor)
+    setPixel(grid, 5, 9, patternColor)
+    setPixel(grid, 8, 9, patternColor)
+  } else if (accVariant === 14) {
+    // Void Visor (dark with purple glow)
+    const visorColor = "#1a1020"
+    const glowColor = "#8040c0"
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 4, visorColor)
+      setPixel(grid, x, 5, visorColor)
+    }
+    setPixel(grid, 2, 4, glowColor)
+    setPixel(grid, 11, 4, glowColor)
+    setPixel(grid, 2, 5, glowColor)
+    setPixel(grid, 11, 5, glowColor)
+  } else if (accVariant === 15) {
+    // Prismatic Lens (rainbow shifting)
+    const colors = ["#ff6080", "#ffb060", "#60ff80", "#60b0ff", "#a060ff"]
+    setPixel(grid, 3, 5, colors[0])
+    setPixel(grid, 4, 4, colors[1])
+    setPixel(grid, 5, 4, colors[1])
+    setPixel(grid, 6, 5, colors[2])
+    setPixel(grid, 4, 5, colors[2])
+    setPixel(grid, 5, 5, colors[2])
+    setPixel(grid, 7, 5, "#1a1a1a")
+    setPixel(grid, 8, 4, colors[3])
+    setPixel(grid, 9, 4, colors[3])
+    setPixel(grid, 10, 5, colors[4])
+    setPixel(grid, 8, 5, colors[4])
+    setPixel(grid, 9, 5, colors[4])
+  } else if (accVariant === 16) {
+    // All-Seeing Eye (legendary third eye)
+    const frameColor = "#d4a030"
+    const eyeColor = "#40e0ff"
+    const pupilColor = "#1a1a1a"
+    // Third eye on forehead
+    setPixel(grid, 6, 3, frameColor)
+    setPixel(grid, 7, 3, frameColor)
+    setPixel(grid, 5, 4, frameColor)
+    setPixel(grid, 6, 4, eyeColor)
+    setPixel(grid, 7, 4, pupilColor)
+    setPixel(grid, 8, 4, frameColor)
+    setPixel(grid, 6, 5, frameColor)
+    setPixel(grid, 7, 5, frameColor)
   }
   
   // Draw hat
@@ -471,6 +608,159 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 4, 0, crownColor)
     setPixel(grid, 7, 0, gemColor)
     setPixel(grid, 10, 0, crownColor)
+  } else if (hatVariant === 7) {
+    // Dust Hood (larger hood)
+    const hoodColor = "#6b5a4a"
+    for (let x = 1; x < 13; x++) {
+      setPixel(grid, x, 0, hoodColor)
+      setPixel(grid, x, 1, hoodColor)
+    }
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 2, hoodColor)
+    }
+    setPixel(grid, 1, 2, hoodColor)
+    setPixel(grid, 12, 2, hoodColor)
+    setPixel(grid, 1, 3, hoodColor)
+    setPixel(grid, 12, 3, hoodColor)
+  } else if (hatVariant === 8) {
+    // Signal Beanie (tight cap)
+    const beanieColor = "#4a6080"
+    const stripeColor = "#6080a0"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 0, beanieColor)
+      setPixel(grid, x, 1, stripeColor)
+      setPixel(grid, x, 2, beanieColor)
+    }
+  } else if (hatVariant === 9) {
+    // Worn Helmet (protective headgear)
+    const helmetColor = "#606060"
+    const visorColor = "#405060"
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 0, helmetColor)
+      setPixel(grid, x, 1, helmetColor)
+    }
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 2, visorColor)
+    }
+  } else if (hatVariant === 10) {
+    // Relay Headset (tech headphones)
+    const bandColor = "#404040"
+    const earColor = "#505060"
+    const lightColor = "#40ff80"
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 0, bandColor)
+    }
+    setPixel(grid, 2, 3, earColor)
+    setPixel(grid, 2, 4, earColor)
+    setPixel(grid, 2, 5, earColor)
+    setPixel(grid, 1, 4, lightColor)
+    setPixel(grid, 11, 3, earColor)
+    setPixel(grid, 11, 4, earColor)
+    setPixel(grid, 11, 5, earColor)
+    setPixel(grid, 12, 4, lightColor)
+  } else if (hatVariant === 11) {
+    // Archive Hood (mystical hood)
+    const hoodColor = "#3a3050"
+    const runeColor = "#8060c0"
+    for (let x = 1; x < 13; x++) {
+      setPixel(grid, x, 0, hoodColor)
+      setPixel(grid, x, 1, hoodColor)
+    }
+    setPixel(grid, 1, 2, hoodColor)
+    setPixel(grid, 12, 2, hoodColor)
+    setPixel(grid, 1, 3, hoodColor)
+    setPixel(grid, 12, 3, hoodColor)
+    // Rune on forehead
+    setPixel(grid, 6, 1, runeColor)
+    setPixel(grid, 7, 1, runeColor)
+  } else if (hatVariant === 12) {
+    // Scout Helm (light helmet with visor)
+    const helmColor = "#708060"
+    const visorColor = "#a0c090"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 0, helmColor)
+      setPixel(grid, x, 1, helmColor)
+    }
+    setPixel(grid, 2, 1, helmColor)
+    setPixel(grid, 11, 1, helmColor)
+    for (let x = 2; x < 7; x++) {
+      setPixel(grid, x, 2, visorColor)
+    }
+  } else if (hatVariant === 13) {
+    // Drift Crown (ethereal crown)
+    const crownColor = "#80a0c0"
+    const glowColor = "#a0d0ff"
+    setPixel(grid, 4, 0, glowColor)
+    setPixel(grid, 7, 0, glowColor)
+    setPixel(grid, 10, 0, glowColor)
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, crownColor)
+    }
+  } else if (hatVariant === 14) {
+    // Echo Circlet (glowing band)
+    const bandColor = "#606080"
+    const gemColor = "#60ffff"
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, bandColor)
+    }
+    setPixel(grid, 6, 1, gemColor)
+    setPixel(grid, 7, 1, gemColor)
+    setPixel(grid, 6, 0, gemColor)
+    setPixel(grid, 7, 0, gemColor)
+  } else if (hatVariant === 15) {
+    // Signal Crest (decorative headpiece)
+    const crestColor = "#c0a060"
+    const accentColor = "#ffe0a0"
+    setPixel(grid, 6, 0, accentColor)
+    setPixel(grid, 7, 0, accentColor)
+    setPixel(grid, 5, 1, crestColor)
+    setPixel(grid, 6, 1, crestColor)
+    setPixel(grid, 7, 1, crestColor)
+    setPixel(grid, 8, 1, crestColor)
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 2, crestColor)
+    }
+  } else if (hatVariant === 16) {
+    // Void Helm (dark with purple glow)
+    const helmColor = "#201830"
+    const glowColor = "#8040c0"
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 0, helmColor)
+      setPixel(grid, x, 1, helmColor)
+      setPixel(grid, x, 2, helmColor)
+    }
+    setPixel(grid, 6, 0, glowColor)
+    setPixel(grid, 7, 0, glowColor)
+    setPixel(grid, 2, 2, glowColor)
+    setPixel(grid, 11, 2, glowColor)
+  } else if (hatVariant === 17) {
+    // Rift Diadem (mystical tiara)
+    const diademColor = "#6050a0"
+    const crystalColor = "#c0a0ff"
+    const glowColor = "#e0d0ff"
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 1, diademColor)
+    }
+    setPixel(grid, 5, 0, crystalColor)
+    setPixel(grid, 6, 0, glowColor)
+    setPixel(grid, 7, 0, glowColor)
+    setPixel(grid, 8, 0, crystalColor)
+  } else if (hatVariant === 18) {
+    // Primordial Antlers (legendary antlers)
+    const antlerColor = "#8b6b4b"
+    const tipColor = "#d0c0a0"
+    // Left antler
+    setPixel(grid, 2, 0, tipColor)
+    setPixel(grid, 3, 0, antlerColor)
+    setPixel(grid, 3, 1, antlerColor)
+    setPixel(grid, 4, 1, antlerColor)
+    setPixel(grid, 1, 1, tipColor)
+    // Right antler
+    setPixel(grid, 11, 0, tipColor)
+    setPixel(grid, 10, 0, antlerColor)
+    setPixel(grid, 10, 1, antlerColor)
+    setPixel(grid, 9, 1, antlerColor)
+    setPixel(grid, 12, 1, tipColor)
   }
   
   return grid
