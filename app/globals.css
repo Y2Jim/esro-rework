@@ -122,6 +122,7 @@
   }
   
   /* Rollable Themes - Dynamic via CSS custom properties */
+  /* Intensity scales glow effects: common=1.0, uncommon=1.2, rare=1.4, epic=1.6, legendary=1.8, mythic=2.0 */
   [data-theme="rollable"] {
     --color-bg: var(--rollable-bg, #0a0608);
     --color-bg-alt: color-mix(in srgb, var(--rollable-bg, #0a0608), var(--rollable-accent, #bb81ff) 5%);
@@ -136,6 +137,115 @@
     --color-border: color-mix(in srgb, var(--rollable-accent, #bb81ff) 42%, transparent);
     --color-border-soft: color-mix(in srgb, var(--rollable-accent, #bb81ff) 25%, transparent);
     --color-border-strong: color-mix(in srgb, var(--rollable-accent-bright, #dda0ff) 46%, transparent);
+    /* Secondary color for rare+ themes */
+    --color-secondary: var(--rollable-secondary, var(--rollable-accent-bright));
+  }
+  
+  /* ============ THEME EFFECT CLASSES ============ */
+  
+  /* Epic: Subtle pulse animation on borders */
+  .theme-effect-pulse [class*="border-"] {
+    animation: theme-border-pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes theme-border-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  /* Epic: Shimmer effect on panels */
+  .theme-effect-shimmer .rounded-lg,
+  .theme-effect-shimmer .rounded-md {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .theme-effect-shimmer .rounded-lg::before,
+  .theme-effect-shimmer .rounded-md::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+    animation: theme-shimmer 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes theme-shimmer {
+    0%, 100% { left: -100%; }
+    50% { left: 200%; }
+  }
+  
+  /* Legendary: Glow effect - enhanced borders and text glow */
+  .theme-effect-glow {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+    --color-border-soft: color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+  }
+  
+  .theme-effect-glow [class*="border-"] {
+    box-shadow: 
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+      inset 0 0 4px color-mix(in srgb, var(--rollable-accent) 10%, transparent);
+  }
+  
+  .theme-effect-glow .text-glow {
+    text-shadow: 
+      0 0 8px var(--rollable-accent),
+      0 0 16px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  /* Mythic: Radiant effect - everything has ethereal glow */
+  .theme-effect-radiant {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 70%, transparent);
+    --color-accent-glow: color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+  }
+  
+  .theme-effect-radiant [class*="border-"] {
+    box-shadow: 
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+      0 0 24px color-mix(in srgb, var(--rollable-accent) 20%, transparent),
+      inset 0 0 6px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    animation: theme-radiant-border 4s ease-in-out infinite;
+  }
+  
+  @keyframes theme-radiant-border {
+    0%, 100% { 
+      box-shadow: 
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+        0 0 24px color-mix(in srgb, var(--rollable-accent) 20%, transparent),
+        inset 0 0 6px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    }
+    50% { 
+      box-shadow: 
+        0 0 16px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+        0 0 32px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+        inset 0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    }
+  }
+  
+  .theme-effect-radiant .text-glow {
+    text-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px var(--rollable-accent),
+      0 0 30px color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+    animation: theme-radiant-text 3s ease-in-out infinite;
+  }
+  
+  @keyframes theme-radiant-text {
+    0%, 100% { 
+      text-shadow: 
+        0 0 10px var(--rollable-accent),
+        0 0 20px var(--rollable-accent),
+        0 0 30px color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+    }
+    50% { 
+      text-shadow: 
+        0 0 14px var(--rollable-accent),
+        0 0 28px var(--rollable-accent),
+        0 0 42px color-mix(in srgb, var(--rollable-accent) 70%, transparent);
+    }
   }
 
   * {

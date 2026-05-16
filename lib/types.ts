@@ -115,7 +115,15 @@ export interface RollableUITheme {
     accentBright: string
     background: string
     panel: string
+    /** Secondary accent for rare+ themes */
+    secondary?: string
   }
+  /** Visual intensity multiplier (1.0 = normal, higher = more glow/effects) */
+  intensity: number
+  /** Special effect class name for epic+ themes */
+  effectClass?: string
+  /** Border style override for legendary+ themes */
+  borderStyle?: "solid" | "glow" | "pulse" | "shimmer"
   unlocked: boolean
 }
   | "epic"

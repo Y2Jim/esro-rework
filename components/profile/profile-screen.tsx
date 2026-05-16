@@ -462,37 +462,79 @@ function SettingsTab() {
           </div>
         ) : (
           <div className="space-y-2">
-            {unlockedRollableThemes.map((theme) => (
-              <button
-                key={theme.id}
-                type="button"
-                onClick={() => setUiTheme(theme.id)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
-                  uiTheme === theme.id
-                    ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
-                    : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
-                )}
-              >
-                <div 
-                  className="h-4 w-4 rounded-full"
-                  style={{ backgroundColor: theme.colors.accent, boxShadow: `0 0 8px ${theme.colors.accent}50` }}
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-[11px]", rarityColor[theme.rarity])}>
-                      {theme.label}
-                    </span>
+            {unlockedRollableThemes.map((theme) => {
+              const hasEffects = theme.effectClass || theme.borderStyle
+              const intensityLabel = theme.intensity >= 2.0 ? "Maximum" : 
+                theme.intensity >= 1.8 ? "High" : 
+                theme.intensity >= 1.6 ? "Enhanced" : 
+                theme.intensity >= 1.4 ? "Moderate" : 
+                theme.intensity > 1.0 ? "Slight" : "Standard"
+              
+              return (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => setUiTheme(theme.id)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                    uiTheme === theme.id
+                      ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
+                      : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
+                  )}
+                >
+                  {/* Color swatch with intensity-based glow */}
+                  <div 
+                    className="h-5 w-5 rounded-full shrink-0"
+                    style={{ 
+                      backgroundColor: theme.colors.accent, 
+                      boxShadow: `0 0 ${4 * theme.intensity}px ${theme.colors.accent}, 0 0 ${8 * theme.intensity}px ${theme.colors.accent}50`,
+                      border: theme.colors.secondary ? `1px solid ${theme.colors.secondary}` : undefined
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("text-[11px] font-medium", rarityColor[theme.rarity])}>
+                        {theme.label}
+                      </span>
+                      <span className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                        {theme.rarity}
+                      </span>
+                    </div>
+                    <div className="text-[9px] text-[color:var(--color-muted)] line-clamp-1">
+                      {theme.description}
+                    </div>
+                    {/* Effects indicators for higher rarity themes */}
+                    {(hasEffects || theme.intensity > 1.0) && (
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        <span className="text-[8px] px-1 py-0.5 rounded bg-[color:var(--color-panel)] text-[color:var(--color-muted)]">
+                          {intensityLabel} Glow
+                        </span>
+                        {theme.effectClass && (
+                          <span className={cn(
+                            "text-[8px] px-1 py-0.5 rounded",
+                            theme.effectClass === "theme-effect-radiant" ? "bg-[color:var(--color-rarity-mythic)]/20 text-[color:var(--color-rarity-mythic)]" :
+                            theme.effectClass === "theme-effect-glow" ? "bg-[color:var(--color-rarity-legendary)]/20 text-[color:var(--color-rarity-legendary)]" :
+                            "bg-[color:var(--color-rarity-epic)]/20 text-[color:var(--color-rarity-epic)]"
+                          )}>
+                            {theme.effectClass === "theme-effect-radiant" ? "Radiant Aura" :
+                             theme.effectClass === "theme-effect-glow" ? "Plasma Glow" :
+                             theme.effectClass === "theme-effect-shimmer" ? "Shimmer" : "Pulse"}
+                          </span>
+                        )}
+                        {theme.borderStyle && theme.borderStyle !== "solid" && (
+                          <span className="text-[8px] px-1 py-0.5 rounded bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]">
+                            {theme.borderStyle === "shimmer" ? "Ethereal Borders" : "Glowing Borders"}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-[9px] text-[color:var(--color-muted)]">
-                    {theme.description}
-                  </div>
-                </div>
-                {uiTheme === theme.id && (
-                  <span className="text-[8px] uppercase text-[color:var(--color-accent)]">active</span>
-                )}
-              </button>
-            ))}
+                  {uiTheme === theme.id && (
+                    <span className="text-[8px] uppercase text-[color:var(--color-accent)] shrink-0">active</span>
+                  )}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
