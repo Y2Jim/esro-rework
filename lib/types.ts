@@ -282,12 +282,19 @@ export interface FriendRequest {
   status: "pending" | "accepted" | "declined"
 }
 
+export interface TradeItem {
+  itemId: string
+  label: string
+  qty: number
+  rarity?: Rarity
+}
+
 export interface TradeOffer {
   id: string
   fromHandle: string
   toHandle: string
-  fromItems: { itemId: string; qty: number }[]
-  toItems: { itemId: string; qty: number }[]
+  fromItems: TradeItem[]
+  toItems: TradeItem[]
   fromTokens: number
   toTokens: number
   status: "pending" | "accepted" | "declined" | "cancelled" | "completed"

@@ -813,10 +813,32 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
   )
 }
 
+function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty: number; rarity?: string } }) {
+  const rarityColors: Record<string, string> = {
+    common: "var(--color-muted)",
+    uncommon: "var(--color-cyan)",
+    rare: "var(--color-violet-bright)",
+    epic: "var(--color-amber)",
+    legendary: "#f1d38a",
+    mythic: "#ff6090",
+  }
+  const color = rarityColors[item.rarity || "common"] || "var(--color-text)"
+  
+  return (
+    <div className="flex items-center gap-1 text-[9px]">
+      <span className="text-[color:var(--color-muted)]">x{item.qty}</span>
+      <span style={{ color }}>{item.label}</span>
+    </div>
+  )
+}
+
 function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>["tradeOffers"][0]; type: "incoming" | "outgoing" }) {
+  const inventory = useEsroStore((s) => s.inventory)
   const [showCounterOffer, setShowCounterOffer] = useState(false)
   const [counterTokensOffered, setCounterTokensOffered] = useState(offer.toTokens)
   const [counterTokensRequested, setCounterTokensRequested] = useState(offer.fromTokens)
+  const [counterItemsOffered, setCounterItemsOffered] = useState<typeof offer.toItems>([...offer.toItems])
+  const [counterItemsRequested, setCounterItemsRequested] = useState<typeof offer.fromItems>([...offer.fromItems])
   const [counterMessage, setCounterMessage] = useState("")
   
   const timeLeft = Math.max(0, Math.floor((offer.expiresAt - Date.now()) / 1000 / 60))
@@ -826,11 +848,46 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
     // In production this would send the counter-offer to the server
     console.log("[v0] Sending counter-offer:", {
       originalOfferId: offer.id,
+      counterItemsOffered,
+      counterItemsRequested,
       counterTokensOffered,
       counterTokensRequested,
       counterMessage,
     })
     setShowCounterOffer(false)
+  }
+
+  const adjustItemQty = (
+    items: typeof offer.fromItems,
+    setItems: React.Dispatch<React.SetStateAction<typeof offer.fromItems>>,
+    itemId: string,
+    delta: number
+  ) => {
+    setItems(prev => 
+      prev.map(item => 
+        item.itemId === itemId 
+          ? { ...item, qty: Math.max(0, item.qty + delta) }
+          : item
+      ).filter(item => item.qty > 0)
+    )
+  }
+
+  const addItemToCounter = (
+    items: typeof offer.fromItems,
+    setItems: React.Dispatch<React.SetStateAction<typeof offer.fromItems>>,
+    invItem: typeof inventory[0]
+  ) => {
+    const existing = items.find(i => i.itemId === invItem.id)
+    if (existing) {
+      adjustItemQty(items, setItems, invItem.id, 1)
+    } else {
+      setItems(prev => [...prev, { 
+        itemId: invItem.id, 
+        label: invItem.label, 
+        qty: 1, 
+        rarity: invItem.rarity 
+      }])
+    }
   }
 
   return (
@@ -861,7 +918,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           </div>
           <div className="mt-1 space-y-0.5">
             {offer.fromItems.map((item, i) => (
-              <div key={i} className="text-[9px] text-[color:var(--color-text)]">x{item.qty} item</div>
+              <TradeItemDisplay key={i} item={item} />
             ))}
             {offer.fromTokens > 0 && (
               <div className="text-[9px] text-[color:var(--color-amber)]">+{offer.fromTokens} tokens</div>
@@ -877,7 +934,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           </div>
           <div className="mt-1 space-y-0.5">
             {offer.toItems.map((item, i) => (
-              <div key={i} className="text-[9px] text-[color:var(--color-text)]">x{item.qty} item</div>
+              <TradeItemDisplay key={i} item={item} />
             ))}
             {offer.toTokens > 0 && (
               <div className="text-[9px] text-[color:var(--color-amber)]">+{offer.toTokens} tokens</div>
@@ -909,6 +966,93 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
             >
               Cancel
             </button>
+          </div>
+          
+          {/* Counter items - What you offer */}
+          <div>
+            <div className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
+              Your Items
+            </div>
+            <div className="rounded bg-[color:var(--color-panel)]/50 p-2 space-y-1">
+              {counterItemsOffered.length > 0 ? (
+                counterItemsOffered.map((item) => (
+                  <div key={item.itemId} className="flex items-center justify-between">
+                    <TradeItemDisplay item={item} />
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => adjustItemQty(counterItemsOffered, setCounterItemsOffered, item.itemId, -1)}
+                        className="h-4 w-4 rounded bg-[color:var(--color-danger)]/20 text-[8px] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/30"
+                      >
+                        -
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => adjustItemQty(counterItemsOffered, setCounterItemsOffered, item.itemId, 1)}
+                        className="h-4 w-4 rounded bg-[color:var(--color-green)]/20 text-[8px] text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/30"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-[9px] text-[color:var(--color-muted)]">No items</div>
+              )}
+              
+              {/* Add from inventory */}
+              {inventory.length > 0 && (
+                <div className="pt-1 border-t border-[color:var(--color-border)]">
+                  <div className="text-[8px] text-[color:var(--color-muted)] mb-1">Add from inventory:</div>
+                  <div className="flex flex-wrap gap-1">
+                    {inventory.slice(0, 6).map((invItem) => (
+                      <button
+                        key={invItem.id}
+                        type="button"
+                        onClick={() => addItemToCounter(counterItemsOffered, setCounterItemsOffered, invItem)}
+                        className="rounded bg-[color:var(--color-panel)] px-1.5 py-0.5 text-[8px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+                      >
+                        {invItem.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Counter items - What you request */}
+          <div>
+            <div className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
+              Request Items
+            </div>
+            <div className="rounded bg-[color:var(--color-panel)]/50 p-2 space-y-1">
+              {counterItemsRequested.length > 0 ? (
+                counterItemsRequested.map((item) => (
+                  <div key={item.itemId} className="flex items-center justify-between">
+                    <TradeItemDisplay item={item} />
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => adjustItemQty(counterItemsRequested, setCounterItemsRequested, item.itemId, -1)}
+                        className="h-4 w-4 rounded bg-[color:var(--color-danger)]/20 text-[8px] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/30"
+                      >
+                        -
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => adjustItemQty(counterItemsRequested, setCounterItemsRequested, item.itemId, 1)}
+                        className="h-4 w-4 rounded bg-[color:var(--color-green)]/20 text-[8px] text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/30"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-[9px] text-[color:var(--color-muted)]">No items requested</div>
+              )}
+            </div>
           </div>
           
           {/* Adjust tokens */}
