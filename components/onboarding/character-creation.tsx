@@ -185,7 +185,7 @@ function StatBar({ stat, value, max = 20, highlight = false }: { stat: keyof Bas
 }
 
 export function CharacterCreation({ onComplete }: CharacterCreationProps) {
-  const [step, setStep] = useState<CharacterCreationStep>("briefing")
+  const [step, setStep] = useState<CharacterCreationStep>("incoming")
   const [briefingIndex, setBriefingIndex] = useState(0)
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
@@ -222,6 +222,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
 
   const canProceed = () => {
     switch (step) {
+      case "incoming":
+        return true
       case "briefing":
         return true
       case "race":
@@ -243,6 +245,9 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
 
   const nextStep = () => {
     switch (step) {
+      case "incoming":
+        setStep("briefing")
+        break
       case "briefing":
         if (briefingIndex < ONBOARDING_PANELS.length - 1) {
           setBriefingIndex(i => i + 1)
@@ -281,9 +286,14 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
 
   const prevStep = () => {
     switch (step) {
+      case "incoming":
+        // Can't go back from incoming
+        break
       case "briefing":
         if (briefingIndex > 0) {
           setBriefingIndex(i => i - 1)
+        } else {
+          setStep("incoming")
         }
         break
       case "race":
@@ -330,13 +340,13 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       {/* Progress indicator */}
       <div className="px-4 py-3 border-b border-[rgba(168,123,255,0.1)]">
         <div className="flex items-center justify-center gap-1.5">
-          {["briefing", "race", "courier", "avatar", "skills", "name", "confirm"].map((s, i) => (
+          {["incoming", "briefing", "race", "courier", "avatar", "skills", "name", "confirm"].map((s, i) => (
             <div
               key={s}
               className={`h-1 w-5 rounded-full transition-colors ${
                 step === s
                   ? "bg-[color:var(--color-accent)]"
-                  : ["briefing", "race", "courier", "avatar", "skills", "name", "confirm"].indexOf(step) > i
+                  : ["incoming", "briefing", "race", "courier", "avatar", "skills", "name", "confirm"].indexOf(step) > i
                   ? "bg-[color:var(--color-accent)]/50"
                   : "bg-[rgba(255,255,255,0.1)]"
               }`}
@@ -344,6 +354,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           ))}
         </div>
         <p className="mt-1.5 text-center text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-widest">
+          {step === "incoming" && "Signal Detected"}
           {step === "briefing" && `Transmission ${briefingIndex + 1}/${ONBOARDING_PANELS.length}`}
           {step === "race" && "Select Lineage"}
           {step === "courier" && "Select Role"}
@@ -355,8 +366,75 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-6">
         <AnimatePresence mode="wait">
+          {/* Incoming Transmission Alert */}
+          {step === "incoming" && (
+            <motion.div
+              key="incoming"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ duration: 0.4 }}
+              className="mx-auto max-w-sm flex flex-col items-center justify-center min-h-[300px]"
+            >
+              {/* Pulsing signal icon */}
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  opacity: [0.6, 1, 0.6]
+                }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="mb-6 relative"
+              >
+                <div className="w-16 h-16 rounded-full border-2 border-[color:var(--color-accent)] flex items-center justify-center">
+                  <Zap className="w-7 h-7 text-[color:var(--color-accent)]" />
+                </div>
+                {/* Ripple rings */}
+                <motion.div
+                  animate={{ scale: [1, 2], opacity: [0.4, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 rounded-full border border-[color:var(--color-accent)]"
+                />
+                <motion.div
+                  animate={{ scale: [1, 2], opacity: [0.4, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                  className="absolute inset-0 rounded-full border border-[color:var(--color-accent)]"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-center"
+              >
+                <h2 className="text-lg font-bold text-[color:var(--color-accent)] uppercase tracking-wider mb-2">
+                  Incoming Transmission
+                </h2>
+                <p className="text-[12px] text-[color:var(--color-text-secondary)]">
+                  Establishing secure relay connection...
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="mt-8"
+              >
+                <button
+                  type="button"
+                  onClick={() => setStep("briefing")}
+                  className="flex items-center gap-2 rounded-lg border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 px-6 py-2.5 text-[12px] font-medium text-[color:var(--color-accent)] uppercase tracking-wider transition-colors hover:bg-[color:var(--color-accent)]/20"
+                >
+                  Accept Transmission
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+
           {/* Briefing */}
           {step === "briefing" && (
             <motion.div
@@ -367,7 +445,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
               transition={{ duration: 0.3 }}
               className="mx-auto max-w-sm"
             >
-              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.95)] p-5">
+              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.95)] p-6">
                 <div className="mb-3 flex items-center gap-2 text-[10px] text-[color:var(--color-accent)]">
                   <motion.span 
                     animate={{ opacity: [0.5, 1, 0.5] }}
@@ -874,27 +952,29 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <div className="border-t border-[rgba(168,123,255,0.1)] p-3">
-        <div className="mx-auto flex max-w-sm items-center justify-between gap-3">
-          <button
-            onClick={prevStep}
-            disabled={step === "briefing" && briefingIndex === 0}
-            className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-            Back
-          </button>
-          <button
-            onClick={nextStep}
-            disabled={!canProceed()}
-            className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 text-[12px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            {step === "confirm" ? "Initialize" : "Continue"}
-            {step !== "confirm" && <ChevronRight className="h-3.5 w-3.5" />}
-          </button>
+      {/* Navigation - hidden during incoming step */}
+      {step !== "incoming" && (
+        <div className="border-t border-[rgba(168,123,255,0.1)] p-4">
+          <div className="mx-auto flex max-w-sm items-center justify-between gap-3">
+            <button
+              onClick={prevStep}
+              disabled={step === "briefing" && briefingIndex === 0}
+              className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Back
+            </button>
+            <button
+              onClick={nextStep}
+              disabled={!canProceed()}
+              className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 text-[12px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              {step === "confirm" ? "Initialize" : "Continue"}
+              {step !== "confirm" && <ChevronRight className="h-3.5 w-3.5" />}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -528,6 +528,7 @@ export interface OnboardingPanel {
 
 export type CharacterCreationStep = 
   | "boot"
+  | "incoming"
   | "briefing"
   | "race"
   | "courier"
