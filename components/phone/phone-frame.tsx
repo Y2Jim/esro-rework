@@ -49,16 +49,16 @@ export function PhoneFrame({
           <div aria-hidden className="theme-effect-shimmer-layer pointer-events-none absolute inset-0 z-0" />
           {/* Legendary scan lines - background layer */}
           <div aria-hidden className="theme-effect-scanlines pointer-events-none absolute inset-0 z-0" />
+          {/* Mythic particles - background layer */}
+          <div aria-hidden className="theme-effect-particles pointer-events-none absolute inset-0 z-0" />
+          {/* Mythic halo - background layer */}
+          <div aria-hidden className="theme-effect-halo pointer-events-none absolute inset-0 z-0" />
           
           {/* Overlay effects (above content but subtle, z-40) */}
           {/* Epic pulse corners */}
           <div aria-hidden className="theme-effect-corners pointer-events-none absolute inset-0 z-40" />
           {/* Legendary edge glow */}
           <div aria-hidden className="theme-effect-edge-glow pointer-events-none absolute inset-0 z-40" />
-          {/* Mythic particles */}
-          <div aria-hidden className="theme-effect-particles pointer-events-none absolute inset-0 z-40" />
-          {/* Mythic halo */}
-          <div aria-hidden className="theme-effect-halo pointer-events-none absolute inset-0 z-40" />
           
           {/* scanlines + vignette wrapper */}
           <div className="phone-screen scanlines vignette relative h-full w-full">
