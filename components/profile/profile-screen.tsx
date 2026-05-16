@@ -465,6 +465,19 @@ function SettingsTab() {
           <li>- Privacy options (coming soon)</li>
         </ul>
       </div>
+
+      {/* Admin/Debug Section */}
+      <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-danger)]">
+          Admin / Debug
+        </div>
+        <p className="mb-3 text-[9px] text-[color:var(--color-muted)]">
+          Testing options for development. These will be removed in production.
+        </p>
+        <div className="space-y-2">
+          <AdminUnlockButton />
+        </div>
+      </div>
     </div>
   )
 }
@@ -538,6 +551,56 @@ function NotificationsTab() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function AdminUnlockButton() {
+  const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
+  const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)
+  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean }>({
+    cosmetics: false,
+    titles: false,
+  })
+
+  const handleUnlockCosmetics = () => {
+    unlockAllCosmetics()
+    setUnlocked((prev) => ({ ...prev, cosmetics: true }))
+  }
+
+  const handleUnlockTitles = () => {
+    unlockAllTitles()
+    setUnlocked((prev) => ({ ...prev, titles: true }))
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        onClick={handleUnlockCosmetics}
+        disabled={unlocked.cosmetics}
+        className={cn(
+          "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+          unlocked.cosmetics
+            ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
+            : "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
+        )}
+      >
+        {unlocked.cosmetics ? "All Cosmetics Unlocked" : "Unlock All Cosmetics"}
+      </button>
+      <button
+        type="button"
+        onClick={handleUnlockTitles}
+        disabled={unlocked.titles}
+        className={cn(
+          "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+          unlocked.titles
+            ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
+            : "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
+        )}
+      >
+        {unlocked.titles ? "All Titles Unlocked" : "Unlock All Titles"}
+      </button>
     </div>
   )
 }

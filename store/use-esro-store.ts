@@ -17,6 +17,7 @@ import type {
   PartyMember,
   Profile,
   ProfileNotification,
+  ProfileTitle,
   QuickAction,
   RecoveryResult,
   ScreenId,
@@ -131,6 +132,10 @@ interface EsroState {
   // Avatar & Vanity
   equipVanity: (vanityId: string) => void
   unequipVanity: (layerType: AvatarLayerType) => void
+  
+  // Admin/Debug
+  unlockAllCosmetics: () => void
+  unlockAllTitles: () => void
 }
 
 function rollRarity(focused: boolean): Rarity {
@@ -640,6 +645,87 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({
       profile: { ...profile, vanityItems: updatedItems },
       identity: { ...identity, avatar: updatedAvatar },
+    })
+  },
+  
+  // Admin/Debug - unlock all cosmetics
+  unlockAllCosmetics: () => {
+    const { profile } = get()
+    const allCosmetics: VanityItem[] = []
+    const rarities: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
+    
+    // Generate all possible cosmetic variants for each layer type
+    const layers: { type: AvatarLayerType; maxVariants: number; labels: string[] }[] = [
+      { type: "hair", maxVariants: 8, labels: ["Short Cut", "Long Flow", "Spiky", "Slicked", "Braided", "Mohawk", "Curly", "Bald Fade"] },
+      { type: "eyes", maxVariants: 6, labels: ["Standard", "Narrow", "Wide", "Glowing", "Cyber", "Ancient"] },
+      { type: "mouth", maxVariants: 5, labels: ["Neutral", "Smirk", "Frown", "Open", "Masked"] },
+      { type: "accessory", maxVariants: 7, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask"] },
+      { type: "hat", maxVariants: 7, labels: ["None", "Cap", "Hood", "Headband", "Helmet", "Crown", "Antenna"] },
+      { type: "flair", maxVariants: 4, labels: ["None", "Glow", "Pulse", "Sparkle"] },
+    ]
+    
+    for (const layer of layers) {
+      for (let v = 1; v < layer.maxVariants; v++) {
+        const rarity = rarities[Math.min(Math.floor(v / 2), rarities.length - 1)]
+        const existing = profile.vanityItems.find(
+          item => item.layerType === layer.type && item.variant === v
+        )
+        if (!existing) {
+          allCosmetics.push({
+            id: `vanity-admin-${layer.type}-${v}`,
+            label: layer.labels[v] || `${layer.type} Style ${v}`,
+            layerType: layer.type,
+            variant: v,
+            rarity,
+            unlocked: true,
+            equipped: false,
+          })
+        }
+      }
+    }
+    
+    // Unlock existing items and add new ones
+    const updatedItems = profile.vanityItems.map(v => ({ ...v, unlocked: true }))
+    
+    set({
+      profile: {
+        ...profile,
+        vanityItems: [...updatedItems, ...allCosmetics],
+      },
+    })
+  },
+  
+  // Admin/Debug - unlock all titles
+  unlockAllTitles: () => {
+    const { profile } = get()
+    const allTitles: ProfileTitle[] = [
+      { id: "faded_echo", label: "Faded Echo", rarity: "common", equipped: false, source: "Admin unlock" },
+      { id: "signal_keeper", label: "Signal Keeper", rarity: "uncommon", equipped: false, source: "Admin unlock" },
+      { id: "route_finder", label: "Route Finder", rarity: "uncommon", equipped: false, source: "Admin unlock" },
+      { id: "archive_listener", label: "Archive Listener", rarity: "rare", equipped: false, source: "Admin unlock" },
+      { id: "waystone_keeper", label: "Waystone Keeper", rarity: "rare", equipped: false, source: "Admin unlock" },
+      { id: "drift_walker", label: "Drift Walker", rarity: "rare", equipped: false, source: "Admin unlock" },
+      { id: "relay_warden", label: "Relay Warden", rarity: "epic", equipped: false, source: "Admin unlock" },
+      { id: "depth_touched", label: "Depth Touched", rarity: "epic", equipped: false, source: "Admin unlock" },
+      { id: "void_speaker", label: "Void Speaker", rarity: "epic", equipped: false, source: "Admin unlock" },
+      { id: "deep_pull_regent", label: "Deep Pull Regent", rarity: "legendary", equipped: false, source: "Admin unlock" },
+      { id: "primordial_echo", label: "Primordial Echo", rarity: "legendary", equipped: false, source: "Admin unlock" },
+      { id: "the_returned", label: "The Returned", rarity: "legendary", equipped: false, source: "Admin unlock" },
+      { id: "gloam_signal_regent", label: "Gloam Signal Regent", rarity: "legendary", equipped: false, source: "Admin unlock" },
+      { id: "myth_relay_sea", label: "Myth of the Relay Sea", rarity: "mythic", equipped: false, source: "Admin unlock" },
+      { id: "shardheart_ascendant", label: "Shardheart Ascendant", rarity: "mythic", equipped: false, source: "Admin unlock" },
+      { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic", equipped: false, source: "Admin unlock" },
+    ]
+    
+    // Merge with existing titles (don't duplicate)
+    const existingIds = new Set(profile.ownedTitles.map(t => t.id))
+    const newTitles = allTitles.filter(t => !existingIds.has(t.id))
+    
+    set({
+      profile: {
+        ...profile,
+        ownedTitles: [...profile.ownedTitles, ...newTitles],
+      },
     })
   },
 }))
