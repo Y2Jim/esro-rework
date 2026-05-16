@@ -218,51 +218,56 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
               exit={{ opacity: 0, y: -10 }}
               className="space-y-3"
             >
-              {FACTIONS.map((faction) => (
-                <button
-                  key={faction.id}
-                  onClick={() => setSelectedFaction(faction)}
-                  className={`relative w-full rounded-lg border p-3 text-left transition-all ${
-                    selectedFaction?.id === faction.id ? "ring-1" : ""
-                  }`}
-                  style={{
-                    borderColor: selectedFaction?.id === faction.id ? faction.color : `${faction.color}30`,
-                    backgroundColor: selectedFaction?.id === faction.id ? faction.colorVars.bg : "transparent",
-                    boxShadow: selectedFaction?.id === faction.id ? `0 0 16px ${faction.glow}` : undefined,
-                    ["--tw-ring-color" as string]: faction.color,
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <FactionEmblem 
-                      faction={faction} 
-                      selected={selectedFaction?.id === faction.id} 
-                      size="md" 
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-[12px]" style={{ color: faction.color }}>
-                        {faction.name}
-                      </h3>
-                      <p className="mt-0.5 text-[9px] text-[color:var(--color-muted)] italic">
-                        &quot;{faction.motto}&quot;
-                      </p>
-                      <p className="mt-1 text-[9px] text-[color:var(--color-text-secondary)] leading-relaxed line-clamp-2">
-                        {faction.lore}
-                      </p>
+              {FACTIONS.map((faction) => {
+                const isSelected = selectedFaction?.id === faction.id
+                return (
+                  <button
+                    key={faction.id}
+                    onClick={() => setSelectedFaction(faction)}
+                    className={`relative w-full rounded-lg border p-3 text-left transition-all ${
+                      isSelected ? "ring-1" : ""
+                    }`}
+                    style={{
+                      borderColor: isSelected ? faction.color : `${faction.color}30`,
+                      backgroundColor: isSelected ? faction.colorVars.bg : "transparent",
+                      boxShadow: isSelected ? `0 0 16px ${faction.glow}` : undefined,
+                      ["--tw-ring-color" as string]: faction.color,
+                    }}
+                  >
+                    {/* Header row with emblem and name */}
+                    <div className="flex items-center gap-3">
+                      <FactionEmblem 
+                        faction={faction} 
+                        selected={isSelected} 
+                        size="sm" 
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-[12px]" style={{ color: faction.color }}>
+                          {faction.name}
+                        </h3>
+                        <p className="text-[9px] text-[color:var(--color-muted)] italic">
+                          &quot;{faction.motto}&quot;
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                          style={{ backgroundColor: faction.color }}
+                        >
+                          <Check className="h-3 w-3 text-black" />
+                        </motion.div>
+                      )}
                     </div>
-                  </div>
-                  
-                  {selectedFaction?.id === faction.id && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full"
-                      style={{ backgroundColor: faction.color }}
-                    >
-                      <Check className="h-3 w-3 text-black" />
-                    </motion.div>
-                  )}
-                </button>
-              ))}
+                    
+                    {/* Full description */}
+                    <p className="mt-2 text-[10px] text-[color:var(--color-text-secondary)] leading-relaxed">
+                      {faction.lore}
+                    </p>
+                  </button>
+                )
+              })}
             </motion.div>
           )}
 
