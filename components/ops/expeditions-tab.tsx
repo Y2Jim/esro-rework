@@ -8,6 +8,7 @@ export function ExpeditionsTab() {
   const expeditions = useEsroStore((s) => s.expeditions)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
   const startExpedition = useEsroStore((s) => s.startExpedition)
+  const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const skills = useEsroStore((s) => s.skills)
 
   const getRiskColor = (risk: string) => {
@@ -90,6 +91,17 @@ export function ExpeditionsTab() {
               ))}
             </div>
           )}
+
+          {/* Cancel button */}
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={cancelExpedition}
+              className="rounded border border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-danger)] transition-colors hover:border-[color:var(--color-danger)]/60 hover:bg-[color:var(--color-danger)]/20"
+            >
+              Cancel Expedition
+            </button>
+          </div>
         </div>
       )}
 

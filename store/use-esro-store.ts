@@ -89,6 +89,7 @@ interface EsroState {
   expeditions: Expedition[]
   activeExpedition: ActiveExpedition | null
   startExpedition: (id: string) => void
+  cancelExpedition: () => void
 
   // Ops - Skills
   skills: Skill[]
@@ -394,6 +395,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         log: ["Expedition started..."],
       },
     })
+  },
+  cancelExpedition: () => {
+    const { activeExpedition } = get()
+    if (!activeExpedition) return
+    set({ activeExpedition: null })
   },
 
   // Skills
