@@ -40,14 +40,97 @@ function RollingText({ text, speed = 25, onComplete }: { text: string; speed?: n
   )
 }
 
-/** Generate a Relay handle suffix (5 alphanumeric chars) per Lua spec */
-function generateRelaySuffix(): string {
-  const chars = "0123456789abcdef"
-  let suffix = ""
-  for (let i = 0; i < 5; i++) {
-    suffix += chars[Math.floor(Math.random() * chars.length)]
+/** Name generation pools per Lua config */
+const NAME_POOLS = {
+  first: [
+    'Amber', 'Ashen', 'Aster', 'Autumn', 'Black', 'Bloom', 'Blue', 'Bright',
+    'Bronze', 'Cinder', 'Cloud', 'Copper', 'Crimson', 'Crystal', 'Dawn', 'Deep',
+    'Dream', 'Drift', 'Dusk', 'Echo', 'Ember', 'Even', 'Fable', 'Fallen',
+    'Fern', 'Gilded', 'Glass', 'Glimmer', 'Gold', 'Gray', 'Green', 'Hallow',
+    'Haze', 'Honey', 'Iron', 'Ivory', 'Jade', 'Juniper', 'Lark', 'Lilac',
+    'Lost', 'Lunar', 'Marble', 'Mist', 'Moon', 'Morrow', 'Moss', 'Night',
+    'Oak', 'Opal', 'Pale', 'Pearl', 'Petal', 'Raven', 'Red', 'River',
+    'Rose', 'Rune', 'Sable', 'Saffron', 'Sea', 'Shade', 'Shadow', 'Silver',
+    'Snow', 'Soft', 'Solar', 'Song', 'Star', 'Still', 'Stone', 'Storm',
+    'Summer', 'Sun', 'Swift', 'Thorn', 'Velvet', 'Verdant', 'Violet', 'Wander',
+    'White', 'Wild', 'Willow', 'Wind', 'Winter', 'Wisp', 'Wood', 'Woven',
+    'Arc', 'Auric', 'Birch', 'Blaze', 'Bramble', 'Cobalt', 'Dust',
+    'Ebon', 'Ever', 'Flint', 'Frost', 'Glow', 'Golden', 'Harrow', 'Hearth',
+    'Hollow', 'Indigo', 'Kindle', 'Meadow', 'Nova', 'Pine', 'Quiet', 'Rain',
+    'Sage', 'Scarlet', 'Shard', 'Slate', 'Steel', 'Sylvan', 'Thunder', 'Umber',
+    'Vale', 'Verdigris', 'Warm', 'Whisper', 'Wilde', 'Yew', 'Zephyr'
+  ],
+  second: [
+    'Ash', 'Bloom', 'Branch', 'Brook', 'Cairn', 'Candle', 'Chord', 'Cloak',
+    'Crown', 'Dancer', 'Dew', 'Drifter', 'Ember', 'Fern', 'Field', 'Flare',
+    'Flower', 'Fox', 'Garden', 'Gale', 'Glim', 'Grove', 'Harbor', 'Hearth',
+    'Heart', 'Hollow', 'Lace', 'Leaf', 'Light', 'Loom', 'Lotus', 'Lute',
+    'March', 'Mark', 'Meadow', 'Mirror', 'Moth', 'Needle', 'Petal', 'Pond',
+    'Quill', 'Rain', 'Reed', 'Rest', 'Rill', 'Road', 'Rune', 'Shade',
+    'Shell', 'Shore', 'Sigil', 'Silk', 'Song', 'Spark', 'Spire', 'Star',
+    'Step', 'Stone', 'Tale', 'Thread', 'Thistle', 'Torch', 'Trail', 'Vale',
+    'Veil', 'Vow', 'Wave', 'Whisper', 'Will', 'Wing', 'Wish', 'Wisp',
+    'Wood', 'Wren', 'Bloomer', 'Watcher', 'Walker', 'Seeker', 'Keeper', 'Singer',
+    'Beacon', 'Blade', 'Briar', 'Caller', 'Charm', 'Dreamer', 'Dust', 'Fable',
+    'Feather', 'Flame', 'Gazer', 'Glen', 'Harrow', 'Haven', 'Haze',
+    'Lantern', 'Lore', 'Mender', 'Mist', 'Oracle', 'Pine', 'Rider',
+    'River', 'Sparrow', 'Spirit', 'Stag', 'Summit', 'Sylph', 'Talon', 'Tempest',
+    'Thorn', 'Traveler', 'Ward', 'Weaver', 'Wilder', 'Wythe'
+  ],
+  tail: [
+    'Aster', 'Bell', 'Briar', 'Cairn', 'Cindra', 'Corvin', 'Dale', 'Dawn',
+    'Elar', 'Elowen', 'Ember', 'Faelis', 'Fenn', 'Gray', 'Hale', 'Iris',
+    'Juno', 'Korin', 'Luneth', 'Lys', 'Morrow', 'Nettle', 'Nyra', 'Orin',
+    'Quill', 'Rill', 'Riven', 'Rowan', 'Sable', 'Sorrel', 'Talyn', 'Thorne',
+    'Vale', 'Vesper', 'Wren', 'Yarrow', 'Zephyr', 'Sylra', 'Vey', 'Auren',
+    'Avel', 'Blythe', 'Caelum', 'Dusk', 'Eryn', 'Fable', 'Galen', 'Harrow',
+    'Ione', 'Kael', 'Liora', 'Mire', 'Noctis', 'Orrin', 'Pyre', 'Rook',
+    'Seren', 'Tarin', 'Wilder', 'Ysra', 'Zorin'
+  ],
+  rareTail: [
+    'ofGlass', 'ofVelvet', 'ofDawn', 'ofNight', 'ofRain', 'ofEmbers',
+    'ofThorns', 'ofStars', 'ofShadows', 'ofMoths', 'ofAsh', 'ofEchoes',
+    'ofCinders', 'ofFrost', 'ofLanterns', 'ofMist', 'ofMoonlight', 'ofPetals',
+    'ofSilence', 'ofStorms', 'ofTwilight', 'ofWhispers'
+  ],
+  ultraRareTail: [
+    'theEclipsed', 'theGilded', 'theHollow', 'theMoonbound', 'theRuneborn',
+    'theStarforged', 'theVeiled', 'theWandering', 'ofTheFirstDawn',
+    'ofTheLastEmber', 'ofTheSilverWilds', 'ofTheStillVale'
+  ]
+}
+
+/** Pick random element from array */
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+/** Roll chance (chance out of outOf) */
+function rollChance(chance: number, outOf: number): boolean {
+  return Math.random() * outOf < chance
+}
+
+/** Generate a handle per Lua name generation spec */
+function generateHandle(): string {
+  const first = pick(NAME_POOLS.first)
+  const second = pick(NAME_POOLS.second)
+  let base = first + second
+
+  // 45% chance to add tail
+  if (rollChance(45, 100)) {
+    base = base + '_' + pick(NAME_POOLS.tail)
   }
-  return suffix
+
+  // Ultra rare tail (0.5%), rare tail (1%), or number tail (35%)
+  if (rollChance(5, 1000)) {
+    base = base + '_' + pick(NAME_POOLS.ultraRareTail)
+  } else if (rollChance(5, 500)) {
+    base = base + '_' + pick(NAME_POOLS.rareTail)
+  } else if (rollChance(35, 100)) {
+    base = base + '_' + (Math.floor(Math.random() * 990) + 10)
+  }
+
+  return base
 }
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
 import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS } from "@/lib/avatar-generator"
@@ -107,7 +190,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
-  const [relaySuffix] = useState(() => generateRelaySuffix())
+  const [generatedHandle, setGeneratedHandle] = useState(() => generateHandle())
   const [avatarSeed, setAvatarSeed] = useState(() => `seed-${Date.now()}`)
   const [avatar, setAvatar] = useState<AvatarConfig>(() => generateAvatarFromSeed(`seed-${Date.now()}`))
   
@@ -188,7 +271,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             race: selectedRace,
             courier: selectedCourier,
             starterSkills: selectedSkills,
-            handle: `Relay${relaySuffix}`,
+            handle: generatedHandle,
             avatar: avatar,
           })
         }
@@ -266,7 +349,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "courier" && "Select Role"}
           {step === "avatar" && "Customize Avatar"}
           {step === "skills" && `Choose Skills (${selectedSkills.length}/${STARTER_SKILL_COUNT})`}
-          {step === "name" && "Relay Assignment"}
+          {step === "name" && "Handle Assignment"}
           {step === "confirm" && "Confirm Identity"}
         </p>
       </div>
@@ -708,30 +791,35 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                     transition={{ duration: 1.5, repeat: Infinity }}
                     className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent)]" 
                   />
-                  <span className="font-mono uppercase tracking-widest">Relay Assignment</span>
+                  <span className="font-mono uppercase tracking-widest">Handle Assignment</span>
                 </div>
                 
                 <p className="mb-4 text-[12px] text-[color:var(--color-text-secondary)] leading-relaxed">
-                  Your unique relay identifier has been generated from your signal signature. This handle will identify you across all relay networks.
+                  The network has generated your unique handle. This name will identify you across all relay channels and field operations.
                 </p>
                 
                 <div className="rounded-lg border border-[color:var(--color-accent)]/30 bg-[rgba(168,123,255,0.08)] p-4 text-center">
                   <div className="text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider mb-2">
-                    Your Relay Handle
+                    Your Handle
                   </div>
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.2, type: "spring" }}
-                    className="text-xl font-bold text-[color:var(--color-accent)] font-mono"
+                    className="text-lg font-bold text-[color:var(--color-accent)] font-mono break-all"
                   >
-                    @Relay{relaySuffix}
+                    @{generatedHandle}
                   </motion.div>
                 </div>
                 
-                <p className="mt-3 text-[10px] text-[color:var(--color-text-muted)] text-center">
-                  Handle format follows standard relay protocol.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setGeneratedHandle(generateHandle())}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[10px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] hover:text-[color:var(--color-text-primary)]"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Generate New Handle
+                </button>
               </div>
             </motion.div>
           )}
@@ -749,7 +837,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                 <div className="mx-auto mb-3">
                   <PixelAvatar config={avatar} size="md" />
                 </div>
-                <h2 className="text-lg font-bold text-[color:var(--color-accent)] font-mono">@Relay{relaySuffix}</h2>
+                <h2 className="text-lg font-bold text-[color:var(--color-accent)] font-mono">@{generatedHandle}</h2>
                 <p className="mt-0.5 text-[12px]" style={{ color: selectedRace.color }}>
                   {selectedRace.name} {selectedCourier.name}
                 </p>
