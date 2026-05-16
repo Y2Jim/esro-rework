@@ -44,21 +44,18 @@ export function PhoneFrame({
           />
           
           {/* Theme effect layers - dedicated elements for each effect type */}
-          {/* Background effects (behind HUD, z-0) */}
-          {/* Epic/Legendary shimmer sweep - subtle background effect */}
-          <div aria-hidden className="theme-effect-shimmer-layer pointer-events-none absolute inset-0 z-0" />
-          {/* Mythic halo - background glow */}
-          <div aria-hidden className="theme-effect-halo pointer-events-none absolute inset-0 z-0" />
-          
-          {/* Foreground effects (above content but subtle, z-40) */}
           {/* Epic pulse corners */}
           <div aria-hidden className="theme-effect-corners pointer-events-none absolute inset-0 z-40" />
+          {/* Epic/Legendary shimmer sweep */}
+          <div aria-hidden className="theme-effect-shimmer-layer pointer-events-none absolute inset-0 z-40" />
           {/* Legendary scan lines */}
           <div aria-hidden className="theme-effect-scanlines pointer-events-none absolute inset-0 z-40" />
           {/* Legendary edge glow */}
           <div aria-hidden className="theme-effect-edge-glow pointer-events-none absolute inset-0 z-40" />
           {/* Mythic particles */}
           <div aria-hidden className="theme-effect-particles pointer-events-none absolute inset-0 z-40" />
+          {/* Mythic halo */}
+          <div aria-hidden className="theme-effect-halo pointer-events-none absolute inset-0 z-40" />
           
           {/* scanlines + vignette wrapper */}
           <div className="phone-screen scanlines vignette relative h-full w-full">
