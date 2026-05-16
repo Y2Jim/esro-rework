@@ -825,6 +825,7 @@ function AdminUnlockButton() {
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
   const addMaterials = useEsroStore((s) => s.addMaterials)
   const injectTestChatMessages = useEsroStore((s) => s.injectTestChatMessages)
+  const setScreen = useEsroStore((s) => s.setScreen)
   const unlockTheme = useEsroStore((s) => s.unlockTheme)
   const identity = useEsroStore((s) => s.identity)
   
@@ -973,6 +974,8 @@ function AdminUnlockButton() {
           onClick={() => {
             injectTestChatMessages()
             setUnlocked((prev) => ({ ...prev, chat: true }))
+            // Navigate to terminal to see the messages
+            setScreen("terminal")
           }}
           className={cn(
             "w-full rounded border px-3 py-2 text-[10px] transition-colors",
@@ -984,7 +987,7 @@ function AdminUnlockButton() {
           {unlocked.chat ? "Test Messages Sent" : "Inject Title Test Messages"}
         </button>
         <p className="mt-1 text-[8px] text-[color:var(--color-muted)]">
-          Adds messages with all rarity titles to current channel
+          Adds messages with all rarity titles to PUBLIC channel
         </p>
       </div>
       
