@@ -8,8 +8,8 @@ export const rarityLabel: Record<Rarity, string> = {
   common: "Faded",
   uncommon: "Recovered",
   rare: "Refined",
-  epic: "Prismatic",
-  legendary: "Singular",
+  epic: "Legendary",
+  legendary: "Iridescent",
   mythic: "Transcendent",
 }
 
