@@ -5,7 +5,7 @@
     {
       "name": "Conditioning",
       "linkedStat": "hp",
-      "summary": "Long-haul stamina, recovery discipline, and carrying strength under pressure.",
+      "summary": "+3% expedition duration. Reduces fatigue buildup.",
       "stats": [
         { "id": "marching", "name": "Marching" },
         { "id": "recovery", "name": "Recovery" },
@@ -15,7 +15,7 @@
     {
       "name": "Field Medicine",
       "linkedStat": "hp",
-      "summary": "Keeping bodies standing with triage, stabilization, and practical frontier care.",
+      "summary": "+3% safe return chance. Improves party recovery.",
       "stats": [
         { "id": "triage", "name": "Triage" },
         { "id": "stabilization", "name": "Stabilization" },
@@ -25,7 +25,7 @@
     {
       "name": "Beast Tending",
       "linkedStat": "hp",
-      "summary": "Managing mounts, pack beasts, and living cargo through stress and fatigue.",
+      "summary": "+3% carry capacity. Reduces mount fatigue.",
       "stats": [
         { "id": "handling", "name": "Handling" },
         { "id": "soothing", "name": "Soothing" },
@@ -35,7 +35,7 @@
     {
       "name": "Bladecraft",
       "linkedStat": "atk",
-      "summary": "Close-range offense built on edge control, tempo, and committed finishing blows.",
+      "summary": "+3% combat damage. Improves finishing strikes.",
       "stats": [
         { "id": "edgework", "name": "Edgework" },
         { "id": "riposte", "name": "Riposte" },
@@ -45,7 +45,7 @@
     {
       "name": "Marksmanship",
       "linkedStat": "atk",
-      "summary": "Ranged pressure through sight discipline, shot preparation, and precision release.",
+      "summary": "+3% ranged damage. Increases critical chance.",
       "stats": [
         { "id": "sighting", "name": "Sighting" },
         { "id": "draw", "name": "Draw" },
@@ -55,7 +55,7 @@
     {
       "name": "Brawling",
       "linkedStat": "atk",
-      "summary": "Raw physical offense built on leverage, breaks, and punishing impact.",
+      "summary": "+3% unarmed damage. Improves hostile mitigation.",
       "stats": [
         { "id": "clinch", "name": "Clinch" },
         { "id": "breaks", "name": "Breaks" },
@@ -65,7 +65,7 @@
     {
       "name": "Bulwark",
       "linkedStat": "def",
-      "summary": "Direct protection through bracing, shield discipline, and body-line interception.",
+      "summary": "+3% damage reduction. Improves convoy defense.",
       "stats": [
         { "id": "shielding", "name": "Shielding" },
         { "id": "bracing", "name": "Bracing" },
@@ -75,7 +75,7 @@
     {
       "name": "Guardwork",
       "linkedStat": "def",
-      "summary": "Defensive positioning, watch discipline, and safe escort through hostile ground.",
+      "summary": "+3% hostile risk reduction. Improves escort safety.",
       "stats": [
         { "id": "formation", "name": "Formation" },
         { "id": "watchkeeping", "name": "Watchkeeping" },
@@ -85,7 +85,7 @@
     {
       "name": "Warding",
       "linkedStat": "def",
-      "summary": "Arcane or technical protection through barriers, anchors, and disruption control.",
+      "summary": "+3% resistance. Reduces anomaly exposure.",
       "stats": [
         { "id": "barriers", "name": "Barriers" },
         { "id": "anchors", "name": "Anchors" },
@@ -95,7 +95,7 @@
     {
       "name": "Gathering",
       "linkedStat": "luck",
-      "summary": "Field retrieval, harvest timing, and salvage appraisal.",
+      "summary": "+3% material yield. Improves harvest quality.",
       "stats": [
         { "id": "foraging", "name": "Foraging" },
         { "id": "harvesting", "name": "Harvesting" },
@@ -105,7 +105,7 @@
     {
       "name": "Fishing",
       "linkedStat": "luck",
-      "summary": "Line placement, tension control, and wreck salvage handling.",
+      "summary": "+3% catch rate. Improves wreck salvage yield.",
       "stats": [
         { "id": "casting", "name": "Casting" },
         { "id": "tension", "name": "Tension" },
@@ -115,7 +115,7 @@
     {
       "name": "Scavenging",
       "linkedStat": "luck",
-      "summary": "Finding overlooked value through spotting, extraction, and deal-making instinct.",
+      "summary": "+3% discovery quality. Improves rare find chance.",
       "stats": [
         { "id": "spotting", "name": "Spotting" },
         { "id": "extraction", "name": "Extraction" },
@@ -125,7 +125,7 @@
     {
       "name": "Pathfinding",
       "linkedStat": "focus",
-      "summary": "Route surveying, traversal planning, and survival reads.",
+      "summary": "+3% recon success. Improves zone pressure.",
       "stats": [
         { "id": "surveying", "name": "Surveying" },
         { "id": "routing", "name": "Routing" },
@@ -135,7 +135,7 @@
     {
       "name": "Ritualism",
       "linkedStat": "focus",
-      "summary": "Measured spellwork and ceremonial execution through channels, sigils, and invocations.",
+      "summary": "+2% contract rewards. Improves faction standing.",
       "stats": [
         { "id": "channeling", "name": "Channeling" },
         { "id": "sigils", "name": "Sigils" },
@@ -145,7 +145,7 @@
     {
       "name": "Lorekeeping",
       "linkedStat": "focus",
-      "summary": "Focused knowledge work through recall, translation, and sharp analysis.",
+      "summary": "+3% archive quality. Improves fragment analysis.",
       "stats": [
         { "id": "recall", "name": "Recall" },
         { "id": "translation", "name": "Translation" },

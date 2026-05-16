@@ -13,8 +13,8 @@ export function SkillsTab() {
   
   const playerStats = getPlayerStats()
   
-  /** Get linked stat info for a skill */
-  const getSkillStatInfo = (skillLabel: string) => {
+  /** Get linked stat info and summary for a skill */
+  const getSkillInfo = (skillLabel: string) => {
     const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skillLabel)
     if (!skillDef) return null
     const stat = skillDef.linkedStat as keyof BaseStats
@@ -23,6 +23,7 @@ export function SkillsTab() {
       label: STAT_LABELS[stat],
       color: STAT_COLORS[stat],
       value: playerStats[stat],
+      summary: skillDef.summary,
     }
   }
 
@@ -60,45 +61,52 @@ export function SkillsTab() {
           Loadout ({equipped.length}/4)
         </div>
         
-        <div className="grid grid-cols-4 gap-2">
-          {[0, 1, 2, 3].map((i) => {
-            const skill = equipped[i]
-            const statInfo = skill ? getSkillStatInfo(skill.label) : null
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => skill && toggleLoadout(skill.id)}
-                className={cn(
-                  "flex aspect-square flex-col items-center justify-center rounded-lg border p-2 text-center transition-colors",
-                  skill
-                    ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 hover:bg-[color:var(--color-accent)]/20"
-                    : "border-dashed border-[color:var(--color-border)]"
-                )}
-              >
-                {skill ? (
-                  <>
-                    <span className="text-[10px] font-medium text-[color:var(--color-text)]">
-                      {skill.label.slice(0, 6)}
-                    </span>
-                    <span className="text-[9px] text-[color:var(--color-muted)]">
-                      Lv {skill.level}
-                    </span>
-                    {statInfo && (
-                      <span 
-                        className="mt-0.5 text-[7px] font-medium"
-                        style={{ color: statInfo.color }}
-                      >
-                        {statInfo.label}
+        <div className="space-y-2">
+          {equipped.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-3 text-center text-[10px] text-[color:var(--color-muted)]">
+              No skills equipped
+            </div>
+          ) : (
+            equipped.map((skill) => {
+              const info = getSkillInfo(skill.label)
+              return (
+                <button
+                  key={skill.id}
+                  type="button"
+                  onClick={() => toggleLoadout(skill.id)}
+                  className="flex w-full items-start justify-between rounded-lg border border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/10 px-3 py-2 text-left transition-colors hover:bg-[color:var(--color-accent)]/20"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-medium text-[color:var(--color-text)]">
+                        {skill.label}
                       </span>
+                      <span className="text-[9px] text-[color:var(--color-muted)]">
+                        Lv {skill.level}
+                      </span>
+                      {info && (
+                        <span 
+                          className="rounded px-1 py-0.5 text-[8px] font-medium"
+                          style={{ 
+                            backgroundColor: `${info.color}15`,
+                            color: info.color,
+                          }}
+                        >
+                          {info.label}
+                        </span>
+                      )}
+                    </div>
+                    {info?.summary && (
+                      <p className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+                        {info.summary}
+                      </p>
                     )}
-                  </>
-                ) : (
-                  <span className="text-[9px] text-[color:var(--color-muted)]">—</span>
-                )}
-              </button>
-            )
-          })}
+                  </div>
+                  <span className="ml-2 text-[9px] text-[color:var(--color-danger)]">−</span>
+                </button>
+              )
+            })
+          )}
         </div>
       </div>
 
@@ -109,39 +117,44 @@ export function SkillsTab() {
             Available
           </div>
           
-          <div className="space-y-1">
+          <div className="space-y-2">
             {available.map((skill) => {
-              const statInfo = getSkillStatInfo(skill.label)
+              const info = getSkillInfo(skill.label)
               return (
                 <button
                   key={skill.id}
                   type="button"
                   onClick={() => toggleLoadout(skill.id)}
                   disabled={loadout.length >= 4}
-                  className="flex w-full items-center justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2 text-left transition-colors hover:border-[color:var(--color-accent)]/50 disabled:opacity-50"
+                  className="flex w-full items-start justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2 text-left transition-colors hover:border-[color:var(--color-accent)]/50 disabled:opacity-50"
                 >
-                  <div className="flex items-center gap-2">
-                    <div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
                       <span className="text-[11px] font-medium text-[color:var(--color-text)]">
                         {skill.label}
                       </span>
-                      <span className="ml-2 text-[10px] text-[color:var(--color-muted)]">
+                      <span className="text-[9px] text-[color:var(--color-muted)]">
                         Lv {skill.level}
                       </span>
+                      {info && (
+                        <span 
+                          className="rounded px-1 py-0.5 text-[8px] font-medium"
+                          style={{ 
+                            backgroundColor: `${info.color}15`,
+                            color: info.color,
+                          }}
+                        >
+                          {info.label}
+                        </span>
+                      )}
                     </div>
-                    {statInfo && (
-                      <span 
-                        className="rounded px-1 py-0.5 text-[8px] font-medium"
-                        style={{ 
-                          backgroundColor: `${statInfo.color}15`,
-                          color: statInfo.color,
-                        }}
-                      >
-                        {statInfo.label}
-                      </span>
+                    {info?.summary && (
+                      <p className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+                        {info.summary}
+                      </p>
                     )}
                   </div>
-                  <span className="text-[9px] text-[color:var(--color-accent)]">+</span>
+                  <span className="ml-2 text-[9px] text-[color:var(--color-accent)]">+</span>
                 </button>
               )
             })}
