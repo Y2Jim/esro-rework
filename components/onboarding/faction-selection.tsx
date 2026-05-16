@@ -265,6 +265,18 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                     <p className="mt-2 text-[10px] text-[color:var(--color-text-secondary)] leading-relaxed">
                       {faction.lore}
                     </p>
+                    
+                    {/* Faction bonus */}
+                    <div 
+                      className="mt-2 flex items-center gap-1.5 rounded px-2 py-1 text-[9px] font-medium"
+                      style={{ 
+                        backgroundColor: `${faction.color}15`,
+                        color: faction.color,
+                      }}
+                    >
+                      <span>★</span>
+                      {faction.bonus}
+                    </div>
                   </button>
                 )
               })}
@@ -309,10 +321,25 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="rounded-lg border border-[color:var(--color-border)] p-3 text-left"
+                className="rounded-lg border p-3 text-left"
+                style={{ 
+                  borderColor: `${selectedFaction.color}40`,
+                  backgroundColor: selectedFaction.colorVars.bg,
+                }}
               >
                 <div className="mb-2 text-[9px] text-[color:var(--color-muted)] uppercase tracking-wider">
-                  Faction Benefits
+                  Faction Bonus
+                </div>
+                <div 
+                  className="flex items-center gap-2 text-[11px] font-medium mb-3"
+                  style={{ color: selectedFaction.color }}
+                >
+                  <span className="text-[14px]">★</span>
+                  {selectedFaction.bonus}
+                </div>
+                
+                <div className="mb-2 text-[9px] text-[color:var(--color-muted)] uppercase tracking-wider">
+                  Additional Benefits
                 </div>
                 <ul className="space-y-1.5 text-[10px] text-[color:var(--color-text-secondary)]">
                   <li className="flex items-center gap-2">
@@ -325,11 +352,11 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                   </li>
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
-                    Bonus rewards on aligned expeditions
+                    Access to faction projects
                   </li>
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
-                    Exclusive faction projects
+                    Bonus standing on aligned expeditions
                   </li>
                 </ul>
               </motion.div>

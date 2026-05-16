@@ -14,7 +14,8 @@
         "accent": "#ffe4a8",
         "bg": "rgba(241, 211, 138, 0.08)"
       },
-      "lore": "Crownborn courts believe bearing matters. Their towers preserve luminous rites, audience laws, and the controlled projection of force that keeps lesser halls from fracturing. (EXP Increase When Partied)",
+      "lore": "Crownborn courts believe bearing matters. Their towers preserve luminous rites, audience laws, and the controlled projection of force that keeps lesser halls from fracturing.",
+      "bonus": "EXP Increase When Partied",
       "motto": "Light reveals. Order endures."
     },
     {
@@ -29,7 +30,8 @@
         "accent": "#ffc299",
         "bg": "rgba(255, 155, 106, 0.08)"
       },
-      "lore": "Hearthkin rings build for tomorrow first. Their wardens keep roads lit, train escorts, and hold refuge lines wherever the frontier tries to starve a settlement out. (Reduced Building Times)",
+      "lore": "Hearthkin rings build for tomorrow first. Their wardens keep roads lit, train escorts, and hold refuge lines wherever the frontier tries to starve a settlement out.",
+      "bonus": "Reduced Building Times",
       "motto": "Hold the line. Shelter the road."
     },
     {
@@ -44,7 +46,8 @@
         "accent": "#b8d4ff",
         "bg": "rgba(140, 178, 255, 0.08)"
       },
-      "lore": "The Veiled Circle prefer the cover of shade and layers their plans. Their networks share whispers, dark secrets, and methods for survival. (Increased Loot Chance)",
+      "lore": "The Veiled Circle prefer the cover of shade and layers their plans. Their networks share whispers, dark secrets, and methods for survival.",
+      "bonus": "Increased Loot Chance",
       "motto": "See without being seen."
     },
     {
@@ -59,7 +62,8 @@
         "accent": "#9aebd7",
         "bg": "rgba(104, 217, 192, 0.08)"
       },
-      "lore": "Roadsingers map by feel, as if they are the pen writing road as if it were ink. Their choirs keep routes stable, memories and an uncanny instinct that sends them down the hidden paths that everyone else overlooked. (Higher Chance of Hidden Route Discovery)",
+      "lore": "Roadsingers map by feel, as if they are the pen writing road as if it were ink. Their choirs keep routes stable, memories and an uncanny instinct that sends them down the hidden paths that everyone else overlooked.",
+      "bonus": "Higher Chance of Hidden Route Discovery",
       "motto": "Every road opens another door."
     }
   ]

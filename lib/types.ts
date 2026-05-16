@@ -390,6 +390,7 @@ export interface FactionData {
     bg: string
   }
   lore: string
+  bonus: string // gameplay bonus description
   motto: string
   unlockLevel: number
 }
