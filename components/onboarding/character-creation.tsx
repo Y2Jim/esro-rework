@@ -963,7 +963,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             <button
               onClick={prevStep}
               disabled={step === "briefing" && briefingIndex === 0}
-              className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
               Back
@@ -971,7 +971,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             <button
               onClick={nextStep}
               disabled={!canProceed()}
-              className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 text-[12px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 font-mono text-[11px] font-medium uppercase tracking-wider text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {step === "confirm" ? "Initialize" : "Continue"}
               {step !== "confirm" && <ChevronRight className="h-3.5 w-3.5" />}
