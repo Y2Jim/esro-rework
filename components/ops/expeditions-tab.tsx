@@ -3,6 +3,25 @@
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { rarityColor } from "@/lib/rarity"
+import { STAT_COLORS, SKILL_DEFINITIONS } from "@/lib/game-data"
+import type { BaseStats } from "@/lib/types"
+
+/** Map expedition tags to relevant stats for bonus calculation */
+const TAG_STAT_MAP: Record<string, keyof BaseStats> = {
+  "combat": "atk",
+  "security": "def",
+  "patrol": "def",
+  "exploration": "focus",
+  "archive": "focus",
+  "research": "focus",
+  "supply": "luck",
+  "recovery": "luck",
+  "scavenging": "luck",
+  "salvage": "luck",
+  "networking": "focus",
+  "support": "hp",
+  "cartography": "focus",
+}
 
 export function ExpeditionsTab() {
   const expeditions = useEsroStore((s) => s.expeditions)
@@ -10,6 +29,44 @@ export function ExpeditionsTab() {
   const startExpedition = useEsroStore((s) => s.startExpedition)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const skills = useEsroStore((s) => s.skills)
+  const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
+  const getStatBonus = useEsroStore((s) => s.getStatBonus)
+  
+  const playerStats = getPlayerStats()
+  
+  /** Calculate bonus percentage for an expedition based on relevant stats */
+  const getExpeditionBonus = (exp: typeof expeditions[0]) => {
+    let totalBonus = 0
+    let relevantStats: { stat: keyof BaseStats; bonus: number }[] = []
+    
+    // Check expedition tags for relevant stats
+    exp.tags.forEach(tag => {
+      const stat = TAG_STAT_MAP[tag.toLowerCase()]
+      if (stat) {
+        const bonus = getStatBonus(stat)
+        if (bonus > 0 && !relevantStats.find(r => r.stat === stat)) {
+          relevantStats.push({ stat, bonus })
+          totalBonus += bonus
+        }
+      }
+    })
+    
+    // Check required skill's linked stat
+    const skill = skills.find(s => s.id === exp.requiredSkill)
+    if (skill && !skill.locked) {
+      const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skill.label)
+      if (skillDef) {
+        const linkedStat = skillDef.linkedStat as keyof BaseStats
+        const bonus = getStatBonus(linkedStat)
+        if (bonus > 0 && !relevantStats.find(r => r.stat === linkedStat)) {
+          relevantStats.push({ stat: linkedStat, bonus })
+          totalBonus += Math.floor(bonus / 2) // Skill stat bonus is half
+        }
+      }
+    }
+    
+    return { totalBonus: Math.min(totalBonus, 50), relevantStats } // Cap at 50%
+  }
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
@@ -115,6 +172,7 @@ export function ExpeditionsTab() {
           {expeditions.map((exp) => {
             const requiredSkill = skills.find(s => s.id === exp.requiredSkill)
             const meetsRequirement = requiredSkill && !requiredSkill.locked
+            const { totalBonus, relevantStats } = getExpeditionBonus(exp)
 
             return (
               <button
@@ -210,6 +268,29 @@ export function ExpeditionsTab() {
                     )}
                   </div>
                 </div>
+
+                {/* Stat bonuses */}
+                {meetsRequirement && totalBonus > 0 && (
+                  <div className="mt-2 flex items-center gap-2 rounded border border-[color:var(--color-success)]/20 bg-[color:var(--color-success)]/5 px-2 py-1">
+                    <span className="text-[9px] text-[color:var(--color-success)]">
+                      +{totalBonus}% bonus
+                    </span>
+                    <div className="flex gap-1">
+                      {relevantStats.slice(0, 3).map(({ stat, bonus }) => (
+                        <span 
+                          key={stat}
+                          className="rounded px-1 py-0.5 text-[8px] font-medium"
+                          style={{ 
+                            backgroundColor: `${STAT_COLORS[stat]}15`,
+                            color: STAT_COLORS[stat],
+                          }}
+                        >
+                          {stat.toUpperCase()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {!meetsRequirement && requiredSkill && (
                   <div className="mt-2 rounded border border-[color:var(--color-danger-muted)]/30 bg-[color:var(--color-danger)]/5 px-2 py-1 text-[9px] text-[color:var(--color-danger-muted)]">

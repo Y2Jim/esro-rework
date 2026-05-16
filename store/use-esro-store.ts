@@ -30,7 +30,8 @@ import type {
   FactionData,
   RaceId,
 } from "@/lib/types"
-import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById } from "@/lib/game-data"
+import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById, DEFAULT_BASE_STATS, SKILL_DEFINITIONS } from "@/lib/game-data"
+import type { BaseStats } from "@/lib/types"
 import {
   channels as seedChannels,
   contracts as seedContracts,
@@ -66,6 +67,10 @@ interface EsroState {
   setUiTheme: (theme: string) => void
   unlockTheme: (themeId: string) => void
   checkFactionUnlock: () => void
+  
+  // Player Stats
+  getPlayerStats: () => BaseStats
+  getStatBonus: (stat: keyof BaseStats) => number
   
   // Navigation
   screen: ScreenId
@@ -333,6 +338,59 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     if (!factionUnlocked && profile.level >= FACTION_UNLOCK_LEVEL) {
       set({ factionUnlocked: true })
     }
+  },
+  
+  // Player Stats - calculated from race, courier, level, and skills
+  getPlayerStats: () => {
+    const { characterRace, characterCourier, profile, skills } = get()
+    
+    // Start with base stats
+    const stats: BaseStats = { ...DEFAULT_BASE_STATS }
+    
+    // Add race bonuses
+    if (characterRace) {
+      stats.hp += characterRace.stats.hp
+      stats.atk += characterRace.stats.atk
+      stats.def += characterRace.stats.def
+      stats.focus += characterRace.stats.focus
+      stats.luck += characterRace.stats.luck
+    }
+    
+    // Add courier bonuses
+    if (characterCourier) {
+      stats.hp += characterCourier.stats.hp
+      stats.atk += characterCourier.stats.atk
+      stats.def += characterCourier.stats.def
+      stats.focus += characterCourier.stats.focus
+      stats.luck += characterCourier.stats.luck
+    }
+    
+    // Add level bonuses (+1 to each stat every 5 levels)
+    const levelBonus = Math.floor((profile.level - 1) / 5)
+    stats.hp += levelBonus * 2 // HP grows faster
+    stats.atk += levelBonus
+    stats.def += levelBonus
+    stats.focus += levelBonus
+    stats.luck += levelBonus
+    
+    // Add skill bonuses (each unlocked skill linked to a stat gives +1 to that stat)
+    skills.forEach(skill => {
+      if (!skill.locked && skill.level > 0) {
+        const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skill.label)
+        if (skillDef) {
+          const linkedStat = skillDef.linkedStat as keyof BaseStats
+          stats[linkedStat] += Math.floor(skill.level / 2) // +1 per 2 skill levels
+        }
+      }
+    })
+    
+    return stats
+  },
+  
+  getStatBonus: (stat) => {
+    const stats = get().getPlayerStats()
+    // Return percentage bonus based on stat value (each point above 10 = 2% bonus)
+    return Math.max(0, (stats[stat] - 10) * 2)
   },
 
   // Navigation

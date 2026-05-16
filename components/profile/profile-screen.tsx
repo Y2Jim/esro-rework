@@ -7,7 +7,8 @@ import { rarityColor, rarityAnimation } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 
-import { FACTIONS } from "@/lib/game-data"
+import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
+import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
 import type { RaceId, Rarity } from "@/lib/types"
 
@@ -79,8 +80,10 @@ function SummaryTab() {
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const characterRace = useEsroStore((s) => s.characterRace)
   const characterCourier = useEsroStore((s) => s.characterCourier)
+  const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
 
   const xpPercent = (profile.xp / profile.xpToNext) * 100
+  const playerStats = getPlayerStats()
 
   return (
     <div className="space-y-4">
@@ -187,7 +190,35 @@ function SummaryTab() {
         </div>
       )}
 
-      {/* Stats summary */}
+      {/* Character Stats */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Character Stats
+        </div>
+        <div className="grid grid-cols-5 gap-1">
+          {(Object.keys(playerStats) as (keyof BaseStats)[]).map((stat) => (
+            <div 
+              key={stat} 
+              className="flex flex-col items-center rounded bg-[color:var(--color-panel)]/50 p-2"
+            >
+              <div 
+                className="text-[14px] font-bold"
+                style={{ color: STAT_COLORS[stat] }}
+              >
+                {playerStats[stat]}
+              </div>
+              <div 
+                className="text-[8px] font-medium uppercase"
+                style={{ color: `${STAT_COLORS[stat]}99` }}
+              >
+                {STAT_LABELS[stat]}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Collection summary */}
       <div className="grid grid-cols-3 gap-2 rounded-lg border border-[color:var(--color-border)] p-3">
         <div className="text-center">
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">
