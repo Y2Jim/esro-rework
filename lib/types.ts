@@ -121,6 +121,7 @@ export interface RollableUITheme {
   | "epic"
   | "legendary"
   | "mythic"
+  | "admin"
 
 // Avatar system
 export type AvatarLayerType = "base" | "skin" | "eyes" | "mouth" | "hair" | "accessory" | "hat" | "flair"

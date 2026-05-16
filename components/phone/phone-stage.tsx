@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { PhoneFrame } from "./phone-frame"
 import { BootSplash } from "@/components/boot/boot-splash"
 import { AppShell } from "@/components/shell/app-shell"
+import { CharacterCreation } from "@/components/onboarding/character-creation"
 import { ThemeProvider } from "@/components/theme-provider"
 import { useEsroStore } from "@/store/use-esro-store"
 import { AnimatePresence, motion } from "framer-motion"
@@ -15,6 +16,8 @@ import { AnimatePresence, motion } from "framer-motion"
  */
 export function PhoneStage() {
   const booted = useEsroStore((s) => s.booted)
+  const characterCreated = useEsroStore((s) => s.characterCreated)
+  const setCharacterData = useEsroStore((s) => s.setCharacterData)
 
   // a tiny page-level ambient effect
   useEffect(() => {
@@ -53,6 +56,21 @@ export function PhoneStage() {
                 className="absolute inset-0"
               >
                 <BootSplash />
+              </motion.div>
+            ) : !characterCreated ? (
+              <motion.div
+                key="character-creation"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0"
+              >
+                <CharacterCreation
+                  onComplete={(data) => {
+                    setCharacterData(data.race, data.courier, data.handle, data.starterSkills, data.avatar)
+                  }}
+                />
               </motion.div>
             ) : (
               <motion.div

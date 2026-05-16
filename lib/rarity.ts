@@ -11,6 +11,7 @@ export const rarityLabel: Record<Rarity, string> = {
   epic: "Legendary",
   legendary: "Iridescent",
   mythic: "Transcendent",
+  admin: "Overseer",
 }
 
 export const rarityOrder: Rarity[] = [
@@ -20,6 +21,7 @@ export const rarityOrder: Rarity[] = [
   "epic",
   "legendary",
   "mythic",
+  "admin",
 ]
 
 /** Base text colors for each rarity */
@@ -30,6 +32,7 @@ export const rarityColor: Record<Rarity, string> = {
   epic: "text-[color:var(--color-rarity-epic)]",
   legendary: "text-[color:var(--color-rarity-legendary)]",
   mythic: "text-[color:var(--color-rarity-mythic)]",
+  admin: "text-[color:var(--color-rarity-admin)]",
 }
 
 /** Border colors for rarity-themed containers */
@@ -40,6 +43,7 @@ export const rarityBorder: Record<Rarity, string> = {
   epic: "border-[color:var(--color-rarity-epic)]/50",
   legendary: "border-[color:var(--color-rarity-legendary)]/60",
   mythic: "border-[color:var(--color-rarity-mythic)]/70",
+  admin: "border-[color:var(--color-rarity-admin)]/80",
 }
 
 /** Background colors for rarity-themed containers */
@@ -50,6 +54,7 @@ export const rarityBg: Record<Rarity, string> = {
   epic: "bg-[color:var(--color-rarity-epic)]/10",
   legendary: "bg-[color:var(--color-rarity-legendary)]/12",
   mythic: "bg-[color:var(--color-rarity-mythic)]/15",
+  admin: "bg-[color:var(--color-rarity-admin)]/18",
 }
 
 /** Glow/shadow effects for each rarity */
@@ -60,9 +65,10 @@ export const rarityGlow: Record<Rarity, string> = {
   epic: "drop-shadow-[0_0_6px_var(--color-rarity-epic)]",
   legendary: "drop-shadow-[0_0_8px_var(--color-rarity-legendary)]",
   mythic: "drop-shadow-[0_0_10px_var(--color-rarity-mythic)]",
+  admin: "drop-shadow-[0_0_12px_var(--color-rarity-admin)]",
 }
 
-/** Animation classes for legendary/mythic titles */
+/** Animation classes for legendary/mythic/admin titles */
 export const rarityAnimation: Record<Rarity, string> = {
   common: "",
   uncommon: "",
@@ -70,6 +76,7 @@ export const rarityAnimation: Record<Rarity, string> = {
   epic: "",
   legendary: "title-legendary",
   mythic: "title-mythic",
+  admin: "title-admin",
 }
 
 /** Combined title class - color + animation */

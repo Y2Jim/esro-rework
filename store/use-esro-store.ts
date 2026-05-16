@@ -61,7 +61,7 @@ interface EsroState {
   factionUnlocked: boolean
   uiTheme: string // "default" | RaceId | RollableThemeId
   unlockedThemes: string[] // List of unlocked rollable theme IDs
-  setCharacterData: (race: Race, courier: Courier, handle: string, starterSkills: string[]) => void
+  setCharacterData: (race: Race, courier: Courier, handle: string, starterSkills: string[], avatar?: AvatarConfig) => void
   setFaction: (factionId: RaceId) => void
   setUiTheme: (theme: string) => void
   unlockTheme: (themeId: string) => void
@@ -289,7 +289,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   factionUnlocked: false,
   uiTheme: "default",
   unlockedThemes: [], // Start with no rollable themes unlocked
-  setCharacterData: (race, courier, handle, starterSkills) => {
+  setCharacterData: (race, courier, handle, starterSkills, avatar) => {
     const { profile, identity } = get()
     set({
       characterCreated: true,
@@ -300,6 +300,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         ...identity,
         handle: `@${handle}`,
         established: true,
+        ...(avatar && { avatar }),
       },
       profile: {
         ...profile,
