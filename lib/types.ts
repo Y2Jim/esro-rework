@@ -14,6 +14,7 @@ export type ScreenId =
   | "contracts"
   | "social"
   | "profile"
+  | "admin"
 
 export type SocialTab = "party" | "faction" | "friends" | "trade"
 
@@ -548,3 +549,60 @@ export type FactionSelectionStep =
   | "confirm"
   | "pledged"
   | "complete"
+
+// ============ ADMIN SYSTEM ============
+
+export type AdminTab = "dashboard" | "events" | "contracts" | "expeditions" | "players" | "broadcast" | "logs" | "devtools"
+
+export type EventType = "seasonal" | "limited" | "special"
+
+export interface GameEvent {
+  id: string
+  label: string
+  description: string
+  type: EventType
+  startDate: number
+  endDate: number
+  rewards: string[]
+  active: boolean
+}
+
+export type PlayerStatus = "active" | "muted" | "banned"
+
+export interface PlayerRecord {
+  handle: string
+  status: PlayerStatus
+  mutedUntil?: number
+  bannedReason?: string
+  warnings: number
+  lastSeen: number
+  level?: number
+  faction?: string
+}
+
+export type AdminAction = 
+  | "mute_player"
+  | "unmute_player"
+  | "ban_player"
+  | "unban_player"
+  | "warn_player"
+  | "create_event"
+  | "delete_event"
+  | "toggle_event"
+  | "create_contract"
+  | "delete_contract"
+  | "create_expedition"
+  | "delete_expedition"
+  | "broadcast"
+  | "add_materials"
+  | "unlock_cosmetics"
+  | "unlock_titles"
+
+export interface AdminLog {
+  id: string
+  action: AdminAction
+  target?: string
+  adminHandle: string
+  timestamp: number
+  details?: string
+}

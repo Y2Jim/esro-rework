@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
+import { Shield } from "lucide-react"
 import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
 import type { RaceId, Rarity } from "@/lib/types"
@@ -621,18 +622,8 @@ function SettingsTab() {
         </ul>
       </div>
 
-      {/* Admin/Debug Section */}
-      <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-danger)]">
-          Admin / Debug
-        </div>
-        <p className="mb-3 text-[9px] text-[color:var(--color-muted)]">
-          Testing options for development. These will be removed in production.
-        </p>
-        <div className="space-y-2">
-          <AdminUnlockButton />
-        </div>
-      </div>
+      {/* Admin Panel Access */}
+      <AdminPanelButton />
     </div>
   )
 }
@@ -817,6 +808,42 @@ function TitlePreviewSelector() {
   )
 }
 
+function AdminPanelButton() {
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const isAdmin = useEsroStore((s) => s.isAdmin)
+  const setAdminMode = useEsroStore((s) => s.setAdminMode)
+
+  const handleOpenAdmin = () => {
+    setAdminMode(true)
+    setScreen("admin")
+  }
+
+  return (
+    <div className="rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/5 p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <Shield className="h-3.5 w-3.5 text-[#ff6b4a]" />
+        <span className="text-[10px] uppercase tracking-wider text-[#ff6b4a]">
+          Admin Panel
+        </span>
+      </div>
+      <p className="mb-3 text-[9px] text-[color:var(--color-muted)]">
+        Access administrative tools for managing events, contracts, players, and system settings.
+      </p>
+      <button
+        type="button"
+        onClick={handleOpenAdmin}
+        className="w-full rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
+      >
+        Open Admin Panel
+      </button>
+      {isAdmin && (
+        <p className="mt-2 text-center text-[8px] text-[#ff6b4a]">Admin mode active</p>
+      )}
+    </div>
+  )
+}
+
+// Legacy admin button - kept for reference but replaced by AdminPanelButton
 function AdminUnlockButton() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
   const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)

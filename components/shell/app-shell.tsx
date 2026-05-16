@@ -11,6 +11,7 @@ import { OpsScreen } from "@/components/ops/ops-screen"
 import { ContractsScreen } from "@/components/contracts/contracts-screen"
 import { SocialScreen } from "@/components/social/social-screen"
 import { ProfileScreen } from "@/components/profile/profile-screen"
+import { AdminScreen } from "@/components/admin/admin-screen"
 
 export function AppShell() {
   const screen = useEsroStore((s) => s.screen)
@@ -44,6 +45,7 @@ export function AppShell() {
             {screen === "contracts" && <ContractsScreen />}
             {screen === "social" && <SocialScreen />}
             {screen === "profile" && <ProfileScreen />}
+            {screen === "admin" && <AdminScreen />}
           </motion.div>
         </AnimatePresence>
       </div>

@@ -29,6 +29,11 @@ import type {
   Courier,
   FactionData,
   RaceId,
+  AdminTab,
+  GameEvent,
+  PlayerRecord,
+  AdminLog,
+  AdminAction,
 } from "@/lib/types"
 import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById, DEFAULT_BASE_STATS, SKILL_DEFINITIONS } from "@/lib/game-data"
 import type { BaseStats } from "@/lib/types"
@@ -152,6 +157,30 @@ interface EsroState {
   simulateExpedition: (expeditionId?: string) => void
   completeActiveExpedition: () => void
   injectTestChatMessages: () => void
+  
+  // Admin Panel
+  isAdmin: boolean
+  adminTab: AdminTab
+  setAdminMode: (v: boolean) => void
+  setAdminTab: (tab: AdminTab) => void
+  events: GameEvent[]
+  createEvent: (event: Omit<GameEvent, "id">) => void
+  updateEvent: (id: string, updates: Partial<GameEvent>) => void
+  deleteEvent: (id: string) => void
+  toggleEventActive: (id: string) => void
+  playerRecords: PlayerRecord[]
+  mutePlayer: (handle: string, durationMinutes: number) => void
+  unmutePlayer: (handle: string) => void
+  banPlayer: (handle: string, reason: string) => void
+  unbanPlayer: (handle: string) => void
+  warnPlayer: (handle: string) => void
+  adminLogs: AdminLog[]
+  logAdminAction: (action: AdminAction, target?: string, details?: string) => void
+  broadcastMessage: (message: string, channel: ChannelId) => void
+  createContract: (contract: Omit<Contract, "id">) => void
+  deleteContract: (id: string) => void
+  createExpedition: (expedition: Omit<Expedition, "id">) => void
+  deleteExpedition: (id: string) => void
 }
 
 function rollRarity(focused: boolean): Rarity {
@@ -1121,5 +1150,170 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     
     // Set messages and switch to PUBLIC channel so user can see them
     set({ messages: [...messages, ...testMessages], channel: targetChannel })
+  },
+
+  // ============ ADMIN PANEL ============
+  isAdmin: false,
+  adminTab: "dashboard",
+  setAdminMode: (v) => set({ isAdmin: v }),
+  setAdminTab: (tab) => set({ adminTab: tab }),
+  
+  // Events
+  events: [],
+  createEvent: (event) => {
+    const { events, identity } = get()
+    const newEvent: GameEvent = {
+      ...event,
+      id: `event-${Date.now()}`,
+    }
+    set({ events: [...events, newEvent] })
+    get().logAdminAction("create_event", newEvent.label, `Created ${event.type} event`)
+  },
+  updateEvent: (id, updates) => {
+    const { events } = get()
+    set({
+      events: events.map((e) => (e.id === id ? { ...e, ...updates } : e)),
+    })
+  },
+  deleteEvent: (id) => {
+    const { events } = get()
+    const event = events.find((e) => e.id === id)
+    set({ events: events.filter((e) => e.id !== id) })
+    if (event) {
+      get().logAdminAction("delete_event", event.label, "Deleted event")
+    }
+  },
+  toggleEventActive: (id) => {
+    const { events } = get()
+    const event = events.find((e) => e.id === id)
+    if (event) {
+      set({
+        events: events.map((e) =>
+          e.id === id ? { ...e, active: !e.active } : e
+        ),
+      })
+      get().logAdminAction("toggle_event", event.label, `Set active: ${!event.active}`)
+    }
+  },
+
+  // Player Records
+  playerRecords: [
+    { handle: "@test_player", status: "active", warnings: 0, lastSeen: Date.now() },
+    { handle: "@quiet_one", status: "active", warnings: 1, lastSeen: Date.now() - 3600000 },
+    { handle: "@troublemaker", status: "muted", mutedUntil: Date.now() + 1800000, warnings: 2, lastSeen: Date.now() - 7200000 },
+  ],
+  mutePlayer: (handle, durationMinutes) => {
+    const { playerRecords } = get()
+    const mutedUntil = Date.now() + durationMinutes * 60 * 1000
+    set({
+      playerRecords: playerRecords.map((p) =>
+        p.handle === handle ? { ...p, status: "muted" as const, mutedUntil } : p
+      ),
+    })
+    get().logAdminAction("mute_player", handle, `Muted for ${durationMinutes} minutes`)
+  },
+  unmutePlayer: (handle) => {
+    const { playerRecords } = get()
+    set({
+      playerRecords: playerRecords.map((p) =>
+        p.handle === handle ? { ...p, status: "active" as const, mutedUntil: undefined } : p
+      ),
+    })
+    get().logAdminAction("unmute_player", handle, "Unmuted player")
+  },
+  banPlayer: (handle, reason) => {
+    const { playerRecords } = get()
+    set({
+      playerRecords: playerRecords.map((p) =>
+        p.handle === handle ? { ...p, status: "banned" as const, bannedReason: reason } : p
+      ),
+    })
+    get().logAdminAction("ban_player", handle, `Banned: ${reason}`)
+  },
+  unbanPlayer: (handle) => {
+    const { playerRecords } = get()
+    set({
+      playerRecords: playerRecords.map((p) =>
+        p.handle === handle ? { ...p, status: "active" as const, bannedReason: undefined } : p
+      ),
+    })
+    get().logAdminAction("unban_player", handle, "Unbanned player")
+  },
+  warnPlayer: (handle) => {
+    const { playerRecords } = get()
+    set({
+      playerRecords: playerRecords.map((p) =>
+        p.handle === handle ? { ...p, warnings: p.warnings + 1 } : p
+      ),
+    })
+    get().logAdminAction("warn_player", handle, "Issued warning")
+  },
+
+  // Admin Logs
+  adminLogs: [],
+  logAdminAction: (action, target, details) => {
+    const { adminLogs, identity } = get()
+    const log: AdminLog = {
+      id: `log-${Date.now()}`,
+      action,
+      target,
+      adminHandle: identity.handle,
+      timestamp: Date.now(),
+      details,
+    }
+    set({ adminLogs: [log, ...adminLogs].slice(0, 100) }) // Keep last 100 logs
+  },
+
+  // Broadcast
+  broadcastMessage: (message, channel) => {
+    const { messages } = get()
+    const systemMessage: ChatMessage = {
+      id: `system-${Date.now()}`,
+      channel,
+      kind: "system",
+      handle: "SYSTEM",
+      body: message,
+      at: Date.now(),
+    }
+    set({ messages: [...messages, systemMessage] })
+    get().logAdminAction("broadcast", channel, message)
+  },
+
+  // Admin Contract Management
+  createContract: (contract) => {
+    const { contracts } = get()
+    const newContract: Contract = {
+      ...contract,
+      id: `contract-${Date.now()}`,
+    }
+    set({ contracts: [...contracts, newContract] })
+    get().logAdminAction("create_contract", newContract.label, `Created ${contract.type} contract`)
+  },
+  deleteContract: (id) => {
+    const { contracts } = get()
+    const contract = contracts.find((c) => c.id === id)
+    set({ contracts: contracts.filter((c) => c.id !== id) })
+    if (contract) {
+      get().logAdminAction("delete_contract", contract.label, "Deleted contract")
+    }
+  },
+
+  // Admin Expedition Management
+  createExpedition: (expedition) => {
+    const { expeditions } = get()
+    const newExpedition: Expedition = {
+      ...expedition,
+      id: `expedition-${Date.now()}`,
+    }
+    set({ expeditions: [...expeditions, newExpedition] })
+    get().logAdminAction("create_expedition", newExpedition.label, `Created ${expedition.risk} risk expedition`)
+  },
+  deleteExpedition: (id) => {
+    const { expeditions } = get()
+    const expedition = expeditions.find((e) => e.id === id)
+    set({ expeditions: expeditions.filter((e) => e.id !== id) })
+    if (expedition) {
+      get().logAdminAction("delete_expedition", expedition.label, "Deleted expedition")
+    }
   },
 }))
