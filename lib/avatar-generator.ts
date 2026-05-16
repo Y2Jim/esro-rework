@@ -706,18 +706,35 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
       setPixel(grid, x, 2, capColor)
     }
   } else if (hatVariant === 2) {
-    // Hood
+    // Hood - wraps around head like a cloak cowl
     const hoodColor = "#505060"
-    for (let x = 2; x < 12; x++) {
+    const hoodShadow = "#404050"
+    // Top of hood (pointed/rounded peak)
+    for (let x = 4; x < 10; x++) {
       setPixel(grid, x, 0, hoodColor)
+    }
+    // Hood drapes down sides, framing the face
+    for (let x = 2; x < 12; x++) {
       setPixel(grid, x, 1, hoodColor)
     }
+    // Left side drape
     setPixel(grid, 1, 1, hoodColor)
-    setPixel(grid, 12, 1, hoodColor)
     setPixel(grid, 1, 2, hoodColor)
-    setPixel(grid, 12, 2, hoodColor)
     setPixel(grid, 1, 3, hoodColor)
+    setPixel(grid, 1, 4, hoodColor)
+    setPixel(grid, 1, 5, hoodShadow)
+    setPixel(grid, 1, 6, hoodShadow)
+    setPixel(grid, 2, 2, hoodShadow)
+    setPixel(grid, 2, 3, hoodShadow)
+    // Right side drape
+    setPixel(grid, 12, 1, hoodColor)
+    setPixel(grid, 12, 2, hoodColor)
     setPixel(grid, 12, 3, hoodColor)
+    setPixel(grid, 12, 4, hoodColor)
+    setPixel(grid, 12, 5, hoodShadow)
+    setPixel(grid, 12, 6, hoodShadow)
+    setPixel(grid, 11, 2, hoodShadow)
+    setPixel(grid, 11, 3, hoodShadow)
   } else if (hatVariant === 3) {
     // Antenna
     const antennaColor = "#808080"
@@ -752,19 +769,44 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 7, 0, gemColor)
     setPixel(grid, 10, 0, crownColor)
   } else if (hatVariant === 7) {
-    // Dust Hood (larger hood)
+    // Dust Hood - heavier cloak hood with more coverage
     const hoodColor = "#6b5a4a"
-    for (let x = 1; x < 13; x++) {
+    const hoodShadow = "#5a4a3a"
+    const hoodDark = "#4a3a2a"
+    // Wide hood top
+    for (let x = 3; x < 11; x++) {
       setPixel(grid, x, 0, hoodColor)
+    }
+    for (let x = 1; x < 13; x++) {
       setPixel(grid, x, 1, hoodColor)
     }
-    for (let x = 2; x < 12; x++) {
-      setPixel(grid, x, 2, hoodColor)
-    }
-    setPixel(grid, 1, 2, hoodColor)
-    setPixel(grid, 12, 2, hoodColor)
-    setPixel(grid, 1, 3, hoodColor)
-    setPixel(grid, 12, 3, hoodColor)
+    // Hood frames the face more heavily
+    setPixel(grid, 0, 1, hoodShadow)
+    setPixel(grid, 13, 1, hoodShadow)
+    // Left side heavy drape
+    setPixel(grid, 0, 2, hoodColor)
+    setPixel(grid, 0, 3, hoodColor)
+    setPixel(grid, 0, 4, hoodShadow)
+    setPixel(grid, 0, 5, hoodShadow)
+    setPixel(grid, 0, 6, hoodDark)
+    setPixel(grid, 0, 7, hoodDark)
+    setPixel(grid, 1, 2, hoodShadow)
+    setPixel(grid, 1, 3, hoodShadow)
+    setPixel(grid, 1, 4, hoodShadow)
+    setPixel(grid, 1, 5, hoodDark)
+    setPixel(grid, 2, 2, hoodDark)
+    // Right side heavy drape
+    setPixel(grid, 13, 2, hoodColor)
+    setPixel(grid, 13, 3, hoodColor)
+    setPixel(grid, 13, 4, hoodShadow)
+    setPixel(grid, 13, 5, hoodShadow)
+    setPixel(grid, 13, 6, hoodDark)
+    setPixel(grid, 13, 7, hoodDark)
+    setPixel(grid, 12, 2, hoodShadow)
+    setPixel(grid, 12, 3, hoodShadow)
+    setPixel(grid, 12, 4, hoodShadow)
+    setPixel(grid, 12, 5, hoodDark)
+    setPixel(grid, 11, 2, hoodDark)
   } else if (hatVariant === 8) {
     // Signal Beanie (tight cap)
     const beanieColor = "#4a6080"
