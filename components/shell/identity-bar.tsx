@@ -2,7 +2,7 @@
 
 import { useEsroStore } from "@/store/use-esro-store"
 import { EsroLogo } from "@/components/brand/esro-logo"
-import { rarityColor } from "@/lib/rarity"
+import { getTitleClass } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
 const screenLabel: Record<string, string> = {
@@ -17,10 +17,7 @@ export function IdentityBar() {
   const identity = useEsroStore((s) => s.identity)
   const screen = useEsroStore((s) => s.screen)
 
-  const titleClass =
-    identity.titleRarity === "legendary"
-      ? "prismatic-text"
-      : rarityColor[identity.titleRarity]
+  const titleClass = getTitleClass(identity.titleRarity)
 
   return (
     <div className="relative z-20 flex items-center justify-between gap-3 px-4 pb-3 pt-1">

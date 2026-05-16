@@ -5,7 +5,7 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { PartyAvatar, PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { TitleDisplay } from "@/components/ui/title-display"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
-import { rarityColor } from "@/lib/rarity"
+import { getTitleClass } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { FACTIONS, FACTION_UNLOCK_LEVEL } from "@/lib/game-data"
 import { FactionSelection } from "@/components/onboarding/faction-selection"
@@ -92,7 +92,7 @@ function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }
                 )}
               </div>
               {m.title && (
-                <div className={cn("text-[9px]", rarityColor[m.titleRarity || "common"])}>{m.title}</div>
+                <div className={cn("text-[9px]", getTitleClass(m.titleRarity || "common"))}>{m.title}</div>
               )}
               <div className="flex items-center gap-3 text-[9px] text-[color:var(--color-muted)]">
                 <span>{m.role}</span>
@@ -687,9 +687,9 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
               friend.status === "offline" && "bg-[color:var(--color-muted)]"
             )} />
           </div>
-          {friend.title && (
-            <div className={cn("text-[9px]", rarityColor[friend.titleRarity || "common"])}>{friend.title}</div>
-          )}
+{friend.title && (
+                <div className={cn("text-[9px]", getTitleClass(friend.titleRarity || "common"))}>{friend.title}</div>
+              )}
           {friend.faction && (
             <div className="text-[9px] text-[color:var(--color-muted)]">{friend.faction}</div>
           )}

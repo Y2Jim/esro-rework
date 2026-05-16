@@ -1,7 +1,7 @@
 "use client"
 
 import type { PartyMember } from "@/lib/types"
-import { rarityColor } from "@/lib/rarity"
+import { getTitleClass } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
 const statusTone: Record<PartyMember["status"], string> = {
@@ -44,12 +44,9 @@ export function PartySlot({
     )
   }
 
-  const titleCls =
-    member.titleRarity === "legendary"
-      ? "prismatic-text"
-      : member.titleRarity
-        ? rarityColor[member.titleRarity]
-        : "text-[color:var(--color-muted)]"
+  const titleCls = member.titleRarity 
+    ? getTitleClass(member.titleRarity) 
+    : "text-[color:var(--color-muted)]"
 
   return (
     <div
