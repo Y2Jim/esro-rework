@@ -105,10 +105,10 @@ function SummaryTab() {
         </div>
         <div className="flex-1">
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
-          {identity.title && (
+          {profile.title && (
             <TitleDisplay 
-              title={identity.title} 
-              rarity={identity.titleRarity} 
+              title={profile.title.label} 
+              rarity={profile.title.rarity} 
               className="text-[11px]" 
             />
           )}
