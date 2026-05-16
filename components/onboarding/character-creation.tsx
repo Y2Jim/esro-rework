@@ -2,9 +2,11 @@
 
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles } from "lucide-react"
+import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles, RefreshCw } from "lucide-react"
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
-import type { Race, Courier, CharacterCreationStep, BaseStats } from "@/lib/types"
+import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS } from "@/lib/avatar-generator"
+import { PixelAvatar } from "@/components/avatar/pixel-avatar"
+import type { Race, Courier, CharacterCreationStep, BaseStats, AvatarConfig, AvatarLayer } from "@/lib/types"
 
 interface CharacterCreationProps {
   onComplete: (data: {
@@ -12,6 +14,7 @@ interface CharacterCreationProps {
     courier: Courier
     starterSkills: string[]
     handle: string
+    avatar: AvatarConfig
   }) => void
 }
 
@@ -59,6 +62,27 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [handle, setHandle] = useState("")
+  const [avatarSeed, setAvatarSeed] = useState(() => `seed-${Date.now()}`)
+  const [avatar, setAvatar] = useState<AvatarConfig>(() => generateAvatarFromSeed(`seed-${Date.now()}`))
+  
+  // Regenerate avatar with new random seed
+  const randomizeAvatar = () => {
+    const newSeed = `seed-${Date.now()}-${Math.random()}`
+    setAvatarSeed(newSeed)
+    setAvatar(generateAvatarFromSeed(newSeed))
+  }
+  
+  // Update a specific layer
+  const updateAvatarLayer = (layerType: AvatarLayer["type"], variant: number, color?: number) => {
+    setAvatar(prev => ({
+      ...prev,
+      layers: prev.layers.map(layer =>
+        layer.type === layerType
+          ? { ...layer, variant, ...(color !== undefined ? { color } : {}) }
+          : layer
+      )
+    }))
+  }
 
   const combinedStats = useMemo(() => {
     if (selectedRace && selectedCourier) {
@@ -75,6 +99,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
         return selectedRace !== null
       case "courier":
         return selectedCourier !== null
+      case "avatar":
+        return true // Avatar is always valid
       case "skills":
         return selectedSkills.length === STARTER_SKILL_COUNT
       case "name":
@@ -99,6 +125,9 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
         setStep("courier")
         break
       case "courier":
+        setStep("avatar")
+        break
+      case "avatar":
         setStep("skills")
         break
       case "skills":
@@ -114,6 +143,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             courier: selectedCourier,
             starterSkills: selectedSkills,
             handle: handle.trim(),
+            avatar: avatar,
           })
         }
         break
@@ -134,8 +164,11 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       case "courier":
         setStep("race")
         break
-      case "skills":
+      case "avatar":
         setStep("courier")
+        break
+      case "skills":
+        setStep("avatar")
         break
       case "name":
         setStep("skills")
@@ -168,13 +201,13 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       {/* Progress indicator */}
       <div className="p-4 border-b border-[rgba(168,123,255,0.1)]">
         <div className="flex items-center justify-center gap-2">
-          {["briefing", "race", "courier", "skills", "name", "confirm"].map((s, i) => (
+          {["briefing", "race", "courier", "avatar", "skills", "name", "confirm"].map((s, i) => (
             <div
               key={s}
-              className={`h-1.5 w-8 rounded-full transition-colors ${
+              className={`h-1.5 w-6 rounded-full transition-colors ${
                 step === s
                   ? "bg-[color:var(--color-accent)]"
-                  : ["briefing", "race", "courier", "skills", "name", "confirm"].indexOf(step) > i
+                  : ["briefing", "race", "courier", "avatar", "skills", "name", "confirm"].indexOf(step) > i
                   ? "bg-[color:var(--color-accent)]/50"
                   : "bg-[rgba(255,255,255,0.1)]"
               }`}
@@ -185,6 +218,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "briefing" && `Briefing ${briefingIndex + 1}/${ONBOARDING_PANELS.length}`}
           {step === "race" && "Select Lineage"}
           {step === "courier" && "Select Role"}
+          {step === "avatar" && "Customize Avatar"}
           {step === "skills" && `Choose Skills (${selectedSkills.length}/${STARTER_SKILL_COUNT})`}
           {step === "name" && "Set Handle"}
           {step === "confirm" && "Confirm Identity"}
@@ -363,6 +397,178 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             </motion.div>
           )}
 
+          {/* Avatar Customization */}
+          {step === "avatar" && (
+            <motion.div
+              key="avatar"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="mx-auto max-w-md space-y-4"
+            >
+              {/* Avatar preview */}
+              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-6">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <PixelAvatar config={avatar} size="lg" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={randomizeAvatar}
+                    className="flex items-center gap-2 rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(168,123,255,0.1)] px-4 py-2 text-sm text-[color:var(--color-accent)] transition-colors hover:bg-[rgba(168,123,255,0.2)]"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Randomize
+                  </button>
+                </div>
+              </div>
+
+              {/* Customization options */}
+              <div className="space-y-3">
+                {/* Skin */}
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
+                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                    Skin Tone
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {SKIN_COLORS.map((color, i) => {
+                      const currentSkin = avatar.layers.find(l => l.type === "skin")?.variant ?? 0
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => updateAvatarLayer("skin", i)}
+                          className={`h-7 w-7 rounded-full border-2 transition-all ${
+                            currentSkin === i
+                              ? "border-[color:var(--color-accent)] scale-110"
+                              : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Hair */}
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
+                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                    Hair Style
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {Array.from({ length: LAYER_VARIANTS.hair }, (_, i) => {
+                      const currentHair = avatar.layers.find(l => l.type === "hair")?.variant ?? 0
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => updateAvatarLayer("hair", i)}
+                          className={`h-8 w-8 rounded border text-xs font-mono transition-all ${
+                            currentHair === i
+                              ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
+                              : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="text-xs text-[color:var(--color-text-muted)] mb-2">Hair Color</div>
+                  <div className="flex flex-wrap gap-2">
+                    {HAIR_COLORS.map((color, i) => {
+                      const currentColor = avatar.layers.find(l => l.type === "hair")?.color ?? 0
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            const hairLayer = avatar.layers.find(l => l.type === "hair")
+                            if (hairLayer) updateAvatarLayer("hair", hairLayer.variant, i)
+                          }}
+                          className={`h-6 w-6 rounded-full border-2 transition-all ${
+                            currentColor === i
+                              ? "border-[color:var(--color-accent)] scale-110"
+                              : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Eyes */}
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
+                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                    Eyes
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {Array.from({ length: LAYER_VARIANTS.eyes }, (_, i) => {
+                      const currentEyes = avatar.layers.find(l => l.type === "eyes")?.variant ?? 0
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => updateAvatarLayer("eyes", i)}
+                          className={`h-8 w-8 rounded border text-xs font-mono transition-all ${
+                            currentEyes === i
+                              ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
+                              : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="text-xs text-[color:var(--color-text-muted)] mb-2">Eye Color</div>
+                  <div className="flex flex-wrap gap-2">
+                    {EYE_COLORS.map((color, i) => {
+                      const currentColor = avatar.layers.find(l => l.type === "eyes")?.color ?? 0
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            const eyesLayer = avatar.layers.find(l => l.type === "eyes")
+                            if (eyesLayer) updateAvatarLayer("eyes", eyesLayer.variant, i)
+                          }}
+                          className={`h-6 w-6 rounded-full border-2 transition-all ${
+                            currentColor === i
+                              ? "border-[color:var(--color-accent)] scale-110"
+                              : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                          style={{ backgroundColor: color }}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Mouth */}
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
+                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                    Mouth
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: LAYER_VARIANTS.mouth }, (_, i) => {
+                      const currentMouth = avatar.layers.find(l => l.type === "mouth")?.variant ?? 0
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => updateAvatarLayer("mouth", i)}
+                          className={`h-8 w-8 rounded border text-xs font-mono transition-all ${
+                            currentMouth === i
+                              ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
+                              : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                        >
+                          {i + 1}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Skills Selection */}
           {step === "skills" && (
             <motion.div
@@ -454,18 +660,11 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
               className="mx-auto max-w-md space-y-4"
             >
               <div className="rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(15,16,22,0.9)] p-6 text-center">
-                <div 
-                  className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl text-2xl font-bold"
-                  style={{ 
-                    backgroundColor: `${selectedRace.color}20`,
-                    color: selectedRace.color,
-                    boxShadow: `0 0 30px ${selectedRace.glow}`
-                  }}
-                >
-                  {selectedRace.icon}
+                <div className="mx-auto mb-4">
+                  <PixelAvatar config={avatar} size="lg" />
                 </div>
                 <h2 className="text-2xl font-bold text-[color:var(--color-accent)]">@{handle}</h2>
-                <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]">
+                <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]" style={{ color: selectedRace.color }}>
                   {selectedRace.name} {selectedCourier.name}
                 </p>
               </div>

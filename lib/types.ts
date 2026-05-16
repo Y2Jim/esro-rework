@@ -146,6 +146,13 @@ export interface VanityItem {
   equipped: boolean
 }
 
+export interface SkillEffect {
+  type: "expedition_time" | "material_yield" | "rare_chance" | "xp_bonus" | "risk_reduction" | "faction_standing" | "craft_efficiency" | "party_bonus"
+  value: number // percentage or flat bonus
+  description: string
+  appliesTo?: string[] // expedition types or categories this applies to
+}
+
 export interface Skill {
   id: string
   label: string
@@ -154,7 +161,11 @@ export interface Skill {
   maxLevel: number
   locked: boolean
   variant?: string
-}
+  /** What expeditions this skill is primary for */
+  primaryExpeditions?: string[]
+  /** Effects granted per level */
+  effects?: SkillEffect[]
+  }
 
 export interface ExpeditionStage {
   id: string
@@ -511,6 +522,7 @@ export type CharacterCreationStep =
   | "briefing"
   | "race"
   | "courier"
+  | "avatar"
   | "skills"
   | "name"
   | "confirm"
