@@ -1,12 +1,32 @@
 "use client"
 
-import { party } from "@/lib/mock-data"
+import { useEsroStore } from "@/store/use-esro-store"
 import { ScreenScroll, ScreenSection } from "@/components/ui/screen-section"
 import { PartySlot } from "./party-slot"
+import type { PartyMember } from "@/lib/types"
 
 export function PartyScreen() {
-  const filled = party.length
-  const slots = [0, 1, 2, 3].map((i) => party[i] ?? null)
+  const party = useEsroStore((s) => s.party)
+  const profile = useEsroStore((s) => s.profile)
+  const identity = useEsroStore((s) => s.identity)
+  
+  // Update the player's own party entry with current profile data
+  const partyWithUpdatedPlayer: (PartyMember | null)[] = party.map((m) => {
+    // Check if this is the current player (leader or matching handle)
+    if (m.leader || m.handle === identity.handle) {
+      return {
+        ...m,
+        handle: profile.handle || identity.handle,
+        title: profile.title?.label || m.title,
+        titleRarity: profile.title?.rarity || m.titleRarity,
+        avatar: identity.avatar,
+      }
+    }
+    return m
+  })
+  
+  const filled = partyWithUpdatedPlayer.length
+  const slots = [0, 1, 2, 3].map((i) => partyWithUpdatedPlayer[i] ?? null)
 
   return (
     <ScreenScroll className="pb-3">

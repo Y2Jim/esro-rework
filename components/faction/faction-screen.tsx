@@ -83,15 +83,31 @@ function getRankTitle(rank: number): string {
 
 function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }) {
   const maxSlots = 4
+  const profile = useEsroStore((s) => s.profile)
+  const identity = useEsroStore((s) => s.identity)
+  
+  // Update the player's own party entry with current profile data
+  const partyWithUpdatedPlayer = party.map((m) => {
+    if (m.leader || m.handle === identity.handle) {
+      return {
+        ...m,
+        handle: profile.handle || identity.handle,
+        title: profile.title?.label || m.title,
+        titleRarity: profile.title?.rarity || m.titleRarity,
+        avatar: identity.avatar,
+      }
+    }
+    return m
+  })
 
   return (
     <div className="space-y-4">
       <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
-        Party Members ({party.length}/{maxSlots})
+        Party Members ({partyWithUpdatedPlayer.length}/{maxSlots})
       </div>
 
       <div className="space-y-2">
-        {party.map((m) => (
+        {partyWithUpdatedPlayer.map((m) => (
           <div
             key={m.slot}
             className="flex items-center gap-3 rounded-lg border border-[color:var(--color-border)] px-3 py-2"
@@ -128,7 +144,7 @@ function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }
         ))}
 
         {/* Empty slots */}
-        {Array.from({ length: maxSlots - party.length }).map((_, i) => (
+        {Array.from({ length: maxSlots - partyWithUpdatedPlayer.length }).map((_, i) => (
           <div
             key={`empty-${i}`}
             className="flex items-center justify-center rounded-lg border border-dashed border-[color:var(--color-border-soft)] px-3 py-4"
