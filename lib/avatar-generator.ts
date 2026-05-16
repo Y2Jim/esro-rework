@@ -59,7 +59,7 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   eyes: 6,
   mouth: 5,
   hair: 8,
-  accessory: 6,
+  accessory: 7,  // 0=none, 1=glasses, 2=eyepatch, 3=scar, 4=visor, 5=shades, 6=mask
   hat: 7,
   flair: 4,
 }
@@ -328,12 +328,12 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
   }
   
   // Draw accessory
-  // Variants: 0=none, 1=glasses, 2=eyepatch, 3=scar, 4=visor, 5=mask
+  // Variants: 0=none, 1=glasses, 2=eyepatch, 3=scar, 4=visor, 5=shades, 6=mask
   if (accVariant === 1) {
-    // Glasses
+    // Glasses - clear lenses with thin frames
     const glassColor = "#1a1a1a"
     const lensColor = "#8ab8d8"
-    // Left lens
+    // Left lens frame + lens
     setPixel(grid, 3, 5, glassColor)
     setPixel(grid, 4, 4, glassColor)
     setPixel(grid, 5, 4, glassColor)
@@ -343,13 +343,38 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     // Bridge
     setPixel(grid, 6, 5, glassColor)
     setPixel(grid, 7, 5, glassColor)
-    // Right lens
+    // Right lens frame + lens
     setPixel(grid, 8, 4, glassColor)
     setPixel(grid, 9, 4, glassColor)
     setPixel(grid, 7, 5, glassColor)
     setPixel(grid, 10, 5, glassColor)
     setPixel(grid, 8, 5, lensColor)
     setPixel(grid, 9, 5, lensColor)
+  } else if (accVariant === 5) {
+    // Shades - dark sunglasses over eyes
+    const frameColor = "#1a1a1a"
+    const lensColor = "#2a2a3a"
+    // Left lens (dark, covers eye)
+    setPixel(grid, 3, 4, frameColor)
+    setPixel(grid, 4, 4, frameColor)
+    setPixel(grid, 5, 4, frameColor)
+    setPixel(grid, 6, 4, frameColor)
+    setPixel(grid, 3, 5, frameColor)
+    setPixel(grid, 4, 5, lensColor)
+    setPixel(grid, 5, 5, lensColor)
+    setPixel(grid, 6, 5, frameColor)
+    // Bridge
+    setPixel(grid, 6, 5, frameColor)
+    setPixel(grid, 7, 5, frameColor)
+    // Right lens (dark, covers eye)
+    setPixel(grid, 7, 4, frameColor)
+    setPixel(grid, 8, 4, frameColor)
+    setPixel(grid, 9, 4, frameColor)
+    setPixel(grid, 10, 4, frameColor)
+    setPixel(grid, 7, 5, frameColor)
+    setPixel(grid, 8, 5, lensColor)
+    setPixel(grid, 9, 5, lensColor)
+    setPixel(grid, 10, 5, frameColor)
   } else if (accVariant === 2) {
     // Eyepatch
     const patchColor = "#2a2020"
@@ -377,8 +402,8 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
       setPixel(grid, x, 4, visorColor)
       setPixel(grid, x, 5, visorColor)
     }
-  } else if (accVariant === 5) {
-    // Face mask
+  } else if (accVariant === 6) {
+    // Face mask (covers mouth)
     const maskColor = "#404050"
     for (let x = 4; x < 10; x++) {
       setPixel(grid, x, 7, maskColor)
