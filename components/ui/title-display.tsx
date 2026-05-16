@@ -9,6 +9,11 @@ const TRANSCENDENT_TITLE_ANIMATIONS: Record<string, string> = {
   "Myth of the Relay Sea": "title-relay-sea",
   "Shardheart Ascendant": "title-shardheart",
   "Eternal Courier": "title-eternal-courier",
+  "Voidtouched Oracle": "title-voidtouched",
+  "Primordial Flame": "title-primordial-flame",
+  "Silence Between Stars": "title-silence-stars",
+  "Dreamer Unchained": "title-dreamer-unchained",
+  "Ashen Sovereign": "title-ashen-sovereign",
 }
 
 function getAnimationClass(title: string, rarity: Rarity): string {
