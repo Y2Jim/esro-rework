@@ -20,11 +20,8 @@ export function MessageList() {
 
   if (filtered.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center p-4">
+      <div className="flex flex-1 items-center justify-center p-4">
         <EmptyState message="No messages in this channel" />
-        <div className="mt-2 text-[8px] text-[color:var(--color-muted)]">
-          DEBUG: channel={channel}, total={messages.length}, filtered={filtered.length}
-        </div>
       </div>
     )
   }

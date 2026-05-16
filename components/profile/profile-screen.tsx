@@ -972,7 +972,6 @@ function AdminUnlockButton() {
         <button
           type="button"
           onClick={() => {
-            alert("Inject button clicked - injecting messages")
             injectTestChatMessages()
             setUnlocked((prev) => ({ ...prev, chat: true }))
             setScreen("terminal")

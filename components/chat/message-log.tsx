@@ -9,7 +9,7 @@ const PAGE_SIZE = 20
 export function MessageLog() {
   const channel = useEsroStore((s) => s.channel)
   const all = useEsroStore((s) => s.messages)
-  const pageOffset = useEsroStore((s) => s.pageOffset)
+  const pageOffset = useEsroStore((s) => s.pageOffset) ?? 0
   const logRef = useRef<HTMLDivElement>(null)
   const isLogChannel = channel === "LOG"
 
@@ -40,10 +40,7 @@ export function MessageLog() {
     >
       {list.length === 0 ? (
         <div className="px-4 py-6 text-center text-[11px] text-[color:var(--color-muted)]">
-          <div>channel quiet · no traffic</div>
-          <div className="mt-2 text-[8px] opacity-50">
-            [DEBUG] channel={channel} | total={all.length} | filtered={all.filter(m => m.channel === channel).length}
-          </div>
+          channel quiet · no traffic
         </div>
       ) : (
         <div className="divide-y divide-[color:var(--color-border-soft)]/50 py-1.5">
