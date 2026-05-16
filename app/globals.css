@@ -38,6 +38,7 @@
   --color-rarity-epic: #ffb347;
   --color-rarity-legendary: #f3d58a;
   --color-rarity-mythic: #ff6b9d;
+  --color-rarity-admin: #ff3030;
 
   --radius-panel: 14px;
   --radius-button: 999px;
@@ -542,6 +543,59 @@
 .title-legendary:hover,
 .title-mythic:hover {
   animation-duration: 1.5s, 1s;
+}
+
+/* ============ ADMIN TITLE ANIMATION ============ */
+
+@keyframes admin-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px #ff3030,
+      0 0 8px #ff3030,
+      0 0 16px rgba(255, 48, 48, 0.6);
+  }
+  50% {
+    text-shadow:
+      0 0 8px #ff3030,
+      0 0 16px #ff3030,
+      0 0 32px rgba(255, 48, 48, 0.8),
+      0 0 48px rgba(255, 48, 48, 0.4);
+  }
+}
+
+@keyframes admin-flicker {
+  0%, 95%, 100% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.8;
+  }
+  97% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0.6;
+  }
+}
+
+.title-admin {
+  color: #ff3030;
+  text-shadow:
+    0 0 4px #ff3030,
+    0 0 8px #ff3030,
+    0 0 16px rgba(255, 48, 48, 0.6);
+  animation: admin-pulse 2s ease-in-out infinite, admin-flicker 4s ease-in-out infinite;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.title-admin:hover {
+  animation-duration: 1s, 2s;
+  text-shadow:
+    0 0 8px #ff3030,
+    0 0 16px #ff3030,
+    0 0 32px rgba(255, 48, 48, 0.8),
+    0 0 48px rgba(255, 48, 48, 0.5);
 }
 
 /* ============ UNIQUE TRANSCENDENT TITLE ANIMATIONS ============ */

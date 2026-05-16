@@ -221,7 +221,7 @@ function TitlesTab() {
 
   // Sort by rarity (highest first)
   const sortedTitles = [...ownedTitles].sort((a, b) => {
-    const order = ["mythic", "legendary", "epic", "rare", "uncommon", "common"]
+    const order = ["admin", "mythic", "legendary", "epic", "rare", "uncommon", "common"]
     return order.indexOf(a.rarity) - order.indexOf(b.rarity)
   })
 
@@ -651,6 +651,8 @@ const ALL_TITLES: { id: string; label: string; rarity: Rarity }[] = [
   { id: "myth_relay_sea", label: "Myth of the Relay Sea", rarity: "mythic" },
   { id: "shardheart_ascendant", label: "Shardheart Ascendant", rarity: "mythic" },
   { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic" },
+  // Admin - exclusive red title
+  { id: "system_overseer", label: "System Overseer", rarity: "admin" },
 ]
 
 function TitlePreviewSelector() {

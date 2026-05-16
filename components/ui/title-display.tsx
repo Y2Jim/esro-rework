@@ -12,6 +12,10 @@ const TRANSCENDENT_TITLE_ANIMATIONS: Record<string, string> = {
 }
 
 function getAnimationClass(title: string, rarity: Rarity): string {
+  // Admin titles always use admin animation
+  if (rarity === "admin") {
+    return rarityAnimation[rarity]
+  }
   // Check for unique transcendent animations first
   if (rarity === "mythic" && TRANSCENDENT_TITLE_ANIMATIONS[title]) {
     return TRANSCENDENT_TITLE_ANIMATIONS[title]

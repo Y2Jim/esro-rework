@@ -877,6 +877,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { id: "myth_relay_sea", label: "Myth of the Relay Sea", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "shardheart_ascendant", label: "Shardheart Ascendant", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic", equipped: false, source: "Admin unlock" },
+      // Admin exclusive
+      { id: "system_overseer", label: "System Overseer", rarity: "admin", equipped: false, source: "Admin exclusive" },
     ]
     
     // Merge with existing titles (don't duplicate)
