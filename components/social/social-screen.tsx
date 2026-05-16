@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
-import { PartyAvatar } from "@/components/avatar/pixel-avatar"
+import { PartyAvatar, PixelAvatar } from "@/components/avatar/pixel-avatar"
+import { TitleDisplay } from "@/components/ui/title-display"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
@@ -667,12 +668,15 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
 
 function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friends"][0] }) {
   const [showUnfriendConfirm, setShowUnfriendConfirm] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
   const removeFriend = useEsroStore((s) => s.removeFriend)
+  
+  const friendAvatar = friend.avatar || generateAvatarFromSeed(friend.handle)
   
   return (
     <div className="rounded-lg border border-[color:var(--color-border)]">
       <div className="flex items-center gap-3 px-3 py-2">
-        <PartyAvatar config={friend.avatar || generateAvatarFromSeed(friend.handle)} />
+        <PartyAvatar config={friendAvatar} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-[11px] text-[color:var(--color-text)]">{friend.handle}</span>
@@ -691,6 +695,19 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
           )}
         </div>
         <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={() => setShowProfile(!showProfile)}
+            className={cn(
+              "rounded border p-1.5 text-[10px] transition-colors",
+              showProfile
+                ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]"
+                : "border-[color:var(--color-border)] text-[color:var(--color-muted)] hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
+            )}
+            title="View Profile"
+          >
+            ◎
+          </button>
           <button
             type="button"
             className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
@@ -715,6 +732,72 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
           </button>
         </div>
       </div>
+      
+      {/* Profile view */}
+      {showProfile && (
+        <div className="border-t border-[color:var(--color-border)] bg-[color:var(--color-panel)]/30 p-3">
+          <div className="flex gap-4">
+            {/* Avatar */}
+            <div className="flex flex-col items-center gap-2">
+              <PixelAvatar config={friendAvatar} size="lg" showFlair={true} />
+              <div className={cn(
+                "text-[8px] uppercase tracking-wider",
+                friend.status === "online" && "text-[color:var(--color-success)]",
+                friend.status === "away" && "text-[color:var(--color-amber)]",
+                friend.status === "offline" && "text-[color:var(--color-muted)]"
+              )}>
+                {friend.status}
+              </div>
+            </div>
+            
+            {/* Info */}
+            <div className="flex-1 space-y-2">
+              <div>
+                <div className="text-[12px] font-medium text-[color:var(--color-text)]">{friend.handle}</div>
+                {friend.title && (
+                  <TitleDisplay title={friend.title} rarity={friend.titleRarity || "common"} variant="inline" className="text-[10px]" />
+                )}
+              </div>
+              
+              {friend.faction && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-[color:var(--color-muted)]">Faction:</span>
+                  <span className="text-[9px] text-[color:var(--color-text)]">{friend.faction}</span>
+                </div>
+              )}
+              
+              {friend.lastSeen && friend.status === "offline" && (
+                <div className="text-[9px] text-[color:var(--color-muted)]">
+                  Last seen: {new Date(friend.lastSeen).toLocaleDateString()}
+                </div>
+              )}
+              
+              {friend.note && (
+                <div className="rounded bg-[color:var(--color-bg)]/50 p-2">
+                  <div className="mb-1 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">Note</div>
+                  <div className="text-[9px] text-[color:var(--color-text)]">{friend.note}</div>
+                </div>
+              )}
+              
+              {/* Quick actions */}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  className="rounded border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/10 px-2 py-1 text-[9px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
+                >
+                  Send Message
+                </button>
+                <button
+                  type="button"
+                  className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[9px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+                >
+                  Invite to Party
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Unfriend confirmation */}
       {showUnfriendConfirm && (
