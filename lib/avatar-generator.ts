@@ -59,9 +59,9 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   eyes: 6,
   mouth: 5,
   hair: 8,
-  accessory: 17,  // 0=none, 1-16 various accessories
-  hat: 19,        // 0=none, 1-18 various hats
-  flair: 13,      // 0=none, 1-12 various flairs
+  accessory: 22,  // 0=none, 1-16 standard, 17-21 mythic
+  hat: 24,        // 0=none, 1-18 standard, 19-23 mythic
+  flair: 18,      // 0=none, 1-12 standard, 13-17 mythic
 }
 
 // Generate avatar config from seed
@@ -547,6 +547,106 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 8, 4, frameColor)
     setPixel(grid, 6, 5, frameColor)
     setPixel(grid, 7, 5, frameColor)
+  } else if (accVariant === 17) {
+    // MYTHIC: Voidtouched Gaze (eyes replaced with void energy)
+    const voidCore = "#1a0820"
+    const voidGlow = "#8040c0"
+    const voidBright = "#c080ff"
+    // Replace eyes with void orbs
+    setPixel(grid, 4, 5, voidCore)
+    setPixel(grid, 5, 5, voidGlow)
+    setPixel(grid, 4, 4, voidBright)
+    setPixel(grid, 9, 5, voidCore)
+    setPixel(grid, 8, 5, voidGlow)
+    setPixel(grid, 9, 4, voidBright)
+    // Void tendrils
+    setPixel(grid, 3, 4, voidGlow)
+    setPixel(grid, 10, 4, voidGlow)
+    setPixel(grid, 2, 3, voidBright)
+    setPixel(grid, 11, 3, voidBright)
+  } else if (accVariant === 18) {
+    // MYTHIC: Relay Sea Mask (oceanic flowing mask)
+    const deepBlue = "#1a3050"
+    const waveBlue = "#3080b0"
+    const foamWhite = "#a0d0e0"
+    const shimmer = "#60e0ff"
+    // Full face coverage with wave pattern
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 5, deepBlue)
+      setPixel(grid, x, 6, waveBlue)
+      setPixel(grid, x, 7, deepBlue)
+      setPixel(grid, x, 8, waveBlue)
+    }
+    // Wave crests
+    setPixel(grid, 4, 5, foamWhite)
+    setPixel(grid, 7, 5, shimmer)
+    setPixel(grid, 10, 5, foamWhite)
+    setPixel(grid, 5, 7, shimmer)
+    setPixel(grid, 8, 7, foamWhite)
+    // Eye holes with glow
+    setPixel(grid, 5, 5, shimmer)
+    setPixel(grid, 8, 5, shimmer)
+  } else if (accVariant === 19) {
+    // MYTHIC: Shardheart Visor (crystalline fractured visor)
+    const crystalCore = "#c060e0"
+    const crystalEdge = "#ff80c0"
+    const crystalGlow = "#e0a0ff"
+    const shardDark = "#603080"
+    // Fractured crystal visor
+    for (let x = 2; x < 12; x++) {
+      setPixel(grid, x, 4, shardDark)
+      setPixel(grid, x, 5, crystalCore)
+    }
+    // Fracture lines and glowing points
+    setPixel(grid, 3, 4, crystalGlow)
+    setPixel(grid, 5, 5, crystalEdge)
+    setPixel(grid, 7, 4, crystalGlow)
+    setPixel(grid, 9, 5, crystalEdge)
+    setPixel(grid, 11, 4, crystalGlow)
+    // Shard extensions
+    setPixel(grid, 2, 3, crystalEdge)
+    setPixel(grid, 6, 3, crystalGlow)
+    setPixel(grid, 11, 3, crystalEdge)
+  } else if (accVariant === 20) {
+    // MYTHIC: Eternal Courier's Mark (golden time-worn insignia)
+    const goldDark = "#b08030"
+    const goldBright = "#ffd080"
+    const goldGlow = "#ffe8b0"
+    const amberCore = "#ff9040"
+    // Central insignia
+    setPixel(grid, 6, 4, goldGlow)
+    setPixel(grid, 7, 4, goldGlow)
+    setPixel(grid, 5, 5, goldBright)
+    setPixel(grid, 6, 5, amberCore)
+    setPixel(grid, 7, 5, amberCore)
+    setPixel(grid, 8, 5, goldBright)
+    setPixel(grid, 6, 6, goldDark)
+    setPixel(grid, 7, 6, goldDark)
+    // Trailing light lines
+    setPixel(grid, 4, 4, goldBright)
+    setPixel(grid, 3, 3, goldGlow)
+    setPixel(grid, 9, 4, goldBright)
+    setPixel(grid, 10, 3, goldGlow)
+  } else if (accVariant === 21) {
+    // MYTHIC: Primordial Echo (ancient runes around face)
+    const runeGlow = "#40ffb0"
+    const runeDark = "#206050"
+    const runeAncient = "#80ffd0"
+    const voidBlack = "#0a1010"
+    // Rune circle around face
+    setPixel(grid, 3, 3, runeGlow)
+    setPixel(grid, 10, 3, runeGlow)
+    setPixel(grid, 2, 5, runeAncient)
+    setPixel(grid, 11, 5, runeAncient)
+    setPixel(grid, 2, 7, runeDark)
+    setPixel(grid, 11, 7, runeDark)
+    setPixel(grid, 4, 9, runeGlow)
+    setPixel(grid, 9, 9, runeGlow)
+    // Central void mark
+    setPixel(grid, 6, 4, voidBlack)
+    setPixel(grid, 7, 4, voidBlack)
+    setPixel(grid, 6, 5, runeAncient)
+    setPixel(grid, 7, 5, runeAncient)
   }
   
   // Draw hat
@@ -761,6 +861,104 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 10, 1, antlerColor)
     setPixel(grid, 9, 1, antlerColor)
     setPixel(grid, 12, 1, tipColor)
+  } else if (hatVariant === 19) {
+    // MYTHIC: Crown of the Relay Sea (ocean crown with waves)
+    const deepBlue = "#1a4060"
+    const waveBlue = "#40a0d0"
+    const foamWhite = "#c0e8ff"
+    const shimmer = "#80ffff"
+    // Crown base
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, deepBlue)
+    }
+    // Wave spikes
+    setPixel(grid, 4, 0, waveBlue)
+    setPixel(grid, 5, 0, foamWhite)
+    setPixel(grid, 7, 0, shimmer)
+    setPixel(grid, 8, 0, foamWhite)
+    setPixel(grid, 10, 0, waveBlue)
+    // Droplets above
+    setPixel(grid, 6, 0, shimmer)
+  } else if (hatVariant === 20) {
+    // MYTHIC: Shardheart Coronet (crystalline crown)
+    const crystalPink = "#ff80c0"
+    const crystalPurple = "#c060e0"
+    const crystalGlow = "#ffa0e0"
+    const shardCore = "#e0c0ff"
+    // Base band
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, crystalPurple)
+    }
+    // Crystal spires
+    setPixel(grid, 4, 0, crystalPink)
+    setPixel(grid, 5, 0, crystalGlow)
+    setPixel(grid, 6, 0, shardCore)
+    setPixel(grid, 7, 0, crystalGlow)
+    setPixel(grid, 8, 0, crystalPink)
+    setPixel(grid, 9, 0, crystalGlow)
+    // Floating shards
+    setPixel(grid, 3, 0, crystalGlow)
+    setPixel(grid, 10, 0, crystalGlow)
+  } else if (hatVariant === 21) {
+    // MYTHIC: Eternal Courier's Crest (golden time crown)
+    const goldDark = "#a07020"
+    const goldBright = "#ffd060"
+    const goldGlow = "#ffe8a0"
+    const amberCore = "#ffb040"
+    // Crown base with trails
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, goldDark)
+    }
+    // Central crest
+    setPixel(grid, 6, 0, goldGlow)
+    setPixel(grid, 7, 0, goldGlow)
+    setPixel(grid, 5, 0, goldBright)
+    setPixel(grid, 8, 0, goldBright)
+    // Trailing light
+    setPixel(grid, 3, 0, amberCore)
+    setPixel(grid, 10, 0, amberCore)
+    setPixel(grid, 2, 1, goldGlow)
+    setPixel(grid, 11, 1, goldGlow)
+  } else if (hatVariant === 22) {
+    // MYTHIC: Voidtouched Halo (dark halo with void energy)
+    const voidBlack = "#0a0810"
+    const voidPurple = "#6030a0"
+    const voidGlow = "#a060ff"
+    const voidBright = "#d0a0ff"
+    // Dark halo ring
+    setPixel(grid, 3, 0, voidPurple)
+    setPixel(grid, 4, 0, voidGlow)
+    setPixel(grid, 5, 0, voidBright)
+    setPixel(grid, 6, 0, voidGlow)
+    setPixel(grid, 7, 0, voidGlow)
+    setPixel(grid, 8, 0, voidBright)
+    setPixel(grid, 9, 0, voidGlow)
+    setPixel(grid, 10, 0, voidPurple)
+    // Void tendrils
+    setPixel(grid, 2, 1, voidBlack)
+    setPixel(grid, 11, 1, voidBlack)
+    setPixel(grid, 1, 0, voidGlow)
+    setPixel(grid, 12, 0, voidGlow)
+  } else if (hatVariant === 23) {
+    // MYTHIC: Primordial Echo Crown (ancient runic crown)
+    const runeGlow = "#40ffb0"
+    const runeDark = "#206050"
+    const runeAncient = "#80ffd0"
+    const runeCore = "#60ffc0"
+    // Crown base
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, runeDark)
+    }
+    // Runic spires
+    setPixel(grid, 4, 0, runeGlow)
+    setPixel(grid, 5, 0, runeAncient)
+    setPixel(grid, 6, 0, runeCore)
+    setPixel(grid, 7, 0, runeCore)
+    setPixel(grid, 8, 0, runeAncient)
+    setPixel(grid, 9, 0, runeGlow)
+    // Floating runes
+    setPixel(grid, 2, 0, runeAncient)
+    setPixel(grid, 11, 0, runeAncient)
   }
   
   return grid

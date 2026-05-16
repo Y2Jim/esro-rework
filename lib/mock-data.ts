@@ -934,6 +934,29 @@ export const vanityItems: VanityItem[] = [
   // Flair - Legendary
   { id: "v44", label: "Prismatic Aura", layerType: "flair", variant: 11, rarity: "legendary", unlocked: false, equipped: false },
   { id: "v45", label: "Celestial Flame", layerType: "flair", variant: 12, rarity: "legendary", unlocked: false, equipped: false },
+
+  // ============ MYTHIC / TRANSCENDENT TIER ============
+  
+  // Accessories - Mythic
+  { id: "v50", label: "Voidtouched Gaze", layerType: "accessory", variant: 17, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v51", label: "Relay Sea Mask", layerType: "accessory", variant: 18, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v52", label: "Shardheart Visor", layerType: "accessory", variant: 19, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v53", label: "Eternal Courier's Mark", layerType: "accessory", variant: 20, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v54", label: "Primordial Echo", layerType: "accessory", variant: 21, rarity: "mythic", unlocked: false, equipped: false },
+
+  // Hats - Mythic
+  { id: "v55", label: "Crown of the Relay Sea", layerType: "hat", variant: 19, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v56", label: "Shardheart Coronet", layerType: "hat", variant: 20, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v57", label: "Eternal Courier's Crest", layerType: "hat", variant: 21, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v58", label: "Voidtouched Halo", layerType: "hat", variant: 22, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v59", label: "Primordial Echo Crown", layerType: "hat", variant: 23, rarity: "mythic", unlocked: false, equipped: false },
+
+  // Flair - Mythic
+  { id: "v60", label: "Relay Sea Aura", layerType: "flair", variant: 13, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v61", label: "Shardheart Radiance", layerType: "flair", variant: 14, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v62", label: "Eternal Courier's Light", layerType: "flair", variant: 15, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v63", label: "Voidtouched Presence", layerType: "flair", variant: 16, rarity: "mythic", unlocked: false, equipped: false },
+  { id: "v64", label: "Primordial Resonance", layerType: "flair", variant: 17, rarity: "mythic", unlocked: false, equipped: false },
 ]
 
 export const profile: Profile = {

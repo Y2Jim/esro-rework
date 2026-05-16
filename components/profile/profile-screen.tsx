@@ -573,7 +573,14 @@ function AdminUnlockButton() {
   })
   
   const [previewFlair, setPreviewFlair] = useState(0)
-  const flairNames = ["None", "Pulse Glow", "Static Aura", "Sparkle", "Soft Glow", "Dust Motes", "Signal Flicker", "Route Trails", "Echo Ripples", "Data Stream", "Void Shimmer", "Prismatic Aura", "Celestial Flame"]
+  const flairNames = [
+    "None", "Pulse Glow", "Static Aura", "Sparkle", "Soft Glow", "Dust Motes", 
+    "Signal Flicker", "Route Trails", "Echo Ripples", "Data Stream", "Void Shimmer", 
+    "Prismatic Aura", "Celestial Flame",
+    // Mythic flairs (13-17)
+    "Relay Sea Aura", "Shardheart Radiance", "Eternal Courier's Light", "Voidtouched Presence", "Primordial Resonance"
+  ]
+  const isMythicFlair = previewFlair >= 13
   
   // Create preview avatar with current flair
   const previewAvatar = useMemo(() => ({
@@ -628,24 +635,37 @@ function AdminUnlockButton() {
           Flair Preview
         </div>
         <div className="flex items-center gap-3">
-          <div className="p-2">
+          <div className="p-3">
             <PixelAvatar config={previewAvatar} size="md" showFlair={true} />
           </div>
           <div className="flex-1 space-y-1">
-            <div className="text-[10px] text-[color:var(--color-text)]">
-              {flairNames[previewFlair]} {previewFlair > 0 && `(${previewFlair})`}
+            <div className="flex items-center gap-1.5">
+              <span className={cn(
+                "text-[10px]",
+                isMythicFlair ? "title-mythic font-medium" : "text-[color:var(--color-text)]"
+              )}>
+                {flairNames[previewFlair]}
+              </span>
+              {previewFlair > 0 && (
+                <span className="text-[9px] text-[color:var(--color-muted)]">({previewFlair})</span>
+              )}
+              {isMythicFlair && (
+                <span className="rounded bg-[color:var(--color-mythic)]/20 px-1 py-0.5 text-[8px] text-[color:var(--color-mythic)]">
+                  MYTHIC
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => setPreviewFlair((prev) => (prev > 0 ? prev - 1 : 12))}
+                onClick={() => setPreviewFlair((prev) => (prev > 0 ? prev - 1 : 17))}
                 className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
               >
                 Prev
               </button>
               <button
                 type="button"
-                onClick={() => setPreviewFlair((prev) => (prev < 12 ? prev + 1 : 0))}
+                onClick={() => setPreviewFlair((prev) => (prev < 17 ? prev + 1 : 0))}
                 className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
               >
                 Next

@@ -50,10 +50,17 @@ export function PixelAvatar({ config, size = "md", className, showFlair = true }
     10: { boxShadow: "0 0 14px 5px rgba(100,50,150,0.6)" }, // Void Shimmer - purple
     11: { boxShadow: "0 0 12px 4px rgba(255,100,150,0.4), 0 0 24px 8px rgba(100,150,255,0.25)" }, // Prismatic Aura
     12: { boxShadow: "0 0 14px 5px rgba(255,180,80,0.6), 0 0 20px 8px rgba(255,100,50,0.3)" }, // Celestial Flame - orange
+    // MYTHIC FLAIRS (13-17)
+    13: { boxShadow: "0 0 16px 6px rgba(64,160,220,0.7), 0 0 30px 12px rgba(32,100,180,0.4), 0 0 45px 18px rgba(100,200,255,0.2)" }, // Relay Sea Aura
+    14: { boxShadow: "0 0 14px 5px rgba(200,96,224,0.7), 0 0 28px 10px rgba(255,128,192,0.4), 0 0 42px 16px rgba(150,200,255,0.25)" }, // Shardheart Radiance
+    15: { boxShadow: "0 0 18px 6px rgba(255,180,80,0.7), 0 0 32px 12px rgba(255,140,60,0.4), 0 0 48px 20px rgba(255,200,100,0.2)" }, // Eternal Courier's Light
+    16: { boxShadow: "0 0 20px 8px rgba(128,64,192,0.8), 0 0 35px 14px rgba(80,32,160,0.5), 0 0 50px 22px rgba(160,100,255,0.3)" }, // Voidtouched Presence
+    17: { boxShadow: "0 0 16px 6px rgba(64,255,176,0.7), 0 0 30px 12px rgba(32,96,80,0.5), 0 0 45px 18px rgba(128,255,208,0.25)" }, // Primordial Resonance
   }
   
   const currentFlairStyle = showFlair && flairVariant > 0 ? flairStyles[flairVariant] || {} : {}
   const isPulsing = showFlair && (flairVariant === 2 || flairVariant === 6)
+  const isMythicFlair = flairVariant >= 13 && flairVariant <= 17
   
   return (
     <div
@@ -170,6 +177,125 @@ export function PixelAvatar({ config, size = "md", className, showFlair = true }
           <div
             className="absolute h-1 w-1 animate-ping rounded-full bg-red-400/50"
             style={{ top: "8%", left: "40%", animationDelay: "0.4s" }}
+          />
+        </div>
+      )}
+      
+      {/* MYTHIC: Relay Sea Aura overlay - ocean waves */}
+      {flairVariant === 13 && showFlair && (
+        <div className="pointer-events-none absolute inset-0 animate-pulse">
+          <div
+            className="absolute h-1.5 w-1.5 rounded-full bg-cyan-300/80"
+            style={{ top: "5%", left: "20%", animation: "ping 2s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-blue-400/70"
+            style={{ top: "15%", left: "80%", animation: "ping 2s ease-in-out infinite 0.5s" }}
+          />
+          <div
+            className="absolute h-1.5 w-1.5 rounded-full bg-teal-300/60"
+            style={{ top: "85%", left: "70%", animation: "ping 2s ease-in-out infinite 1s" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-cyan-400/70"
+            style={{ top: "80%", left: "15%", animation: "ping 2s ease-in-out infinite 1.5s" }}
+          />
+        </div>
+      )}
+      
+      {/* MYTHIC: Shardheart Radiance overlay - crystal shards */}
+      {flairVariant === 14 && showFlair && (
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute h-2 w-0.5 rotate-45 bg-gradient-to-t from-purple-400/0 to-pink-300/80"
+            style={{ top: "0%", left: "85%", animation: "pulse 1.5s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute h-2 w-0.5 -rotate-45 bg-gradient-to-t from-pink-400/0 to-purple-300/80"
+            style={{ top: "0%", left: "10%", animation: "pulse 1.5s ease-in-out infinite 0.3s" }}
+          />
+          <div
+            className="absolute h-1.5 w-0.5 rotate-12 bg-gradient-to-t from-blue-400/0 to-pink-300/70"
+            style={{ top: "75%", left: "90%", animation: "pulse 1.5s ease-in-out infinite 0.6s" }}
+          />
+          <div
+            className="absolute h-1.5 w-0.5 -rotate-12 bg-gradient-to-t from-purple-400/0 to-blue-300/70"
+            style={{ top: "80%", left: "5%", animation: "pulse 1.5s ease-in-out infinite 0.9s" }}
+          />
+        </div>
+      )}
+      
+      {/* MYTHIC: Eternal Courier's Light overlay - golden trails */}
+      {flairVariant === 15 && showFlair && (
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute h-0.5 w-3 bg-gradient-to-r from-amber-400/80 to-amber-400/0"
+            style={{ top: "20%", left: "75%", animation: "pulse 2s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute h-0.5 w-2.5 bg-gradient-to-r from-yellow-300/70 to-yellow-300/0"
+            style={{ top: "50%", left: "80%", animation: "pulse 2s ease-in-out infinite 0.4s" }}
+          />
+          <div
+            className="absolute h-0.5 w-2 bg-gradient-to-r from-orange-400/60 to-orange-400/0"
+            style={{ top: "75%", left: "70%", animation: "pulse 2s ease-in-out infinite 0.8s" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-yellow-200/90"
+            style={{ top: "10%", left: "50%", animation: "ping 3s ease-in-out infinite" }}
+          />
+        </div>
+      )}
+      
+      {/* MYTHIC: Voidtouched Presence overlay - void tendrils */}
+      {flairVariant === 16 && showFlair && (
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute h-3 w-1 rounded-full bg-gradient-to-t from-purple-900/0 via-purple-600/60 to-purple-400/80"
+            style={{ top: "-10%", left: "50%", animation: "pulse 2s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute h-2 w-0.5 rounded-full bg-gradient-to-b from-violet-900/0 to-violet-500/70"
+            style={{ top: "85%", left: "25%", animation: "pulse 2s ease-in-out infinite 0.5s" }}
+          />
+          <div
+            className="absolute h-2 w-0.5 rounded-full bg-gradient-to-b from-purple-900/0 to-purple-500/70"
+            style={{ top: "85%", left: "75%", animation: "pulse 2s ease-in-out infinite 1s" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-violet-300/80"
+            style={{ top: "5%", left: "20%", animation: "ping 1.5s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-purple-300/80"
+            style={{ top: "5%", left: "80%", animation: "ping 1.5s ease-in-out infinite 0.75s" }}
+          />
+        </div>
+      )}
+      
+      {/* MYTHIC: Primordial Resonance overlay - ancient runes */}
+      {flairVariant === 17 && showFlair && (
+        <div className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute h-1.5 w-1.5 rounded-full bg-emerald-300/80"
+            style={{ top: "0%", left: "50%", animation: "ping 2.5s ease-in-out infinite" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-teal-400/70"
+            style={{ top: "50%", left: "0%", animation: "ping 2.5s ease-in-out infinite 0.6s" }}
+          />
+          <div
+            className="absolute h-1 w-1 rounded-full bg-green-400/70"
+            style={{ top: "50%", left: "95%", animation: "ping 2.5s ease-in-out infinite 1.2s" }}
+          />
+          <div
+            className="absolute h-1.5 w-1.5 rounded-full bg-emerald-400/60"
+            style={{ top: "95%", left: "50%", animation: "ping 2.5s ease-in-out infinite 1.8s" }}
+          />
+          {/* Rune circle effect */}
+          <div
+            className="absolute inset-0 rounded-full border border-emerald-400/30"
+            style={{ animation: "pulse 3s ease-in-out infinite" }}
           />
         </div>
       )}
