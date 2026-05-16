@@ -558,6 +558,10 @@ function NotificationsTab() {
 function AdminUnlockButton() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
   const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)
+  const simulateExpedition = useEsroStore((s) => s.simulateExpedition)
+  const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
+  const activeExpedition = useEsroStore((s) => s.activeExpedition)
+  
   const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean }>({
     cosmetics: false,
     titles: false,
@@ -601,6 +605,35 @@ function AdminUnlockButton() {
       >
         {unlocked.titles ? "All Titles Unlocked" : "Unlock All Titles"}
       </button>
+      
+      {/* Expedition simulation */}
+      <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
+        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Expedition Testing
+        </div>
+        {!activeExpedition ? (
+          <button
+            type="button"
+            onClick={() => simulateExpedition()}
+            className="w-full rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-2 text-[10px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20"
+          >
+            Start Test Expedition
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <div className="rounded bg-[color:var(--color-cyan)]/10 px-2 py-1.5 text-[9px] text-[color:var(--color-cyan)]">
+              Active: {activeExpedition.label} ({Math.round(activeExpedition.progress * 100)}%)
+            </div>
+            <button
+              type="button"
+              onClick={completeActiveExpedition}
+              className="w-full rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-2 text-[10px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
+            >
+              Complete Expedition (Get Loot)
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

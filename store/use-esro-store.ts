@@ -136,6 +136,8 @@ interface EsroState {
   // Admin/Debug
   unlockAllCosmetics: () => void
   unlockAllTitles: () => void
+  simulateExpedition: (expeditionId?: string) => void
+  completeActiveExpedition: () => void
 }
 
 function rollRarity(focused: boolean): Rarity {
@@ -725,6 +727,74 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       profile: {
         ...profile,
         ownedTitles: [...profile.ownedTitles, ...newTitles],
+      },
+    })
+  },
+  
+  // Admin/Debug - simulate starting an expedition
+  simulateExpedition: (expeditionId) => {
+    const { expeditions, activeExpedition } = get()
+    if (activeExpedition) return // already have an active one
+    
+    // Pick first available expedition if no ID provided
+    const exp = expeditionId 
+      ? expeditions.find(e => e.id === expeditionId)
+      : expeditions[0]
+    
+    if (!exp) return
+    
+    set({
+      activeExpedition: {
+        id: exp.id,
+        label: exp.label,
+        progress: 0.15,
+        etaSeconds: 180,
+        log: [
+          "Expedition started...",
+          "Signal lock established.",
+          "Traversing relay network...",
+        ],
+      },
+    })
+  },
+  
+  // Admin/Debug - instantly complete active expedition
+  completeActiveExpedition: () => {
+    const { activeExpedition, inventory } = get()
+    if (!activeExpedition) return
+    
+    // Generate random loot rewards
+    const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
+    const rarities: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"]
+    const numRewards = 2 + Math.floor(Math.random() * 3) // 2-4 items
+    
+    const newItems: InventoryItem[] = []
+    for (let i = 0; i < numRewards; i++) {
+      const rarityRoll = Math.random()
+      let rarity: Rarity = "common"
+      if (rarityRoll > 0.95) rarity = "legendary"
+      else if (rarityRoll > 0.85) rarity = "epic"
+      else if (rarityRoll > 0.65) rarity = "rare"
+      else if (rarityRoll > 0.40) rarity = "uncommon"
+      
+      newItems.push({
+        id: `loot-${Date.now()}-${i}`,
+        label: lootTypes[Math.floor(Math.random() * lootTypes.length)],
+        rarity,
+        qty: 1 + Math.floor(Math.random() * 3),
+        type: "material",
+      })
+    }
+    
+    // Add token reward
+    const tokenReward = 50 + Math.floor(Math.random() * 150)
+    
+    set({
+      activeExpedition: null,
+      inventory: [...inventory, ...newItems],
+      profile: {
+        ...get().profile,
+        tokens: get().profile.tokens + tokenReward,
       },
     })
   },
