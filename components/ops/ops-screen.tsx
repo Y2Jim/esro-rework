@@ -30,9 +30,10 @@ export function OpsScreen() {
             onClick={() => setOpsTab(tab.id)}
             className={cn(
               "flex items-center gap-1.5 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              tab.hover,
               opsTab === tab.id
                 ? cn(tab.bgColor, tab.color)
-                : cn("text-[color:var(--color-muted)]", tab.hover)
+                : "text-[color:var(--color-muted)]"
             )}
           >
             <span className="text-[11px]">{tab.icon}</span>

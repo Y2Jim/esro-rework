@@ -108,9 +108,10 @@ export function ChannelTabs() {
               onClick={() => setChannel(c.id)}
               className={cn(
                 "relative flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[10px] uppercase tracking-[0.15em] transition-all",
+                style.hover,
                 active
                   ? cn(style.text, style.activeBg, style.activeBorder)
-                  : cn("text-[color:var(--color-muted)]", style.inactiveBorder, style.hover),
+                  : cn("text-[color:var(--color-muted)]", style.inactiveBorder),
               )}
             >
               {/* icon */}

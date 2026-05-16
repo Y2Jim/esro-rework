@@ -34,9 +34,10 @@ export function BottomNav() {
                 onClick={() => setScreen(it.id)}
                 className={cn(
                   "group relative flex w-full flex-col items-center gap-0.5 rounded-md py-1.5 px-1 transition-all",
+                  it.hover,
                   active
                     ? cn(it.color, it.bg)
-                    : cn("text-[color:var(--color-muted)]", it.hover),
+                    : "text-[color:var(--color-muted)]",
                 )}
                 aria-current={active ? "page" : undefined}
               >

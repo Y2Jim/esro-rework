@@ -39,9 +39,10 @@ export function ProfileScreen() {
             onClick={() => setTab(t.id)}
             className={cn(
               "relative flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              t.hover,
               tab === t.id
                 ? cn(t.bgColor, t.color)
-                : cn("text-[color:var(--color-muted)]", t.hover)
+                : "text-[color:var(--color-muted)]"
             )}
           >
             <span className="text-[10px]">{t.icon}</span>
