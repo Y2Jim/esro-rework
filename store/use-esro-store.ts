@@ -617,30 +617,30 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Friends
   friends: [
     {
-      handle: "@signalwatcher",
+      handle: "@Relay3e8f2",
       title: "Signal Keeper",
       titleRarity: "uncommon" as const,
       status: "online" as const,
-      faction: "Waykeepers",
+      faction: "Hearth Wardens",
     },
     {
-      handle: "@archivesoul",
+      handle: "@Relay9d2e7",
       title: "Archive Listener",
       titleRarity: "rare" as const,
       status: "online" as const,
-      faction: "Archive Collective",
+      faction: "Veiled Circle",
     },
     {
-      handle: "@dustrunner",
+      handle: "@Relay8b1c5",
       status: "away" as const,
-      faction: "Waykeepers",
+      faction: "Open Roads Chorus",
     },
     {
-      handle: "@relaykeeper",
+      handle: "@Relay6c4d3",
       title: "Route Tender",
       titleRarity: "common" as const,
       status: "offline" as const,
-      faction: "Signal Corps",
+      faction: "Crowned Courts",
     },
 ] as Friend[],
   removeFriend: (handle) => {
@@ -653,8 +653,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   tradeOffers: [
     {
       id: "trade-1",
-      fromHandle: "@signalwatcher",
-      toHandle: "@you",
+      fromHandle: "@Relay3e8f2",
+      toHandle: "@Relay7a3b2",
       fromItems: [
         { itemId: "relay_scrap", label: "Relay Scrap", qty: 5, rarity: "common" as const },
         { itemId: "signal_shard", label: "Signal Shard", qty: 2, rarity: "uncommon" as const },
