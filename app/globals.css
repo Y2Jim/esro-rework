@@ -59,6 +59,15 @@
     --color-text-primary: var(--color-text);
     --color-text-secondary: var(--color-muted);
     --color-text-muted: var(--color-muted-2);
+    
+    /* Rarity Colors - duplicated from @theme for CSS var() access */
+    --color-rarity-common: #a791c7;
+    --color-rarity-uncommon: #5dd0ff;
+    --color-rarity-rare: #bb81ff;
+    --color-rarity-epic: #ffb347;
+    --color-rarity-legendary: #f3d58a;
+    --color-rarity-mythic: #ff6b9d;
+    --color-rarity-admin: #ff3030;
   }
   
   /* Faction Theme: Crownborn - Golden luminous */
