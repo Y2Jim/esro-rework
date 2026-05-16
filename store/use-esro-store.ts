@@ -120,6 +120,7 @@ interface EsroState {
   
   // Social - Friends
   friends: Friend[]
+  removeFriend: (handle: string) => void
   
   // Social - Trade
   tradeOffers: TradeOffer[]
@@ -634,8 +635,13 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       status: "offline" as const,
       faction: "Signal Corps",
     },
-  ] as Friend[],
-
+] as Friend[],
+  removeFriend: (handle) => {
+    set((state) => ({
+      friends: state.friends.filter((f) => f.handle !== handle),
+    }))
+  },
+  
   // Trade
   tradeOffers: [
     {

@@ -666,42 +666,82 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
 }
 
 function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friends"][0] }) {
+  const [showUnfriendConfirm, setShowUnfriendConfirm] = useState(false)
+  const removeFriend = useEsroStore((s) => s.removeFriend)
+  
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-[color:var(--color-border)] px-3 py-2">
-      <PartyAvatar config={friend.avatar || generateAvatarFromSeed(friend.handle)} />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-[color:var(--color-text)]">{friend.handle}</span>
-          <span className={cn(
-            "h-1.5 w-1.5 rounded-full",
-            friend.status === "online" && "bg-[color:var(--color-success)]",
-            friend.status === "away" && "bg-[color:var(--color-amber)]",
-            friend.status === "offline" && "bg-[color:var(--color-muted)]"
-          )} />
+    <div className="rounded-lg border border-[color:var(--color-border)]">
+      <div className="flex items-center gap-3 px-3 py-2">
+        <PartyAvatar config={friend.avatar || generateAvatarFromSeed(friend.handle)} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-[color:var(--color-text)]">{friend.handle}</span>
+            <span className={cn(
+              "h-1.5 w-1.5 rounded-full",
+              friend.status === "online" && "bg-[color:var(--color-success)]",
+              friend.status === "away" && "bg-[color:var(--color-amber)]",
+              friend.status === "offline" && "bg-[color:var(--color-muted)]"
+            )} />
+          </div>
+          {friend.title && (
+            <div className={cn("text-[9px]", rarityColor[friend.titleRarity || "common"])}>{friend.title}</div>
+          )}
+          {friend.faction && (
+            <div className="text-[9px] text-[color:var(--color-muted)]">{friend.faction}</div>
+          )}
         </div>
-        {friend.title && (
-          <div className={cn("text-[9px]", rarityColor[friend.titleRarity || "common"])}>{friend.title}</div>
-        )}
-        {friend.faction && (
-          <div className="text-[9px] text-[color:var(--color-muted)]">{friend.faction}</div>
-        )}
+        <div className="flex gap-1">
+          <button
+            type="button"
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
+            title="Message"
+          >
+            ◇
+          </button>
+          <button
+            type="button"
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
+            title="Invite to party"
+          >
+            ⋈
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowUnfriendConfirm(true)}
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-danger)]/50 hover:bg-[color:var(--color-danger)]/10 hover:text-[color:var(--color-danger)]"
+            title="Unfriend"
+          >
+            ✕
+          </button>
+        </div>
       </div>
-      <div className="flex gap-1">
-        <button
-          type="button"
-          className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
-          title="Message"
-        >
-          ◇
-        </button>
-        <button
-          type="button"
-          className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
-          title="Invite to party"
-        >
-          ⋈
-        </button>
-      </div>
+      
+      {/* Unfriend confirmation */}
+      {showUnfriendConfirm && (
+        <div className="border-t border-[color:var(--color-border)] bg-[color:var(--color-danger)]/5 px-3 py-2">
+          <div className="mb-2 text-[10px] text-[color:var(--color-text)]">
+            Remove {friend.handle} from friends?
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                removeFriend(friend.handle)
+              }}
+              className="flex-1 rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/15 px-2 py-1 text-[9px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/25"
+            >
+              Unfriend
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowUnfriendConfirm(false)}
+              className="flex-1 rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[9px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
