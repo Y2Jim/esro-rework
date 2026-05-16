@@ -64,7 +64,7 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
   {
     id: "golden_archive",
     label: "Cold Iron",
-    description: "Steel blue hues of salvaged machinery.",
+    description: "Heartless steel blue of salvaged machinery.",
     rarity: "uncommon",
     colors: {
       accent: "#6080a0",
