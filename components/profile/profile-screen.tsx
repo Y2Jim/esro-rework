@@ -11,7 +11,7 @@ import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { Shield } from "lucide-react"
 import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
-import type { RaceId, Rarity } from "@/lib/types"
+import type { RaceId, Rarity, VanityItem } from "@/lib/types"
 
 type ProfileTab = "summary" | "titles" | "cosmetics" | "settings" | "notifications"
 
@@ -320,10 +320,25 @@ function CosmeticsTab() {
     return acc
   }, {} as Record<string, typeof unlocked>)
 
-  const layerOrder = ["hair", "eyes", "mouth", "accessory", "hat", "flair"]
+  const layerOrder = ["hair", "eyes", "accessory", "hat", "flair"]
+
+  // Get current avatar layer variants for hair/eyes
+  const currentHairVariant = identity.avatar.layers.find(l => l.type === "hair")?.variant ?? 0
+  const currentEyesVariant = identity.avatar.layers.find(l => l.type === "eyes")?.variant ?? 0
+
+  // Determine if a vanity item is "active" (either equipped flag or matching current avatar variant for hair/eyes)
+  const isItemActive = (item: VanityItem): boolean => {
+    if (item.layerType === "hair") {
+      return item.variant === currentHairVariant
+    }
+    if (item.layerType === "eyes") {
+      return item.variant === currentEyesVariant
+    }
+    return item.equipped
+  }
 
   // Get currently equipped items
-  const equipped = vanityItems.filter(v => v.equipped)
+  const equipped = vanityItems.filter(v => isItemActive(v))
 
   return (
     <div className="space-y-4">
@@ -370,26 +385,29 @@ function CosmeticsTab() {
                   <div className="h-px flex-1 bg-[color:var(--color-border-soft)]" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  {items.map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => v.equipped ? unequipVanity(v.layerType) : equipVanity(v.id)}
-                      className={cn(
-                        "flex flex-col items-start rounded-lg border p-2 text-left transition-all",
-                        v.equipped
-                          ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
-                          : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
-                      )}
-                    >
-                      <div className="flex w-full items-center justify-between">
-                        <span className={cn("text-[10px]", rarityColor[v.rarity])}>{v.label}</span>
-                        {v.equipped && (
-                          <span className="text-[8px] uppercase text-[color:var(--color-accent)]">worn</span>
+                  {items.map((v) => {
+                    const isActive = isItemActive(v)
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => isActive ? unequipVanity(v.layerType) : equipVanity(v.id)}
+                        className={cn(
+                          "flex flex-col items-start rounded-lg border p-2 text-left transition-all",
+                          isActive
+                            ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
+                            : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
                         )}
-                      </div>
-                    </button>
-                  ))}
+                      >
+                        <div className="flex w-full items-center justify-between">
+                          <span className={cn("text-[10px]", rarityColor[v.rarity])}>{v.label}</span>
+                          {isActive && (
+                            <span className="text-[8px] uppercase text-[color:var(--color-accent)]">active</span>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )

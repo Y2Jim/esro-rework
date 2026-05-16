@@ -1264,6 +1264,26 @@ export const factionProjects: FactionProject[] = [
 
 // Unlocked vanity items
 export const vanityItems: VanityItem[] = [
+  // Hair Styles - all unlocked by default as base customization
+  { id: "hair_bald", label: "Bald", layerType: "hair", variant: 0, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_buzz", label: "Buzz Cut", layerType: "hair", variant: 1, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_spiky", label: "Spiky", layerType: "hair", variant: 2, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_sidepart", label: "Side Part", layerType: "hair", variant: 3, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_long", label: "Long", layerType: "hair", variant: 4, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_mohawk", label: "Mohawk", layerType: "hair", variant: 5, rarity: "uncommon", unlocked: true, equipped: false },
+  { id: "hair_bangs", label: "Bangs", layerType: "hair", variant: 6, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_curly", label: "Curly", layerType: "hair", variant: 7, rarity: "common", unlocked: true, equipped: false },
+  { id: "hair_slicked", label: "Slicked Back", layerType: "hair", variant: 8, rarity: "uncommon", unlocked: true, equipped: false },
+  { id: "hair_undercut", label: "Undercut", layerType: "hair", variant: 9, rarity: "uncommon", unlocked: true, equipped: false },
+
+  // Eye Styles - all unlocked by default as base customization
+  { id: "eyes_normal", label: "Normal", layerType: "eyes", variant: 0, rarity: "common", unlocked: true, equipped: false },
+  { id: "eyes_wide", label: "Wide", layerType: "eyes", variant: 1, rarity: "common", unlocked: true, equipped: false },
+  { id: "eyes_narrow", label: "Narrow", layerType: "eyes", variant: 2, rarity: "common", unlocked: true, equipped: false },
+  { id: "eyes_happy", label: "Happy", layerType: "eyes", variant: 3, rarity: "common", unlocked: true, equipped: false },
+  { id: "eyes_tired", label: "Tired", layerType: "eyes", variant: 4, rarity: "common", unlocked: true, equipped: false },
+  { id: "eyes_big", label: "Big", layerType: "eyes", variant: 5, rarity: "common", unlocked: true, equipped: false },
+
   // Accessories - Common
   { id: "v1", label: "Signal Glasses", layerType: "accessory", variant: 1, rarity: "common", unlocked: true, equipped: true },
   { id: "v11", label: "Basic Shades", layerType: "accessory", variant: 5, rarity: "common", unlocked: true, equipped: false },

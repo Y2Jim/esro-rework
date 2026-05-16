@@ -69,6 +69,16 @@ export const HAIR_STYLE_NAMES = [
   "Undercut",
 ]
 
+// Eye style names for UI
+export const EYE_STYLE_NAMES = [
+  "Normal",
+  "Wide",
+  "Narrow",
+  "Happy",
+  "Tired",
+  "Big",
+]
+
 // Layer variant counts
 export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   base: 3,        // head shapes: round, square, oval
