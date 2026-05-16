@@ -182,6 +182,13 @@ export type ItemAspect =
   | "salvage"
   | "cosmetic"
   | "unknown"
+  | "food"
+  | "potion"
+  | "material"
+  | "herb"
+  | "mineral"
+  | "essence"
+  | "consumable"
 
 export interface InventoryItem {
   id: string
@@ -191,6 +198,38 @@ export interface InventoryItem {
   qty: number
   identified: boolean
   description: string
+  type?: "material" | "consumable" | "equipment" | "quest" | "misc"
+  effects?: string[]
+  duration?: number // in seconds for buffs
+}
+
+export type CraftingCategory = "food" | "potion" | "gear" | "component" | "special"
+
+export interface CraftingIngredient {
+  itemId: string
+  label: string
+  qty: number
+}
+
+export interface CraftingRecipe {
+  id: string
+  label: string
+  category: CraftingCategory
+  description: string
+  ingredients: CraftingIngredient[]
+  output: {
+    itemId: string
+    label: string
+    aspect: ItemAspect
+    rarity: Rarity
+    qty: number
+    description: string
+    effects?: string[]
+  }
+  craftTime: number // seconds
+  requiredSkill?: string
+  requiredSkillLevel?: number
+  unlocked: boolean
 }
 
 export interface PartyMember {

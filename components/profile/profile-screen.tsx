@@ -561,10 +561,12 @@ function AdminUnlockButton() {
   const simulateExpedition = useEsroStore((s) => s.simulateExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
+  const addMaterials = useEsroStore((s) => s.addMaterials)
   
-  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean }>({
+  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean }>({
     cosmetics: false,
     titles: false,
+    materials: false,
   })
 
   const handleUnlockCosmetics = () => {
@@ -605,6 +607,29 @@ function AdminUnlockButton() {
       >
         {unlocked.titles ? "All Titles Unlocked" : "Unlock All Titles"}
       </button>
+      
+      {/* Crafting materials */}
+      <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
+        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Crafting Testing
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            addMaterials()
+            setUnlocked((prev) => ({ ...prev, materials: true }))
+          }}
+          disabled={unlocked.materials}
+          className={cn(
+            "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+            unlocked.materials
+              ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
+              : "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
+          )}
+        >
+          {unlocked.materials ? "Materials Added" : "Add Crafting Materials"}
+        </button>
+      </div>
       
       {/* Expedition simulation */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">

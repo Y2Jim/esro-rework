@@ -100,6 +100,10 @@ interface EsroState {
   lastRecovered: RecoveryResult | null
   runRecovery: (mode: "standard" | "focused") => void
   clearLastRecovered: () => void
+  activeCraft: { recipeId: string; label: string; startedAt: number; duration: number } | null
+  craftItem: (recipeId: string) => { success: boolean; message: string }
+  completeCraft: () => void
+  addMaterials: () => void // Admin function to add crafting materials
 
   // Contracts
   contracts: Contract[]
@@ -457,6 +461,117 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   clearLastRecovered: () => set({ lastRecovered: null }),
+  
+  // Crafting
+  activeCraft: null,
+  craftItem: (recipeId) => {
+    const { inventory, activeCraft } = get()
+    if (activeCraft) return { success: false, message: "Already crafting something" }
+    
+    // Import recipes dynamically to avoid circular deps
+    const { CRAFTING_RECIPES } = require("@/config/crafting-recipes")
+    const recipe = CRAFTING_RECIPES.find((r: any) => r.id === recipeId)
+    if (!recipe) return { success: false, message: "Recipe not found" }
+    if (!recipe.unlocked) return { success: false, message: "Recipe locked" }
+    
+    // Check ingredients
+    for (const ing of recipe.ingredients) {
+      const owned = inventory.find(i => i.id === ing.itemId || i.label === ing.label)
+      if (!owned || owned.qty < ing.qty) {
+        return { success: false, message: `Missing ${ing.label}` }
+      }
+    }
+    
+    // Consume ingredients
+    let updatedInventory = [...inventory]
+    for (const ing of recipe.ingredients) {
+      const idx = updatedInventory.findIndex(i => i.id === ing.itemId || i.label === ing.label)
+      if (idx !== -1) {
+        if (updatedInventory[idx].qty <= ing.qty) {
+          updatedInventory = updatedInventory.filter((_, i) => i !== idx)
+        } else {
+          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - ing.qty }
+        }
+      }
+    }
+    
+    set({
+      inventory: updatedInventory,
+      activeCraft: {
+        recipeId: recipe.id,
+        label: recipe.label,
+        startedAt: Date.now(),
+        duration: recipe.craftTime * 1000,
+      },
+    })
+    
+    return { success: true, message: `Crafting ${recipe.label}...` }
+  },
+  completeCraft: () => {
+    const { activeCraft, inventory } = get()
+    if (!activeCraft) return
+    
+    const { CRAFTING_RECIPES } = require("@/config/crafting-recipes")
+    const recipe = CRAFTING_RECIPES.find((r: any) => r.id === activeCraft.recipeId)
+    if (!recipe) {
+      set({ activeCraft: null })
+      return
+    }
+    
+    // Add crafted item to inventory
+    const existingItem = inventory.find(i => i.id === recipe.output.itemId)
+    let updatedInventory: InventoryItem[]
+    
+    if (existingItem) {
+      updatedInventory = inventory.map(i =>
+        i.id === recipe.output.itemId
+          ? { ...i, qty: i.qty + recipe.output.qty }
+          : i
+      )
+    } else {
+      const newItem: InventoryItem = {
+        id: recipe.output.itemId,
+        label: recipe.output.label,
+        aspect: recipe.output.aspect,
+        rarity: recipe.output.rarity,
+        qty: recipe.output.qty,
+        identified: true,
+        description: recipe.output.description,
+        effects: recipe.output.effects,
+      }
+      updatedInventory = [...inventory, newItem]
+    }
+    
+    set({
+      inventory: updatedInventory,
+      activeCraft: null,
+    })
+  },
+  addMaterials: () => {
+    const { inventory } = get()
+    const { CRAFTING_MATERIALS } = require("@/config/crafting-recipes")
+    
+    // Add some of each material
+    const newMaterials: InventoryItem[] = CRAFTING_MATERIALS.map((mat: InventoryItem) => ({
+      ...mat,
+      qty: 5 + Math.floor(Math.random() * 10),
+    }))
+    
+    // Merge with existing inventory
+    let updatedInventory = [...inventory]
+    for (const mat of newMaterials) {
+      const existing = updatedInventory.find(i => i.id === mat.id)
+      if (existing) {
+        updatedInventory = updatedInventory.map(i =>
+          i.id === mat.id ? { ...i, qty: i.qty + mat.qty } : i
+        )
+      } else {
+        updatedInventory.push(mat)
+      }
+    }
+    
+    set({ inventory: updatedInventory })
+  },
 
   // Contracts
   contracts: seedContracts,
