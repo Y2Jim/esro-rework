@@ -1030,15 +1030,16 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   
-  // Admin/Debug - inject test chat messages with all title rarities
+  // Admin/Debug - inject test chat messages with all title rarities to PUBLIC channel
   injectTestChatMessages: () => {
-    const { messages, channel } = get()
+    const { messages } = get()
     const now = Date.now()
+    const targetChannel: ChannelId = "PUBLIC"
     
     const testMessages: ChatMessage[] = [
       {
         id: `test-common-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@faded_one",
         title: "Faded Echo",
@@ -1048,7 +1049,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-uncommon-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@signal_keeper",
         title: "Signal Keeper",
@@ -1058,7 +1059,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-rare-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@archive_seeker",
         title: "Archive Listener",
@@ -1068,7 +1069,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-epic-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@depth_walker",
         title: "Void Speaker",
@@ -1078,7 +1079,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-legendary-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@golden_regent",
         title: "Deep Pull Regent",
@@ -1088,7 +1089,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-mythic-1-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@relay_myth",
         title: "Myth of the Relay Sea",
@@ -1098,7 +1099,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-mythic-2-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@shard_ascendant",
         title: "Shardheart Ascendant",
@@ -1108,7 +1109,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
       {
         id: `test-mythic-3-${now}`,
-        channel: channel,
+        channel: targetChannel,
         kind: "player",
         handle: "@eternal_one",
         title: "Eternal Courier",
@@ -1118,6 +1119,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
     ]
     
-    set({ messages: [...messages, ...testMessages] })
+    // Set messages and switch to PUBLIC channel so user can see them
+    set({ messages: [...messages, ...testMessages], channel: targetChannel })
   },
 }))
