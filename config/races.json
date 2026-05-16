@@ -35,7 +35,7 @@
       "color": "#8cb2ff",
       "glow": "rgba(140, 178, 255, 0.30)",
       "lore": "Gloamwhisper circles train by listening before acting. Their operators read tension in the dark, then shift shape around whatever the frontier tries next.",
-      "stats": { "hp": 0, "atk": 1, "def": 1, "focus": 1, "luck": 1 }
+      "stats": { "hp": 0, "atk": 1, "def": 0, "focus": 2, "luck": 1 }
     },
     {
       "id": "roadsinger",
