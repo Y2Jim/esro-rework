@@ -4,6 +4,7 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { EsroLogo } from "@/components/brand/esro-logo"
 import { getTitleClass } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
+import { Package } from "lucide-react"
 
 const screenLabel: Record<string, string> = {
   terminal: "relay · channels",
@@ -11,13 +12,18 @@ const screenLabel: Record<string, string> = {
   contracts: "contract board",
   faction: "faction hub",
   profile: "profile",
+  inventory: "inventory",
+  admin: "admin panel",
 }
 
 export function IdentityBar() {
   const identity = useEsroStore((s) => s.identity)
   const screen = useEsroStore((s) => s.screen)
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const inventory = useEsroStore((s) => s.inventory)
 
   const titleClass = getTitleClass(identity.titleRarity)
+  const itemCount = inventory.reduce((sum, item) => sum + item.qty, 0)
 
   return (
     <div className="relative z-20 flex items-center justify-between gap-3 px-4 pb-3 pt-1">
@@ -39,17 +45,34 @@ export function IdentityBar() {
         </div>
       </div>
 
-      <div className="flex flex-col items-end leading-tight">
-        <div className="text-[12px] font-medium text-[color:var(--color-foreground)] text-glow-soft">
-          {identity.handle}
-        </div>
-        <div
+      <div className="flex items-center gap-3">
+        {/* Inventory button */}
+        <button
+          type="button"
+          onClick={() => setScreen("inventory")}
           className={cn(
-            "text-[9px] uppercase tracking-[0.25em]",
-            titleClass,
+            "group relative flex items-center gap-1.5 rounded-md border px-2 py-1 transition-all",
+            screen === "inventory"
+              ? "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)]"
+              : "border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 text-[color:var(--color-muted)] hover:border-[color:var(--color-amber)]/30 hover:text-[color:var(--color-amber)]/80"
           )}
         >
-          {identity.title}
+          <Package className="h-3.5 w-3.5" />
+          <span className="text-[9px] uppercase tracking-wider">{itemCount}</span>
+        </button>
+
+        <div className="flex flex-col items-end leading-tight">
+          <div className="text-[12px] font-medium text-[color:var(--color-foreground)] text-glow-soft">
+            {identity.handle}
+          </div>
+          <div
+            className={cn(
+              "text-[9px] uppercase tracking-[0.25em]",
+              titleClass,
+            )}
+          >
+            {identity.title}
+          </div>
         </div>
       </div>
     </div>

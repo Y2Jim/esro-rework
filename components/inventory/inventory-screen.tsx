@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { inventory } from "@/lib/mock-data"
+import { useEsroStore } from "@/store/use-esro-store"
 import { ScreenScroll, ScreenSection } from "@/components/ui/screen-section"
 import { ItemRow } from "./item-row"
 import { ItemDetail } from "./item-detail"
 import { AnimatePresence, motion } from "framer-motion"
 
 export function InventoryScreen() {
+  const inventory = useEsroStore((s) => s.inventory)
   const [selectedId, setSelectedId] = useState<string | null>(inventory[0]?.id ?? null)
   const selected = inventory.find((i) => i.id === selectedId) ?? null
 

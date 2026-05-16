@@ -15,6 +15,7 @@ export type ScreenId =
   | "social"
   | "profile"
   | "admin"
+  | "inventory"
 
 export type SocialTab = "party" | "faction" | "friends" | "trade"
 
