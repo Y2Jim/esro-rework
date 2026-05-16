@@ -527,7 +527,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                         <h3 className="font-bold text-[13px] text-[color:var(--color-text-primary)]">{race.name}</h3>
                         <span className="text-[10px] text-[color:var(--color-text-muted)]">/ {race.role}</span>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)] line-clamp-2">
+                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)]">
                         {race.summary}
                       </p>
                       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
@@ -587,7 +587,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-[13px] text-[color:var(--color-text-primary)]">{courier.name}</h3>
-                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)] line-clamp-2">
+                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)]">
                         {courier.summary}
                       </p>
                       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
