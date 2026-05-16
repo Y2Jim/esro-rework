@@ -195,9 +195,21 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
-  const [generatedHandle, setGeneratedHandle] = useState(() => generateHandle())
-  const [avatarSeed, setAvatarSeed] = useState(() => `seed-${Date.now()}`)
-  const [avatar, setAvatar] = useState<AvatarConfig>(() => generateAvatarFromSeed(`seed-${Date.now()}`))
+  const [generatedHandle, setGeneratedHandle] = useState("")
+  const [avatarSeed, setAvatarSeed] = useState("initial-seed")
+  const [avatar, setAvatar] = useState<AvatarConfig>(() => generateAvatarFromSeed("initial-seed"))
+  const [mounted, setMounted] = useState(false)
+  
+  // Generate random values only on client after mount to avoid hydration mismatch
+  useEffect(() => {
+    if (!mounted) {
+      setMounted(true)
+      const seed = `seed-${Date.now()}`
+      setAvatarSeed(seed)
+      setAvatar(generateAvatarFromSeed(seed))
+      setGeneratedHandle(generateHandle())
+    }
+  }, [mounted])
   
   // Regenerate avatar with new random seed
   const randomizeAvatar = () => {

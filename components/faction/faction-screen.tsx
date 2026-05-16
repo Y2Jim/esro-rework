@@ -18,6 +18,7 @@ const factionTabs: { id: FactionTab; label: string; icon: string; color: string;
 export function FactionScreen() {
   const [tab, setTab] = useState<FactionTab>("party")
   const profile = useEsroStore((s) => s.profile)
+  const identity = useEsroStore((s) => s.identity)
   const party = useEsroStore((s) => s.party)
   const factionProjects = useEsroStore((s) => s.factionProjects)
 
@@ -68,7 +69,7 @@ export function FactionScreen() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
-        {tab === "party" && <PartyTab party={party} />}
+        {tab === "party" && <PartyTab party={party} profile={profile} identity={identity} />}
         {tab === "projects" && <ProjectsTab projects={factionProjects} />}
         {tab === "ranks" && <RanksTab currentRank={faction?.rank || 0} />}
       </div>
@@ -81,10 +82,16 @@ function getRankTitle(rank: number): string {
   return titles[Math.min(rank, titles.length - 1)]
 }
 
-function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }) {
+function PartyTab({ 
+  party, 
+  profile, 
+  identity 
+}: { 
+  party: ReturnType<typeof useEsroStore>["party"]
+  profile: ReturnType<typeof useEsroStore>["profile"]
+  identity: ReturnType<typeof useEsroStore>["identity"]
+}) {
   const maxSlots = 4
-  const profile = useEsroStore((s) => s.profile)
-  const identity = useEsroStore((s) => s.identity)
   
   // Update the player's own party entry with current profile data
   const partyWithUpdatedPlayer = party.map((m) => {
