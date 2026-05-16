@@ -389,45 +389,14 @@
     50% { opacity: 0.5; }
   }
   
-  /* Mythic: Subtle accent text enhancement - no overlapping glow */
+  /* Mythic: Subtle accent text - no glow animation */
   .theme-effect-radiant .text-\[color\:var\(--color-accent\)\] {
-    text-shadow: 0 0 4px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    text-shadow: 0 0 2px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
   }
   
-  @keyframes theme-radiant-text {
-    0%, 100% { 
-      text-shadow: 0 0 4px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
-    }
-    50% { 
-      text-shadow: 
-        0 0 18px var(--rollable-accent),
-        0 0 36px var(--rollable-accent),
-        0 0 54px color-mix(in srgb, var(--rollable-accent) 80%, transparent);
-    }
-  }
-  
-  /* Mythic: Buttons have divine radiance */
+  /* Mythic: Buttons have minimal enhancement */
   .theme-effect-radiant button {
-    box-shadow: 
-      0 0 20px var(--rollable-accent),
-      0 0 40px color-mix(in srgb, var(--rollable-accent) 65%, transparent),
-      0 0 60px color-mix(in srgb, var(--rollable-accent) 35%, transparent);
-    animation: theme-radiant-button 2.5s ease-in-out infinite;
-  }
-  
-  @keyframes theme-radiant-button {
-    0%, 100% {
-      box-shadow: 
-        0 0 20px var(--rollable-accent),
-        0 0 40px color-mix(in srgb, var(--rollable-accent) 65%, transparent),
-        0 0 60px color-mix(in srgb, var(--rollable-accent) 35%, transparent);
-    }
-    50% {
-      box-shadow: 
-        0 0 28px var(--rollable-accent),
-        0 0 56px color-mix(in srgb, var(--rollable-accent) 75%, transparent),
-        0 0 84px color-mix(in srgb, var(--rollable-accent) 45%, transparent);
-    }
+    box-shadow: 0 0 3px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
   }
 
   * {
