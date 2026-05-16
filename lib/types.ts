@@ -328,6 +328,8 @@ export interface Profile {
   handle: string
   title: OwnedTitle | null
   faction: Faction | null
+  race: Race | null
+  courier: Courier | null
   level: number
   xp: number
   xpToNext: number
@@ -336,3 +338,111 @@ export interface Profile {
   notifications: ProfileNotification[]
   vanityItems: VanityItem[]
 }
+
+// ============ CHARACTER CREATION / FACTIONS ============
+
+export type RaceId = "crownborn" | "hearthkin" | "gloamwhisper" | "roadsinger"
+export type CourierId = "gallant" | "trickster" | "caregiver" | "visionary"
+
+export interface BaseStats {
+  hp: number
+  atk: number
+  def: number
+  focus: number
+  luck: number
+}
+
+export interface Race {
+  id: RaceId
+  name: string
+  summary: string
+  affinity: string
+  role: string
+  icon: string
+  color: string
+  glow: string
+  lore: string
+  stats: BaseStats
+}
+
+export interface Courier {
+  id: CourierId
+  name: string
+  summary: string
+  theme: string
+  icon: string
+  color: string
+  glow: string
+  stats: BaseStats
+}
+
+export interface FactionData {
+  id: RaceId
+  name: string
+  emblem: string // unicode symbol for faction emblem
+  color: string
+  glow: string
+  colorVars: {
+    primary: string
+    secondary: string
+    accent: string
+    bg: string
+  }
+  lore: string
+  motto: string
+  unlockLevel: number
+}
+
+export interface CharacterData {
+  handle: string
+  race: Race
+  courier: Courier
+  faction: FactionData | null
+  stats: BaseStats
+  level: number
+  xp: number
+  xpToNext: number
+  skills: SkillSnapshot[]
+  starterSkills: string[]
+  established: boolean
+  createdAt: number
+}
+
+export interface SkillStat {
+  id: string
+  name: string
+  level: number
+  progress: number
+}
+
+export interface SkillSnapshot {
+  name: string
+  linkedStat: keyof BaseStats
+  summary: string
+  level: number
+  progress: number
+  specialty: string
+  starterChoice: boolean
+  stats: SkillStat[]
+}
+
+export interface OnboardingPanel {
+  title: string
+  body: string
+}
+
+export type CharacterCreationStep = 
+  | "boot"
+  | "briefing"
+  | "race"
+  | "courier"
+  | "skills"
+  | "name"
+  | "confirm"
+  | "complete"
+
+export type FactionSelectionStep =
+  | "intro"
+  | "selection"
+  | "confirm"
+  | "complete"

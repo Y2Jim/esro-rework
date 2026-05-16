@@ -24,7 +24,12 @@ import type {
   Rarity,
   TradeOffer,
   VanityItem,
+  Race,
+  Courier,
+  FactionData,
+  RaceId,
 } from "@/lib/types"
+import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById } from "@/lib/game-data"
 import {
   channels as seedChannels,
   contracts as seedContracts,
@@ -46,6 +51,19 @@ interface EsroState {
   booted: boolean
   setBooted: (v: boolean) => void
 
+  // Character Creation & Onboarding
+  isNewUser: boolean
+  characterCreated: boolean
+  characterRace: Race | null
+  characterCourier: Courier | null
+  characterFaction: FactionData | null
+  factionUnlocked: boolean
+  uiTheme: "default" | RaceId
+  setCharacterData: (race: Race, courier: Courier, handle: string, starterSkills: string[]) => void
+  setFaction: (factionId: RaceId) => void
+  setUiTheme: (theme: "default" | RaceId) => void
+  checkFactionUnlock: () => void
+  
   // Navigation
   screen: ScreenId
   setScreen: (s: ScreenId) => void
@@ -244,6 +262,52 @@ const POOL: Record<Rarity, PoolItem[]> = {
 export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
   setBooted: (v) => set({ booted: v }),
+
+  // Character Creation & Onboarding
+  isNewUser: false, // Set to true to trigger onboarding
+  characterCreated: true, // Set to false for new users
+  characterRace: null,
+  characterCourier: null,
+  characterFaction: null,
+  factionUnlocked: false,
+  uiTheme: "default",
+  setCharacterData: (race, courier, handle, starterSkills) => {
+    const { profile, identity } = get()
+    set({
+      characterCreated: true,
+      characterRace: race,
+      characterCourier: courier,
+      isNewUser: false,
+      identity: {
+        ...identity,
+        handle: `@${handle}`,
+        established: true,
+      },
+      profile: {
+        ...profile,
+        handle: `@${handle}`,
+        race: race,
+        courier: courier,
+      },
+    })
+  },
+  setFaction: (factionId) => {
+    const faction = FACTIONS.find(f => f.id === factionId)
+    if (!faction) return
+    const race = getRaceById(factionId)
+    set({ 
+      characterFaction: faction,
+      uiTheme: factionId,
+      characterRace: race || get().characterRace,
+    })
+  },
+  setUiTheme: (theme) => set({ uiTheme: theme }),
+  checkFactionUnlock: () => {
+    const { profile, factionUnlocked } = get()
+    if (!factionUnlocked && profile.level >= FACTION_UNLOCK_LEVEL) {
+      set({ factionUnlocked: true })
+    }
+  },
 
   // Navigation
   screen: "terminal",

@@ -6,12 +6,16 @@ import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
-type ProfileTab = "summary" | "titles" | "cosmetics" | "notifications"
+import { FACTIONS } from "@/lib/game-data"
+import type { RaceId } from "@/lib/types"
+
+type ProfileTab = "summary" | "titles" | "cosmetics" | "settings" | "notifications"
 
 const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15", hover: "hover-lilac" },
   { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
   { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
+  { id: "settings", label: "Settings", icon: "⚙", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
   { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15", hover: "hover-danger" },
 ]
 
@@ -56,6 +60,7 @@ export function ProfileScreen() {
         {tab === "summary" && <SummaryTab />}
         {tab === "titles" && <TitlesTab />}
         {tab === "cosmetics" && <CosmeticsTab />}
+        {tab === "settings" && <SettingsTab />}
         {tab === "notifications" && <NotificationsTab />}
       </div>
     </div>
@@ -65,18 +70,45 @@ export function ProfileScreen() {
 function SummaryTab() {
   const profile = useEsroStore((s) => s.profile)
   const identity = useEsroStore((s) => s.identity)
+  const characterFaction = useEsroStore((s) => s.characterFaction)
+  const characterRace = useEsroStore((s) => s.characterRace)
+  const characterCourier = useEsroStore((s) => s.characterCourier)
 
   const xpPercent = (profile.xp / profile.xpToNext) * 100
 
   return (
     <div className="space-y-4">
-      {/* Identity with Avatar */}
+      {/* Identity with Avatar and Faction Badge */}
       <div className="flex items-center gap-4">
-        <PixelAvatar config={identity.avatar} size="lg" />
+        <div className="relative">
+          <PixelAvatar config={identity.avatar} size="lg" />
+          {/* Faction Badge Overlay */}
+          {characterFaction && (
+            <div 
+              className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold shadow-lg"
+              style={{ 
+                backgroundColor: characterFaction.color,
+                color: "#000",
+                boxShadow: `0 0 8px ${characterFaction.glow}`,
+              }}
+              title={characterFaction.name}
+            >
+              {characterFaction.emblem}
+            </div>
+          )}
+        </div>
         <div className="flex-1">
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
           {identity.title && (
             <div className={cn("text-[11px]", rarityColor[identity.titleRarity])}>{identity.title}</div>
+          )}
+          {/* Race/Courier info */}
+          {(characterRace || characterCourier) && (
+            <div className="mt-0.5 flex items-center gap-1 text-[9px] text-[color:var(--color-muted)]">
+              {characterRace && <span style={{ color: characterRace.color }}>{characterRace.name}</span>}
+              {characterRace && characterCourier && <span>/</span>}
+              {characterCourier && <span style={{ color: characterCourier.color }}>{characterCourier.name}</span>}
+            </div>
           )}
           <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
             {identity.established ? "Established identity" : "New arrival"}
@@ -98,21 +130,49 @@ function SummaryTab() {
         </div>
       </div>
 
-      {/* Faction */}
-      {profile.faction && (
-        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-          <div className="flex items-baseline justify-between">
-            <span className="text-[11px] text-[color:var(--color-muted)]">{profile.faction.label}</span>
-            <span className="text-[10px] text-[color:var(--color-accent)]">Rank {profile.faction.rank}</span>
+      {/* Faction Allegiance */}
+      {characterFaction ? (
+        <div 
+          className="rounded-lg border p-3"
+          style={{ 
+            borderColor: `${characterFaction.color}40`,
+            backgroundColor: characterFaction.colorVars.bg,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div 
+              className="flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold"
+              style={{ 
+                backgroundColor: `${characterFaction.color}25`,
+                color: characterFaction.color,
+                boxShadow: `0 0 12px ${characterFaction.glow}`,
+              }}
+            >
+              {characterFaction.emblem}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div 
+                className="text-[12px] font-bold"
+                style={{ color: characterFaction.color }}
+              >
+                {characterFaction.name}
+              </div>
+              <div className="text-[9px] text-[color:var(--color-muted)] italic">
+                &quot;{characterFaction.motto}&quot;
+              </div>
+              {profile.faction && (
+                <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+                  Rank {profile.faction.rank} - {profile.faction.standing}/{profile.faction.maxStanding} standing
+                </div>
+              )}
+            </div>
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
-            <div
-              className="h-full bg-[color:var(--color-accent)]/60"
-              style={{ width: `${(profile.faction.standing / profile.faction.maxStanding) * 100}%` }}
-            />
-          </div>
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
-            {profile.faction.standing}/{profile.faction.maxStanding} standing
+        </div>
+      ) : (
+        <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-3 text-center">
+          <div className="text-[11px] text-[color:var(--color-muted)]">No faction allegiance</div>
+          <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+            Reach Level 5 to join a faction
           </div>
         </div>
       )}
@@ -318,6 +378,97 @@ function CosmeticsTab() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function SettingsTab() {
+  const uiTheme = useEsroStore((s) => s.uiTheme)
+  const setUiTheme = useEsroStore((s) => s.setUiTheme)
+  const characterFaction = useEsroStore((s) => s.characterFaction)
+
+  const themeOptions: { id: "default" | RaceId; label: string; color: string }[] = [
+    { id: "default", label: "Default (Violet)", color: "#a45dff" },
+    ...FACTIONS.map(f => ({ id: f.id, label: f.name, color: f.color }))
+  ]
+
+  return (
+    <div className="space-y-4">
+      {/* UI Theme */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="mb-3 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          UI Theme
+        </div>
+        <div className="space-y-2">
+          {themeOptions.map((theme) => (
+            <button
+              key={theme.id}
+              type="button"
+              onClick={() => setUiTheme(theme.id)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                uiTheme === theme.id
+                  ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
+                  : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
+              )}
+            >
+              <div 
+                className="h-4 w-4 rounded-full"
+                style={{ backgroundColor: theme.color, boxShadow: `0 0 8px ${theme.color}50` }}
+              />
+              <span className="flex-1 text-[11px] text-[color:var(--color-text)]">
+                {theme.label}
+              </span>
+              {uiTheme === theme.id && (
+                <span className="text-[8px] uppercase text-[color:var(--color-accent)]">active</span>
+              )}
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-[9px] text-[color:var(--color-muted)]">
+          Choose your interface color scheme. Faction themes become available after joining a faction.
+        </p>
+      </div>
+
+      {/* Current Faction */}
+      {characterFaction && (
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Current Faction
+          </div>
+          <div className="flex items-center gap-3">
+            <div 
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-xl"
+              style={{ 
+                backgroundColor: `${characterFaction.color}20`,
+                color: characterFaction.color,
+              }}
+            >
+              {characterFaction.emblem}
+            </div>
+            <div>
+              <div className="text-[12px] font-medium" style={{ color: characterFaction.color }}>
+                {characterFaction.name}
+              </div>
+              <div className="text-[9px] text-[color:var(--color-muted)] italic">
+                {characterFaction.motto}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Other Settings Placeholder */}
+      <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3">
+        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          More Settings
+        </div>
+        <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+          <li>- Sound preferences (coming soon)</li>
+          <li>- Notification settings (coming soon)</li>
+          <li>- Privacy options (coming soon)</li>
+        </ul>
+      </div>
     </div>
   )
 }

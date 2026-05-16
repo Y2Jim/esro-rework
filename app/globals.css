@@ -45,6 +45,51 @@
 @layer base {
   :root {
     color-scheme: dark;
+    
+    /* Default theme variables (can be overridden by data-theme) */
+    --color-text-primary: var(--color-text);
+    --color-text-secondary: var(--color-muted);
+    --color-text-muted: var(--color-muted-2);
+  }
+  
+  /* Faction Theme: Crownborn - Golden luminous */
+  [data-theme="crownborn"] {
+    --color-accent: #f1d38a;
+    --color-accent-strong: #ffe4a8;
+    --color-accent-glow: rgba(241, 211, 138, 0.24);
+    --color-border: rgba(241, 211, 138, 0.42);
+    --color-border-soft: rgba(241, 211, 138, 0.25);
+    --color-border-strong: rgba(255, 228, 168, 0.46);
+  }
+  
+  /* Faction Theme: Hearthkin - Warm orange */
+  [data-theme="hearthkin"] {
+    --color-accent: #ff9b6a;
+    --color-accent-strong: #ffc299;
+    --color-accent-glow: rgba(255, 155, 106, 0.24);
+    --color-border: rgba(255, 155, 106, 0.42);
+    --color-border-soft: rgba(255, 155, 106, 0.25);
+    --color-border-strong: rgba(255, 194, 153, 0.46);
+  }
+  
+  /* Faction Theme: Gloamwhisper - Cool blue */
+  [data-theme="gloamwhisper"] {
+    --color-accent: #8cb2ff;
+    --color-accent-strong: #b8d4ff;
+    --color-accent-glow: rgba(140, 178, 255, 0.24);
+    --color-border: rgba(140, 178, 255, 0.42);
+    --color-border-soft: rgba(140, 178, 255, 0.25);
+    --color-border-strong: rgba(184, 212, 255, 0.46);
+  }
+  
+  /* Faction Theme: Roadsinger - Teal green */
+  [data-theme="roadsinger"] {
+    --color-accent: #68d9c0;
+    --color-accent-strong: #9aebd7;
+    --color-accent-glow: rgba(104, 217, 192, 0.24);
+    --color-border: rgba(104, 217, 192, 0.42);
+    --color-border-soft: rgba(104, 217, 192, 0.25);
+    --color-border-strong: rgba(154, 235, 215, 0.46);
   }
 
   * {

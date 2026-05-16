@@ -6,7 +6,9 @@ import { PartyAvatar } from "@/components/avatar/pixel-avatar"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
-import type { SocialTab } from "@/lib/types"
+import { FACTIONS, FACTION_UNLOCK_LEVEL } from "@/lib/game-data"
+import { FactionSelection } from "@/components/onboarding/faction-selection"
+import type { SocialTab, RaceId } from "@/lib/types"
 
 const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
@@ -148,40 +150,162 @@ function FactionTab({
   projects: ReturnType<typeof useEsroStore>["factionProjects"] 
 }) {
   const [subTab, setSubTab] = useState<"overview" | "projects" | "ranks">("overview")
+  const [showFactionSelection, setShowFactionSelection] = useState(false)
+  const characterFaction = useEsroStore((s) => s.characterFaction)
+  const profile = useEsroStore((s) => s.profile)
+  const setFaction = useEsroStore((s) => s.setFaction)
+  
+  const playerLevel = profile?.level || 1
+  const isLocked = playerLevel < FACTION_UNLOCK_LEVEL
 
-  if (!faction) {
+  // Show faction selection overlay
+  if (showFactionSelection) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="text-[12px] text-[color:var(--color-muted)]">No faction joined</div>
-        <button
-          type="button"
-          className="mt-4 rounded border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 px-4 py-2 text-[11px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
-        >
-          Browse Factions
-        </button>
+      <FactionSelection
+        playerLevel={playerLevel}
+        currentFaction={characterFaction}
+        onComplete={(factionId: RaceId) => {
+          setFaction(factionId)
+          setShowFactionSelection(false)
+        }}
+        onCancel={() => setShowFactionSelection(false)}
+      />
+    )
+  }
+
+  // No faction joined yet
+  if (!characterFaction) {
+    return (
+      <div className="space-y-4">
+        {/* Faction preview grid */}
+        <div className="grid grid-cols-2 gap-3">
+          {FACTIONS.map((f) => (
+            <div
+              key={f.id}
+              className="rounded-lg border p-3 text-center"
+              style={{
+                borderColor: isLocked ? "rgba(255,255,255,0.1)" : `${f.color}30`,
+                backgroundColor: isLocked ? "rgba(15,16,22,0.5)" : f.colorVars.bg,
+                opacity: isLocked ? 0.5 : 1,
+              }}
+            >
+              <div 
+                className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-xl font-bold"
+                style={{ 
+                  backgroundColor: `${f.color}20`,
+                  color: isLocked ? "#666" : f.color,
+                }}
+              >
+                {f.emblem}
+              </div>
+              <div 
+                className="mt-2 text-[11px] font-medium"
+                style={{ color: isLocked ? "#888" : f.color }}
+              >
+                {f.name}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {isLocked ? (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-center">
+            <div className="text-[12px] text-amber-400 font-medium">
+              Factions unlock at Level {FACTION_UNLOCK_LEVEL}
+            </div>
+            <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">
+              Current level: {playerLevel}
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+              <div
+                className="h-full bg-amber-500/60"
+                style={{ width: `${(playerLevel / FACTION_UNLOCK_LEVEL) * 100}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowFactionSelection(true)}
+            className="w-full rounded-lg border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 px-4 py-3 text-[12px] font-medium text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
+          >
+            Choose Your Faction
+          </button>
+        )}
+
+        <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3">
+          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Faction Benefits
+          </div>
+          <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+            <li>- Themed UI colors and emblem badge</li>
+            <li>- Bonus rewards on aligned expeditions</li>
+            <li>- Access to faction-exclusive projects</li>
+            <li>- Unique faction ranks and titles</li>
+          </ul>
+        </div>
       </div>
     )
   }
 
+  // Has faction - show full faction view
   return (
     <div className="space-y-4">
-      {/* Faction header */}
-      <div className="rounded-lg border border-[color:var(--color-violet-bright)]/30 bg-[color:var(--color-violet-bright)]/5 p-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[13px] font-medium text-[color:var(--color-text)]">{faction.label}</div>
-            <div className="text-[10px] text-[color:var(--color-muted)]">Rank {faction.rank} - {getRankTitle(faction.rank)}</div>
+      {/* Faction header with emblem */}
+      <div 
+        className="rounded-lg border p-4"
+        style={{
+          borderColor: `${characterFaction.color}40`,
+          backgroundColor: characterFaction.colorVars.bg,
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <div 
+            className="flex h-14 w-14 items-center justify-center rounded-xl text-2xl font-bold"
+            style={{ 
+              backgroundColor: `${characterFaction.color}25`,
+              color: characterFaction.color,
+              boxShadow: `0 0 20px ${characterFaction.glow}`,
+            }}
+          >
+            {characterFaction.emblem}
           </div>
-          <div className="text-right">
-            <div className="text-[11px] text-[color:var(--color-violet-bright)]">{faction.standing}/{faction.maxStanding}</div>
-            <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+          <div className="flex-1">
+            <div 
+              className="text-[14px] font-bold"
+              style={{ color: characterFaction.color }}
+            >
+              {characterFaction.name}
+            </div>
+            <div className="text-[9px] text-[color:var(--color-muted)] italic">
+              &quot;{characterFaction.motto}&quot;
+            </div>
+            {faction && (
+              <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">
+                Rank {faction.rank} - {getRankTitle(faction.rank)}
+              </div>
+            )}
+          </div>
+        </div>
+        {faction && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-[9px]">
+              <span className="text-[color:var(--color-muted)]">Standing Progress</span>
+              <span style={{ color: characterFaction.color }}>
+                {faction.standing}/{faction.maxStanding}
+              </span>
+            </div>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-[rgba(255,255,255,0.1)]">
               <div
-                className="h-full bg-[color:var(--color-violet-bright)]"
-                style={{ width: `${(faction.standing / faction.maxStanding) * 100}%` }}
+                className="h-full transition-all"
+                style={{ 
+                  width: `${(faction.standing / faction.maxStanding) * 100}%`,
+                  backgroundColor: characterFaction.color,
+                }}
               />
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Sub-tabs */}
@@ -194,18 +318,108 @@ function FactionTab({
             className={cn(
               "rounded px-2 py-1 text-[9px] uppercase tracking-wider transition-colors",
               subTab === t
-                ? "bg-[color:var(--color-violet-bright)]/15 text-[color:var(--color-violet-bright)]"
+                ? "text-[color:var(--color-accent)]"
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
+            style={subTab === t ? { 
+              backgroundColor: `${characterFaction.color}15`,
+              color: characterFaction.color,
+            } : {}}
           >
             {t}
           </button>
         ))}
       </div>
 
-      {subTab === "overview" && <FactionOverview faction={faction} />}
+      {subTab === "overview" && <FactionOverviewNew factionData={characterFaction} faction={faction} />}
       {subTab === "projects" && <FactionProjects projects={projects} />}
-      {subTab === "ranks" && <FactionRanks currentRank={faction.rank} />}
+      {subTab === "ranks" && <FactionRanks currentRank={faction?.rank || 0} />}
+    </div>
+  )
+}
+
+function FactionOverviewNew({ 
+  factionData, 
+  faction 
+}: { 
+  factionData: NonNullable<ReturnType<typeof useEsroStore>["characterFaction"]>
+  faction: ReturnType<typeof useEsroStore>["profile"]["faction"]
+}) {
+  return (
+    <div className="space-y-3">
+      {/* Faction Lore */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Faction Lore
+        </div>
+        <p className="mt-2 text-[10px] leading-relaxed text-[color:var(--color-text-secondary)]">
+          {factionData.lore}
+        </p>
+      </div>
+
+      {/* Stats */}
+      {faction && (
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Your Stats</div>
+          <div className="mt-2 grid grid-cols-2 gap-3">
+            <div>
+              <div className="text-[18px] font-medium" style={{ color: factionData.color }}>
+                {faction.rank}
+              </div>
+              <div className="text-[9px] text-[color:var(--color-muted)]">Current Rank</div>
+            </div>
+            <div>
+              <div className="text-[18px] font-medium text-[color:var(--color-text)]">
+                {faction.standing}
+              </div>
+              <div className="text-[9px] text-[color:var(--color-muted)]">Standing</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Next Rank */}
+      {faction && (
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Next Rank</div>
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-[color:var(--color-text)]">{getRankTitle(faction.rank + 1)}</span>
+              <span className="text-[color:var(--color-muted)]">{faction.standing}/{faction.maxStanding}</span>
+            </div>
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+              <div
+                className="h-full transition-all"
+                style={{ 
+                  width: `${(faction.standing / faction.maxStanding) * 100}%`,
+                  backgroundColor: factionData.color,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Faction Doctrines (from Lua config) */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Faction Bonuses
+        </div>
+        <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+          <li className="flex items-center gap-2">
+            <span style={{ color: factionData.color }}>+</span>
+            Bonus rewards on faction-aligned expeditions
+          </li>
+          <li className="flex items-center gap-2">
+            <span style={{ color: factionData.color }}>+</span>
+            Hidden attunement growth from matched skills
+          </li>
+          <li className="flex items-center gap-2">
+            <span style={{ color: factionData.color }}>+</span>
+            Faction-specific drop bias on routes
+          </li>
+        </ul>
+      </div>
     </div>
   )
 }
