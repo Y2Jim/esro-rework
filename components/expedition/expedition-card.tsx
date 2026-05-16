@@ -22,7 +22,7 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
           <h4 className="truncate text-[13px] font-medium text-[color:var(--color-foreground)]">
             {exp.label}
           </h4>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
             <span>req · {exp.requiredSkill}</span>
             <span className="text-[color:var(--color-muted-2)]">·</span>
             <span>party {exp.suggestedParty}</span>
@@ -31,13 +31,13 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
         <div className="flex flex-col items-end">
           <span
             className={cn(
-              "text-[10px] uppercase tracking-[0.2em]",
+              "text-[12px] uppercase tracking-[0.2em]",
               riskTone[exp.risk],
             )}
           >
             {exp.risk}
           </span>
-          <span className="text-[9px] text-[color:var(--color-muted)]">
+          <span className="text-[11px] text-[color:var(--color-muted)]">
             {formatDuration(exp.duration)}
           </span>
         </div>
@@ -58,7 +58,7 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
         </div>
         <button
           type="button"
-          className="shrink-0 rounded-sm border border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 px-2 py-[3px] text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-cyan)] transition-all hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
+          className="shrink-0 rounded-sm border border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 px-2 py-[3px] text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-cyan)] transition-all hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
         >
           begin
         </button>

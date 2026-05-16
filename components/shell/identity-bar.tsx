@@ -30,20 +30,20 @@ export function IdentityBar() {
   const itemCount = inventory.reduce((sum, item) => sum + item.qty, 0)
 
   return (
-    <div className="relative z-20 flex items-center justify-between gap-3 px-4 pb-3 pt-1">
-      <div className="flex items-center gap-2.5">
+    <div className="relative z-20 flex items-center justify-between gap-3 px-5 pb-3 pt-1">
+      <div className="flex items-center gap-3">
         <div className="relative">
-          <EsroLogo size={26} />
+          <EsroLogo size={30} />
           <div
             aria-hidden
             className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[color:var(--color-violet-bright)] text-glow"
           />
         </div>
         <div className="leading-tight">
-          <div className="text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+          <div className="text-[12px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
             esro
           </div>
-          <div className="text-[11px] text-[color:var(--color-foreground)]/90">
+          <div className="text-[13px] text-[color:var(--color-foreground)]/90">
             {screenLabel[screen] ?? "relay"}
           </div>
         </div>
@@ -62,7 +62,7 @@ export function IdentityBar() {
           )}
         >
           <Package className="h-3.5 w-3.5" />
-          <span className="text-[9px] uppercase tracking-wider">{itemCount}</span>
+          <span className="text-[12px] uppercase tracking-wider">{itemCount}</span>
         </button>
 
         <div className="flex flex-col items-end leading-tight">
@@ -71,7 +71,7 @@ export function IdentityBar() {
           </div>
           <div
             className={cn(
-              "text-[9px] uppercase tracking-[0.25em]",
+              "text-[11px] uppercase tracking-[0.25em]",
               titleClass,
             )}
           >

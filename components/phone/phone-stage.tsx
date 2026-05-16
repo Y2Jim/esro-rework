@@ -88,7 +88,7 @@ export function PhoneStage() {
         </PhoneFrame>
 
         {/* tiny footer caption, easy to remove when ported */}
-        <p className="pointer-events-none absolute bottom-3 left-1/2 z-0 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-muted-2)]">
+        <p className="pointer-events-none absolute bottom-3 left-1/2 z-0 -translate-x-1/2 text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-muted-2)]">
           esro prototype · phone viewport
         </p>
       </main>

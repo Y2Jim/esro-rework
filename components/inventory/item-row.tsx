@@ -38,7 +38,7 @@ export function ItemRow({
       <div
         aria-hidden
         className={cn(
-          "h-7 w-7 shrink-0 rounded-sm border text-center text-[11px] leading-[26px]",
+          "h-7 w-7 shrink-0 rounded-sm border text-center text-[13px] leading-[26px]",
           isUnknown
             ? "border-[color:var(--color-danger)]/50 text-[color:var(--color-danger)]"
             : "border-[color:var(--color-border)]",
@@ -60,11 +60,11 @@ export function ItemRow({
           >
             {isUnknown ? "unstable imprint" : item.label}
           </h4>
-          <span className="shrink-0 text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+          <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
             x{item.qty}
           </span>
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em]">
+        <div className="mt-0.5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
           <span className="text-[color:var(--color-muted)]">
             {aspectLabel[item.aspect]}
           </span>

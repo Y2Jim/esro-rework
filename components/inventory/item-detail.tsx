@@ -11,7 +11,7 @@ export function ItemDetail({ item }: { item: InventoryItem }) {
           <h4 className="text-[13px] text-[color:var(--color-amber)] text-glow-amber">
             {isUnknown ? "unstable imprint" : item.label}
           </h4>
-          <div className="mt-0.5 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em]">
+          <div className="mt-0.5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
             <span className="text-[color:var(--color-muted)]">
               {isUnknown ? "unstable" : item.aspect}
             </span>
@@ -27,14 +27,14 @@ export function ItemDetail({ item }: { item: InventoryItem }) {
             </span>
           </div>
         </div>
-        <span className="text-[10px] tabular-nums text-[color:var(--color-lilac)]">
+        <span className="text-[12px] tabular-nums text-[color:var(--color-lilac)]">
           x{item.qty}
         </span>
       </header>
 
       <div className="my-2 hr-dashed" />
 
-      <p className="text-[11px] leading-relaxed text-[color:var(--color-foreground)]/85">
+      <p className="text-[13px] leading-relaxed text-[color:var(--color-foreground)]/85">
         {isUnknown
           ? "aspect unresolved · signal irregular · reconstruct at archive to stabilize"
           : item.description}

@@ -28,10 +28,10 @@ function VariantSelector({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[color:var(--color-border)] px-3 py-2">
           <div>
-            <div className="text-[11px] font-medium text-[color:var(--color-text)]">
+            <div className="text-[13px] font-medium text-[color:var(--color-text)]">
               {skill.label} Variants
             </div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">
+            <div className="text-[11px] text-[color:var(--color-muted)]">
               Long-press to change variant
             </div>
           </div>
@@ -47,7 +47,7 @@ function VariantSelector({
         {/* Variants List */}
         <div className="max-h-64 overflow-y-auto p-2">
           {unlockedVariants.length === 0 && lockedVariants.length === 0 && (
-            <div className="py-4 text-center text-[10px] text-[color:var(--color-muted)]">
+            <div className="py-4 text-center text-[12px] text-[color:var(--color-muted)]">
               No variants discovered yet
             </div>
           )}
@@ -68,14 +68,14 @@ function VariantSelector({
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-[color:var(--color-text)]">
+                  <span className="text-[13px] font-medium text-[color:var(--color-text)]">
                     {variant.label}
                   </span>
                   {isActive && (
                     <Check className="h-3.5 w-3.5 text-[color:var(--color-accent)]" />
                   )}
                 </div>
-                <p className="mt-0.5 text-[9px] text-[color:var(--color-muted)]">
+                <p className="mt-0.5 text-[11px] text-[color:var(--color-muted)]">
                   {variant.description}
                 </p>
                 {variant.effects && variant.effects.length > 0 && (
@@ -83,7 +83,7 @@ function VariantSelector({
                     {variant.effects.map((effect, i) => (
                       <span
                         key={i}
-                        className="rounded bg-[color:var(--color-accent)]/10 px-1.5 py-0.5 text-[8px] text-[color:var(--color-accent)]"
+                        className="rounded bg-[color:var(--color-accent)]/10 px-1.5 py-0.5 text-[10px] text-[color:var(--color-accent)]"
                       >
                         {effect.description}
                       </span>
@@ -100,7 +100,7 @@ function VariantSelector({
               {unlockedVariants.length > 0 && (
                 <div className="my-2 border-t border-[color:var(--color-border)]" />
               )}
-              <div className="mb-1.5 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <div className="mb-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Locked
               </div>
               {lockedVariants.map((variant) => (
@@ -108,10 +108,10 @@ function VariantSelector({
                   key={variant.id}
                   className="mb-1.5 w-full rounded-md border border-[color:var(--color-border)]/50 bg-[color:var(--color-panel-2)]/30 p-2 opacity-50 last:mb-0"
                 >
-                  <span className="text-[11px] font-medium text-[color:var(--color-muted)]">
+                  <span className="text-[13px] font-medium text-[color:var(--color-muted)]">
                     {variant.label}
                   </span>
-                  <p className="mt-0.5 text-[9px] text-[color:var(--color-muted)]/70">
+                  <p className="mt-0.5 text-[11px] text-[color:var(--color-muted)]/70">
                     {variant.description}
                   </p>
                 </div>
@@ -188,15 +188,15 @@ function SkillButton({
     >
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-medium text-[color:var(--color-text)]">
+          <span className="text-[13px] font-medium text-[color:var(--color-text)]">
             {skill.label}
           </span>
-          <span className="text-[9px] text-[color:var(--color-muted)]">
+          <span className="text-[11px] text-[color:var(--color-muted)]">
             Lv {skill.level}
           </span>
           {info && (
             <span
-              className="rounded px-1 py-0.5 text-[8px] font-medium"
+              className="rounded px-1 py-0.5 text-[10px] font-medium"
               style={{
                 backgroundColor: `${info.color}15`,
                 color: info.color,
@@ -206,30 +206,30 @@ function SkillButton({
             </span>
           )}
           {hasVariants && (
-            <span className="rounded bg-[color:var(--color-accent)]/20 px-1 py-0.5 text-[7px] uppercase tracking-wider text-[color:var(--color-accent)]">
+            <span className="rounded bg-[color:var(--color-accent)]/20 px-1 py-0.5 text-[9px] uppercase tracking-wider text-[color:var(--color-accent)]">
               variants
             </span>
           )}
         </div>
         {activeVariant && (
-          <div className="mt-0.5 text-[9px] text-[color:var(--color-accent)]">
+          <div className="mt-0.5 text-[11px] text-[color:var(--color-accent)]">
             {activeVariant.label}
           </div>
         )}
         {info?.summary && (
-          <p className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+          <p className="mt-1 text-[11px] text-[color:var(--color-muted)]">
             {info.summary}
           </p>
         )}
         {hasVariants && (
-          <p className="mt-1 text-[8px] italic text-[color:var(--color-muted)]/70">
+          <p className="mt-1 text-[10px] italic text-[color:var(--color-muted)]/70">
             Hold to change variant
           </p>
         )}
       </div>
       <span
         className={cn(
-          "ml-2 text-[9px]",
+          "ml-2 text-[11px]",
           isEquipped ? "text-[color:var(--color-danger)]" : "text-[color:var(--color-accent)]"
         )}
       >
@@ -287,16 +287,16 @@ export function SkillsTab() {
 
       {/* Stats Overview */}
       <div className="flex items-center justify-between rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 px-3 py-2">
-        <span className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Stats
         </span>
         <div className="flex gap-2">
           {(Object.keys(playerStats) as (keyof BaseStats)[]).map((stat) => (
             <div key={stat} className="flex items-center gap-1">
-              <span className="text-[10px] font-bold" style={{ color: STAT_COLORS[stat] }}>
+              <span className="text-[12px] font-bold" style={{ color: STAT_COLORS[stat] }}>
                 {playerStats[stat]}
               </span>
-              <span className="text-[8px]" style={{ color: `${STAT_COLORS[stat]}80` }}>
+              <span className="text-[10px]" style={{ color: `${STAT_COLORS[stat]}80` }}>
                 {STAT_LABELS[stat]}
               </span>
             </div>
@@ -306,13 +306,13 @@ export function SkillsTab() {
 
       {/* Loadout */}
       <div>
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Loadout ({equipped.length}/4)
         </div>
 
         <div className="space-y-2">
           {equipped.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-3 text-center text-[10px] text-[color:var(--color-muted)]">
+            <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-3 text-center text-[12px] text-[color:var(--color-muted)]">
               No skills equipped
             </div>
           ) : (
@@ -337,7 +337,7 @@ export function SkillsTab() {
       {/* Available */}
       {available.length > 0 && (
         <div>
-          <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
             Available
           </div>
 

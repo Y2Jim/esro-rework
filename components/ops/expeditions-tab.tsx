@@ -83,11 +83,11 @@ export function ExpeditionsTab() {
       {activeExpedition && (
         <div className="rounded-lg border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/5 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-accent)]">
+            <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-accent)]">
               Active Expedition
             </span>
             {activeExpedition.currentStage && activeExpedition.totalStages && (
-              <span className="text-[10px] text-[color:var(--color-muted)]">
+              <span className="text-[12px] text-[color:var(--color-muted)]">
                 Stage {activeExpedition.currentStage}/{activeExpedition.totalStages}
               </span>
             )}
@@ -105,7 +105,7 @@ export function ExpeditionsTab() {
             />
           </div>
 
-          <div className="flex justify-between text-[10px] text-[color:var(--color-muted)]">
+          <div className="flex justify-between text-[12px] text-[color:var(--color-muted)]">
             <span>{Math.round(activeExpedition.progress * 100)}% complete</span>
             <span>ETA {Math.ceil(activeExpedition.etaSeconds / 60)}m</span>
           </div>
@@ -116,7 +116,7 @@ export function ExpeditionsTab() {
               {activeExpedition.partyMembers.map((handle) => (
                 <span
                   key={handle}
-                  className="rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[9px] text-[color:var(--color-muted)]"
+                  className="rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[11px] text-[color:var(--color-muted)]"
                 >
                   {handle}
                 </span>
@@ -127,10 +127,10 @@ export function ExpeditionsTab() {
           {/* Live log */}
           {activeExpedition.log && activeExpedition.log.length > 0 && (
             <div className="mt-3 rounded border border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/50 p-2">
-              <div className="mb-1 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <div className="mb-1 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Activity Log
               </div>
-              <div className="max-h-20 space-y-0.5 overflow-y-auto text-[10px]">
+              <div className="max-h-20 space-y-0.5 overflow-y-auto text-[12px]">
                 {activeExpedition.log.slice(-5).map((entry, i) => (
                   <div key={i} className="text-[color:var(--color-foreground)]/80">{entry}</div>
                 ))}
@@ -142,7 +142,7 @@ export function ExpeditionsTab() {
           {activeExpedition.skillGains && activeExpedition.skillGains.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {activeExpedition.skillGains.map((gain, i) => (
-                <span key={i} className="text-[9px] text-[color:var(--color-cyan)]">
+                <span key={i} className="text-[11px] text-[color:var(--color-cyan)]">
                   +{gain.xp} {gain.skill} XP
                 </span>
               ))}
@@ -154,7 +154,7 @@ export function ExpeditionsTab() {
             <button
               type="button"
               onClick={cancelExpedition}
-              className="rounded border border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-danger)] transition-colors hover:border-[color:var(--color-danger)]/60 hover:bg-[color:var(--color-danger)]/20"
+              className="rounded border border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-danger)] transition-colors hover:border-[color:var(--color-danger)]/60 hover:bg-[color:var(--color-danger)]/20"
             >
               Cancel Expedition
             </button>
@@ -164,7 +164,7 @@ export function ExpeditionsTab() {
 
       {/* Available Expeditions */}
       <div>
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Available ({expeditions.length})
         </div>
 
@@ -194,17 +194,17 @@ export function ExpeditionsTab() {
                         {exp.label}
                       </span>
                       {exp.minLevel && (
-                        <span className="text-[9px] text-[color:var(--color-muted)]">
+                        <span className="text-[11px] text-[color:var(--color-muted)]">
                           Lv.{exp.minLevel}+
                         </span>
                       )}
                     </div>
                     {exp.description && (
-                      <div className="mt-0.5 text-[10px] text-[color:var(--color-muted)]">
+                      <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
                         {exp.description}
                       </div>
                     )}
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[9px]">
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
                       <span className="text-[color:var(--color-muted)]">
                         {Math.round(exp.duration / 60)}m
                       </span>
@@ -225,7 +225,7 @@ export function ExpeditionsTab() {
                     {exp.rewards.skillXp && exp.rewards.skillXp.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {exp.rewards.skillXp.map((gain, i) => (
-                          <span key={i} className="text-[9px] text-[color:var(--color-violet-bright)]">
+                          <span key={i} className="text-[11px] text-[color:var(--color-violet-bright)]">
                             +{gain.amount} {gain.skill}
                           </span>
                         ))}
@@ -238,13 +238,13 @@ export function ExpeditionsTab() {
                         {exp.rewards.possibleDrops.slice(0, 3).map((drop, i) => (
                           <span
                             key={i}
-                            className={cn("rounded px-1 py-0.5 text-[8px]", rarityColor[drop.rarity])}
+                            className={cn("rounded px-1 py-0.5 text-[10px]", rarityColor[drop.rarity])}
                           >
                             {drop.label}
                           </span>
                         ))}
                         {exp.rewards.possibleDrops.length > 3 && (
-                          <span className="text-[8px] text-[color:var(--color-muted)]">
+                          <span className="text-[10px] text-[color:var(--color-muted)]">
                             +{exp.rewards.possibleDrops.length - 3} more
                           </span>
                         )}
@@ -256,13 +256,13 @@ export function ExpeditionsTab() {
                     {exp.tags.map((tag, i) => (
                       <span
                         key={i}
-                        className="rounded bg-[color:var(--color-panel-soft)] px-1.5 py-0.5 text-[8px] uppercase text-[color:var(--color-muted)]"
+                        className="rounded bg-[color:var(--color-panel-soft)] px-1.5 py-0.5 text-[10px] uppercase text-[color:var(--color-muted)]"
                       >
                         {tag}
                       </span>
                     ))}
                     {exp.suggestedParty > 1 && (
-                      <span className="text-[8px] text-[color:var(--color-green)]">
+                      <span className="text-[10px] text-[color:var(--color-green)]">
                         {exp.suggestedParty} party
                       </span>
                     )}
@@ -272,14 +272,14 @@ export function ExpeditionsTab() {
                 {/* Stat bonuses */}
                 {meetsRequirement && totalBonus > 0 && (
                   <div className="mt-2 flex items-center gap-2 rounded border border-[color:var(--color-success)]/20 bg-[color:var(--color-success)]/5 px-2 py-1">
-                    <span className="text-[9px] text-[color:var(--color-success)]">
+                    <span className="text-[11px] text-[color:var(--color-success)]">
                       +{totalBonus}% bonus
                     </span>
                     <div className="flex gap-1">
                       {relevantStats.slice(0, 3).map(({ stat, bonus }) => (
                         <span 
                           key={stat}
-                          className="rounded px-1 py-0.5 text-[8px] font-medium"
+                          className="rounded px-1 py-0.5 text-[10px] font-medium"
                           style={{ 
                             backgroundColor: `${STAT_COLORS[stat]}15`,
                             color: STAT_COLORS[stat],
@@ -293,7 +293,7 @@ export function ExpeditionsTab() {
                 )}
 
                 {!meetsRequirement && requiredSkill && (
-                  <div className="mt-2 rounded border border-[color:var(--color-danger-muted)]/30 bg-[color:var(--color-danger)]/5 px-2 py-1 text-[9px] text-[color:var(--color-danger-muted)]">
+                  <div className="mt-2 rounded border border-[color:var(--color-danger-muted)]/30 bg-[color:var(--color-danger)]/5 px-2 py-1 text-[11px] text-[color:var(--color-danger-muted)]">
                     Requires: {requiredSkill.label}
                   </div>
                 )}

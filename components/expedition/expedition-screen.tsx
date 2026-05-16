@@ -16,14 +16,14 @@ export function ExpeditionScreen() {
       <ScreenSection
         title="loadout summary"
         right={
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {loadout.length}/4 equipped
           </span>
         }
       >
         <div className="flex flex-wrap gap-1">
           {loadout.length === 0 && (
-            <div className="rounded-md border border-dashed border-[color:var(--color-border-soft)] px-2.5 py-1.5 text-[10px] text-[color:var(--color-muted)]">
+            <div className="rounded-md border border-dashed border-[color:var(--color-border-soft)] px-2.5 py-1.5 text-[12px] text-[color:var(--color-muted)]">
               no skills equipped · open skills page
             </div>
           )}
@@ -41,7 +41,7 @@ export function ExpeditionScreen() {
       <ScreenSection
         title="expedition ledger"
         right={
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {expeditions.length} runs
           </span>
         }

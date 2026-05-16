@@ -72,7 +72,7 @@ export function TitleDisplay({
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-sm border font-medium uppercase tracking-[0.12em]",
-        isSmall ? "px-1 py-[1px] text-[8px]" : "px-1.5 py-[2px] text-[9px]",
+        isSmall ? "px-1 py-[1px] text-[10px]" : "px-1.5 py-[2px] text-[11px]",
         colorClass,
         borderClass,
         bgClass,
@@ -82,7 +82,7 @@ export function TitleDisplay({
     >
       {title}
       {showRarityLabel && (
-        <span className="opacity-60 text-[7px] lowercase">
+        <span className="opacity-60 text-[9px] lowercase">
           ({rarityLabel[rarity]})
         </span>
       )}
@@ -133,13 +133,13 @@ export function TitleBadgeRow({
           {title}
         </div>
         <div className="mt-0.5 flex items-center gap-2">
-          <span className={cn("text-[8px] uppercase tracking-wider", colorClass, "opacity-70")}>
+          <span className={cn("text-[10px] uppercase tracking-wider", colorClass, "opacity-70")}>
             {rarityLabel[rarity]}
           </span>
           {source && (
             <>
               <span className="text-[color:var(--color-muted-2)]">-</span>
-              <span className="text-[9px] text-[color:var(--color-muted)]">
+              <span className="text-[11px] text-[color:var(--color-muted)]">
                 {source}
               </span>
             </>
@@ -147,7 +147,7 @@ export function TitleBadgeRow({
         </div>
       </div>
       {isEquipped && (
-        <span className="shrink-0 rounded bg-[color:var(--color-accent)]/20 px-2 py-0.5 text-[8px] uppercase text-[color:var(--color-accent)]">
+        <span className="shrink-0 rounded bg-[color:var(--color-accent)]/20 px-2 py-0.5 text-[10px] uppercase text-[color:var(--color-accent)]">
           active
         </span>
       )}

@@ -32,10 +32,10 @@ export function FactionScreen() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-[13px] font-medium text-[color:var(--color-text)]">{faction.label}</div>
-              <div className="text-[10px] text-[color:var(--color-muted)]">Rank {faction.rank} - {getRankTitle(faction.rank)}</div>
+              <div className="text-[12px] text-[color:var(--color-muted)]">Rank {faction.rank} - {getRankTitle(faction.rank)}</div>
             </div>
             <div className="text-right">
-              <div className="text-[11px] text-[color:var(--color-accent)]">{faction.standing}/{faction.maxStanding}</div>
+              <div className="text-[13px] text-[color:var(--color-accent)]">{faction.standing}/{faction.maxStanding}</div>
               <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-[color:var(--color-border)]">
                 <div
                   className="h-full bg-[color:var(--color-accent)]"
@@ -55,13 +55,13 @@ export function FactionScreen() {
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              "flex items-center gap-1 rounded px-2 py-1 text-[12px] uppercase tracking-wider transition-colors",
               tab === t.id
                 ? cn(t.bgColor, t.color)
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
           >
-            <span className="text-[10px]">{t.icon}</span>
+            <span className="text-[12px]">{t.icon}</span>
             {t.label}
           </button>
         ))}
@@ -109,7 +109,7 @@ function PartyTab({
 
   return (
     <div className="space-y-4">
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Party Members ({partyWithUpdatedPlayer.length}/{maxSlots})
       </div>
 
@@ -122,17 +122,17 @@ function PartyTab({
             <PartyAvatar config={m.avatar || generateAvatarFromSeed(m.handle)} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[color:var(--color-text)]">{m.handle}</span>
+                <span className="text-[13px] text-[color:var(--color-text)]">{m.handle}</span>
                 {m.leader && (
-                  <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[8px] text-[color:var(--color-accent)]">
+                  <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[10px] text-[color:var(--color-accent)]">
                     Leader
                   </span>
                 )}
               </div>
               {m.title && (
-                <div className={cn("text-[9px]", rarityColor[m.titleRarity || "common"])}>{m.title}</div>
+                <div className={cn("text-[11px]", rarityColor[m.titleRarity || "common"])}>{m.title}</div>
               )}
-              <div className="flex items-center gap-3 text-[9px] text-[color:var(--color-muted)]">
+              <div className="flex items-center gap-3 text-[11px] text-[color:var(--color-muted)]">
                 <span>{m.role}</span>
                 <span className={cn(
                   m.status === "ready" && "text-[color:var(--color-success)]",
@@ -157,8 +157,8 @@ function PartyTab({
             className="flex items-center justify-center rounded-lg border border-dashed border-[color:var(--color-border-soft)] px-3 py-4"
           >
             <div className="text-center">
-              <div className="text-[11px] text-[color:var(--color-muted)]">Empty Slot</div>
-              <div className="mt-0.5 text-[9px] text-[color:var(--color-muted-2)]">Invite a player</div>
+              <div className="text-[13px] text-[color:var(--color-muted)]">Empty Slot</div>
+              <div className="mt-0.5 text-[11px] text-[color:var(--color-muted-2)]">Invite a player</div>
             </div>
           </div>
         ))}
@@ -166,17 +166,17 @@ function PartyTab({
 
       {/* Party actions */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">Party Actions</div>
+        <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">Party Actions</div>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button
             type="button"
-            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
           >
             Invite Player
           </button>
           <button
             type="button"
-            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
           >
             Party Settings
           </button>
@@ -189,13 +189,13 @@ function PartyTab({
 function ProjectsTab({ projects }: { projects: ReturnType<typeof useEsroStore>["factionProjects"] }) {
   return (
     <div className="space-y-4">
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Active Projects ({projects.length})
       </div>
 
       {projects.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
-          <div className="text-[11px] text-[color:var(--color-muted)]">No active projects</div>
+          <div className="text-[13px] text-[color:var(--color-muted)]">No active projects</div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -208,9 +208,9 @@ function ProjectsTab({ projects }: { projects: ReturnType<typeof useEsroStore>["
               >
                 <div className="flex items-start justify-between">
                   <div className="text-[12px] font-medium text-[color:var(--color-text)]">{p.label}</div>
-                  <span className="text-[9px] text-[color:var(--color-accent)]">{Math.floor(pct)}%</span>
+                  <span className="text-[11px] text-[color:var(--color-accent)]">{Math.floor(pct)}%</span>
                 </div>
-                <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">{p.description}</div>
+                <div className="mt-1 text-[12px] text-[color:var(--color-muted)]">{p.description}</div>
 
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-[color:var(--color-border)]">
                   <div
@@ -218,14 +218,14 @@ function ProjectsTab({ projects }: { projects: ReturnType<typeof useEsroStore>["
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <div className="mt-1 flex justify-between text-[9px] text-[color:var(--color-muted)]">
+                <div className="mt-1 flex justify-between text-[11px] text-[color:var(--color-muted)]">
                   <span>{p.progress}/{p.goal} collected</span>
                   <span>{p.contributors} contributors</span>
                 </div>
 
                 <button
                   type="button"
-                  className="mt-2 w-full rounded border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
+                  className="mt-2 w-full rounded border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
                 >
                   Contribute
                 </button>
@@ -251,7 +251,7 @@ function RanksTab({ currentRank }: { currentRank: number }) {
 
   return (
     <div className="space-y-4">
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Faction Ranks
       </div>
 
@@ -278,18 +278,18 @@ function RanksTab({ currentRank }: { currentRank: number }) {
                     Rank {r.rank}: {r.title}
                   </span>
                   {isCurrent && (
-                    <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[8px] text-[color:var(--color-accent)]">
+                    <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[10px] text-[color:var(--color-accent)]">
                       Current
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] text-[color:var(--color-muted)]">{r.standing} standing</span>
+                <span className="text-[12px] text-[color:var(--color-muted)]">{r.standing} standing</span>
               </div>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {r.rewards.map((reward, i) => (
                   <span
                     key={i}
-                    className="rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[9px] text-[color:var(--color-muted)]"
+                    className="rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[11px] text-[color:var(--color-muted)]"
                   >
                     {reward}
                   </span>

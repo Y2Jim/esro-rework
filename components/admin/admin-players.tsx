@@ -43,10 +43,10 @@ export function AdminPlayers() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Player Records ({playerRecords.length})
         </div>
-        <div className="flex gap-2 text-[9px] text-[color:var(--color-muted)]">
+        <div className="flex gap-2 text-[11px] text-[color:var(--color-muted)]">
           <span className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full bg-[#60d060]" />
             Active
@@ -65,9 +65,9 @@ export function AdminPlayers() {
       {/* Mute Modal */}
       {muteModal && (
         <div className="rounded-lg border border-[#ffb347]/30 bg-[#ffb347]/5 p-3 space-y-3">
-          <div className="text-[11px] text-[#ffb347]">Mute {muteModal.handle}</div>
+          <div className="text-[13px] text-[#ffb347]">Mute {muteModal.handle}</div>
           <div>
-            <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Duration (minutes)
             </label>
             <input
@@ -75,21 +75,21 @@ export function AdminPlayers() {
               value={muteModal.duration}
               onChange={(e) => setMuteModal({ ...muteModal, duration: parseInt(e.target.value) || 5 })}
               min={1}
-              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] focus:border-[#ffb347] focus:outline-none"
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ffb347] focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setMuteModal(null)}
-              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]"
+              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleMute}
-              className="rounded bg-[#ffb347] px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-black"
+              className="rounded bg-[#ffb347] px-3 py-1.5 text-[12px] font-medium uppercase tracking-wider text-black"
             >
               Mute Player
             </button>
@@ -100,9 +100,9 @@ export function AdminPlayers() {
       {/* Ban Modal */}
       {banModal && (
         <div className="rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/5 p-3 space-y-3">
-          <div className="text-[11px] text-[#ff6b4a]">Ban {banModal.handle}</div>
+          <div className="text-[13px] text-[#ff6b4a]">Ban {banModal.handle}</div>
           <div>
-            <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Reason
             </label>
             <textarea
@@ -110,14 +110,14 @@ export function AdminPlayers() {
               onChange={(e) => setBanModal({ ...banModal, reason: e.target.value })}
               placeholder="Reason for ban..."
               rows={2}
-              className="w-full resize-none rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+              className="w-full resize-none rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setBanModal(null)}
-              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]"
+              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]"
             >
               Cancel
             </button>
@@ -125,7 +125,7 @@ export function AdminPlayers() {
               type="button"
               onClick={handleBan}
               disabled={!banModal.reason.trim()}
-              className="rounded bg-[#ff6b4a] px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-black disabled:opacity-50"
+              className="rounded bg-[#ff6b4a] px-3 py-1.5 text-[12px] font-medium uppercase tracking-wider text-black disabled:opacity-50"
             >
               Ban Player
             </button>
@@ -136,7 +136,7 @@ export function AdminPlayers() {
       {/* Players List */}
       {playerRecords.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-          <p className="text-[11px] text-[color:var(--color-muted)]">No player records</p>
+          <p className="text-[13px] text-[color:var(--color-muted)]">No player records</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -165,23 +165,23 @@ export function AdminPlayers() {
                       {player.handle}
                     </span>
                     {player.warnings > 0 && (
-                      <span className="flex items-center gap-0.5 rounded bg-[#ffb347]/20 px-1.5 py-0.5 text-[8px] text-[#ffb347]">
+                      <span className="flex items-center gap-0.5 rounded bg-[#ffb347]/20 px-1.5 py-0.5 text-[10px] text-[#ffb347]">
                         <AlertTriangle className="h-2.5 w-2.5" />
                         {player.warnings} warning{player.warnings > 1 ? "s" : ""}
                       </span>
                     )}
                   </div>
                   {player.status === "muted" && player.mutedUntil && (
-                    <p className="mt-1 text-[9px] text-[#ffb347]">
+                    <p className="mt-1 text-[11px] text-[#ffb347]">
                       {formatTimeRemaining(player.mutedUntil)}
                     </p>
                   )}
                   {player.status === "banned" && player.bannedReason && (
-                    <p className="mt-1 text-[9px] text-[#ff6b4a]">
+                    <p className="mt-1 text-[11px] text-[#ff6b4a]">
                       Reason: {player.bannedReason}
                     </p>
                   )}
-                  <p className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+                  <p className="mt-1 text-[11px] text-[color:var(--color-muted)]">
                     Last seen: {new Date(player.lastSeen).toLocaleString()}
                   </p>
                 </div>

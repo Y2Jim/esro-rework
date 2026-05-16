@@ -45,7 +45,7 @@ export function BootSplash() {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-between px-6 pb-8 pt-16">
       {/* top status */}
-      <div className="flex w-full items-center justify-between text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+      <div className="flex w-full items-center justify-between text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
         <span>esro · v0.1</span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-[5px] w-[5px] rounded-full bg-[color:var(--color-violet-bright)] text-glow" />
@@ -85,7 +85,7 @@ export function BootSplash() {
           <div className="text-[22px] font-semibold tracking-[0.45em] text-[color:var(--color-foreground)] text-glow">
             ESRO
           </div>
-          <div className="mt-1 text-[9px] uppercase tracking-[0.35em] text-[color:var(--color-muted)]">
+          <div className="mt-1 text-[11px] uppercase tracking-[0.35em] text-[color:var(--color-muted)]">
             enchanted star realms online
           </div>
         </motion.div>
@@ -94,7 +94,7 @@ export function BootSplash() {
       {/* boot lines */}
       <div className="w-full max-w-[280px]">
         <div className="mb-2 hr-dashed" />
-        <ul className="space-y-1 font-mono text-[11px] leading-5 text-[color:var(--color-lilac)]">
+        <ul className="space-y-1 font-mono text-[13px] leading-5 text-[color:var(--color-lilac)]">
           {LINES.map((line, i) => {
             const visible = i < shown
             const isLast = i === shown - 1 && shown < LINES.length

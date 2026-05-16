@@ -99,7 +99,7 @@ export function SkillCard({
                 </span>
               )}
             </h4>
-            <span className="shrink-0 text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+            <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
               {locked ? "locked" : `lv ${skill.level}/${skill.maxLevel}`}
             </span>
           </div>
@@ -127,7 +127,7 @@ export function SkillCard({
                 {skill.effects.map((effect, i) => (
                   <span 
                     key={i} 
-                    className={cn("text-[10px]", EFFECT_COLORS[effect.type])}
+                    className={cn("text-[12px]", EFFECT_COLORS[effect.type])}
                     title={effect.description}
                   >
                     {EFFECT_ICONS[effect.type]}
@@ -137,7 +137,7 @@ export function SkillCard({
               <button
                 type="button"
                 onClick={handleExpand}
-                className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-accent)]"
+                className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-accent)]"
               >
                 {expanded ? "hide" : "details"}
               </button>
@@ -149,7 +149,7 @@ export function SkillCard({
       {/* Expanded effects panel */}
       {expanded && skill.effects && (
         <div className="border-t border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/30 px-3 py-2">
-          <div className="mb-1.5 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="mb-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
             Effects at Level {skill.level}
           </div>
           <div className="space-y-1">
@@ -157,7 +157,7 @@ export function SkillCard({
               const totalBonus = effect.value * skill.level
               const sign = effect.value > 0 ? "+" : ""
               return (
-                <div key={i} className="flex items-start gap-2 text-[10px]">
+                <div key={i} className="flex items-start gap-2 text-[12px]">
                   <span className={cn("shrink-0", EFFECT_COLORS[effect.type])}>
                     {EFFECT_ICONS[effect.type]}
                   </span>
@@ -174,7 +174,7 @@ export function SkillCard({
             })}
           </div>
           {skill.primaryExpeditions && skill.primaryExpeditions.length > 0 && (
-            <div className="mt-2 text-[9px] text-[color:var(--color-muted)]">
+            <div className="mt-2 text-[11px] text-[color:var(--color-muted)]">
               Primary for: {skill.primaryExpeditions.map(e => e.replace(/_/g, " ")).join(", ")}
             </div>
           )}

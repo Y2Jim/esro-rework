@@ -24,7 +24,7 @@ export function AppShell() {
       <StatusBar />
       <IdentityBar />
 
-      <div className="hr-dashed mx-4" />
+      <div className="hr-dashed mx-5" />
 
       {/* screen content */}
       <div className="relative min-h-0 flex-1 overflow-hidden">

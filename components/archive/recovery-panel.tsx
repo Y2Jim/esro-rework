@@ -61,12 +61,12 @@ function PullRow({
           )}>
             {title}
           </h4>
-          <p className="mt-0.5 text-[10px] leading-snug text-[color:var(--color-foreground)]/70">
+          <p className="mt-0.5 text-[12px] leading-snug text-[color:var(--color-foreground)]/70">
             {detail}
           </p>
         </div>
         <span className={cn(
-          "shrink-0 text-[9px] uppercase tracking-[0.22em]",
+          "shrink-0 text-[11px] uppercase tracking-[0.22em]",
           tone === "cyan" ? "text-[color:var(--color-cyan-muted)]" : "text-[color:var(--color-amber-muted)]"
         )}>
           cost · {cost}
@@ -77,7 +77,7 @@ function PullRow({
         onClick={onPull}
         disabled={!canPull}
         className={cn(
-          "mt-2 w-full rounded-sm border px-2 py-1.5 text-[10px] uppercase tracking-[0.28em] transition-all",
+          "mt-2 w-full rounded-sm border px-2 py-1.5 text-[12px] uppercase tracking-[0.28em] transition-all",
           tone === "cyan"
             ? "border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)] hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
             : "border-[color:var(--color-amber-muted)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:text-glow-amber hover:border-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20",

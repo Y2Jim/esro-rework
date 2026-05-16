@@ -372,7 +372,7 @@ if (briefingIndex > 0) {
             />
           ))}
         </div>
-        <p className="mt-1.5 text-center text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-widest">
+        <p className="mt-1.5 text-center text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-widest">
           {step === "incoming" && "Signal Detected"}
           {step === "briefing" && `Transmission ${briefingIndex + 1}/${ONBOARDING_PANELS.length}`}
           {step === "race" && "Select Lineage"}
@@ -465,7 +465,7 @@ if (briefingIndex > 0) {
               className="mx-auto max-w-sm"
             >
               <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.95)] p-6">
-                <div className="mb-3 flex items-center gap-2 text-[10px] text-[color:var(--color-accent)]">
+                <div className="mb-3 flex items-center gap-2 text-[12px] text-[color:var(--color-accent)]">
                   <motion.span 
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -543,9 +543,9 @@ if (briefingIndex > 0) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-[13px] text-[color:var(--color-text-primary)]">{race.name}</h3>
-                        <span className="text-[10px] text-[color:var(--color-text-muted)]">/ {race.role}</span>
+                        <span className="text-[12px] text-[color:var(--color-text-muted)]">/ {race.role}</span>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)]">
+                      <p className="mt-0.5 text-[13px] text-[color:var(--color-text-secondary)]">
                         {race.summary}
                       </p>
                       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
@@ -553,7 +553,7 @@ if (briefingIndex > 0) {
                           race.stats[stat] !== 0 && (
                             <span 
                               key={stat} 
-                              className="text-[10px] font-mono"
+                              className="text-[12px] font-mono"
                               style={{ color: race.stats[stat] > 0 ? race.color : "#888" }}
                             >
                               {STAT_LABELS[stat]} {race.stats[stat] > 0 ? "+" : ""}{race.stats[stat]}
@@ -605,7 +605,7 @@ if (briefingIndex > 0) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-[13px] text-[color:var(--color-text-primary)]">{courier.name}</h3>
-                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)]">
+                      <p className="mt-0.5 text-[13px] text-[color:var(--color-text-secondary)]">
                         {courier.summary}
                       </p>
                       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
@@ -613,7 +613,7 @@ if (briefingIndex > 0) {
                           courier.stats[stat] !== 0 && (
                             <span 
                               key={stat} 
-                              className="text-[10px] font-mono"
+                              className="text-[12px] font-mono"
                               style={{ color: courier.stats[stat] > 0 ? courier.color : "#888" }}
                             >
                               {STAT_LABELS[stat]} {courier.stats[stat] > 0 ? "+" : ""}{courier.stats[stat]}
@@ -634,7 +634,7 @@ if (briefingIndex > 0) {
               {/* Combined stats preview */}
               {combinedStats && (
                 <div className="mt-3 rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-3">
-                  <div className="mb-2 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                  <div className="mb-2 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Combined Stats
                   </div>
                   <div className="space-y-1.5">
@@ -673,7 +673,7 @@ if (briefingIndex > 0) {
                   <button
                     type="button"
                     onClick={randomizeAvatar}
-                    className="flex items-center gap-1.5 rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(168,123,255,0.1)] px-3 py-1.5 text-[11px] text-[color:var(--color-accent)] transition-colors hover:bg-[rgba(168,123,255,0.2)]"
+                    className="flex items-center gap-1.5 rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(168,123,255,0.1)] px-3 py-1.5 text-[13px] text-[color:var(--color-accent)] transition-colors hover:bg-[rgba(168,123,255,0.2)]"
                   >
                     <RefreshCw className="h-3.5 w-3.5" />
                     Randomize
@@ -685,7 +685,7 @@ if (briefingIndex > 0) {
               <div className="space-y-2">
                 {/* Skin */}
                 <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
-                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                  <div className="mb-1.5 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Skin Tone
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -709,7 +709,7 @@ if (briefingIndex > 0) {
 
                 {/* Hair */}
                 <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
-                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                  <div className="mb-1.5 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Hair Style
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-2">
@@ -719,7 +719,7 @@ if (briefingIndex > 0) {
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("hair", i)}
-                          className={`rounded border px-2 py-1 text-[9px] font-mono transition-all ${
+                          className={`rounded border px-2 py-1 text-[11px] font-mono transition-all ${
                             currentHair === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
@@ -730,7 +730,7 @@ if (briefingIndex > 0) {
                       )
                     })}
                   </div>
-                  <div className="text-[10px] text-[color:var(--color-text-muted)] mb-1.5">Hair Color</div>
+                  <div className="text-[12px] text-[color:var(--color-text-muted)] mb-1.5">Hair Color</div>
                   <div className="flex flex-wrap gap-1.5">
                     {HAIR_COLORS.map((color, i) => {
                       const currentColor = avatar.layers.find(l => l.type === "hair")?.color ?? 0
@@ -755,7 +755,7 @@ if (briefingIndex > 0) {
 
                 {/* Eyes */}
                 <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
-                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                  <div className="mb-1.5 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Eyes
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-2">
@@ -765,7 +765,7 @@ if (briefingIndex > 0) {
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("eyes", i)}
-                          className={`h-7 w-7 rounded border text-[10px] font-mono transition-all ${
+                          className={`h-7 w-7 rounded border text-[12px] font-mono transition-all ${
                             currentEyes === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
@@ -776,7 +776,7 @@ if (briefingIndex > 0) {
                       )
                     })}
                   </div>
-                  <div className="text-[10px] text-[color:var(--color-text-muted)] mb-1.5">Eye Color</div>
+                  <div className="text-[12px] text-[color:var(--color-text-muted)] mb-1.5">Eye Color</div>
                   <div className="flex flex-wrap gap-1.5">
                     {EYE_COLORS.map((color, i) => {
                       const currentColor = avatar.layers.find(l => l.type === "eyes")?.color ?? 0
@@ -801,7 +801,7 @@ if (briefingIndex > 0) {
 
                 {/* Head Shape */}
                 <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
-                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                  <div className="mb-1.5 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Head Shape
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -811,7 +811,7 @@ if (briefingIndex > 0) {
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("base", i)}
-                          className={`rounded border px-2.5 py-1.5 text-[10px] font-mono transition-all ${
+                          className={`rounded border px-2.5 py-1.5 text-[12px] font-mono transition-all ${
                             currentBase === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
@@ -836,7 +836,7 @@ if (briefingIndex > 0) {
               exit={{ opacity: 0, y: -10 }}
               className="mx-auto max-w-sm"
             >
-              <p className="mb-3 text-[11px] text-[color:var(--color-text-secondary)]">
+              <p className="mb-3 text-[13px] text-[color:var(--color-text-secondary)]">
                 Choose {STARTER_SKILL_COUNT} starting skills at level 1. Others start locked.
               </p>
               <div className="space-y-1.5">
@@ -860,7 +860,7 @@ if (briefingIndex > 0) {
                         </div>
                         <div>
                           <h4 className="font-medium text-[color:var(--color-text-primary)] text-[12px]">{skill.name}</h4>
-                          <p className="text-[10px] text-[color:var(--color-text-muted)]">{STAT_LABELS[skill.linkedStat]} linked</p>
+                          <p className="text-[12px] text-[color:var(--color-text-muted)]">{STAT_LABELS[skill.linkedStat]} linked</p>
                         </div>
                       </div>
                       {selectedSkills.includes(skill.name) && (
@@ -885,7 +885,7 @@ if (briefingIndex > 0) {
               className="mx-auto max-w-sm"
             >
               <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.95)] p-5">
-                <div className="mb-3 flex items-center gap-2 text-[10px] text-[color:var(--color-accent)]">
+                <div className="mb-3 flex items-center gap-2 text-[12px] text-[color:var(--color-accent)]">
                   <motion.span 
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -899,7 +899,7 @@ if (briefingIndex > 0) {
                 </p>
                 
                 <div className="rounded-lg border border-[color:var(--color-accent)]/30 bg-[rgba(168,123,255,0.08)] p-4 text-center">
-                  <div className="text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider mb-2">
+                  <div className="text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider mb-2">
                     Your Handle
                   </div>
                   <motion.div
@@ -915,7 +915,7 @@ if (briefingIndex > 0) {
                 <button
                   type="button"
                   onClick={() => setGeneratedHandle(generateHandle())}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[10px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] hover:text-[color:var(--color-text-primary)]"
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] px-3 py-1.5 text-[12px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] hover:text-[color:var(--color-text-primary)]"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Generate New Handle
@@ -944,7 +944,7 @@ if (briefingIndex > 0) {
               </div>
 
               <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
-                <div className="mb-2 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="mb-2 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                   Final Stats
                 </div>
                 <div className="space-y-1.5">
@@ -955,14 +955,14 @@ if (briefingIndex > 0) {
               </div>
 
               <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
-                <div className="mb-2 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="mb-2 text-[12px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                   Starting Skills
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedSkills.map(skill => (
                     <span 
                       key={skill}
-                      className="rounded-full bg-[rgba(168,123,255,0.2)] px-2.5 py-0.5 text-[10px] font-medium text-[color:var(--color-accent)]"
+                      className="rounded-full bg-[rgba(168,123,255,0.2)] px-2.5 py-0.5 text-[12px] font-medium text-[color:var(--color-accent)]"
                     >
                       {skill}
                     </span>
@@ -981,7 +981,7 @@ if (briefingIndex > 0) {
             <button
               onClick={prevStep}
               disabled={step === "briefing" && briefingIndex === 0}
-              className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 font-mono text-[13px] uppercase tracking-wider text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
               Back
@@ -989,7 +989,7 @@ if (briefingIndex > 0) {
             <button
               onClick={nextStep}
               disabled={!canProceed()}
-              className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 font-mono text-[11px] font-medium uppercase tracking-wider text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 font-mono text-[13px] font-medium uppercase tracking-wider text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {step === "confirm" ? "Initialize" : "Continue"}
               {step !== "confirm" && <ChevronRight className="h-3.5 w-3.5" />}

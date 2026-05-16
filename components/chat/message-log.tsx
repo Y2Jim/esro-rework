@@ -39,7 +39,7 @@ export function MessageLog() {
       aria-live="polite"
     >
       {list.length === 0 ? (
-        <div className="px-4 py-6 text-center text-[11px] text-[color:var(--color-muted)]">
+        <div className="px-4 py-6 text-center text-[13px] text-[color:var(--color-muted)]">
           channel quiet · no traffic
         </div>
       ) : (
@@ -52,7 +52,7 @@ export function MessageLog() {
 
       {/* page marker */}
       {pageOffset > 0 && (
-        <div className="sticky bottom-0 left-0 right-0 border-t border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/80 px-3 py-1 text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-muted)] backdrop-blur">
+        <div className="sticky bottom-0 left-0 right-0 border-t border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/80 px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-muted)] backdrop-blur">
           viewing history · page -{pageOffset}
         </div>
       )}

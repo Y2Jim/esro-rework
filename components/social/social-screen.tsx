@@ -41,14 +41,14 @@ export function SocialScreen() {
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[12px] uppercase tracking-wider transition-colors",
               t.hover,
               tab === t.id
                 ? cn(t.bgColor, t.color)
                 : "text-[color:var(--color-muted)]"
             )}
           >
-            <span className="text-[10px]">{t.icon}</span>
+            <span className="text-[12px]">{t.icon}</span>
             {t.label}
           </button>
         ))}
@@ -71,7 +71,7 @@ function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }
 
   return (
     <div className="space-y-4">
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Party Members ({party.length}/{maxSlots})
       </div>
 
@@ -84,17 +84,17 @@ function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }
             <PartyAvatar config={m.avatar || generateAvatarFromSeed(m.handle)} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-[color:var(--color-text)]">{m.handle}</span>
+                <span className="text-[13px] text-[color:var(--color-text)]">{m.handle}</span>
                 {m.leader && (
-                  <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[8px] text-[color:var(--color-accent)]">
+                  <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[10px] text-[color:var(--color-accent)]">
                     Leader
                   </span>
                 )}
               </div>
               {m.title && (
-                <div className={cn("text-[9px]", getTitleClass(m.titleRarity || "common"))}>{m.title}</div>
+                <div className={cn("text-[11px]", getTitleClass(m.titleRarity || "common"))}>{m.title}</div>
               )}
-              <div className="flex items-center gap-3 text-[9px] text-[color:var(--color-muted)]">
+              <div className="flex items-center gap-3 text-[11px] text-[color:var(--color-muted)]">
                 <span>{m.role}</span>
                 <span className={cn(
                   m.status === "ready" && "text-[color:var(--color-success)]",
@@ -117,8 +117,8 @@ function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }
             className="flex items-center justify-center rounded-lg border border-dashed border-[color:var(--color-border-soft)] px-3 py-4"
           >
             <div className="text-center">
-              <div className="text-[11px] text-[color:var(--color-muted)]">Empty Slot</div>
-              <div className="mt-0.5 text-[9px] text-[color:var(--color-muted-2)]">Invite a player</div>
+              <div className="text-[13px] text-[color:var(--color-muted)]">Empty Slot</div>
+              <div className="mt-0.5 text-[11px] text-[color:var(--color-muted-2)]">Invite a player</div>
             </div>
           </div>
         ))}
@@ -126,17 +126,17 @@ function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }
 
       {/* Party actions */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">Party Actions</div>
+        <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">Party Actions</div>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button
             type="button"
-            className="rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20"
+            className="rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20"
           >
             Invite Player
           </button>
           <button
             type="button"
-            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
           >
             Party Settings
           </button>
@@ -204,7 +204,7 @@ function FactionTab({
                 {f.emblem}
               </div>
               <div 
-                className="mt-2 text-[11px] font-medium"
+                className="mt-2 text-[13px] font-medium"
                 style={{ color: isLocked ? "#888" : f.color }}
               >
                 {f.name}
@@ -218,7 +218,7 @@ function FactionTab({
             <div className="text-[12px] text-amber-400 font-medium">
               Factions unlock at Level {FACTION_UNLOCK_LEVEL}
             </div>
-            <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">
+            <div className="mt-1 text-[12px] text-[color:var(--color-muted)]">
               Current level: {playerLevel}
             </div>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
@@ -239,10 +239,10 @@ function FactionTab({
         )}
 
         <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3">
-          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
             Faction Benefits
           </div>
-          <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+          <ul className="mt-2 space-y-1 text-[11px] text-[color:var(--color-muted)]">
             <li>- Themed UI colors and emblem badge</li>
             <li>- Bonus rewards on aligned expeditions</li>
             <li>- Access to faction-exclusive projects</li>
@@ -282,11 +282,11 @@ function FactionTab({
             >
               {characterFaction.name}
             </div>
-            <div className="text-[9px] text-[color:var(--color-muted)] italic">
+            <div className="text-[11px] text-[color:var(--color-muted)] italic">
               &quot;{characterFaction.motto}&quot;
             </div>
             {faction && (
-              <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">
+              <div className="mt-1 text-[12px] text-[color:var(--color-muted)]">
                 Rank {faction.rank} - {getRankTitle(faction.rank)}
               </div>
             )}
@@ -294,7 +294,7 @@ function FactionTab({
         </div>
         {faction && (
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[9px]">
+            <div className="flex items-center justify-between text-[11px]">
               <span className="text-[color:var(--color-muted)]">Standing Progress</span>
               <span style={{ color: characterFaction.color }}>
                 {faction.standing}/{faction.maxStanding}
@@ -321,7 +321,7 @@ function FactionTab({
             type="button"
             onClick={() => setSubTab(t)}
             className={cn(
-              "rounded px-2 py-1 text-[9px] uppercase tracking-wider transition-colors",
+              "rounded px-2 py-1 text-[11px] uppercase tracking-wider transition-colors",
               subTab === t
                 ? "text-[color:var(--color-accent)]"
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
@@ -354,10 +354,10 @@ function FactionOverviewNew({
     <div className="space-y-3">
       {/* Faction Lore */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Faction Lore
         </div>
-        <p className="mt-2 text-[10px] leading-relaxed text-[color:var(--color-text-secondary)]">
+        <p className="mt-2 text-[12px] leading-relaxed text-[color:var(--color-text-secondary)]">
           {factionData.lore}
         </p>
       </div>
@@ -365,19 +365,19 @@ function FactionOverviewNew({
       {/* Stats */}
       {faction && (
         <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Your Stats</div>
+          <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Your Stats</div>
           <div className="mt-2 grid grid-cols-2 gap-3">
             <div>
               <div className="text-[18px] font-medium" style={{ color: factionData.color }}>
                 {faction.rank}
               </div>
-              <div className="text-[9px] text-[color:var(--color-muted)]">Current Rank</div>
+              <div className="text-[11px] text-[color:var(--color-muted)]">Current Rank</div>
             </div>
             <div>
               <div className="text-[18px] font-medium text-[color:var(--color-text)]">
                 {faction.standing}
               </div>
-              <div className="text-[9px] text-[color:var(--color-muted)]">Standing</div>
+              <div className="text-[11px] text-[color:var(--color-muted)]">Standing</div>
             </div>
           </div>
         </div>
@@ -386,9 +386,9 @@ function FactionOverviewNew({
       {/* Next Rank */}
       {faction && (
         <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Next Rank</div>
+          <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Next Rank</div>
           <div className="mt-2">
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-[13px]">
               <span className="text-[color:var(--color-text)]">{getRankTitle(faction.rank + 1)}</span>
               <span className="text-[color:var(--color-muted)]">{faction.standing}/{faction.maxStanding}</span>
             </div>
@@ -407,10 +407,10 @@ function FactionOverviewNew({
 
       {/* Faction Doctrines (from Lua config) */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Faction Bonuses
         </div>
-        <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+        <ul className="mt-2 space-y-1 text-[11px] text-[color:var(--color-muted)]">
           <li className="flex items-center gap-2">
             <span style={{ color: factionData.color }}>+</span>
             Bonus rewards on faction-aligned expeditions
@@ -433,23 +433,23 @@ function FactionOverview({ faction }: { faction: NonNullable<ReturnType<typeof u
   return (
     <div className="space-y-3">
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Stats</div>
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Stats</div>
         <div className="mt-2 grid grid-cols-2 gap-3">
           <div>
             <div className="text-[18px] font-medium text-[color:var(--color-text)]">{faction.rank}</div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">Current Rank</div>
+            <div className="text-[11px] text-[color:var(--color-muted)]">Current Rank</div>
           </div>
           <div>
             <div className="text-[18px] font-medium text-[color:var(--color-text)]">{faction.standing}</div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">Standing</div>
+            <div className="text-[11px] text-[color:var(--color-muted)]">Standing</div>
           </div>
         </div>
       </div>
 
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Next Rank</div>
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Next Rank</div>
         <div className="mt-2">
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-[13px]">
             <span className="text-[color:var(--color-text)]">{getRankTitle(faction.rank + 1)}</span>
             <span className="text-[color:var(--color-muted)]">{faction.standing}/{faction.maxStanding}</span>
           </div>
@@ -469,7 +469,7 @@ function FactionProjects({ projects }: { projects: ReturnType<typeof useEsroStor
   if (projects.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
-        <div className="text-[11px] text-[color:var(--color-muted)]">No active projects</div>
+        <div className="text-[13px] text-[color:var(--color-muted)]">No active projects</div>
       </div>
     )
   }
@@ -482,19 +482,19 @@ function FactionProjects({ projects }: { projects: ReturnType<typeof useEsroStor
           <div key={p.id} className="rounded-lg border border-[color:var(--color-border)] p-3">
             <div className="flex items-start justify-between">
               <div className="text-[12px] font-medium text-[color:var(--color-text)]">{p.label}</div>
-              <span className="text-[9px] text-[color:var(--color-violet-bright)]">{Math.floor(pct)}%</span>
+              <span className="text-[11px] text-[color:var(--color-violet-bright)]">{Math.floor(pct)}%</span>
             </div>
-            <div className="mt-1 text-[10px] text-[color:var(--color-muted)]">{p.description}</div>
+            <div className="mt-1 text-[12px] text-[color:var(--color-muted)]">{p.description}</div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-[color:var(--color-border)]">
               <div className="h-full bg-[color:var(--color-violet-bright)] transition-all" style={{ width: `${pct}%` }} />
             </div>
-            <div className="mt-1 flex justify-between text-[9px] text-[color:var(--color-muted)]">
+            <div className="mt-1 flex justify-between text-[11px] text-[color:var(--color-muted)]">
               <span>{p.progress}/{p.goal} collected</span>
               <span>{p.contributors} contributors</span>
             </div>
             <button
               type="button"
-              className="mt-2 w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/20"
+              className="mt-2 w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/20"
             >
               Contribute
             </button>
@@ -548,7 +548,7 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
         const colors = tierColors[tier]
         return (
           <div key={tier} className="space-y-2">
-            <div className={cn("text-[9px] uppercase tracking-wider", colors.text)}>
+            <div className={cn("text-[11px] uppercase tracking-wider", colors.text)}>
               {tierLabels[tier]}
             </div>
             {tierRanks.map((r) => {
@@ -568,20 +568,20 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-medium text-[color:var(--color-text)]">
+                      <span className="text-[13px] font-medium text-[color:var(--color-text)]">
                         {r.rank}. {r.title}
                       </span>
                       {isCurrent && (
-                        <span className={cn("rounded px-1.5 py-0.5 text-[8px]", colors.bg, colors.text)}>
+                        <span className={cn("rounded px-1.5 py-0.5 text-[10px]", colors.bg, colors.text)}>
                           Current
                         </span>
                       )}
                     </div>
-                    <span className="text-[9px] text-[color:var(--color-muted)]">{r.standing}</span>
+                    <span className="text-[11px] text-[color:var(--color-muted)]">{r.standing}</span>
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {r.rewards.map((reward, i) => (
-                      <span key={i} className="rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[8px] text-[color:var(--color-muted)]">
+                      <span key={i} className="rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[10px] text-[color:var(--color-muted)]">
                         {reward}
                       </span>
                     ))}
@@ -595,8 +595,8 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
 
       {/* Faction Wars info */}
       <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
-        <div className="text-[10px] font-medium text-[color:var(--color-danger)]">Faction Wars</div>
-        <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+        <div className="text-[12px] font-medium text-[color:var(--color-danger)]">Faction Wars</div>
+        <div className="mt-1 text-[11px] text-[color:var(--color-muted)]">
           Reach Vanguard rank to participate in faction v faction conflicts. Higher ranks unlock leadership roles in coordinating war efforts, defending territories, and declaring wars against rival factions.
         </div>
       </div>
@@ -618,12 +618,12 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Friends ({friends.length})
         </div>
         <button
           type="button"
-          className="rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-2 py-1 text-[9px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
+          className="rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-2 py-1 text-[11px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
         >
           Add Friend
         </button>
@@ -631,14 +631,14 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
 
       {friends.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-          <div className="text-[11px] text-[color:var(--color-muted)]">No friends yet</div>
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">Add players to see them here</div>
+          <div className="text-[13px] text-[color:var(--color-muted)]">No friends yet</div>
+          <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">Add players to see them here</div>
         </div>
       ) : (
         <div className="space-y-4">
           {online.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-success)]">
+              <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-success)]">
                 Online ({online.length})
               </div>
               {online.map(f => <FriendRow key={f.handle} friend={f} />)}
@@ -646,7 +646,7 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
           )}
           {away.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-amber)]">
+              <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
                 Away ({away.length})
               </div>
               {away.map(f => <FriendRow key={f.handle} friend={f} />)}
@@ -654,7 +654,7 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
           )}
           {offline.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Offline ({offline.length})
               </div>
               {offline.map(f => <FriendRow key={f.handle} friend={f} />)}
@@ -679,7 +679,7 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
         <PartyAvatar config={friendAvatar} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-[color:var(--color-text)]">{friend.handle}</span>
+            <span className="text-[13px] text-[color:var(--color-text)]">{friend.handle}</span>
             <span className={cn(
               "h-1.5 w-1.5 rounded-full",
               friend.status === "online" && "bg-[color:var(--color-success)]",
@@ -688,10 +688,10 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
             )} />
           </div>
 {friend.title && (
-                <div className={cn("text-[9px]", getTitleClass(friend.titleRarity || "common"))}>{friend.title}</div>
+                <div className={cn("text-[11px]", getTitleClass(friend.titleRarity || "common"))}>{friend.title}</div>
               )}
           {friend.faction && (
-            <div className="text-[9px] text-[color:var(--color-muted)]">{friend.faction}</div>
+            <div className="text-[11px] text-[color:var(--color-muted)]">{friend.faction}</div>
           )}
         </div>
         <div className="flex gap-1">
@@ -699,7 +699,7 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
             type="button"
             onClick={() => setShowProfile(!showProfile)}
             className={cn(
-              "rounded border p-1.5 text-[10px] transition-colors",
+              "rounded border p-1.5 text-[12px] transition-colors",
               showProfile
                 ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]"
                 : "border-[color:var(--color-border)] text-[color:var(--color-muted)] hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
@@ -710,14 +710,14 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
           </button>
           <button
             type="button"
-            className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[12px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
             title="Message"
           >
             ◇
           </button>
           <button
             type="button"
-            className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[12px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
             title="Invite to party"
           >
             ⋈
@@ -725,7 +725,7 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
           <button
             type="button"
             onClick={() => setShowUnfriendConfirm(true)}
-            className="rounded border border-[color:var(--color-border)] p-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-danger)]/50 hover:bg-[color:var(--color-danger)]/10 hover:text-[color:var(--color-danger)]"
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[12px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-danger)]/50 hover:bg-[color:var(--color-danger)]/10 hover:text-[color:var(--color-danger)]"
             title="Unfriend"
           >
             ✕
@@ -741,7 +741,7 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
             <div className="flex flex-col items-center gap-2">
               <PixelAvatar config={friendAvatar} size="lg" showFlair={true} />
               <div className={cn(
-                "text-[8px] uppercase tracking-wider",
+                "text-[10px] uppercase tracking-wider",
                 friend.status === "online" && "text-[color:var(--color-success)]",
                 friend.status === "away" && "text-[color:var(--color-amber)]",
                 friend.status === "offline" && "text-[color:var(--color-muted)]"
@@ -755,27 +755,27 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
               <div>
                 <div className="text-[12px] font-medium text-[color:var(--color-text)]">{friend.handle}</div>
                 {friend.title && (
-                  <TitleDisplay title={friend.title} rarity={friend.titleRarity || "common"} variant="inline" className="text-[10px]" />
+                  <TitleDisplay title={friend.title} rarity={friend.titleRarity || "common"} variant="inline" className="text-[12px]" />
                 )}
               </div>
               
               {friend.faction && (
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] text-[color:var(--color-muted)]">Faction:</span>
-                  <span className="text-[9px] text-[color:var(--color-text)]">{friend.faction}</span>
+                  <span className="text-[11px] text-[color:var(--color-muted)]">Faction:</span>
+                  <span className="text-[11px] text-[color:var(--color-text)]">{friend.faction}</span>
                 </div>
               )}
               
               {friend.lastSeen && friend.status === "offline" && (
-                <div className="text-[9px] text-[color:var(--color-muted)]">
+                <div className="text-[11px] text-[color:var(--color-muted)]">
                   Last seen: {new Date(friend.lastSeen).toLocaleDateString()}
                 </div>
               )}
               
               {friend.note && (
                 <div className="rounded bg-[color:var(--color-bg)]/50 p-2">
-                  <div className="mb-1 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">Note</div>
-                  <div className="text-[9px] text-[color:var(--color-text)]">{friend.note}</div>
+                  <div className="mb-1 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">Note</div>
+                  <div className="text-[11px] text-[color:var(--color-text)]">{friend.note}</div>
                 </div>
               )}
               
@@ -783,13 +783,13 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
-                  className="rounded border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/10 px-2 py-1 text-[9px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
+                  className="rounded border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/10 px-2 py-1 text-[11px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
                 >
                   Send Message
                 </button>
                 <button
                   type="button"
-                  className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[9px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+                  className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[11px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
                 >
                   Invite to Party
                 </button>
@@ -802,7 +802,7 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
       {/* Unfriend confirmation */}
       {showUnfriendConfirm && (
         <div className="border-t border-[color:var(--color-border)] bg-[color:var(--color-danger)]/5 px-3 py-2">
-          <div className="mb-2 text-[10px] text-[color:var(--color-text)]">
+          <div className="mb-2 text-[12px] text-[color:var(--color-text)]">
             Remove {friend.handle} from friends?
           </div>
           <div className="flex gap-2">
@@ -811,14 +811,14 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
               onClick={() => {
                 removeFriend(friend.handle)
               }}
-              className="flex-1 rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/15 px-2 py-1 text-[9px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/25"
+              className="flex-1 rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/15 px-2 py-1 text-[11px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/25"
             >
               Unfriend
             </button>
             <button
               type="button"
               onClick={() => setShowUnfriendConfirm(false)}
-              className="flex-1 rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[9px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+              className="flex-1 rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[11px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
             >
               Cancel
             </button>
@@ -846,7 +846,7 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
               type="button"
               onClick={() => setSubTab(t)}
               className={cn(
-                "rounded px-2 py-1 text-[9px] uppercase tracking-wider transition-colors",
+                "rounded px-2 py-1 text-[11px] uppercase tracking-wider transition-colors",
                 subTab === t
                   ? "bg-[color:var(--color-amber)]/15 text-[color:var(--color-amber)]"
                   : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
@@ -858,7 +858,7 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
         </div>
         <button
           type="button"
-          className="rounded border border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 px-2 py-1 text-[9px] text-[color:var(--color-amber)] transition-colors hover:bg-[color:var(--color-amber)]/20"
+          className="rounded border border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 px-2 py-1 text-[11px] text-[color:var(--color-amber)] transition-colors hover:bg-[color:var(--color-amber)]/20"
         >
           New Trade
         </button>
@@ -868,7 +868,7 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
         <>
           {incoming.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-amber)]">
+              <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
                 Incoming ({incoming.length})
               </div>
               {incoming.map(o => <TradeOfferRow key={o.id} offer={o} type="incoming" />)}
@@ -877,7 +877,7 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
 
           {outgoing.length > 0 && (
             <div className="space-y-2">
-              <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-cyan)]">
+              <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-cyan)]">
                 Outgoing ({outgoing.length})
               </div>
               {outgoing.map(o => <TradeOfferRow key={o.id} offer={o} type="outgoing" />)}
@@ -886,15 +886,15 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
 
           {incoming.length === 0 && outgoing.length === 0 && (
             <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-              <div className="text-[11px] text-[color:var(--color-muted)]">No pending trades</div>
-              <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">Start a trade with another player</div>
+              <div className="text-[13px] text-[color:var(--color-muted)]">No pending trades</div>
+              <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">Start a trade with another player</div>
             </div>
           )}
 
           {/* Trade tips */}
           <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-            <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">Trade Tips</div>
-            <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+            <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">Trade Tips</div>
+            <ul className="mt-2 space-y-1 text-[11px] text-[color:var(--color-muted)]">
               <li>- Trades expire after 2 hours</li>
               <li>- Both parties must confirm for completion</li>
               <li>- Check rarity before accepting</li>
@@ -912,13 +912,13 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
                   <div className="flex items-center gap-2">
                     <PartyAvatar config={generateAvatarFromSeed(o.fromHandle === "@you" ? o.toHandle : o.fromHandle)} />
                     <div>
-                      <div className="text-[11px] text-[color:var(--color-text)]">
+                      <div className="text-[13px] text-[color:var(--color-text)]">
                         {o.fromHandle === "@you" ? o.toHandle : o.fromHandle}
                       </div>
-                      <div className="text-[9px] text-[color:var(--color-success)]">Completed</div>
+                      <div className="text-[11px] text-[color:var(--color-success)]">Completed</div>
                     </div>
                   </div>
-                  <div className="text-[9px] text-[color:var(--color-muted)]">
+                  <div className="text-[11px] text-[color:var(--color-muted)]">
                     {new Date(o.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -926,8 +926,8 @@ function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOf
             ))
           ) : (
             <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-              <div className="text-[11px] text-[color:var(--color-muted)]">No trade history</div>
-              <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">Completed trades will appear here</div>
+              <div className="text-[13px] text-[color:var(--color-muted)]">No trade history</div>
+              <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">Completed trades will appear here</div>
             </div>
           )}
         </div>
@@ -948,7 +948,7 @@ function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty
   const color = rarityColors[item.rarity || "common"] || "var(--color-text)"
   
   return (
-    <div className="flex items-center gap-1 text-[9px]">
+    <div className="flex items-center gap-1 text-[11px]">
       <span className="text-[color:var(--color-muted)]">x{item.qty}</span>
       <span style={{ color }}>{item.label}</span>
     </div>
@@ -1022,21 +1022,21 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
         <div className="flex items-center gap-2">
           <PartyAvatar config={generateAvatarFromSeed(otherHandle)} />
           <div>
-            <div className="text-[11px] text-[color:var(--color-text)]">{otherHandle}</div>
-            <div className="text-[9px] text-[color:var(--color-muted)]">
+            <div className="text-[13px] text-[color:var(--color-text)]">{otherHandle}</div>
+            <div className="text-[11px] text-[color:var(--color-muted)]">
               {type === "incoming" ? "Offering" : "Requesting"}
             </div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[8px] text-[color:var(--color-muted)]">{timeLeft}m left</div>
+          <div className="text-[10px] text-[color:var(--color-muted)]">{timeLeft}m left</div>
         </div>
       </div>
 
       {/* Trade details */}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded bg-[color:var(--color-panel)]/50 p-2">
-          <div className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
             {type === "incoming" ? "They offer" : "You offer"}
           </div>
           <div className="mt-1 space-y-0.5">
@@ -1044,15 +1044,15 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
               <TradeItemDisplay key={i} item={item} />
             ))}
             {offer.fromTokens > 0 && (
-              <div className="text-[9px] text-[color:var(--color-amber)]">+{offer.fromTokens} tokens</div>
+              <div className="text-[11px] text-[color:var(--color-amber)]">+{offer.fromTokens} tokens</div>
             )}
             {offer.fromItems.length === 0 && offer.fromTokens === 0 && (
-              <div className="text-[9px] text-[color:var(--color-muted)]">Nothing</div>
+              <div className="text-[11px] text-[color:var(--color-muted)]">Nothing</div>
             )}
           </div>
         </div>
         <div className="rounded bg-[color:var(--color-panel)]/50 p-2">
-          <div className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
             {type === "incoming" ? "For your" : "For their"}
           </div>
           <div className="mt-1 space-y-0.5">
@@ -1060,17 +1060,17 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
               <TradeItemDisplay key={i} item={item} />
             ))}
             {offer.toTokens > 0 && (
-              <div className="text-[9px] text-[color:var(--color-amber)]">+{offer.toTokens} tokens</div>
+              <div className="text-[11px] text-[color:var(--color-amber)]">+{offer.toTokens} tokens</div>
             )}
             {offer.toItems.length === 0 && offer.toTokens === 0 && (
-              <div className="text-[9px] text-[color:var(--color-muted)]">Nothing</div>
+              <div className="text-[11px] text-[color:var(--color-muted)]">Nothing</div>
             )}
           </div>
         </div>
       </div>
 
       {offer.message && (
-        <div className="mt-2 rounded bg-[color:var(--color-panel)]/30 px-2 py-1.5 text-[9px] text-[color:var(--color-muted)] italic">
+        <div className="mt-2 rounded bg-[color:var(--color-panel)]/30 px-2 py-1.5 text-[11px] text-[color:var(--color-muted)] italic">
           &quot;{offer.message}&quot;
         </div>
       )}
@@ -1079,13 +1079,13 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
       {showCounterOffer && type === "incoming" && (
         <div className="mt-3 space-y-3 rounded-lg border border-[color:var(--color-violet-bright)]/30 bg-[color:var(--color-violet-bright)]/5 p-3">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] font-medium text-[color:var(--color-violet-bright)]">
+            <div className="text-[12px] font-medium text-[color:var(--color-violet-bright)]">
               Counter-Offer
             </div>
             <button
               type="button"
               onClick={() => setShowCounterOffer(false)}
-              className="text-[10px] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+              className="text-[12px] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             >
               Cancel
             </button>
@@ -1093,7 +1093,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           
           {/* Counter items - What you offer */}
           <div>
-            <div className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
+            <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
               Your Items
             </div>
             <div className="rounded bg-[color:var(--color-panel)]/50 p-2 space-y-1">
@@ -1105,14 +1105,14 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
                       <button
                         type="button"
                         onClick={() => adjustItemQty(counterItemsOffered, setCounterItemsOffered, item.itemId, -1)}
-                        className="h-4 w-4 rounded bg-[color:var(--color-danger)]/20 text-[8px] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/30"
+                        className="h-4 w-4 rounded bg-[color:var(--color-danger)]/20 text-[10px] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/30"
                       >
                         -
                       </button>
                       <button
                         type="button"
                         onClick={() => adjustItemQty(counterItemsOffered, setCounterItemsOffered, item.itemId, 1)}
-                        className="h-4 w-4 rounded bg-[color:var(--color-green)]/20 text-[8px] text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/30"
+                        className="h-4 w-4 rounded bg-[color:var(--color-green)]/20 text-[10px] text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/30"
                       >
                         +
                       </button>
@@ -1120,20 +1120,20 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
                   </div>
                 ))
               ) : (
-                <div className="text-[9px] text-[color:var(--color-muted)]">No items</div>
+                <div className="text-[11px] text-[color:var(--color-muted)]">No items</div>
               )}
               
               {/* Add from inventory */}
               {inventory.length > 0 && (
                 <div className="pt-1 border-t border-[color:var(--color-border)]">
-                  <div className="text-[8px] text-[color:var(--color-muted)] mb-1">Add from inventory:</div>
+                  <div className="text-[10px] text-[color:var(--color-muted)] mb-1">Add from inventory:</div>
                   <div className="flex flex-wrap gap-1">
                     {inventory.slice(0, 6).map((invItem) => (
                       <button
                         key={invItem.id}
                         type="button"
                         onClick={() => addItemToCounter(counterItemsOffered, setCounterItemsOffered, invItem)}
-                        className="rounded bg-[color:var(--color-panel)] px-1.5 py-0.5 text-[8px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+                        className="rounded bg-[color:var(--color-panel)] px-1.5 py-0.5 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
                       >
                         {invItem.label}
                       </button>
@@ -1146,7 +1146,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           
           {/* Counter items - What you request */}
           <div>
-            <div className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
+            <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)] mb-1">
               Request Items
             </div>
             <div className="rounded bg-[color:var(--color-panel)]/50 p-2 space-y-1">
@@ -1158,14 +1158,14 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
                       <button
                         type="button"
                         onClick={() => adjustItemQty(counterItemsRequested, setCounterItemsRequested, item.itemId, -1)}
-                        className="h-4 w-4 rounded bg-[color:var(--color-danger)]/20 text-[8px] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/30"
+                        className="h-4 w-4 rounded bg-[color:var(--color-danger)]/20 text-[10px] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/30"
                       >
                         -
                       </button>
                       <button
                         type="button"
                         onClick={() => adjustItemQty(counterItemsRequested, setCounterItemsRequested, item.itemId, 1)}
-                        className="h-4 w-4 rounded bg-[color:var(--color-green)]/20 text-[8px] text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/30"
+                        className="h-4 w-4 rounded bg-[color:var(--color-green)]/20 text-[10px] text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/30"
                       >
                         +
                       </button>
@@ -1173,7 +1173,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
                   </div>
                 ))
               ) : (
-                <div className="text-[9px] text-[color:var(--color-muted)]">No items requested</div>
+                <div className="text-[11px] text-[color:var(--color-muted)]">No items requested</div>
               )}
             </div>
           </div>
@@ -1181,7 +1181,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           {/* Adjust tokens */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 You Offer (Tokens)
               </label>
               <input
@@ -1189,11 +1189,11 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
                 min={0}
                 value={counterTokensOffered}
                 onChange={(e) => setCounterTokensOffered(Math.max(0, parseInt(e.target.value) || 0))}
-                className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[11px] text-[color:var(--color-text)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
+                className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[13px] text-[color:var(--color-text)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
               />
             </div>
             <div>
-              <label className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Request (Tokens)
               </label>
               <input
@@ -1201,14 +1201,14 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
                 min={0}
                 value={counterTokensRequested}
                 onChange={(e) => setCounterTokensRequested(Math.max(0, parseInt(e.target.value) || 0))}
-                className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[11px] text-[color:var(--color-text)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
+                className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[13px] text-[color:var(--color-text)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
               />
             </div>
           </div>
           
           {/* Counter message */}
           <div>
-            <label className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Message (optional)
             </label>
             <input
@@ -1217,14 +1217,14 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
               onChange={(e) => setCounterMessage(e.target.value)}
               placeholder="Add a note..."
               maxLength={100}
-              className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[10px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted-2)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
+              className="mt-1 w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[12px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted-2)] focus:border-[color:var(--color-violet-bright)] focus:outline-none"
             />
           </div>
           
           <button
             type="button"
             onClick={handleSendCounter}
-            className="w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/15 px-3 py-1.5 text-[10px] font-medium text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/25"
+            className="w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/15 px-3 py-1.5 text-[12px] font-medium text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/25"
           >
             Send Counter-Offer
           </button>
@@ -1236,13 +1236,13 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              className="rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
+              className="rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
             >
               Accept
             </button>
             <button
               type="button"
-              className="rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
+              className="rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
             >
               Decline
             </button>
@@ -1250,7 +1250,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
           <button
             type="button"
             onClick={() => setShowCounterOffer(true)}
-            className="w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/20"
+            className="w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/20"
           >
             Counter-Offer
           </button>
@@ -1261,7 +1261,7 @@ function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>
         <div className="mt-2">
           <button
             type="button"
-            className="w-full rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[10px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
+            className="w-full rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-3 py-1.5 text-[12px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
           >
             Cancel Trade
           </button>

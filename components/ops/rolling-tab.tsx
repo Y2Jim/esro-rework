@@ -139,7 +139,7 @@ export function RollingTab() {
   return (
     <div className="space-y-4">
       {/* Resources inline */}
-      <div className="flex gap-4 text-[11px]">
+      <div className="flex gap-4 text-[13px]">
         <span className="text-[color:var(--color-muted)]">
           Relay <span className="text-[color:var(--color-text)]">{shards.relay_tokens}</span>
         </span>
@@ -192,7 +192,7 @@ export function RollingTab() {
                       >
                         {/* Type badge */}
                         <div className={cn(
-                          "mx-auto mb-2 inline-block rounded border px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider",
+                          "mx-auto mb-2 inline-block rounded border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
                           typeLabels[currentItem.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]"
                         )}>
                           <span className={typeLabels[currentItem.type]?.color || "text-[color:var(--color-muted)]"}>
@@ -202,7 +202,7 @@ export function RollingTab() {
                         <div className={cn("text-[14px] font-medium", rarityColors[currentItem.rarity])}>
                           {currentItem.label}
                         </div>
-                        <div className="mt-1 text-[10px] capitalize text-[color:var(--color-muted)]">
+                        <div className="mt-1 text-[12px] capitalize text-[color:var(--color-muted)]">
                           {currentItem.rarity}
                         </div>
                       </motion.div>
@@ -219,7 +219,7 @@ export function RollingTab() {
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="mb-2 text-[9px] uppercase tracking-wider text-orange-400"
+                            className="mb-2 text-[11px] uppercase tracking-wider text-orange-400"
                           >
                             Duplicate: {finalResult.duplicateOf}
                           </motion.div>
@@ -230,7 +230,7 @@ export function RollingTab() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1 }}
                           className={cn(
-                            "mx-auto mb-2 inline-block rounded border px-2.5 py-1 text-[9px] font-mono uppercase tracking-wider",
+                            "mx-auto mb-2 inline-block rounded border px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider",
                             typeLabels[finalResult.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]"
                           )}
                         >
@@ -251,7 +251,7 @@ export function RollingTab() {
                             : finalResult.label
                           }
                         </motion.div>
-                        <div className="mt-1 text-[11px] capitalize text-[color:var(--color-muted)]">
+                        <div className="mt-1 text-[13px] capitalize text-[color:var(--color-muted)]">
                           {finalResult.rarity}
                         </div>
                         {/* Salvage bonus info */}
@@ -260,7 +260,7 @@ export function RollingTab() {
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="mt-2 text-[9px] text-orange-300/80"
+                            className="mt-2 text-[11px] text-orange-300/80"
                           >
                             Added to inventory
                           </motion.div>
@@ -302,7 +302,7 @@ export function RollingTab() {
                     setShowResult(false)
                     pendingResultRef.current = null
                   }}
-                  className="mt-2 w-full rounded border border-[color:var(--color-border)] py-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50 hover:text-[color:var(--color-text)]"
+                  className="mt-2 w-full rounded border border-[color:var(--color-border)] py-1.5 text-[12px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50 hover:text-[color:var(--color-text)]"
                 >
                   Continue
                 </motion.button>
@@ -325,8 +325,8 @@ export function RollingTab() {
               : "border-[color:var(--color-border)] opacity-50"
           )}
         >
-          <div className="text-[11px] font-medium text-[color:var(--color-text)]">Standard</div>
-          <div className="text-[9px] text-[color:var(--color-muted)]">1 Relay</div>
+          <div className="text-[13px] font-medium text-[color:var(--color-text)]">Standard</div>
+          <div className="text-[11px] text-[color:var(--color-muted)]">1 Relay</div>
         </button>
         
         <button
@@ -340,19 +340,19 @@ export function RollingTab() {
               : "border-[color:var(--color-border)] opacity-50"
           )}
         >
-          <div className="text-[11px] font-medium text-[color:var(--color-text)]">Focused</div>
-          <div className="text-[9px] text-[color:var(--color-muted)]">2 Resonance</div>
+          <div className="text-[13px] font-medium text-[color:var(--color-text)]">Focused</div>
+          <div className="text-[11px] text-[color:var(--color-muted)]">2 Resonance</div>
         </button>
       </div>
 
       {/* Recent */}
       <div>
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Recent
         </div>
         
         {recovery.length === 0 ? (
-          <div className="text-[11px] text-[color:var(--color-muted)]">No recoveries yet</div>
+          <div className="text-[13px] text-[color:var(--color-muted)]">No recoveries yet</div>
         ) : (
           <div className="space-y-1">
             {recovery.slice(0, 5).map((item) => (
@@ -369,13 +369,13 @@ export function RollingTab() {
                   <div className="flex items-center gap-2">
                     {/* Type badge */}
                     <span className={cn(
-                      "rounded border px-1.5 py-0.5 text-[7px] font-mono uppercase tracking-wider",
+                      "rounded border px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider",
                       typeLabels[item.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]",
                       typeLabels[item.type]?.color || "text-[color:var(--color-muted)]"
                     )}>
                       {typeLabels[item.type]?.label || item.type}
                     </span>
-                    <span className={cn("text-[11px]", rarityColors[item.rarity])}>
+                    <span className={cn("text-[13px]", rarityColors[item.rarity])}>
                       {item.isDuplicate && item.salvageReward 
                         ? `${item.salvageReward.label} x${item.salvageReward.qty}`
                         : item.label
@@ -383,12 +383,12 @@ export function RollingTab() {
                     </span>
                   </div>
                   {item.isDuplicate && item.duplicateOf && (
-                    <span className="text-[8px] text-orange-400/70">
+                    <span className="text-[10px] text-orange-400/70">
                       Duplicate: {item.duplicateOf}
                     </span>
                   )}
                 </div>
-                <span className="text-[9px] capitalize text-[color:var(--color-muted)]">
+                <span className="text-[11px] capitalize text-[color:var(--color-muted)]">
                   {item.rarity}
                 </span>
               </div>

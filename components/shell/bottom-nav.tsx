@@ -43,18 +43,18 @@ export function BottomNav() {
               >
                 <span
                   className={cn(
-                    "relative text-[14px] leading-none transition-all",
+                    "relative text-[16px] leading-none transition-all",
                     active && it.glow,
                   )}
                 >
                   {it.icon}
                   {it.id === "profile" && unreadNotifications > 0 && (
-                    <span className="absolute -right-1.5 -top-1 flex h-3 min-w-3 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)] px-0.5 text-[7px] font-semibold text-[color:var(--color-bg)]">
+                    <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)] px-0.5 text-[9px] font-semibold text-[color:var(--color-bg)]">
                       {unreadNotifications > 9 ? "9+" : unreadNotifications}
                     </span>
                   )}
                 </span>
-                <span className="text-[8.5px] uppercase tracking-[0.18em]">
+                <span className="text-[10px] uppercase tracking-[0.18em]">
                   {it.label}
                 </span>
                 {active && (

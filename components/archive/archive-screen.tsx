@@ -62,7 +62,7 @@ export function ArchiveScreen() {
         <ScreenSection
           title="recent recovered"
           right={
-            <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
               last {recovery.length}
             </span>
           }
@@ -89,7 +89,7 @@ export function ArchiveScreen() {
                   >
                     {r.label}
                   </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em]">
+                  <div className="mt-0.5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
                     <span className="text-[color:var(--color-muted)]">
                       {r.type.replace("_", " ")}
                     </span>
@@ -99,7 +99,7 @@ export function ArchiveScreen() {
                     </span>
                   </div>
                 </div>
-                <span className="shrink-0 text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
+                <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
                   {now ? formatAgo(r.recoveredAt, now) : "--"}
                 </span>
               </li>

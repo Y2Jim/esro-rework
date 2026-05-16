@@ -59,13 +59,13 @@ export function AdminExpeditions() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Expeditions ({expeditions.length})
         </div>
         <button
           type="button"
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1 rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-2 py-1 text-[10px] uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
+          className="flex items-center gap-1 rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-2 py-1 text-[12px] uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
         >
           <Plus className="h-3 w-3" />
           New Expedition
@@ -77,7 +77,7 @@ export function AdminExpeditions() {
         <div className="rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/5 p-3 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Expedition Name
               </label>
               <input
@@ -85,11 +85,11 @@ export function AdminExpeditions() {
                 value={form.label}
                 onChange={(e) => setForm({ ...form, label: e.target.value })}
                 placeholder="Deep Salvage Run"
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Required Skill
               </label>
               <input
@@ -97,13 +97,13 @@ export function AdminExpeditions() {
                 value={form.requiredSkill}
                 onChange={(e) => setForm({ ...form, requiredSkill: e.target.value })}
                 placeholder="analysis"
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
           </div>
           
           <div>
-            <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Description
             </label>
             <textarea
@@ -111,13 +111,13 @@ export function AdminExpeditions() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Expedition details..."
               rows={2}
-              className="w-full resize-none rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+              className="w-full resize-none rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-4 gap-3">
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Duration (sec)
               </label>
               <input
@@ -125,17 +125,17 @@ export function AdminExpeditions() {
                 value={form.duration}
                 onChange={(e) => setForm({ ...form, duration: parseInt(e.target.value) || 60 })}
                 min={60}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Risk
               </label>
               <select
                 value={form.risk}
                 onChange={(e) => setForm({ ...form, risk: e.target.value as "Low" | "Medium" | "High" })}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
@@ -143,7 +143,7 @@ export function AdminExpeditions() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Party Size
               </label>
               <input
@@ -152,11 +152,11 @@ export function AdminExpeditions() {
                 onChange={(e) => setForm({ ...form, suggestedParty: parseInt(e.target.value) || 1 })}
                 min={1}
                 max={4}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Tags
               </label>
               <input
@@ -164,14 +164,14 @@ export function AdminExpeditions() {
                 value={form.tags}
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
                 placeholder="salvage, deep"
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 XP Reward
               </label>
               <input
@@ -179,11 +179,11 @@ export function AdminExpeditions() {
                 value={form.xpReward}
                 onChange={(e) => setForm({ ...form, xpReward: parseInt(e.target.value) || 0 })}
                 min={0}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Token Reward
               </label>
               <input
@@ -191,11 +191,11 @@ export function AdminExpeditions() {
                 value={form.tokenReward}
                 onChange={(e) => setForm({ ...form, tokenReward: parseInt(e.target.value) || 0 })}
                 min={0}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Materials
               </label>
               <input
@@ -203,7 +203,7 @@ export function AdminExpeditions() {
                 value={form.materials}
                 onChange={(e) => setForm({ ...form, materials: e.target.value })}
                 placeholder="Iron, Crystal"
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[11px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
           </div>
@@ -212,7 +212,7 @@ export function AdminExpeditions() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             >
               Cancel
             </button>
@@ -220,7 +220,7 @@ export function AdminExpeditions() {
               type="button"
               onClick={handleCreate}
               disabled={!form.label.trim()}
-              className="rounded bg-[#ff6b4a] px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-black disabled:opacity-50"
+              className="rounded bg-[#ff6b4a] px-3 py-1.5 text-[12px] font-medium uppercase tracking-wider text-black disabled:opacity-50"
             >
               Create Expedition
             </button>
@@ -231,7 +231,7 @@ export function AdminExpeditions() {
       {/* Expeditions List */}
       {expeditions.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-          <p className="text-[11px] text-[color:var(--color-muted)]">No expeditions available</p>
+          <p className="text-[13px] text-[color:var(--color-muted)]">No expeditions available</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -248,7 +248,7 @@ export function AdminExpeditions() {
                     </span>
                     <span
                       className={cn(
-                        "rounded px-1.5 py-0.5 text-[8px] uppercase tracking-wider",
+                        "rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
                         exp.risk === "Low" && "bg-[#60d060]/20 text-[#60d060]",
                         exp.risk === "Medium" && "bg-[#ffb347]/20 text-[#ffb347]",
                         exp.risk === "High" && "bg-[#ff6b4a]/20 text-[#ff6b4a]"
@@ -256,18 +256,18 @@ export function AdminExpeditions() {
                     >
                       {exp.risk} Risk
                     </span>
-                    <span className="text-[9px] text-[color:var(--color-muted)]">
+                    <span className="text-[11px] text-[color:var(--color-muted)]">
                       {Math.floor(exp.duration / 60)}m
                     </span>
                   </div>
-                  <p className="mt-1 text-[10px] text-[color:var(--color-text-secondary)]">
+                  <p className="mt-1 text-[12px] text-[color:var(--color-text-secondary)]">
                     {exp.description}
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {exp.tags.map((tag, i) => (
                       <span
                         key={i}
-                        className="rounded bg-[color:var(--color-bg)] px-1.5 py-0.5 text-[8px] text-[color:var(--color-muted)]"
+                        className="rounded bg-[color:var(--color-bg)] px-1.5 py-0.5 text-[10px] text-[color:var(--color-muted)]"
                       >
                         {tag}
                       </span>

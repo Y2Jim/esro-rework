@@ -52,7 +52,7 @@ export function ContractsScreen() {
               type="button"
               onClick={() => setFilter(tab.id)}
               className={cn(
-                "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-medium transition-colors",
+                "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[12px] font-medium transition-colors",
                 filter === tab.id
                   ? "bg-[color:var(--color-accent)]/20 text-[color:var(--color-accent)]"
                   : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
@@ -71,7 +71,7 @@ export function ContractsScreen() {
           {/* Active */}
           {active.length > 0 && (
             <div>
-              <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-accent)]">
+              <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-accent)]">
                 Active ({active.length})
               </div>
               
@@ -88,29 +88,29 @@ export function ContractsScreen() {
                       <div className="flex items-center gap-2">
                         <div className="text-[12px] font-medium text-[color:var(--color-text)]">{c.label}</div>
                         {c.difficulty && (
-                          <span className={cn("rounded border px-1 py-0.5 text-[8px] uppercase", DIFFICULTY_COLORS[c.difficulty])}>
+                          <span className={cn("rounded border px-1 py-0.5 text-[10px] uppercase", DIFFICULTY_COLORS[c.difficulty])}>
                             {c.difficulty}
                           </span>
                         )}
                       </div>
                       {c.deadline && (
-                        <span className="shrink-0 text-[9px] text-[color:var(--color-danger)]">
+                        <span className="shrink-0 text-[11px] text-[color:var(--color-danger)]">
                           {c.deadline}
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex items-center gap-2 text-[10px] text-[color:var(--color-muted)]">
+                    <div className="mt-1 flex items-center gap-2 text-[12px] text-[color:var(--color-muted)]">
                       <span>{c.issuer}</span>
                       <span className="opacity-50">|</span>
                       <span className="capitalize">{c.type}</span>
                     </div>
-                    <div className="mt-2 text-[11px] text-[color:var(--color-text)]/80">{c.description}</div>
+                    <div className="mt-2 text-[13px] text-[color:var(--color-text)]/80">{c.description}</div>
                     <div className="mt-2 flex items-center justify-between">
-                      <div className="text-[10px] text-[color:var(--color-accent)]">{c.reward}</div>
+                      <div className="text-[12px] text-[color:var(--color-accent)]">{c.reward}</div>
                       <button
                         type="button"
                         onClick={() => cancelContract(c.id)}
-                        className="rounded border border-[color:var(--color-danger)]/40 px-2 py-0.5 text-[9px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/10"
+                        className="rounded border border-[color:var(--color-danger)]/40 px-2 py-0.5 text-[11px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/10"
                       >
                         Cancel
                       </button>
@@ -123,12 +123,12 @@ export function ContractsScreen() {
 
           {/* Available */}
           <div>
-            <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Available ({available.length})
             </div>
             
             {available.length === 0 ? (
-              <div className="rounded-lg border border-[color:var(--color-border)] border-dashed p-4 text-center text-[11px] text-[color:var(--color-muted)]">
+              <div className="rounded-lg border border-[color:var(--color-border)] border-dashed p-4 text-center text-[13px] text-[color:var(--color-muted)]">
                 No {filter === "all" ? "" : filter} contracts available
               </div>
             ) : (
@@ -147,24 +147,24 @@ export function ContractsScreen() {
                       <div className="flex items-center gap-2">
                         <div className="text-[12px] font-medium text-[color:var(--color-text)]">{c.label}</div>
                         {c.difficulty && (
-                          <span className={cn("rounded border px-1 py-0.5 text-[8px] uppercase", DIFFICULTY_COLORS[c.difficulty])}>
+                          <span className={cn("rounded border px-1 py-0.5 text-[10px] uppercase", DIFFICULTY_COLORS[c.difficulty])}>
                             {c.difficulty}
                           </span>
                         )}
                       </div>
                       {c.deadline && (
-                        <span className="shrink-0 text-[9px] text-[color:var(--color-muted)]">
+                        <span className="shrink-0 text-[11px] text-[color:var(--color-muted)]">
                           {c.deadline}
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex items-center gap-2 text-[10px] text-[color:var(--color-muted)]">
+                    <div className="mt-1 flex items-center gap-2 text-[12px] text-[color:var(--color-muted)]">
                       <span>{c.issuer}</span>
                       <span className="opacity-50">|</span>
                       <span className="capitalize">{c.type}</span>
                     </div>
-                    <div className="mt-2 text-[11px] text-[color:var(--color-text)]/70">{c.description}</div>
-                    <div className="mt-2 text-[10px] text-[color:var(--color-accent)]">{c.reward}</div>
+                    <div className="mt-2 text-[13px] text-[color:var(--color-text)]/70">{c.description}</div>
+                    <div className="mt-2 text-[12px] text-[color:var(--color-accent)]">{c.reward}</div>
                   </button>
                 ))}
               </div>

@@ -4,7 +4,8 @@ import type { ReactNode } from "react"
 import { cn } from "@/lib/cn"
 
 /**
- * A compact phone-shaped viewport. Width ~360, height ~720.
+ * A phone-shaped viewport matching LB-Phone dimensions.
+ * LB-Phone uses 29rem x 58.5rem (≈464px x 936px).
  * Scales down gracefully on very small screens.
  */
 export function PhoneFrame({
@@ -19,7 +20,7 @@ export function PhoneFrame({
       {/* bezel */}
       <div
         className={cn(
-          "relative h-[720px] w-[360px] rounded-[var(--radius-phone)]",
+          "relative h-[936px] w-[464px] rounded-[var(--radius-phone)]",
           "border border-[color:var(--color-border)]",
           "bg-gradient-to-b from-[#0d0818] to-[#050309]",
           "shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8),0_0_0_1px_rgba(168,123,255,0.08),inset_0_0_0_1px_rgba(168,123,255,0.05)]",
@@ -31,7 +32,7 @@ export function PhoneFrame({
           {/* notch */}
           <div
             aria-hidden
-            className="absolute left-1/2 top-0 z-30 h-[18px] w-[118px] -translate-x-1/2 rounded-b-[14px] bg-black"
+            className="absolute left-1/2 top-0 z-30 h-[22px] w-[140px] -translate-x-1/2 rounded-b-[14px] bg-black"
           />
           {/* inner bezel halo */}
           <div
@@ -69,15 +70,15 @@ export function PhoneFrame({
         {/* side buttons */}
         <div
           aria-hidden
-          className="absolute -left-[2px] top-[110px] h-[32px] w-[3px] rounded-l-sm bg-[color:var(--color-border)]"
+          className="absolute -left-[2px] top-[140px] h-[38px] w-[3px] rounded-l-sm bg-[color:var(--color-border)]"
         />
         <div
           aria-hidden
-          className="absolute -left-[2px] top-[160px] h-[54px] w-[3px] rounded-l-sm bg-[color:var(--color-border)]"
+          className="absolute -left-[2px] top-[200px] h-[64px] w-[3px] rounded-l-sm bg-[color:var(--color-border)]"
         />
         <div
           aria-hidden
-          className="absolute -right-[2px] top-[140px] h-[72px] w-[3px] rounded-r-sm bg-[color:var(--color-border)]"
+          className="absolute -right-[2px] top-[180px] h-[86px] w-[3px] rounded-r-sm bg-[color:var(--color-border)]"
         />
       </div>
     </div>

@@ -45,17 +45,17 @@ export function ProfileScreen() {
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "relative flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              "relative flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[12px] uppercase tracking-wider transition-colors",
               t.hover,
               tab === t.id
                 ? cn(t.bgColor, t.color)
                 : "text-[color:var(--color-muted)]"
             )}
           >
-            <span className="text-[10px]">{t.icon}</span>
+            <span className="text-[12px]">{t.icon}</span>
             {t.label}
             {t.id === "notifications" && unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-[color:var(--color-danger)] text-[7px] text-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-[color:var(--color-danger)] text-[9px] text-white">
                 {unreadCount}
               </span>
             )}
@@ -95,7 +95,7 @@ function SummaryTab() {
           {/* Faction Badge Overlay */}
           {characterFaction && (
             <div 
-              className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold shadow-lg"
+              className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-bold shadow-lg"
               style={{ 
                 backgroundColor: characterFaction.color,
                 color: "#000",
@@ -113,18 +113,18 @@ function SummaryTab() {
             <TitleDisplay 
               title={profile.title.label} 
               rarity={profile.title.rarity} 
-              className="text-[11px]" 
+              className="text-[13px]" 
             />
           )}
           {/* Race/Courier info */}
           {(characterRace || characterCourier) && (
-            <div className="mt-0.5 flex items-center gap-1 text-[9px] text-[color:var(--color-muted)]">
+            <div className="mt-0.5 flex items-center gap-1 text-[11px] text-[color:var(--color-muted)]">
               {characterRace && <span style={{ color: characterRace.color }}>{characterRace.name}</span>}
               {characterRace && characterCourier && <span>/</span>}
               {characterCourier && <span style={{ color: characterCourier.color }}>{characterCourier.name}</span>}
             </div>
           )}
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+          <div className="mt-1 text-[11px] text-[color:var(--color-muted)]">
             {identity.established ? "Established identity" : "New arrival"}
           </div>
         </div>
@@ -133,8 +133,8 @@ function SummaryTab() {
       {/* Level + XP */}
       <div>
         <div className="flex items-baseline justify-between">
-          <span className="text-[11px] text-[color:var(--color-muted)]">Level {profile.level}</span>
-          <span className="text-[10px] text-[color:var(--color-muted)]">{profile.xp}/{profile.xpToNext} XP</span>
+          <span className="text-[13px] text-[color:var(--color-muted)]">Level {profile.level}</span>
+          <span className="text-[12px] text-[color:var(--color-muted)]">{profile.xp}/{profile.xpToNext} XP</span>
         </div>
         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
           <div
@@ -171,11 +171,11 @@ function SummaryTab() {
               >
                 {characterFaction.name}
               </div>
-              <div className="text-[9px] text-[color:var(--color-muted)] italic">
+              <div className="text-[11px] text-[color:var(--color-muted)] italic">
                 &quot;{characterFaction.motto}&quot;
               </div>
               {profile.faction && (
-                <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+                <div className="mt-1 text-[11px] text-[color:var(--color-muted)]">
                   Rank {profile.faction.rank} - {profile.faction.standing}/{profile.faction.maxStanding} standing
                 </div>
               )}
@@ -184,8 +184,8 @@ function SummaryTab() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-3 text-center">
-          <div className="text-[11px] text-[color:var(--color-muted)]">No faction allegiance</div>
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+          <div className="text-[13px] text-[color:var(--color-muted)]">No faction allegiance</div>
+          <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">
             Reach Level 5 to join a faction
           </div>
         </div>
@@ -193,7 +193,7 @@ function SummaryTab() {
 
       {/* Character Stats */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Character Stats
         </div>
         <div className="grid grid-cols-5 gap-1">
@@ -209,7 +209,7 @@ function SummaryTab() {
                 {playerStats[stat]}
               </div>
               <div 
-                className="text-[8px] font-medium uppercase"
+                className="text-[10px] font-medium uppercase"
                 style={{ color: `${STAT_COLORS[stat]}99` }}
               >
                 {STAT_LABELS[stat]}
@@ -225,19 +225,19 @@ function SummaryTab() {
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">
             {profile.ownedTitles?.length || 0}
           </div>
-          <div className="text-[9px] text-[color:var(--color-muted)]">Titles</div>
+          <div className="text-[11px] text-[color:var(--color-muted)]">Titles</div>
         </div>
         <div className="text-center">
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">
             {profile.vanityItems?.filter(v => v.unlocked).length || 0}
           </div>
-          <div className="text-[9px] text-[color:var(--color-muted)]">Cosmetics</div>
+          <div className="text-[11px] text-[color:var(--color-muted)]">Cosmetics</div>
         </div>
         <div className="text-center">
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">
             {profile.badges?.length || 0}
           </div>
-          <div className="text-[9px] text-[color:var(--color-muted)]">Badges</div>
+          <div className="text-[11px] text-[color:var(--color-muted)]">Badges</div>
         </div>
       </div>
     </div>
@@ -259,14 +259,14 @@ function TitlesTab() {
 
   return (
     <div className="space-y-3">
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Owned Titles ({ownedTitles.length})
       </div>
 
       {ownedTitles.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
-          <div className="text-[11px] text-[color:var(--color-muted)]">No titles unlocked yet</div>
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+          <div className="text-[13px] text-[color:var(--color-muted)]">No titles unlocked yet</div>
+          <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">
             Recover from archive or complete achievements
           </div>
         </div>
@@ -289,10 +289,10 @@ function TitlesTab() {
       )}
 
       <div className="mt-4 rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3">
-        <div className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           How to unlock titles
         </div>
-        <ul className="mt-2 space-y-1 text-[10px] text-[color:var(--color-muted)]">
+        <ul className="mt-2 space-y-1 text-[12px] text-[color:var(--color-muted)]">
           <li>- Recover from archive fragments</li>
           <li>- Complete faction achievements</li>
           <li>- Reach expedition milestones</li>
@@ -345,28 +345,28 @@ function CosmeticsTab() {
       {/* Avatar Preview */}
       <div className="flex flex-col items-center rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-4">
         <PixelAvatar config={identity.avatar} size="lg" />
-        <div className="mt-2 text-[11px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
+        <div className="mt-2 text-[13px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
         {equipped.length > 0 ? (
           <div className="mt-1 flex flex-wrap justify-center gap-1">
             {equipped.map(e => (
-              <span key={e.id} className={cn("rounded px-1.5 py-0.5 text-[8px]", rarityColor[e.rarity])}>
+              <span key={e.id} className={cn("rounded px-1.5 py-0.5 text-[10px]", rarityColor[e.rarity])}>
                 {e.label}
               </span>
             ))}
           </div>
         ) : (
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted)]">No cosmetics equipped</div>
+          <div className="mt-1 text-[11px] text-[color:var(--color-muted)]">No cosmetics equipped</div>
         )}
       </div>
 
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Cosmetics ({unlocked.length} unlocked)
       </div>
 
       {unlocked.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
-          <div className="text-[11px] text-[color:var(--color-muted)]">No cosmetics unlocked yet</div>
-          <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+          <div className="text-[13px] text-[color:var(--color-muted)]">No cosmetics unlocked yet</div>
+          <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">
             Recover from archive to unlock cosmetics
           </div>
         </div>
@@ -379,7 +379,7 @@ function CosmeticsTab() {
             return (
               <div key={layerType}>
                 <div className="mb-2 flex items-center gap-2">
-                  <span className="text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                  <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
                     {layerType}
                   </span>
                   <div className="h-px flex-1 bg-[color:var(--color-border-soft)]" />
@@ -400,9 +400,9 @@ function CosmeticsTab() {
                         )}
                       >
                         <div className="flex w-full items-center justify-between">
-                          <span className={cn("text-[10px]", rarityColor[v.rarity])}>{v.label}</span>
+                          <span className={cn("text-[12px]", rarityColor[v.rarity])}>{v.label}</span>
                           {isActive && (
-                            <span className="text-[8px] uppercase text-[color:var(--color-accent)]">active</span>
+                            <span className="text-[10px] uppercase text-[color:var(--color-accent)]">active</span>
                           )}
                         </div>
                       </button>
@@ -417,10 +417,10 @@ function CosmeticsTab() {
 
       {locked.length > 0 && (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3 text-center">
-          <div className="text-[10px] text-[color:var(--color-muted)]">
+          <div className="text-[12px] text-[color:var(--color-muted)]">
             {locked.length} cosmetics locked
           </div>
-          <div className="text-[9px] text-[color:var(--color-muted-2)]">
+          <div className="text-[11px] text-[color:var(--color-muted-2)]">
             Recover from archive to unlock
           </div>
         </div>
@@ -456,7 +456,7 @@ function SettingsTab() {
     <div className="space-y-4">
       {/* UI Theme - Base Themes */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-        <div className="mb-3 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-3 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           UI Theme
         </div>
         <div className="space-y-2">
@@ -476,17 +476,17 @@ function SettingsTab() {
                 className="h-4 w-4 rounded-full"
                 style={{ backgroundColor: theme.color, boxShadow: `0 0 8px ${theme.color}50` }}
               />
-              <span className="flex-1 text-[11px] text-[color:var(--color-text)]">
+              <span className="flex-1 text-[13px] text-[color:var(--color-text)]">
                 {theme.label}
               </span>
               {uiTheme === theme.id && (
-                <span className="text-[8px] uppercase text-[color:var(--color-accent)]">active</span>
+                <span className="text-[10px] uppercase text-[color:var(--color-accent)]">active</span>
               )}
             </button>
           ))}
         </div>
         {!characterFaction && (
-          <p className="mt-3 text-[9px] text-[color:var(--color-muted)]">
+          <p className="mt-3 text-[11px] text-[color:var(--color-muted)]">
             Join a faction to unlock its unique color scheme.
           </p>
         )}
@@ -495,18 +495,18 @@ function SettingsTab() {
       {/* Rollable Themes Section */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
             Collected Themes
           </span>
-          <span className="text-[9px] text-[color:var(--color-muted)]">
+          <span className="text-[11px] text-[color:var(--color-muted)]">
             {unlockedRollableThemes.length}/{ROLLABLE_THEMES.length}
           </span>
         </div>
         
         {unlockedRollableThemes.length === 0 ? (
           <div className="rounded border border-dashed border-[color:var(--color-border-soft)] p-3 text-center">
-            <div className="text-[10px] text-[color:var(--color-muted)]">No themes collected yet</div>
-            <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+            <div className="text-[12px] text-[color:var(--color-muted)]">No themes collected yet</div>
+            <div className="mt-1 text-[11px] text-[color:var(--color-muted-2)]">
               Themes can be found through expeditions and archive fragments
             </div>
           </div>
@@ -545,7 +545,7 @@ function SettingsTab() {
                     {/* Category badge */}
                     <div className="mb-1">
                       <span className={cn(
-                        "inline-block rounded px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-wider",
+                        "inline-block rounded px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider",
                         theme.rarity === "mythic" ? "bg-[#f0e0a0]/20 text-[#f0e0a0] border border-[#f0e0a0]/30" :
                         theme.rarity === "legendary" ? "bg-[#00d0ff]/20 text-[#00d0ff] border border-[#00d0ff]/30" :
                         theme.rarity === "epic" ? "bg-[#a060ff]/20 text-[#a060ff] border border-[#a060ff]/30" :
@@ -557,22 +557,22 @@ function SettingsTab() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={cn("text-[11px] font-medium", rarityColor[theme.rarity])}>
+                      <span className={cn("text-[13px] font-medium", rarityColor[theme.rarity])}>
                         {theme.label}
                       </span>
                     </div>
-                    <div className="text-[9px] text-[color:var(--color-muted)] leading-relaxed">
+                    <div className="text-[11px] text-[color:var(--color-muted)] leading-relaxed">
                       {theme.description}
                     </div>
                     {/* Effects indicators for higher rarity themes */}
                     {(hasEffects || theme.intensity > 1.0) && (
                       <div className="mt-1 flex flex-wrap gap-1.5">
-                        <span className="text-[8px] px-1 py-0.5 rounded bg-[color:var(--color-panel)] text-[color:var(--color-muted)]">
+                        <span className="text-[10px] px-1 py-0.5 rounded bg-[color:var(--color-panel)] text-[color:var(--color-muted)]">
                           {intensityLabel} Glow
                         </span>
                         {theme.effectClass && (
                           <span className={cn(
-                            "text-[8px] px-1 py-0.5 rounded",
+                            "text-[10px] px-1 py-0.5 rounded",
                             theme.effectClass === "theme-effect-radiant" ? "bg-[color:var(--color-rarity-mythic)]/20 text-[color:var(--color-rarity-mythic)]" :
                             theme.effectClass === "theme-effect-glow" ? "bg-[color:var(--color-rarity-legendary)]/20 text-[color:var(--color-rarity-legendary)]" :
                             "bg-[color:var(--color-rarity-epic)]/20 text-[color:var(--color-rarity-epic)]"
@@ -583,7 +583,7 @@ function SettingsTab() {
                           </span>
                         )}
                         {theme.borderStyle && theme.borderStyle !== "solid" && (
-                          <span className="text-[8px] px-1 py-0.5 rounded bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]">
+                          <span className="text-[10px] px-1 py-0.5 rounded bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]">
                             {theme.borderStyle === "shimmer" ? "Ethereal Borders" : "Glowing Borders"}
                           </span>
                         )}
@@ -591,7 +591,7 @@ function SettingsTab() {
                     )}
                   </div>
                   {uiTheme === theme.id && (
-                    <span className="text-[8px] uppercase text-[color:var(--color-accent)] shrink-0">active</span>
+                    <span className="text-[10px] uppercase text-[color:var(--color-accent)] shrink-0">active</span>
                   )}
                 </button>
               )
@@ -603,7 +603,7 @@ function SettingsTab() {
       {/* Current Faction */}
       {characterFaction && (
         <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-          <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
             Current Faction
           </div>
           <div className="flex items-center gap-3">
@@ -620,7 +620,7 @@ function SettingsTab() {
               <div className="text-[12px] font-medium" style={{ color: characterFaction.color }}>
                 {characterFaction.name}
               </div>
-              <div className="text-[9px] text-[color:var(--color-muted)] italic">
+              <div className="text-[11px] text-[color:var(--color-muted)] italic">
                 {characterFaction.motto}
               </div>
             </div>
@@ -630,10 +630,10 @@ function SettingsTab() {
 
       {/* Other Settings Placeholder */}
       <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           More Settings
         </div>
-        <ul className="mt-2 space-y-1 text-[9px] text-[color:var(--color-muted)]">
+        <ul className="mt-2 space-y-1 text-[11px] text-[color:var(--color-muted)]">
           <li>- Sound preferences (coming soon)</li>
           <li>- Notification settings (coming soon)</li>
           <li>- Privacy options (coming soon)</li>
@@ -657,14 +657,14 @@ function NotificationsTab() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Notifications ({notifications.filter(n => n.state === "unread").length} unread)
         </div>
         {notifications.length > 0 && (
           <button
             type="button"
             onClick={clearAllNotifications}
-            className="text-[9px] text-[color:var(--color-danger)] transition-colors hover:text-[color:var(--color-danger-bright)]"
+            className="text-[11px] text-[color:var(--color-danger)] transition-colors hover:text-[color:var(--color-danger-bright)]"
           >
             Clear All
           </button>
@@ -673,7 +673,7 @@ function NotificationsTab() {
 
       {notifications.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
-          <div className="text-[11px] text-[color:var(--color-muted)]">No notifications</div>
+          <div className="text-[13px] text-[color:var(--color-muted)]">No notifications</div>
         </div>
       ) : (
         <div className="space-y-2">
@@ -695,10 +695,10 @@ function NotificationsTab() {
                 onClick={() => openNotification(n)}
                 className="min-w-0 flex-1 text-left"
               >
-                <div className="text-[11px] text-[color:var(--color-text)]">{n.title}</div>
-                <div className="text-[10px] text-[color:var(--color-muted)]">{n.body}</div>
+                <div className="text-[13px] text-[color:var(--color-text)]">{n.title}</div>
+                <div className="text-[12px] text-[color:var(--color-muted)]">{n.body}</div>
                 {n.deeplink && (
-                  <div className="mt-1 text-[9px] text-[color:var(--color-accent)]">
+                  <div className="mt-1 text-[11px] text-[color:var(--color-accent)]">
                     Tap to view
                   </div>
                 )}
@@ -706,7 +706,7 @@ function NotificationsTab() {
               <button
                 type="button"
                 onClick={() => clearNotification(n.id)}
-                className="shrink-0 p-1 text-[10px] text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-danger)]"
+                className="shrink-0 p-1 text-[12px] text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-danger)]"
                 title="Clear notification"
               >
                 x
@@ -776,7 +776,7 @@ function TitlePreviewSelector() {
     <div className="space-y-2">
       {/* Title display */}
       <div className="rounded bg-[color:var(--color-panel)]/50 p-3 text-center">
-        <div className="mb-1 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
           {currentTitle.rarity}
         </div>
         <TitleDisplay 
@@ -792,17 +792,17 @@ function TitlePreviewSelector() {
         <button
           type="button"
           onClick={() => setPreviewIndex((prev) => (prev > 0 ? prev - 1 : ALL_TITLES.length - 1))}
-          className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+          className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[12px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
         >
           Prev
         </button>
-        <span className="flex-1 text-center text-[9px] text-[color:var(--color-muted)]">
+        <span className="flex-1 text-center text-[11px] text-[color:var(--color-muted)]">
           {previewIndex + 1} / {ALL_TITLES.length}
         </span>
         <button
           type="button"
           onClick={() => setPreviewIndex((prev) => (prev < ALL_TITLES.length - 1 ? prev + 1 : 0))}
-          className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+          className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[12px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
         >
           Next
         </button>
@@ -814,7 +814,7 @@ function TitlePreviewSelector() {
         onClick={handleEquip}
         disabled={isEquipped}
         className={cn(
-          "w-full rounded border px-3 py-1.5 text-[10px] transition-colors",
+          "w-full rounded border px-3 py-1.5 text-[12px] transition-colors",
           isEquipped
             ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
             : "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/20"
@@ -840,22 +840,22 @@ function AdminPanelButton() {
     <div className="rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/5 p-3">
       <div className="mb-2 flex items-center gap-2">
         <Shield className="h-3.5 w-3.5 text-[#ff6b4a]" />
-        <span className="text-[10px] uppercase tracking-wider text-[#ff6b4a]">
+        <span className="text-[12px] uppercase tracking-wider text-[#ff6b4a]">
           Admin Panel
         </span>
       </div>
-      <p className="mb-3 text-[9px] text-[color:var(--color-muted)]">
+      <p className="mb-3 text-[11px] text-[color:var(--color-muted)]">
         Access administrative tools for managing events, contracts, players, and system settings.
       </p>
       <button
         type="button"
         onClick={handleOpenAdmin}
-        className="w-full rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
+        className="w-full rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-3 py-2 text-[12px] font-medium uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
       >
         Open Admin Panel
       </button>
       {isAdmin && (
-        <p className="mt-2 text-center text-[8px] text-[#ff6b4a]">Admin mode active</p>
+        <p className="mt-2 text-center text-[10px] text-[#ff6b4a]">Admin mode active</p>
       )}
     </div>
   )
@@ -917,7 +917,7 @@ function AdminUnlockButton() {
         onClick={handleUnlockCosmetics}
         disabled={unlocked.cosmetics}
         className={cn(
-          "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+          "w-full rounded border px-3 py-2 text-[12px] transition-colors",
           unlocked.cosmetics
             ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
             : "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
@@ -930,7 +930,7 @@ function AdminUnlockButton() {
         onClick={handleUnlockTitles}
         disabled={unlocked.titles}
         className={cn(
-          "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+          "w-full rounded border px-3 py-2 text-[12px] transition-colors",
           unlocked.titles
             ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
             : "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
@@ -946,7 +946,7 @@ function AdminUnlockButton() {
         }}
         disabled={unlocked.themes}
         className={cn(
-          "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+          "w-full rounded border px-3 py-2 text-[12px] transition-colors",
           unlocked.themes
             ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
             : "border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
@@ -957,7 +957,7 @@ function AdminUnlockButton() {
       
       {/* Title preview and equip */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
-        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1.5 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Title Preview &amp; Equip
         </div>
         <TitlePreviewSelector />
@@ -965,7 +965,7 @@ function AdminUnlockButton() {
       
       {/* Flair preview */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
-        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1.5 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Flair Preview
         </div>
         <div className="flex items-center gap-3">
@@ -975,16 +975,16 @@ function AdminUnlockButton() {
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-1.5">
               <span className={cn(
-                "text-[10px]",
+                "text-[12px]",
                 isMythicFlair ? "title-mythic font-medium" : "text-[color:var(--color-text)]"
               )}>
                 {flairNames[previewFlair]}
               </span>
               {previewFlair > 0 && (
-                <span className="text-[9px] text-[color:var(--color-muted)]">({previewFlair})</span>
+                <span className="text-[11px] text-[color:var(--color-muted)]">({previewFlair})</span>
               )}
               {isMythicFlair && (
-                <span className="rounded bg-[color:var(--color-mythic)]/20 px-1 py-0.5 text-[8px] text-[color:var(--color-mythic)]">
+                <span className="rounded bg-[color:var(--color-mythic)]/20 px-1 py-0.5 text-[10px] text-[color:var(--color-mythic)]">
                   MYTHIC
                 </span>
               )}
@@ -993,14 +993,14 @@ function AdminUnlockButton() {
               <button
                 type="button"
                 onClick={() => setPreviewFlair((prev) => (prev > 0 ? prev - 1 : 17))}
-                className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+                className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[12px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
               >
                 Prev
               </button>
               <button
                 type="button"
                 onClick={() => setPreviewFlair((prev) => (prev < 17 ? prev + 1 : 0))}
-                className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+                className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[12px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
               >
                 Next
               </button>
@@ -1011,7 +1011,7 @@ function AdminUnlockButton() {
       
       {/* Chat title testing */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
-        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1.5 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Chat Testing
         </div>
         <button
@@ -1022,7 +1022,7 @@ function AdminUnlockButton() {
             setScreen("terminal")
           }}
           className={cn(
-            "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+            "w-full rounded border px-3 py-2 text-[12px] transition-colors",
             unlocked.chat
               ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
               : "border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/20"
@@ -1030,14 +1030,14 @@ function AdminUnlockButton() {
         >
           {unlocked.chat ? "Test Messages Sent" : "Inject Title Test Messages"}
         </button>
-        <p className="mt-1 text-[8px] text-[color:var(--color-muted)]">
+        <p className="mt-1 text-[10px] text-[color:var(--color-muted)]">
           Adds messages with all rarity titles to PUBLIC channel
         </p>
       </div>
       
       {/* Crafting materials */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
-        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1.5 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Crafting Testing
         </div>
         <button
@@ -1048,7 +1048,7 @@ function AdminUnlockButton() {
           }}
           disabled={unlocked.materials}
           className={cn(
-            "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+            "w-full rounded border px-3 py-2 text-[12px] transition-colors",
             unlocked.materials
               ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
               : "border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
@@ -1060,26 +1060,26 @@ function AdminUnlockButton() {
       
       {/* Expedition simulation */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
-        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1.5 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Expedition Testing
         </div>
         {!activeExpedition ? (
           <button
             type="button"
             onClick={() => simulateExpedition()}
-            className="w-full rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-2 text-[10px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20"
+            className="w-full rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-2 text-[12px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20"
           >
             Start Test Expedition
           </button>
         ) : (
           <div className="space-y-2">
-            <div className="rounded bg-[color:var(--color-cyan)]/10 px-2 py-1.5 text-[9px] text-[color:var(--color-cyan)]">
+            <div className="rounded bg-[color:var(--color-cyan)]/10 px-2 py-1.5 text-[11px] text-[color:var(--color-cyan)]">
               Active: {activeExpedition.label} ({Math.round(activeExpedition.progress * 100)}%)
             </div>
             <button
               type="button"
               onClick={completeActiveExpedition}
-              className="w-full rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-2 text-[10px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
+              className="w-full rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-2 text-[12px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
             >
               Complete Expedition (Get Loot)
             </button>

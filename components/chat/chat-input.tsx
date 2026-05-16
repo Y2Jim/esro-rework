@@ -51,7 +51,7 @@ export function ChatInput() {
           className="min-w-0 flex-1 bg-transparent text-[12px] text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted-2)] outline-none"
           aria-label="chat input"
         />
-        <span className="select-none text-[9px] uppercase tracking-[0.2em] text-[color:var(--color-muted-2)]">
+        <span className="select-none text-[11px] uppercase tracking-[0.2em] text-[color:var(--color-muted-2)]">
           {value.length}/220
         </span>
         <button

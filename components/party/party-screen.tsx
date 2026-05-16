@@ -33,7 +33,7 @@ export function PartyScreen() {
       <ScreenSection
         title="active party"
         right={
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {filled}/4
           </span>
         }

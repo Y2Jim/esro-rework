@@ -18,7 +18,7 @@ export function SkillsScreen() {
       <ScreenSection
         title="equipped loadout"
         right={
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             select 4
           </span>
         }
@@ -29,7 +29,7 @@ export function SkillsScreen() {
       <ScreenSection
         title="available · operator relay"
         right={
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {unlocked.length} unlocked
           </span>
         }
@@ -51,7 +51,7 @@ export function SkillsScreen() {
       <ScreenSection
         title="locked · requires archive key"
         right={
-          <span className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {locked.length}
           </span>
         }

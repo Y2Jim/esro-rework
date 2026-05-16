@@ -29,10 +29,10 @@ export function PartySlot({
             +
           </div>
           <div className="leading-tight">
-            <div className="text-[11px] text-[color:var(--color-muted)]">
+            <div className="text-[13px] text-[color:var(--color-muted)]">
               slot {slot} · empty
             </div>
-            <div className="text-[9px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
+            <div className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
               send invite
             </div>
           </div>
@@ -82,14 +82,14 @@ export function PartySlot({
           </div>
           <span
             className={cn(
-              "shrink-0 text-[9px] uppercase tracking-[0.22em]",
+              "shrink-0 text-[11px] uppercase tracking-[0.22em]",
               statusTone[member.status],
             )}
           >
             {member.status}
           </span>
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em]">
+        <div className="mt-0.5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
           {member.title && <span className={titleCls}>{member.title}</span>}
           {member.title && (
             <span className="text-[color:var(--color-muted-2)]">·</span>

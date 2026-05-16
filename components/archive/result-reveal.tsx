@@ -59,7 +59,7 @@ export function ResultReveal() {
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
               <span>archive · reveal</span>
               <button
                 type="button"
@@ -94,7 +94,7 @@ export function ResultReveal() {
                   transition={{ duration: 0.35 }}
                   className="mt-2.5 rounded-sm border border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/60 p-2.5 text-center"
                 >
-                  <div className="text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+                  <div className="text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
                     {last.vanityData ? "cosmetic unlocked" : "variant recovered"}
                   </div>
                   <div
@@ -107,7 +107,7 @@ export function ResultReveal() {
                   >
                     {last.label}
                   </div>
-                  <div className="mt-1 flex items-center justify-center gap-2 text-[9px] uppercase tracking-[0.25em]">
+                  <div className="mt-1 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.25em]">
                     <span className="text-[color:var(--color-muted)]">
                       {last.vanityData ? last.vanityData.layerType : last.type.replace("_", " ")}
                     </span>
@@ -123,7 +123,7 @@ export function ResultReveal() {
                     </span>
                   </div>
                   {last.vanityData && (
-                    <div className="mt-2 text-[8px] text-[color:var(--color-accent)]">
+                    <div className="mt-2 text-[10px] text-[color:var(--color-accent)]">
                       Equip in Profile &gt; Cosmetics
                     </div>
                   )}

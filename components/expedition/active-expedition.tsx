@@ -12,7 +12,7 @@ export function ActiveExpeditionPanel({ active }: { active: ActiveExpedition }) 
     <section className="mx-3 mt-2 rounded-md border border-[color:var(--color-cyan-muted)]/40 bg-[color:var(--color-panel-2)]/70 p-2.5">
       <header className="flex items-baseline justify-between">
         <div>
-          <div className="text-[9px] uppercase tracking-[0.3em] text-[color:var(--color-cyan-muted)]">
+          <div className="text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-cyan-muted)]">
             active run
           </div>
           <div className="text-[13px] font-medium text-[color:var(--color-cyan)] text-glow-cyan">
@@ -20,7 +20,7 @@ export function ActiveExpeditionPanel({ active }: { active: ActiveExpedition }) 
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[9px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <div className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             eta
           </div>
           <div className="text-[12px] tabular-nums text-[color:var(--color-cyan-bright)]">
@@ -39,7 +39,7 @@ export function ActiveExpeditionPanel({ active }: { active: ActiveExpedition }) 
           }}
         />
       </div>
-      <div className="mt-1 flex items-center justify-between text-[9px] uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
+      <div className="mt-1 flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
         <span className="text-[color:var(--color-cyan)]">{pct}% stable</span>
         <span>signal holding</span>
       </div>
