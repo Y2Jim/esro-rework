@@ -24,9 +24,6 @@ import type {
   Rarity,
   TradeOffer,
   VanityItem,
-  Race,
-  Courier,
-  ThemeId,
 } from "@/lib/types"
 import {
   channels as seedChannels,
@@ -48,22 +45,6 @@ import {
 interface EsroState {
   booted: boolean
   setBooted: (v: boolean) => void
-  
-  // Character Creation
-  characterCreated: boolean
-  playerLevel: number
-  playerRace: Race | null
-  playerCourier: Courier | null
-  starterSkills: string[]
-  setCharacterCreated: (v: boolean) => void
-  setPlayerRace: (race: Race) => void
-  setPlayerCourier: (courier: Courier) => void
-  setStarterSkills: (skills: string[]) => void
-  completeCharacterCreation: (handle: string, race: Race, courier: Courier, skills: string[]) => void
-  
-  // Theme
-  theme: ThemeId
-  setTheme: (theme: ThemeId) => void
 
   // Navigation
   screen: ScreenId
@@ -263,47 +244,6 @@ const POOL: Record<Rarity, PoolItem[]> = {
 export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
   setBooted: (v) => set({ booted: v }),
-
-  // Character Creation
-  characterCreated: true, // Set to false to test character creation flow
-  playerLevel: 7,
-  playerRace: null,
-  playerCourier: null,
-  starterSkills: [],
-  setCharacterCreated: (v) => set({ characterCreated: v }),
-  setPlayerRace: (race) => set({ playerRace: race, theme: race.id as ThemeId }),
-  setPlayerCourier: (courier) => set({ playerCourier: courier }),
-  setStarterSkills: (skills) => set({ starterSkills: skills }),
-  completeCharacterCreation: (handle, race, courier, skills) => {
-    const { identity, profile } = get()
-    set({
-      characterCreated: true,
-      playerRace: race,
-      playerCourier: courier,
-      starterSkills: skills,
-      theme: race.id as ThemeId,
-      identity: {
-        ...identity,
-        handle,
-        established: true,
-      },
-      profile: {
-        ...profile,
-        handle,
-        faction: {
-          id: race.id,
-          label: race.name,
-          rank: 0,
-          standing: 0,
-          maxStanding: 100,
-        },
-      },
-    })
-  },
-
-  // Theme
-  theme: "default" as ThemeId,
-  setTheme: (theme) => set({ theme }),
 
   // Navigation
   screen: "terminal",
