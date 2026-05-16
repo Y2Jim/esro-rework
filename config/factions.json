@@ -4,8 +4,8 @@
   "factions": [
     {
       "id": "crownborn",
-      "name": "Crown Courts",
-      "emblem": "◇",
+      "name": "Crowned Courts",
+      "emblem": "♕",
       "color": "#f1d38a",
       "glow": "rgba(241, 211, 138, 0.35)",
       "colorVars": {
@@ -14,13 +14,13 @@
         "accent": "#ffe4a8",
         "bg": "rgba(241, 211, 138, 0.08)"
       },
-      "lore": "Crownborn courts believe bearing matters. Their towers preserve luminous rites, audience laws, and the controlled projection of force that keeps lesser halls from fracturing.",
+      "lore": "Crownborn courts believe bearing matters. Their towers preserve luminous rites, audience laws, and the controlled projection of force that keeps lesser halls from fracturing. (EXP Increase When Partied)",
       "motto": "Light reveals. Order endures."
     },
     {
       "id": "hearthkin",
       "name": "Hearth Wardens",
-      "emblem": "◈",
+      "emblem": "⌂",
       "color": "#ff9b6a",
       "glow": "rgba(255, 155, 106, 0.35)",
       "colorVars": {
@@ -29,13 +29,13 @@
         "accent": "#ffc299",
         "bg": "rgba(255, 155, 106, 0.08)"
       },
-      "lore": "Hearthkin rings build for tomorrow first. Their wardens keep roads lit, train escorts, and hold refuge lines wherever the frontier tries to starve a settlement out.",
+      "lore": "Hearthkin rings build for tomorrow first. Their wardens keep roads lit, train escorts, and hold refuge lines wherever the frontier tries to starve a settlement out. (Reduced Building Times)",
       "motto": "Hold the line. Shelter the road."
     },
     {
       "id": "gloamwhisper",
-      "name": "Veil Circles",
-      "emblem": "◎",
+      "name": "Veiled Circle",
+      "emblem": "◐",
       "color": "#8cb2ff",
       "glow": "rgba(140, 178, 255, 0.35)",
       "colorVars": {
@@ -44,13 +44,13 @@
         "accent": "#b8d4ff",
         "bg": "rgba(140, 178, 255, 0.08)"
       },
-      "lore": "The Veil Circles prefer half-light and layered plans. Their networks share route whispers, hidden caches, and methods for surviving when a direct answer would get everyone noticed.",
+      "lore": "The Veiled Circle prefer the cover of shade and layers their plans. Their networks share whispers, dark secrets, and methods for survival. (Increased Loot Chance)",
       "motto": "See without being seen."
     },
     {
       "id": "roadsinger",
       "name": "Open Roads Chorus",
-      "emblem": "⬡",
+      "emblem": "∞",
       "color": "#68d9c0",
       "glow": "rgba(104, 217, 192, 0.35)",
       "colorVars": {
@@ -59,7 +59,7 @@
         "accent": "#9aebd7",
         "bg": "rgba(104, 217, 192, 0.08)"
       },
-      "lore": "Roadsingers map by feel as much as by ink. Their choirs keep route songs, hazard memory, and the uncanny instinct that sends them down the one path everyone else overlooked.",
+      "lore": "Roadsingers map by feel, as if they are the pen writing road as if it were ink. Their choirs keep routes stable, memories and an uncanny instinct that sends them down the hidden paths that everyone else overlooked. (Higher Chance of Hidden Route Discovery)",
       "motto": "Every road opens another door."
     }
   ]

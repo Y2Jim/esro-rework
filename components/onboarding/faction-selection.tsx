@@ -13,41 +13,40 @@ interface FactionSelectionProps {
   onCancel?: () => void
 }
 
-function FactionEmblem({ faction, selected, locked, size = "lg" }: { 
+function FactionEmblem({ faction, selected, locked, size = "md" }: { 
   faction: FactionData
   selected: boolean
   locked?: boolean
-  size?: "sm" | "md" | "lg" | "xl"
+  size?: "sm" | "md" | "lg"
 }) {
   const sizeClasses = {
-    sm: "h-12 w-12 text-xl",
-    md: "h-16 w-16 text-2xl",
-    lg: "h-24 w-24 text-4xl",
-    xl: "h-32 w-32 text-5xl",
+    sm: "h-10 w-10 text-lg",
+    md: "h-14 w-14 text-2xl",
+    lg: "h-20 w-20 text-3xl",
   }
   
   return (
     <motion.div
       animate={selected ? { scale: [1, 1.05, 1] } : {}}
       transition={{ duration: 0.5, repeat: selected ? Infinity : 0, repeatDelay: 1 }}
-      className={`relative flex items-center justify-center rounded-xl font-bold transition-all ${sizeClasses[size]} ${
+      className={`relative flex items-center justify-center rounded-lg font-bold transition-all ${sizeClasses[size]} ${
         locked ? "opacity-40 grayscale" : ""
       }`}
       style={{ 
-        backgroundColor: locked ? "rgba(100,100,100,0.2)" : `${faction.color}15`,
+        backgroundColor: locked ? "rgba(100,100,100,0.2)" : `${faction.color}18`,
         color: locked ? "#666" : faction.color,
-        boxShadow: selected && !locked ? `0 0 40px ${faction.glow}, 0 0 80px ${faction.glow}` : undefined,
-        border: `2px solid ${locked ? "rgba(100,100,100,0.3)" : selected ? faction.color : "transparent"}`,
+        boxShadow: selected && !locked ? `0 0 24px ${faction.glow}` : undefined,
+        border: `2px solid ${locked ? "rgba(100,100,100,0.3)" : selected ? faction.color : `${faction.color}30`}`,
       }}
     >
       {/* Inner glow effect */}
       {selected && !locked && (
         <motion.div
-          className="absolute inset-0 rounded-xl"
+          className="absolute inset-0 rounded-lg"
           style={{ 
             background: `radial-gradient(circle at center, ${faction.glow} 0%, transparent 70%)`,
           }}
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          animate={{ opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 2, repeat: Infinity }}
         />
       )}
@@ -55,8 +54,8 @@ function FactionEmblem({ faction, selected, locked, size = "lg" }: {
       <span className="relative z-10">{faction.emblem}</span>
       
       {locked && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40">
-          <Lock className="h-6 w-6 text-white/60" />
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/40">
+          <Lock className="h-4 w-4 text-white/60" />
         </div>
       )}
     </motion.div>
@@ -66,7 +65,6 @@ function FactionEmblem({ faction, selected, locked, size = "lg" }: {
 export function FactionSelection({ playerLevel, currentFaction, onComplete, onCancel }: FactionSelectionProps) {
   const [step, setStep] = useState<FactionSelectionStep>("intro")
   const [selectedFaction, setSelectedFaction] = useState<FactionData | null>(currentFaction || null)
-  const [hoveredFaction, setHoveredFaction] = useState<FactionData | null>(null)
 
   const isLocked = playerLevel < FACTION_UNLOCK_LEVEL
 
@@ -102,36 +100,25 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
     }
   }
 
-  const displayFaction = hoveredFaction || selectedFaction
-
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0b0f]">
-      {/* Scanline effect */}
-      <div 
-        className="pointer-events-none fixed inset-0"
-        style={{
-          background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(168, 123, 255, 0.015) 2px, rgba(168, 123, 255, 0.015) 4px)",
-          zIndex: 100,
-        }}
-      />
-
-      {/* Progress */}
-      <div className="p-4 border-b border-[rgba(168,123,255,0.1)]">
-        <div className="flex items-center justify-center gap-2">
+    <div className="flex h-full flex-col bg-[color:var(--color-bg)]">
+      {/* Header with progress */}
+      <div className="shrink-0 border-b border-[color:var(--color-border)] px-3 py-2">
+        <div className="flex items-center justify-center gap-1.5">
           {["intro", "selection", "confirm"].map((s, i) => (
             <div
               key={s}
-              className={`h-1.5 w-12 rounded-full transition-colors ${
+              className={`h-1 w-8 rounded-full transition-colors ${
                 step === s
                   ? "bg-[color:var(--color-accent)]"
                   : ["intro", "selection", "confirm"].indexOf(step) > i
                   ? "bg-[color:var(--color-accent)]/50"
-                  : "bg-[rgba(255,255,255,0.1)]"
+                  : "bg-[color:var(--color-border)]"
               }`}
             />
           ))}
         </div>
-        <p className="mt-2 text-center text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+        <p className="mt-1 text-center text-[9px] text-[color:var(--color-muted)] uppercase tracking-wider">
           {step === "intro" && "Faction Introduction"}
           {step === "selection" && "Choose Allegiance"}
           {step === "confirm" && "Confirm Faction"}
@@ -139,62 +126,86 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3">
         <AnimatePresence mode="wait">
           {/* Intro */}
           {step === "intro" && (
             <motion.div
               key="intro"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mx-auto max-w-lg"
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-4"
             >
               {/* All emblems showcase */}
-              <div className="mb-8 flex items-center justify-center gap-6">
+              <div className="flex items-center justify-center gap-3">
                 {FACTIONS.map((faction, i) => (
                   <motion.div
                     key={faction.id}
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 * i, duration: 0.4 }}
+                    transition={{ delay: 0.1 * i, duration: 0.3 }}
                   >
-                    <FactionEmblem faction={faction} selected={false} locked={isLocked} size="md" />
+                    <FactionEmblem faction={faction} selected={false} locked={isLocked} size="sm" />
                   </motion.div>
                 ))}
               </div>
 
-              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-6 text-center">
-                <h2 className="mb-4 text-2xl font-bold text-[color:var(--color-accent)]">
+              <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-surface)]/50 p-4 text-center">
+                <h2 className="mb-3 text-lg font-bold text-[color:var(--color-accent)]">
                   Faction Allegiance
                 </h2>
                 
                 {isLocked ? (
                   <>
-                    <div className="mb-4 flex items-center justify-center gap-2 text-amber-400">
-                      <Lock className="h-5 w-5" />
+                    <div className="mb-3 flex items-center justify-center gap-2 text-amber-400 text-sm">
+                      <Lock className="h-4 w-4" />
                       <span className="font-medium">Locked until Level {FACTION_UNLOCK_LEVEL}</span>
                     </div>
-                    <p className="text-sm text-[color:var(--color-text-secondary)] leading-relaxed">
+                    <p className="text-[11px] text-[color:var(--color-muted)] leading-relaxed">
                       Faction allegiance becomes available once you reach Level {FACTION_UNLOCK_LEVEL}. 
-                      Continue running expeditions and building your skills to unlock this feature.
+                      Continue running expeditions to unlock.
                     </p>
-                    <p className="mt-4 text-xs text-[color:var(--color-text-muted)]">
-                      Current Level: {playerLevel} / {FACTION_UNLOCK_LEVEL}
+                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+                      <div
+                        className="h-full bg-amber-500/60"
+                        style={{ width: `${(playerLevel / FACTION_UNLOCK_LEVEL) * 100}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-[9px] text-[color:var(--color-muted)]">
+                      Level {playerLevel} / {FACTION_UNLOCK_LEVEL}
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-sm text-[color:var(--color-text-secondary)] leading-relaxed">
+                    <p className="text-[11px] text-[color:var(--color-text-secondary)] leading-relaxed">
                       Your journey has proven your worth. The time has come to pledge allegiance to one of the four great factions. 
-                      Each faction offers unique bonuses, themed UI colors, and exclusive content.
-                    </p>
-                    <p className="mt-4 text-xs text-[color:var(--color-text-muted)]">
-                      Choosing a faction will change your ESRO interface to match your allegiance.
+                      Each offers unique bonuses and themed UI.
                     </p>
                   </>
                 )}
               </div>
+
+              {/* Faction previews */}
+              {!isLocked && (
+                <div className="space-y-2">
+                  {FACTIONS.map((faction) => (
+                    <div
+                      key={faction.id}
+                      className="rounded-lg border p-2"
+                      style={{
+                        borderColor: `${faction.color}30`,
+                        backgroundColor: faction.colorVars.bg,
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg" style={{ color: faction.color }}>{faction.emblem}</span>
+                        <span className="text-[11px] font-medium" style={{ color: faction.color }}>{faction.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -202,92 +213,56 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
           {step === "selection" && (
             <motion.div
               key="selection"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mx-auto max-w-2xl"
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-3"
             >
-              {/* Info panel */}
-              <AnimatePresence mode="wait">
-                {displayFaction && (
-                  <motion.div
-                    key={displayFaction.id}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="mb-6 rounded-lg border p-4 text-center"
-                    style={{
-                      borderColor: `${displayFaction.color}40`,
-                      backgroundColor: displayFaction.colorVars.bg,
-                    }}
-                  >
-                    <div className="flex items-center justify-center gap-3 mb-2">
-                      <span className="text-2xl" style={{ color: displayFaction.color }}>
-                        {displayFaction.emblem}
-                      </span>
-                      <h3 className="text-xl font-bold" style={{ color: displayFaction.color }}>
-                        {displayFaction.name}
+              {FACTIONS.map((faction) => (
+                <button
+                  key={faction.id}
+                  onClick={() => setSelectedFaction(faction)}
+                  className={`relative w-full rounded-lg border p-3 text-left transition-all ${
+                    selectedFaction?.id === faction.id ? "ring-1" : ""
+                  }`}
+                  style={{
+                    borderColor: selectedFaction?.id === faction.id ? faction.color : `${faction.color}30`,
+                    backgroundColor: selectedFaction?.id === faction.id ? faction.colorVars.bg : "transparent",
+                    boxShadow: selectedFaction?.id === faction.id ? `0 0 16px ${faction.glow}` : undefined,
+                    ["--tw-ring-color" as string]: faction.color,
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <FactionEmblem 
+                      faction={faction} 
+                      selected={selectedFaction?.id === faction.id} 
+                      size="md" 
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-[12px]" style={{ color: faction.color }}>
+                        {faction.name}
                       </h3>
+                      <p className="mt-0.5 text-[9px] text-[color:var(--color-muted)] italic">
+                        &quot;{faction.motto}&quot;
+                      </p>
+                      <p className="mt-1 text-[9px] text-[color:var(--color-text-secondary)] leading-relaxed line-clamp-2">
+                        {faction.lore}
+                      </p>
                     </div>
-                    <p className="text-sm text-[color:var(--color-text-secondary)] italic mb-2">
-                      &quot;{displayFaction.motto}&quot;
-                    </p>
-                    <p className="text-sm text-[color:var(--color-text-secondary)]">
-                      {displayFaction.lore}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Faction grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {FACTIONS.map((faction) => (
-                  <button
-                    key={faction.id}
-                    onClick={() => setSelectedFaction(faction)}
-                    onMouseEnter={() => setHoveredFaction(faction)}
-                    onMouseLeave={() => setHoveredFaction(null)}
-                    className={`relative rounded-xl border p-6 text-left transition-all ${
-                      selectedFaction?.id === faction.id
-                        ? "ring-2 ring-offset-2 ring-offset-black"
-                        : "hover:scale-[1.02]"
-                    }`}
-                    style={{
-                      borderColor: selectedFaction?.id === faction.id ? faction.color : "rgba(255,255,255,0.1)",
-                      backgroundColor: selectedFaction?.id === faction.id ? faction.colorVars.bg : "rgba(15,16,22,0.8)",
-                      boxShadow: selectedFaction?.id === faction.id ? `0 0 30px ${faction.glow}` : undefined,
-                      ["--tw-ring-color" as string]: faction.color,
-                    }}
-                  >
-                    <div className="flex items-start gap-4">
-                      <FactionEmblem 
-                        faction={faction} 
-                        selected={selectedFaction?.id === faction.id} 
-                        size="md" 
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg" style={{ color: faction.color }}>
-                          {faction.name}
-                        </h3>
-                        <p className="mt-1 text-xs text-[color:var(--color-text-muted)] italic">
-                          {faction.motto}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {selectedFaction?.id === faction.id && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full"
-                        style={{ backgroundColor: faction.color }}
-                      >
-                        <Check className="h-4 w-4 text-black" />
-                      </motion.div>
-                    )}
-                  </button>
-                ))}
-              </div>
+                  </div>
+                  
+                  {selectedFaction?.id === faction.id && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full"
+                      style={{ backgroundColor: faction.color }}
+                    >
+                      <Check className="h-3 w-3 text-black" />
+                    </motion.div>
+                  )}
+                </button>
+              ))}
             </motion.div>
           )}
 
@@ -295,61 +270,61 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
           {step === "confirm" && selectedFaction && (
             <motion.div
               key="confirm"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mx-auto max-w-md text-center"
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-4 text-center"
             >
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mb-6 flex justify-center"
+                transition={{ delay: 0.1 }}
+                className="flex justify-center"
               >
-                <FactionEmblem faction={selectedFaction} selected={true} size="xl" />
+                <FactionEmblem faction={selectedFaction} selected={true} size="lg" />
               </motion.div>
 
               <motion.div
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.2 }}
               >
                 <h2 
-                  className="text-3xl font-bold mb-2"
+                  className="text-xl font-bold mb-1"
                   style={{ color: selectedFaction.color }}
                 >
                   {selectedFaction.name}
                 </h2>
-                <p className="text-lg text-[color:var(--color-text-secondary)] italic mb-4">
+                <p className="text-[11px] text-[color:var(--color-text-secondary)] italic">
                   &quot;{selectedFaction.motto}&quot;
                 </p>
               </motion.div>
 
               <motion.div
-                initial={{ y: 20, opacity: 0 }}
+                initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-4 text-left"
+                transition={{ delay: 0.3 }}
+                className="rounded-lg border border-[color:var(--color-border)] p-3 text-left"
               >
-                <div className="mb-3 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="mb-2 text-[9px] text-[color:var(--color-muted)] uppercase tracking-wider">
                   Faction Benefits
                 </div>
-                <ul className="space-y-2 text-sm text-[color:var(--color-text-secondary)]">
+                <ul className="space-y-1.5 text-[10px] text-[color:var(--color-text-secondary)]">
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
-                    Themed UI colors matching your allegiance
+                    Themed UI colors
                   </li>
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
-                    Faction badge displayed on your profile
+                    Faction badge on profile
                   </li>
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
-                    Bonus rewards on faction-aligned expeditions
+                    Bonus rewards on aligned expeditions
                   </li>
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
-                    Access to exclusive faction projects
+                    Exclusive faction projects
                   </li>
                 </ul>
               </motion.div>
@@ -357,10 +332,10 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="mt-4 text-xs text-[color:var(--color-text-muted)]"
+                transition={{ delay: 0.4 }}
+                className="text-[9px] text-[color:var(--color-muted)]"
               >
-                You can change your UI theme in Settings without changing factions.
+                Theme can be changed in Settings without changing faction.
               </motion.p>
             </motion.div>
           )}
@@ -368,19 +343,19 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
       </div>
 
       {/* Navigation */}
-      <div className="border-t border-[rgba(168,123,255,0.1)] p-4">
-        <div className="mx-auto flex max-w-md items-center justify-between gap-4">
+      <div className="shrink-0 border-t border-[color:var(--color-border)] p-3">
+        <div className="flex items-center justify-between gap-3">
           <button
             onClick={prevStep}
-            className="flex items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.1)] px-4 py-2 text-sm text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)]"
+            className="flex items-center gap-1 rounded-lg border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3" />
             {step === "intro" ? "Cancel" : "Back"}
           </button>
           <button
             onClick={nextStep}
             disabled={isLocked || (step === "selection" && !selectedFaction)}
-            className="flex items-center gap-2 rounded-lg px-6 py-2 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 rounded-lg px-4 py-1.5 text-[10px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
               backgroundColor: step === "confirm" && selectedFaction 
                 ? selectedFaction.color 
@@ -388,7 +363,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
             }}
           >
             {step === "confirm" ? "Pledge Allegiance" : "Continue"}
-            {step !== "confirm" && <ChevronRight className="h-4 w-4" />}
+            {step !== "confirm" && <ChevronRight className="h-3 w-3" />}
           </button>
         </div>
       </div>
