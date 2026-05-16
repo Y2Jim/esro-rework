@@ -626,6 +626,106 @@ function NotificationsTab() {
   )
 }
 
+// All available titles for preview - matches unlockAllTitles in store
+const ALL_TITLES: { id: string; label: string; rarity: Rarity }[] = [
+  // Common
+  { id: "route_tender", label: "Route Tender", rarity: "common" },
+  { id: "faded_echo", label: "Faded Echo", rarity: "common" },
+  // Uncommon
+  { id: "signal_keeper", label: "Signal Keeper", rarity: "uncommon" },
+  { id: "route_finder", label: "Route Finder", rarity: "uncommon" },
+  // Rare
+  { id: "archive_listener", label: "Archive Listener", rarity: "rare" },
+  { id: "waystone_keeper", label: "Waystone Keeper", rarity: "rare" },
+  { id: "drift_walker", label: "Drift Walker", rarity: "rare" },
+  // Epic
+  { id: "relay_warden", label: "Relay Warden", rarity: "epic" },
+  { id: "depth_touched", label: "Depth Touched", rarity: "epic" },
+  { id: "void_speaker", label: "Void Speaker", rarity: "epic" },
+  // Legendary
+  { id: "deep_pull_regent", label: "Deep Pull Regent", rarity: "legendary" },
+  { id: "primordial_echo", label: "Primordial Echo", rarity: "legendary" },
+  { id: "the_returned", label: "The Returned", rarity: "legendary" },
+  { id: "gloam_signal_regent", label: "Gloam Signal Regent", rarity: "legendary" },
+  // Mythic (Transcendent) - each has unique animation
+  { id: "myth_relay_sea", label: "Myth of the Relay Sea", rarity: "mythic" },
+  { id: "shardheart_ascendant", label: "Shardheart Ascendant", rarity: "mythic" },
+  { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic" },
+]
+
+function TitlePreviewSelector() {
+  const [previewIndex, setPreviewIndex] = useState(0)
+  const setActiveTitle = useEsroStore((s) => s.setActiveTitle)
+  const profile = useEsroStore((s) => s.profile)
+  const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)
+  
+  const currentTitle = ALL_TITLES[previewIndex]
+  const isEquipped = profile.title?.label === currentTitle.label
+  
+  const handleEquip = () => {
+    // Make sure titles are unlocked first
+    unlockAllTitles()
+    // Find the title by label in owned titles and equip it
+    const ownedTitle = profile.ownedTitles.find(t => t.label === currentTitle.label)
+    if (ownedTitle) {
+      setActiveTitle(ownedTitle.id)
+    }
+  }
+  
+  return (
+    <div className="space-y-2">
+      {/* Title display */}
+      <div className="rounded bg-[color:var(--color-panel)]/50 p-3 text-center">
+        <div className="mb-1 text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          {currentTitle.rarity}
+        </div>
+        <TitleDisplay 
+          title={currentTitle.label} 
+          rarity={currentTitle.rarity} 
+          variant="inline"
+          className="text-[14px] font-medium"
+        />
+      </div>
+      
+      {/* Controls */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setPreviewIndex((prev) => (prev > 0 ? prev - 1 : ALL_TITLES.length - 1))}
+          className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+        >
+          Prev
+        </button>
+        <span className="flex-1 text-center text-[9px] text-[color:var(--color-muted)]">
+          {previewIndex + 1} / {ALL_TITLES.length}
+        </span>
+        <button
+          type="button"
+          onClick={() => setPreviewIndex((prev) => (prev < ALL_TITLES.length - 1 ? prev + 1 : 0))}
+          className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[10px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+        >
+          Next
+        </button>
+      </div>
+      
+      {/* Equip button */}
+      <button
+        type="button"
+        onClick={handleEquip}
+        disabled={isEquipped}
+        className={cn(
+          "w-full rounded border px-3 py-1.5 text-[10px] transition-colors",
+          isEquipped
+            ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
+            : "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/20"
+        )}
+      >
+        {isEquipped ? "Equipped" : "Equip This Title"}
+      </button>
+    </div>
+  )
+}
+
 function AdminUnlockButton() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
   const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)
@@ -717,6 +817,14 @@ function AdminUnlockButton() {
       >
         {unlocked.themes ? "All UI Themes Unlocked" : "Unlock All UI Themes"}
       </button>
+      
+      {/* Title preview and equip */}
+      <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
+        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Title Preview &amp; Equip
+        </div>
+        <TitlePreviewSelector />
+      </div>
       
       {/* Flair preview */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
