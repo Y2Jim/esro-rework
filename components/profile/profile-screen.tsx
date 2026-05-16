@@ -8,7 +8,8 @@ import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 
 import { FACTIONS } from "@/lib/game-data"
-import type { RaceId } from "@/lib/types"
+import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
+import type { RaceId, Rarity } from "@/lib/types"
 
 type ProfileTab = "summary" | "titles" | "cosmetics" | "settings" | "notifications"
 
@@ -382,21 +383,34 @@ function SettingsTab() {
   const uiTheme = useEsroStore((s) => s.uiTheme)
   const setUiTheme = useEsroStore((s) => s.setUiTheme)
   const characterFaction = useEsroStore((s) => s.characterFaction)
+  const unlockedThemes = useEsroStore((s) => s.unlockedThemes)
 
-  const themeOptions: { id: "default" | RaceId; label: string; color: string }[] = [
+  // Build available theme options: default + faction (if selected) + unlocked rollable themes
+  const baseThemes: { id: string; label: string; color: string; rarity?: Rarity }[] = [
     { id: "default", label: "Default (Violet)", color: "#a45dff" },
-    ...FACTIONS.map(f => ({ id: f.id, label: f.name, color: f.color }))
   ]
+  
+  // Add faction theme if player has chosen a faction
+  if (characterFaction) {
+    baseThemes.push({
+      id: characterFaction.id,
+      label: `${characterFaction.name} Theme`,
+      color: characterFaction.color,
+    })
+  }
+
+  // Add unlocked rollable themes
+  const unlockedRollableThemes = ROLLABLE_THEMES.filter(t => unlockedThemes.includes(t.id))
 
   return (
     <div className="space-y-4">
-      {/* UI Theme */}
+      {/* UI Theme - Base Themes */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
         <div className="mb-3 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
           UI Theme
         </div>
         <div className="space-y-2">
-          {themeOptions.map((theme) => (
+          {baseThemes.map((theme) => (
             <button
               key={theme.id}
               type="button"
@@ -421,9 +435,66 @@ function SettingsTab() {
             </button>
           ))}
         </div>
-        <p className="mt-3 text-[9px] text-[color:var(--color-muted)]">
-          Choose your interface color scheme. Faction themes become available after joining a faction.
-        </p>
+        {!characterFaction && (
+          <p className="mt-3 text-[9px] text-[color:var(--color-muted)]">
+            Join a faction to unlock its unique color scheme.
+          </p>
+        )}
+      </div>
+      
+      {/* Rollable Themes Section */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Collected Themes
+          </span>
+          <span className="text-[9px] text-[color:var(--color-muted)]">
+            {unlockedRollableThemes.length}/{ROLLABLE_THEMES.length}
+          </span>
+        </div>
+        
+        {unlockedRollableThemes.length === 0 ? (
+          <div className="rounded border border-dashed border-[color:var(--color-border-soft)] p-3 text-center">
+            <div className="text-[10px] text-[color:var(--color-muted)]">No themes collected yet</div>
+            <div className="mt-1 text-[9px] text-[color:var(--color-muted-2)]">
+              Themes can be found through expeditions and archive fragments
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {unlockedRollableThemes.map((theme) => (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => setUiTheme(theme.id)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                  uiTheme === theme.id
+                    ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
+                    : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
+                )}
+              >
+                <div 
+                  className="h-4 w-4 rounded-full"
+                  style={{ backgroundColor: theme.colors.accent, boxShadow: `0 0 8px ${theme.colors.accent}50` }}
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-[11px]", rarityColor[theme.rarity])}>
+                      {theme.label}
+                    </span>
+                  </div>
+                  <div className="text-[9px] text-[color:var(--color-muted)]">
+                    {theme.description}
+                  </div>
+                </div>
+                {uiTheme === theme.id && (
+                  <span className="text-[8px] uppercase text-[color:var(--color-accent)]">active</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Current Faction */}
@@ -563,13 +634,15 @@ function AdminUnlockButton() {
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
   const addMaterials = useEsroStore((s) => s.addMaterials)
   const injectTestChatMessages = useEsroStore((s) => s.injectTestChatMessages)
+  const unlockTheme = useEsroStore((s) => s.unlockTheme)
   const identity = useEsroStore((s) => s.identity)
   
-  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean }>({
+  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean }>({
     cosmetics: false,
     titles: false,
     materials: false,
     chat: false,
+    themes: false,
   })
   
   const [previewFlair, setPreviewFlair] = useState(0)
@@ -627,6 +700,22 @@ function AdminUnlockButton() {
         )}
       >
         {unlocked.titles ? "All Titles Unlocked" : "Unlock All Titles"}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          ROLLABLE_THEMES.forEach(t => unlockTheme(t.id))
+          setUnlocked((prev) => ({ ...prev, themes: true }))
+        }}
+        disabled={unlocked.themes}
+        className={cn(
+          "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+          unlocked.themes
+            ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
+            : "border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
+        )}
+      >
+        {unlocked.themes ? "All UI Themes Unlocked" : "Unlock All UI Themes"}
       </button>
       
       {/* Flair preview */}

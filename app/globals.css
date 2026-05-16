@@ -119,6 +119,23 @@
     --color-border-soft: rgba(104, 217, 192, 0.25);
     --color-border-strong: rgba(154, 235, 215, 0.46);
   }
+  
+  /* Rollable Themes - Dynamic via CSS custom properties */
+  [data-theme="rollable"] {
+    --color-bg: var(--rollable-bg, #0a0608);
+    --color-bg-alt: color-mix(in srgb, var(--rollable-bg, #0a0608), var(--rollable-accent, #bb81ff) 5%);
+    --color-panel: color-mix(in srgb, var(--rollable-panel, #120b1c) 94%, transparent);
+    --color-panel-soft: color-mix(in srgb, var(--rollable-panel, #120b1c) 82%, transparent);
+    --color-panel-gradient: linear-gradient(180deg, 
+      color-mix(in srgb, var(--rollable-panel, #120b1c) 96%, var(--rollable-accent, #bb81ff) 4%), 
+      color-mix(in srgb, var(--rollable-panel, #120b1c) 92%, transparent));
+    --color-accent: var(--rollable-accent, #bb81ff);
+    --color-accent-strong: var(--rollable-accent-bright, #dda0ff);
+    --color-accent-glow: color-mix(in srgb, var(--rollable-accent, #bb81ff) 24%, transparent);
+    --color-border: color-mix(in srgb, var(--rollable-accent, #bb81ff) 42%, transparent);
+    --color-border-soft: color-mix(in srgb, var(--rollable-accent, #bb81ff) 25%, transparent);
+    --color-border-strong: color-mix(in srgb, var(--rollable-accent-bright, #dda0ff) 46%, transparent);
+  }
 
   * {
     box-sizing: border-box;

@@ -59,10 +59,12 @@ interface EsroState {
   characterCourier: Courier | null
   characterFaction: FactionData | null
   factionUnlocked: boolean
-  uiTheme: "default" | RaceId
+  uiTheme: string // "default" | RaceId | RollableThemeId
+  unlockedThemes: string[] // List of unlocked rollable theme IDs
   setCharacterData: (race: Race, courier: Courier, handle: string, starterSkills: string[]) => void
   setFaction: (factionId: RaceId) => void
-  setUiTheme: (theme: "default" | RaceId) => void
+  setUiTheme: (theme: string) => void
+  unlockTheme: (themeId: string) => void
   checkFactionUnlock: () => void
   
   // Navigation
@@ -285,6 +287,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   characterFaction: null,
   factionUnlocked: false,
   uiTheme: "default",
+  unlockedThemes: [], // Start with no rollable themes unlocked
   setCharacterData: (race, courier, handle, starterSkills) => {
     const { profile, identity } = get()
     set({
@@ -316,6 +319,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   setUiTheme: (theme) => set({ uiTheme: theme }),
+  unlockTheme: (themeId) => {
+    const { unlockedThemes } = get()
+    if (!unlockedThemes.includes(themeId)) {
+      set({ unlockedThemes: [...unlockedThemes, themeId] })
+    }
+  },
   checkFactionUnlock: () => {
     const { profile, factionUnlocked } = get()
     if (!factionUnlocked && profile.level >= FACTION_UNLOCK_LEVEL) {

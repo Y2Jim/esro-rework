@@ -91,6 +91,33 @@ export type Rarity =
   | "common"
   | "uncommon"
   | "rare"
+
+// Rollable UI Themes (separate from faction themes)
+export type RollableThemeId =
+  | "terminal_green"
+  | "blood_moon"
+  | "ocean_depths"
+  | "golden_archive"
+  | "void_static"
+  | "aurora_drift"
+  | "ember_core"
+  | "crystal_lattice"
+  | "neon_pulse"
+  | "primordial_glow"
+
+export interface RollableUITheme {
+  id: RollableThemeId
+  label: string
+  description: string
+  rarity: Rarity
+  colors: {
+    accent: string
+    accentBright: string
+    background: string
+    panel: string
+  }
+  unlocked: boolean
+}
   | "epic"
   | "legendary"
   | "mythic"
