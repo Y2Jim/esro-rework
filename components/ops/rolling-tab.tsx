@@ -41,6 +41,7 @@ const typeLabels: Record<string, { label: string; color: string; bg: string }> =
   badge: { label: "Badge", color: "text-emerald-300", bg: "bg-emerald-500/20 border-emerald-500/30" },
   blueprint: { label: "Blueprint", color: "text-blue-300", bg: "bg-blue-500/20 border-blue-500/30" },
   chat_flair: { label: "Chat Flair", color: "text-pink-300", bg: "bg-pink-500/20 border-pink-500/30" },
+  salvage: { label: "Salvage", color: "text-orange-300", bg: "bg-orange-500/20 border-orange-500/30" },
 }
 
 /** Fake items to cycle through during animation */
@@ -213,6 +214,16 @@ export function RollingTab() {
                         transition={{ type: "spring", damping: 15, stiffness: 300 }}
                         className="text-center"
                       >
+                        {/* Duplicate indicator */}
+                        {finalResult.isDuplicate && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mb-2 text-[9px] uppercase tracking-wider text-orange-400"
+                          >
+                            Duplicate: {finalResult.duplicateOf}
+                          </motion.div>
+                        )}
                         {/* Type badge */}
                         <motion.div 
                           initial={{ opacity: 0, y: -10 }}
@@ -235,22 +246,38 @@ export function RollingTab() {
                           }
                           transition={{ duration: 0.5, repeat: finalResult.rarity === "legendary" || finalResult.rarity === "mythic" ? 2 : 0 }}
                         >
-                          {finalResult.label}
+                          {finalResult.isDuplicate && finalResult.salvageReward 
+                            ? `${finalResult.salvageReward.label} x${finalResult.salvageReward.qty}`
+                            : finalResult.label
+                          }
                         </motion.div>
                         <div className="mt-1 text-[11px] capitalize text-[color:var(--color-muted)]">
                           {finalResult.rarity}
                         </div>
+                        {/* Salvage bonus info */}
+                        {finalResult.isDuplicate && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="mt-2 text-[9px] text-orange-300/80"
+                          >
+                            Added to inventory
+                          </motion.div>
+                        )}
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: "100%" }}
                           transition={{ delay: 0.3, duration: 0.4 }}
                           className={cn(
                             "mx-auto mt-3 h-0.5 rounded-full",
-                            finalResult.rarity === "legendary" || finalResult.rarity === "mythic"
-                              ? "bg-amber-400"
-                              : finalResult.rarity === "epic"
-                                ? "bg-[color:var(--color-accent-strong)]"
-                                : "bg-[color:var(--color-accent)]"
+                            finalResult.isDuplicate
+                              ? "bg-orange-400"
+                              : finalResult.rarity === "legendary" || finalResult.rarity === "mythic"
+                                ? "bg-amber-400"
+                                : finalResult.rarity === "epic"
+                                  ? "bg-[color:var(--color-accent-strong)]"
+                                  : "bg-[color:var(--color-accent)]"
                           )}
                         />
                       </motion.div>
@@ -331,20 +358,35 @@ export function RollingTab() {
             {recovery.slice(0, 5).map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2"
+                className={cn(
+                  "flex items-center justify-between rounded-lg border px-3 py-2",
+                  item.isDuplicate 
+                    ? "border-orange-500/30 bg-orange-500/5" 
+                    : "border-[color:var(--color-border)]"
+                )}
               >
-                <div className="flex items-center gap-2">
-                  {/* Type badge */}
-                  <span className={cn(
-                    "rounded border px-1.5 py-0.5 text-[7px] font-mono uppercase tracking-wider",
-                    typeLabels[item.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]",
-                    typeLabels[item.type]?.color || "text-[color:var(--color-muted)]"
-                  )}>
-                    {typeLabels[item.type]?.label || item.type}
-                  </span>
-                  <span className={cn("text-[11px]", rarityColors[item.rarity])}>
-                    {item.label}
-                  </span>
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    {/* Type badge */}
+                    <span className={cn(
+                      "rounded border px-1.5 py-0.5 text-[7px] font-mono uppercase tracking-wider",
+                      typeLabels[item.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]",
+                      typeLabels[item.type]?.color || "text-[color:var(--color-muted)]"
+                    )}>
+                      {typeLabels[item.type]?.label || item.type}
+                    </span>
+                    <span className={cn("text-[11px]", rarityColors[item.rarity])}>
+                      {item.isDuplicate && item.salvageReward 
+                        ? `${item.salvageReward.label} x${item.salvageReward.qty}`
+                        : item.label
+                      }
+                    </span>
+                  </div>
+                  {item.isDuplicate && item.duplicateOf && (
+                    <span className="text-[8px] text-orange-400/70">
+                      Duplicate: {item.duplicateOf}
+                    </span>
+                  )}
                 </div>
                 <span className="text-[9px] capitalize text-[color:var(--color-muted)]">
                   {item.rarity}
