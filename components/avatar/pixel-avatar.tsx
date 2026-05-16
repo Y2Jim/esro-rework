@@ -36,33 +36,37 @@ export function PixelAvatar({ config, size = "md", className, showFlair = true }
   
   const flairVariant = flairLayer?.variant ?? 0
   
-  // Flair CSS classes based on variant
-  const flairClass = showFlair ? {
-    1: "shadow-[0_0_8px_2px_rgba(168,85,247,0.4)]", // Pulse Glow - purple
-    2: "animate-pulse", // Static Aura
-    3: "", // Sparkle - handled separately
-    4: "shadow-[0_0_6px_1px_rgba(255,255,255,0.2)]", // Soft Glow - white
-    5: "shadow-[0_0_4px_1px_rgba(200,180,140,0.3)]", // Dust Motes - tan
-    6: "animate-pulse shadow-[0_0_6px_2px_rgba(100,180,255,0.3)]", // Signal Flicker - blue pulse
-    7: "shadow-[0_0_8px_3px_rgba(100,200,180,0.25)]", // Route Trails - teal
-    8: "shadow-[0_0_6px_2px_rgba(80,120,200,0.4)]", // Echo Ripples - blue
-    9: "shadow-[0_0_10px_3px_rgba(60,200,255,0.35)]", // Data Stream - cyan
-    10: "shadow-[0_0_12px_4px_rgba(100,50,150,0.5)]", // Void Shimmer - purple
-    11: "shadow-[0_0_10px_3px_rgba(255,100,150,0.3)] shadow-[0_0_20px_6px_rgba(100,150,255,0.2)]", // Prismatic Aura
-    12: "shadow-[0_0_12px_4px_rgba(255,180,80,0.5)]", // Celestial Flame - orange
-  }[flairVariant] || "" : ""
+  // Flair styles - using inline styles for the glow effects to avoid overflow clipping
+  const flairStyles: Record<number, React.CSSProperties> = {
+    1: { boxShadow: "0 0 8px 2px rgba(168,85,247,0.5), 0 0 16px 4px rgba(168,85,247,0.3)" }, // Pulse Glow - purple
+    2: { boxShadow: "0 0 6px 2px rgba(200,200,255,0.3)" }, // Static Aura
+    3: {}, // Sparkle - handled separately with overlay
+    4: { boxShadow: "0 0 8px 2px rgba(255,255,255,0.25)" }, // Soft Glow - white
+    5: { boxShadow: "0 0 6px 2px rgba(200,180,140,0.4)" }, // Dust Motes - tan
+    6: { boxShadow: "0 0 8px 3px rgba(100,180,255,0.4)" }, // Signal Flicker - blue pulse
+    7: { boxShadow: "0 0 10px 4px rgba(100,200,180,0.35)" }, // Route Trails - teal
+    8: { boxShadow: "0 0 8px 3px rgba(80,120,200,0.5)" }, // Echo Ripples - blue
+    9: { boxShadow: "0 0 12px 4px rgba(60,200,255,0.45)" }, // Data Stream - cyan
+    10: { boxShadow: "0 0 14px 5px rgba(100,50,150,0.6)" }, // Void Shimmer - purple
+    11: { boxShadow: "0 0 12px 4px rgba(255,100,150,0.4), 0 0 24px 8px rgba(100,150,255,0.25)" }, // Prismatic Aura
+    12: { boxShadow: "0 0 14px 5px rgba(255,180,80,0.6), 0 0 20px 8px rgba(255,100,50,0.3)" }, // Celestial Flame - orange
+  }
+  
+  const currentFlairStyle = showFlair && flairVariant > 0 ? flairStyles[flairVariant] || {} : {}
+  const isPulsing = showFlair && (flairVariant === 2 || flairVariant === 6)
   
   return (
     <div
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-sm",
-        flairClass,
+        "relative shrink-0 rounded-sm",
+        isPulsing && "animate-pulse",
         className
       )}
       style={{
         width: containerSize,
         height: containerSize,
         backgroundColor: "var(--color-panel)",
+        ...currentFlairStyle,
       }}
     >
       {/* Pixel grid */}

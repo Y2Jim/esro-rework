@@ -799,9 +799,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { type: "hair", maxVariants: 8, labels: ["Short Cut", "Long Flow", "Spiky", "Slicked", "Braided", "Mohawk", "Curly", "Bald Fade"] },
       { type: "eyes", maxVariants: 6, labels: ["Standard", "Narrow", "Wide", "Glowing", "Cyber", "Ancient"] },
       { type: "mouth", maxVariants: 5, labels: ["Neutral", "Smirk", "Frown", "Open", "Masked"] },
-      { type: "accessory", maxVariants: 7, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask"] },
-      { type: "hat", maxVariants: 7, labels: ["None", "Cap", "Hood", "Headband", "Helmet", "Crown", "Antenna"] },
-      { type: "flair", maxVariants: 4, labels: ["None", "Glow", "Pulse", "Sparkle"] },
+      { type: "accessory", maxVariants: 17, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask", "Worn Bandana", "Relay Earpiece", "Signal Monocle", "Route Mask", "Deep Scanner", "Rift Lens", "Echo Mask", "Void Visor", "Prismatic Lens", "All-Seeing Eye"] },
+      { type: "hat", maxVariants: 19, labels: ["None", "Cap", "Hood", "Antenna", "Horns", "Halo", "Crown", "Dust Hood", "Signal Beanie", "Worn Helmet", "Relay Headset", "Archive Hood", "Scout Helm", "Drift Crown", "Echo Circlet", "Signal Crest", "Void Helm", "Rift Diadem", "Primordial Antlers"] },
+      { type: "flair", maxVariants: 13, labels: ["None", "Pulse Glow", "Static Aura", "Sparkle", "Soft Glow", "Dust Motes", "Signal Flicker", "Route Trails", "Echo Ripples", "Data Stream", "Void Shimmer", "Prismatic Aura", "Celestial Flame"] },
     ]
     
     for (const layer of layers) {
