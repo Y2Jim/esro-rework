@@ -4,6 +4,22 @@ import { cn } from "@/lib/cn"
 import type { Rarity } from "@/lib/types"
 import { rarityColor, rarityBorder, rarityBg, rarityAnimation, rarityLabel } from "@/lib/rarity"
 
+/** Map specific transcendent titles to their unique animation classes */
+const TRANSCENDENT_TITLE_ANIMATIONS: Record<string, string> = {
+  "Myth of the Relay Sea": "title-relay-sea",
+  "Shardheart Ascendant": "title-shardheart",
+  "Eternal Courier": "title-eternal-courier",
+}
+
+function getAnimationClass(title: string, rarity: Rarity): string {
+  // Check for unique transcendent animations first
+  if (rarity === "mythic" && TRANSCENDENT_TITLE_ANIMATIONS[title]) {
+    return TRANSCENDENT_TITLE_ANIMATIONS[title]
+  }
+  // Fall back to standard rarity animation
+  return rarityAnimation[rarity]
+}
+
 interface TitleDisplayProps {
   title: string
   rarity: Rarity
@@ -17,6 +33,7 @@ interface TitleDisplayProps {
 /**
  * Displays a title with rarity-appropriate coloring and animations.
  * Legendary and Mythic titles have unique animated effects.
+ * Transcendent (mythic) titles each have their own unique animation.
  */
 export function TitleDisplay({
   title,
@@ -25,8 +42,10 @@ export function TitleDisplay({
   showRarityLabel = false,
   className,
 }: TitleDisplayProps) {
-  const colorClass = rarityColor[rarity]
-  const animClass = rarityAnimation[rarity]
+  const animClass = getAnimationClass(title, rarity)
+  // For mythic with unique animation, don't apply colorClass (animation handles colors)
+  const hasUniqueAnim = rarity === "mythic" && TRANSCENDENT_TITLE_ANIMATIONS[title]
+  const colorClass = hasUniqueAnim ? "" : rarityColor[rarity]
   const borderClass = rarityBorder[rarity]
   const bgClass = rarityBg[rarity]
 
@@ -82,8 +101,9 @@ export function TitleBadgeRow({
   onClick,
   className,
 }: TitleBadgeRowProps) {
-  const colorClass = rarityColor[rarity]
-  const animClass = rarityAnimation[rarity]
+  const animClass = getAnimationClass(title, rarity)
+  const hasUniqueAnim = rarity === "mythic" && TRANSCENDENT_TITLE_ANIMATIONS[title]
+  const colorClass = hasUniqueAnim ? "" : rarityColor[rarity]
   const borderClass = rarityBorder[rarity]
   const bgClass = rarityBg[rarity]
 

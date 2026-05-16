@@ -527,6 +527,169 @@
   animation-duration: 1.5s, 1s;
 }
 
+/* ============ UNIQUE TRANSCENDENT TITLE ANIMATIONS ============ */
+
+/* Myth of the Relay Sea - Ocean waves and deep currents */
+@keyframes relay-sea-waves {
+  0%, 100% {
+    background-position: 0% 50%;
+    text-shadow:
+      0 0 6px rgba(64, 180, 220, 0.7),
+      0 0 12px rgba(32, 120, 180, 0.5),
+      0 0 20px rgba(64, 180, 220, 0.3);
+  }
+  25% {
+    background-position: 50% 30%;
+    text-shadow:
+      0 0 8px rgba(32, 120, 180, 0.8),
+      0 0 16px rgba(100, 200, 255, 0.5),
+      0 0 24px rgba(32, 120, 180, 0.3);
+  }
+  50% {
+    background-position: 100% 50%;
+    text-shadow:
+      0 0 10px rgba(100, 200, 255, 0.8),
+      0 0 20px rgba(64, 180, 220, 0.6),
+      0 0 30px rgba(32, 120, 180, 0.4);
+  }
+  75% {
+    background-position: 50% 70%;
+    text-shadow:
+      0 0 8px rgba(64, 180, 220, 0.7),
+      0 0 14px rgba(32, 120, 180, 0.5),
+      0 0 22px rgba(100, 200, 255, 0.3);
+  }
+}
+
+@keyframes relay-sea-depth {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.2) saturate(1.3); }
+}
+
+.title-relay-sea {
+  background: linear-gradient(
+    100deg,
+    #2078b4 0%,
+    #40b4dc 15%,
+    #64c8ff 30%,
+    #40b4dc 50%,
+    #2088c8 65%,
+    #40e0ff 80%,
+    #2078b4 100%
+  );
+  background-size: 400% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: relay-sea-waves 5s ease-in-out infinite, relay-sea-depth 3s ease-in-out infinite;
+}
+
+/* Shardheart Ascendant - Crystal shattering and reforming */
+@keyframes shardheart-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(200, 100, 255, 0.6),
+      0 0 8px rgba(255, 150, 200, 0.4),
+      -2px 0 6px rgba(150, 200, 255, 0.3),
+      2px 0 6px rgba(255, 100, 180, 0.3);
+    transform: scale(1);
+  }
+  25% {
+    text-shadow:
+      0 0 8px rgba(255, 150, 200, 0.8),
+      0 0 16px rgba(200, 100, 255, 0.5),
+      -3px 1px 10px rgba(150, 200, 255, 0.4),
+      3px -1px 10px rgba(255, 100, 180, 0.4);
+    transform: scale(1.02);
+  }
+  50% {
+    text-shadow:
+      0 0 12px rgba(150, 200, 255, 0.9),
+      0 0 24px rgba(255, 150, 200, 0.6),
+      -4px 2px 14px rgba(200, 100, 255, 0.5),
+      4px -2px 14px rgba(255, 100, 180, 0.5);
+    transform: scale(1.03);
+  }
+  75% {
+    text-shadow:
+      0 0 8px rgba(200, 100, 255, 0.7),
+      0 0 14px rgba(150, 200, 255, 0.5),
+      -2px 1px 8px rgba(255, 150, 200, 0.4),
+      2px -1px 8px rgba(255, 100, 180, 0.4);
+    transform: scale(1.01);
+  }
+}
+
+@keyframes shardheart-fracture {
+  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  33% { background-position: 50% 50%; filter: hue-rotate(20deg); }
+  66% { background-position: 100% 50%; filter: hue-rotate(-10deg); }
+  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+}
+
+.title-shardheart {
+  background: linear-gradient(
+    135deg,
+    #c864ff 0%,
+    #ff96c8 20%,
+    #96c8ff 40%,
+    #ff64b4 60%,
+    #c8a0ff 80%,
+    #c864ff 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shardheart-fracture 4s ease-in-out infinite, shardheart-pulse 2.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Eternal Courier - Flowing motion trails and timeless drift */
+@keyframes courier-drift {
+  0%, 100% {
+    background-position: 0% 50%;
+    letter-spacing: 0.12em;
+    text-shadow:
+      4px 0 8px rgba(255, 200, 100, 0.4),
+      8px 0 12px rgba(255, 180, 80, 0.2),
+      -2px 0 4px rgba(255, 220, 140, 0.3);
+  }
+  50% {
+    background-position: 100% 50%;
+    letter-spacing: 0.16em;
+    text-shadow:
+      6px 0 12px rgba(255, 180, 80, 0.6),
+      12px 0 20px rgba(255, 200, 100, 0.3),
+      -3px 0 6px rgba(255, 220, 140, 0.4);
+  }
+}
+
+@keyframes courier-eternal {
+  0%, 100% { filter: brightness(1.1) contrast(1); opacity: 1; }
+  25% { filter: brightness(1.2) contrast(1.05); opacity: 0.95; }
+  50% { filter: brightness(1.3) contrast(1.1); opacity: 1; }
+  75% { filter: brightness(1.15) contrast(1.05); opacity: 0.98; }
+}
+
+.title-eternal-courier {
+  background: linear-gradient(
+    90deg,
+    #ffc864 0%,
+    #ffe0a0 20%,
+    #ffb450 40%,
+    #ffd080 60%,
+    #ff9830 80%,
+    #ffc864 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: courier-drift 6s ease-in-out infinite, courier-eternal 4s ease-in-out infinite;
+  display: inline-block;
+}
+
 /* Empty state */
 .esro-empty {
   display: grid;
