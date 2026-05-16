@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ESRO Factions Configuration",
+  "description": "Configuration for factions in ESRO",
+  "type": "object",
+  "required": ["unlockLevel", "factions"],
+  "properties": {
+    "unlockLevel": {
+      "type": "integer",
+      "description": "Player level required to unlock faction selection",
+      "minimum": 1
+    },
+    "factions": {
+      "type": "array",
+      "description": "Array of faction definitions",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "emblem", "color", "glow", "colorVars", "lore", "motto"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the faction (should match a race id)",
+            "pattern": "^[a-z]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the faction"
+          },
+          "emblem": {
+            "type": "string",
+            "description": "Unicode symbol used as the faction emblem",
+            "maxLength": 2
+          },
+          "color": {
+            "type": "string",
+            "description": "Primary hex color for the faction",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "glow": {
+            "type": "string",
+            "description": "RGBA glow color for effects"
+          },
+          "colorVars": {
+            "type": "object",
+            "description": "CSS color variables for faction theming",
+            "required": ["primary", "secondary", "accent", "bg"],
+            "properties": {
+              "primary": { "type": "string", "description": "Primary color" },
+              "secondary": { "type": "string", "description": "Secondary color" },
+              "accent": { "type": "string", "description": "Accent color" },
+              "bg": { "type": "string", "description": "Background color (usually rgba)" }
+            }
+          },
+          "lore": {
+            "type": "string",
+            "description": "Faction lore/background text"
+          },
+          "motto": {
+            "type": "string",
+            "description": "Faction motto or slogan"
+          }
+        }
+      }
+    }
+  }
+}

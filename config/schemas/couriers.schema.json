@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ESRO Couriers Configuration",
+  "description": "Configuration for courier archetypes in ESRO",
+  "type": "object",
+  "required": ["couriers"],
+  "properties": {
+    "couriers": {
+      "type": "array",
+      "description": "Array of courier definitions",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "summary", "theme", "icon", "color", "glow", "stats"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the courier (lowercase, no spaces)",
+            "pattern": "^[a-z]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the courier"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short description shown during character creation"
+          },
+          "theme": {
+            "type": "string",
+            "description": "Thematic keywords describing the courier playstyle"
+          },
+          "icon": {
+            "type": "string",
+            "description": "3-letter icon code for the courier",
+            "maxLength": 3
+          },
+          "color": {
+            "type": "string",
+            "description": "Primary hex color for the courier",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "glow": {
+            "type": "string",
+            "description": "RGBA glow color for effects"
+          },
+          "stats": {
+            "type": "object",
+            "description": "Stat modifiers for this courier",
+            "required": ["hp", "atk", "def", "focus", "luck"],
+            "properties": {
+              "hp": { "type": "integer", "description": "HP modifier" },
+              "atk": { "type": "integer", "description": "Attack modifier" },
+              "def": { "type": "integer", "description": "Defense modifier" },
+              "focus": { "type": "integer", "description": "Focus modifier" },
+              "luck": { "type": "integer", "description": "Luck modifier" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

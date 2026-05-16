@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ESRO Game Settings",
+  "description": "Core game settings and constants",
+  "type": "object",
+  "required": ["baseStats", "levelCurve", "statLabels", "statColors"],
+  "properties": {
+    "baseStats": {
+      "type": "object",
+      "description": "Starting stats for all characters before race/courier modifiers",
+      "required": ["hp", "atk", "def", "focus", "luck"],
+      "properties": {
+        "hp": { "type": "integer", "description": "Base HP", "minimum": 1 },
+        "atk": { "type": "integer", "description": "Base Attack", "minimum": 0 },
+        "def": { "type": "integer", "description": "Base Defense", "minimum": 0 },
+        "focus": { "type": "integer", "description": "Base Focus", "minimum": 0 },
+        "luck": { "type": "integer", "description": "Base Luck", "minimum": 0 }
+      }
+    },
+    "levelCurve": {
+      "type": "object",
+      "description": "XP requirements for leveling",
+      "required": ["baseXp", "multiplier"],
+      "properties": {
+        "baseXp": {
+          "type": "integer",
+          "description": "XP required for level 2",
+          "minimum": 1
+        },
+        "multiplier": {
+          "type": "number",
+          "description": "Multiplier applied per level",
+          "minimum": 1
+        }
+      }
+    },
+    "statLabels": {
+      "type": "object",
+      "description": "Display labels for stats",
+      "properties": {
+        "hp": { "type": "string" },
+        "atk": { "type": "string" },
+        "def": { "type": "string" },
+        "focus": { "type": "string" },
+        "luck": { "type": "string" }
+      }
+    },
+    "statColors": {
+      "type": "object",
+      "description": "Hex colors for displaying stats",
+      "properties": {
+        "hp": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "atk": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "def": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "focus": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "luck": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ESRO Onboarding Configuration",
+  "description": "Configuration for boot sequence and onboarding panels",
+  "type": "object",
+  "required": ["boot", "panels"],
+  "properties": {
+    "boot": {
+      "type": "object",
+      "description": "Boot screen configuration",
+      "required": ["header", "body"],
+      "properties": {
+        "header": {
+          "type": "string",
+          "description": "Header text shown at the top of boot screen"
+        },
+        "body": {
+          "type": "string",
+          "description": "Body text shown during boot sequence (supports newlines)"
+        }
+      }
+    },
+    "panels": {
+      "type": "array",
+      "description": "Onboarding panels shown after boot",
+      "items": {
+        "type": "object",
+        "required": ["title", "body"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Panel title"
+          },
+          "body": {
+            "type": "string",
+            "description": "Panel body text"
+          }
+        }
+      }
+    }
+  }
+}

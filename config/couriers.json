@@ -1,0 +1,45 @@
+{
+  "$schema": "./schemas/couriers.schema.json",
+  "couriers": [
+    {
+      "id": "gallant",
+      "name": "Gallant",
+      "summary": "Frontliner courier built for bold entry and straightforward pressure.",
+      "theme": "Frontliner, bold, straightforward pressure.",
+      "icon": "GAL",
+      "color": "#ff8e78",
+      "glow": "rgba(255, 142, 120, 0.28)",
+      "stats": { "hp": 2, "atk": 2, "def": 1, "focus": 0, "luck": 0 }
+    },
+    {
+      "id": "trickster",
+      "name": "Trickster",
+      "summary": "Clever courier built around luck, disruption, and improvisation.",
+      "theme": "Clever, slippery, luck-driven, disruption and improvisation.",
+      "icon": "TRK",
+      "color": "#9e8bff",
+      "glow": "rgba(158, 139, 255, 0.30)",
+      "stats": { "hp": 0, "atk": 1, "def": 0, "focus": 1, "luck": 2 }
+    },
+    {
+      "id": "caregiver",
+      "name": "Caregiver",
+      "summary": "Support courier focused on sustain, protection, and utility.",
+      "theme": "Sustain, protection, utility, strong support identity.",
+      "icon": "CAR",
+      "color": "#7ed4a5",
+      "glow": "rgba(126, 212, 165, 0.28)",
+      "stats": { "hp": 2, "atk": 0, "def": 2, "focus": 2, "luck": 0 }
+    },
+    {
+      "id": "visionary",
+      "name": "Visionary",
+      "summary": "High-focus courier specialized in insight, arcane strength, and analysis.",
+      "theme": "Insight, arcane strength, analysis, high-focus specialist.",
+      "icon": "VIS",
+      "color": "#e6b7ff",
+      "glow": "rgba(230, 183, 255, 0.30)",
+      "stats": { "hp": 0, "atk": 0, "def": 0, "focus": 3, "luck": 1 }
+    }
+  ]
+}

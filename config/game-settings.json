@@ -1,0 +1,28 @@
+{
+  "$schema": "./schemas/game-settings.schema.json",
+  "baseStats": {
+    "hp": 10,
+    "atk": 1,
+    "def": 1,
+    "focus": 1,
+    "luck": 1
+  },
+  "levelCurve": {
+    "baseXp": 100,
+    "multiplier": 1.5
+  },
+  "statLabels": {
+    "hp": "HP",
+    "atk": "ATK",
+    "def": "DEF",
+    "focus": "FOCUS",
+    "luck": "LUCK"
+  },
+  "statColors": {
+    "hp": "#ff6b8a",
+    "atk": "#ff9b6a",
+    "def": "#8cb2ff",
+    "focus": "#e6b7ff",
+    "luck": "#68d9c0"
+  }
+}

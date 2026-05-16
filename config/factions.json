@@ -1,0 +1,66 @@
+{
+  "$schema": "./schemas/factions.schema.json",
+  "unlockLevel": 5,
+  "factions": [
+    {
+      "id": "crownborn",
+      "name": "Crown Courts",
+      "emblem": "◇",
+      "color": "#f1d38a",
+      "glow": "rgba(241, 211, 138, 0.35)",
+      "colorVars": {
+        "primary": "#f1d38a",
+        "secondary": "#c9a84d",
+        "accent": "#ffe4a8",
+        "bg": "rgba(241, 211, 138, 0.08)"
+      },
+      "lore": "Crownborn courts believe bearing matters. Their towers preserve luminous rites, audience laws, and the controlled projection of force that keeps lesser halls from fracturing.",
+      "motto": "Light reveals. Order endures."
+    },
+    {
+      "id": "hearthkin",
+      "name": "Hearth Wardens",
+      "emblem": "◈",
+      "color": "#ff9b6a",
+      "glow": "rgba(255, 155, 106, 0.35)",
+      "colorVars": {
+        "primary": "#ff9b6a",
+        "secondary": "#c76a3d",
+        "accent": "#ffc299",
+        "bg": "rgba(255, 155, 106, 0.08)"
+      },
+      "lore": "Hearthkin rings build for tomorrow first. Their wardens keep roads lit, train escorts, and hold refuge lines wherever the frontier tries to starve a settlement out.",
+      "motto": "Hold the line. Shelter the road."
+    },
+    {
+      "id": "gloamwhisper",
+      "name": "Veil Circles",
+      "emblem": "◎",
+      "color": "#8cb2ff",
+      "glow": "rgba(140, 178, 255, 0.35)",
+      "colorVars": {
+        "primary": "#8cb2ff",
+        "secondary": "#5a82d4",
+        "accent": "#b8d4ff",
+        "bg": "rgba(140, 178, 255, 0.08)"
+      },
+      "lore": "The Veil Circles prefer half-light and layered plans. Their networks share route whispers, hidden caches, and methods for surviving when a direct answer would get everyone noticed.",
+      "motto": "See without being seen."
+    },
+    {
+      "id": "roadsinger",
+      "name": "Open Roads Chorus",
+      "emblem": "⬡",
+      "color": "#68d9c0",
+      "glow": "rgba(104, 217, 192, 0.35)",
+      "colorVars": {
+        "primary": "#68d9c0",
+        "secondary": "#3da88f",
+        "accent": "#9aebd7",
+        "bg": "rgba(104, 217, 192, 0.08)"
+      },
+      "lore": "Roadsingers map by feel as much as by ink. Their choirs keep route songs, hazard memory, and the uncanny instinct that sends them down the one path everyone else overlooked.",
+      "motto": "Every road opens another door."
+    }
+  ]
+}
