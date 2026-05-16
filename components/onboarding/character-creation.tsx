@@ -234,7 +234,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   }
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col bg-[#0a0b0f] overflow-hidden">
+    <div className="absolute inset-0 z-50 flex flex-col bg-[#0a0b0f] overflow-hidden font-mono">
       {/* Scanline */}
       <div 
         className="pointer-events-none absolute inset-0"

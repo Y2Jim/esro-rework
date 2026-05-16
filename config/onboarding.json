@@ -6,16 +6,16 @@
   },
   "panels": [
     {
-      "title": "Relay Briefing",
-      "body": "ESRO is the shard relay every field runner carries after induction. It keeps your relay handle, route traffic, pack state, skill shell, and party links synchronized across the frontier."
+      "title": "Welcome to ESRO",
+      "body": "ESRO is the relay device every runner carries. It tracks your handle, inventory, skills, and party links. You are about to register a new identity on the network."
     },
     {
-      "title": "Frontier Conditions",
-      "body": "Beyond the settled gates, routes fracture, fauna mutates, and signal drift pulls squads apart. Use GAME for live expedition telemetry, PARTY to keep a linked roster, and PACK to review whatever you drag back through the relay."
+      "title": "The Frontier",
+      "body": "Beyond the safe zones, routes shift and danger lurks. Use OPS to run expeditions and train skills. Check CONTRACTS for faction jobs. SOCIAL keeps your party and friends in sync."
     },
     {
-      "title": "Operator Primer",
-      "body": "Your induction binds two traits to this character: RACE, which marks lineage and natural affinity, and COURIER, which defines field role and stat spread. Together they shape how ESRO reads your presence once the handle goes live."
+      "title": "Your Identity",
+      "body": "You will choose a lineage that shapes your natural abilities, and a courier role that defines your specialty. Together they determine your starting stats and how you contribute to your party."
     }
   ]
 }
