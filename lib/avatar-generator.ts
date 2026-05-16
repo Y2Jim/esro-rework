@@ -706,35 +706,47 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
       setPixel(grid, x, 2, capColor)
     }
   } else if (hatVariant === 2) {
-    // Hood - wraps around head like a cloak cowl
-    const hoodColor = "#505060"
-    const hoodShadow = "#404050"
-    // Top of hood (pointed/rounded peak)
-    for (let x = 4; x < 10; x++) {
-      setPixel(grid, x, 0, hoodColor)
-    }
-    // Hood drapes down sides, framing the face
-    for (let x = 2; x < 12; x++) {
-      setPixel(grid, x, 1, hoodColor)
-    }
-    // Left side drape
-    setPixel(grid, 1, 1, hoodColor)
-    setPixel(grid, 1, 2, hoodColor)
-    setPixel(grid, 1, 3, hoodColor)
-    setPixel(grid, 1, 4, hoodColor)
-    setPixel(grid, 1, 5, hoodShadow)
-    setPixel(grid, 1, 6, hoodShadow)
-    setPixel(grid, 2, 2, hoodShadow)
-    setPixel(grid, 2, 3, hoodShadow)
-    // Right side drape
-    setPixel(grid, 12, 1, hoodColor)
-    setPixel(grid, 12, 2, hoodColor)
-    setPixel(grid, 12, 3, hoodColor)
-    setPixel(grid, 12, 4, hoodColor)
-    setPixel(grid, 12, 5, hoodShadow)
-    setPixel(grid, 12, 6, hoodShadow)
-    setPixel(grid, 11, 2, hoodShadow)
-    setPixel(grid, 11, 3, hoodShadow)
+    // Hood - frames the face with curved opening
+    const hoodOuter = "#505060"
+    const hoodInner = "#404050"
+    const hoodDeep = "#303040"
+    // Top curve of hood
+    setPixel(grid, 4, 0, hoodOuter)
+    setPixel(grid, 5, 0, hoodOuter)
+    setPixel(grid, 6, 0, hoodOuter)
+    setPixel(grid, 7, 0, hoodOuter)
+    setPixel(grid, 8, 0, hoodOuter)
+    setPixel(grid, 9, 0, hoodOuter)
+    // Second row - hood curves down at edges
+    setPixel(grid, 2, 1, hoodOuter)
+    setPixel(grid, 3, 1, hoodOuter)
+    setPixel(grid, 10, 1, hoodOuter)
+    setPixel(grid, 11, 1, hoodOuter)
+    // Inner shadow of hood opening (top)
+    setPixel(grid, 4, 1, hoodInner)
+    setPixel(grid, 5, 1, hoodDeep)
+    setPixel(grid, 6, 1, hoodDeep)
+    setPixel(grid, 7, 1, hoodDeep)
+    setPixel(grid, 8, 1, hoodDeep)
+    setPixel(grid, 9, 1, hoodInner)
+    // Left side frame curving around face
+    setPixel(grid, 1, 2, hoodOuter)
+    setPixel(grid, 2, 2, hoodInner)
+    setPixel(grid, 3, 2, hoodDeep)
+    setPixel(grid, 1, 3, hoodOuter)
+    setPixel(grid, 2, 3, hoodInner)
+    setPixel(grid, 1, 4, hoodOuter)
+    setPixel(grid, 2, 4, hoodInner)
+    setPixel(grid, 1, 5, hoodInner)
+    // Right side frame curving around face
+    setPixel(grid, 12, 2, hoodOuter)
+    setPixel(grid, 11, 2, hoodInner)
+    setPixel(grid, 10, 2, hoodDeep)
+    setPixel(grid, 12, 3, hoodOuter)
+    setPixel(grid, 11, 3, hoodInner)
+    setPixel(grid, 12, 4, hoodOuter)
+    setPixel(grid, 11, 4, hoodInner)
+    setPixel(grid, 12, 5, hoodInner)
   } else if (hatVariant === 3) {
     // Antenna
     const antennaColor = "#808080"
@@ -769,44 +781,57 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 7, 0, gemColor)
     setPixel(grid, 10, 0, crownColor)
   } else if (hatVariant === 7) {
-    // Dust Hood - heavier cloak hood with more coverage
-    const hoodColor = "#6b5a4a"
-    const hoodShadow = "#5a4a3a"
-    const hoodDark = "#4a3a2a"
-    // Wide hood top
+    // Dust Hood - deep cowl that frames face with heavy shadow
+    const hoodOuter = "#6b5a4a"
+    const hoodMid = "#5a4a3a"
+    const hoodInner = "#4a3a2a"
+    const hoodDeep = "#3a2a1a"
+    // Top of hood - wider coverage
     for (let x = 3; x < 11; x++) {
-      setPixel(grid, x, 0, hoodColor)
+      setPixel(grid, x, 0, hoodOuter)
     }
-    for (let x = 1; x < 13; x++) {
-      setPixel(grid, x, 1, hoodColor)
-    }
-    // Hood frames the face more heavily
-    setPixel(grid, 0, 1, hoodShadow)
-    setPixel(grid, 13, 1, hoodShadow)
-    // Left side heavy drape
-    setPixel(grid, 0, 2, hoodColor)
-    setPixel(grid, 0, 3, hoodColor)
-    setPixel(grid, 0, 4, hoodShadow)
-    setPixel(grid, 0, 5, hoodShadow)
-    setPixel(grid, 0, 6, hoodDark)
-    setPixel(grid, 0, 7, hoodDark)
-    setPixel(grid, 1, 2, hoodShadow)
-    setPixel(grid, 1, 3, hoodShadow)
-    setPixel(grid, 1, 4, hoodShadow)
-    setPixel(grid, 1, 5, hoodDark)
-    setPixel(grid, 2, 2, hoodDark)
-    // Right side heavy drape
-    setPixel(grid, 13, 2, hoodColor)
-    setPixel(grid, 13, 3, hoodColor)
-    setPixel(grid, 13, 4, hoodShadow)
-    setPixel(grid, 13, 5, hoodShadow)
-    setPixel(grid, 13, 6, hoodDark)
-    setPixel(grid, 13, 7, hoodDark)
-    setPixel(grid, 12, 2, hoodShadow)
-    setPixel(grid, 12, 3, hoodShadow)
-    setPixel(grid, 12, 4, hoodShadow)
-    setPixel(grid, 12, 5, hoodDark)
-    setPixel(grid, 11, 2, hoodDark)
+    // Second row - hood extends wider
+    setPixel(grid, 1, 1, hoodOuter)
+    setPixel(grid, 2, 1, hoodOuter)
+    setPixel(grid, 11, 1, hoodOuter)
+    setPixel(grid, 12, 1, hoodOuter)
+    // Inner shadow at top of face opening
+    setPixel(grid, 3, 1, hoodMid)
+    setPixel(grid, 4, 1, hoodInner)
+    setPixel(grid, 5, 1, hoodDeep)
+    setPixel(grid, 6, 1, hoodDeep)
+    setPixel(grid, 7, 1, hoodDeep)
+    setPixel(grid, 8, 1, hoodDeep)
+    setPixel(grid, 9, 1, hoodInner)
+    setPixel(grid, 10, 1, hoodMid)
+    // Left side - thick frame curving around face
+    setPixel(grid, 0, 2, hoodOuter)
+    setPixel(grid, 1, 2, hoodMid)
+    setPixel(grid, 2, 2, hoodInner)
+    setPixel(grid, 3, 2, hoodDeep)
+    setPixel(grid, 0, 3, hoodOuter)
+    setPixel(grid, 1, 3, hoodMid)
+    setPixel(grid, 2, 3, hoodInner)
+    setPixel(grid, 0, 4, hoodOuter)
+    setPixel(grid, 1, 4, hoodMid)
+    setPixel(grid, 2, 4, hoodInner)
+    setPixel(grid, 0, 5, hoodMid)
+    setPixel(grid, 1, 5, hoodInner)
+    setPixel(grid, 0, 6, hoodInner)
+    // Right side - thick frame curving around face
+    setPixel(grid, 13, 2, hoodOuter)
+    setPixel(grid, 12, 2, hoodMid)
+    setPixel(grid, 11, 2, hoodInner)
+    setPixel(grid, 10, 2, hoodDeep)
+    setPixel(grid, 13, 3, hoodOuter)
+    setPixel(grid, 12, 3, hoodMid)
+    setPixel(grid, 11, 3, hoodInner)
+    setPixel(grid, 13, 4, hoodOuter)
+    setPixel(grid, 12, 4, hoodMid)
+    setPixel(grid, 11, 4, hoodInner)
+    setPixel(grid, 13, 5, hoodMid)
+    setPixel(grid, 12, 5, hoodInner)
+    setPixel(grid, 13, 6, hoodInner)
   } else if (hatVariant === 8) {
     // Signal Beanie (tight cap)
     const beanieColor = "#4a6080"
