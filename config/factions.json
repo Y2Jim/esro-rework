@@ -20,7 +20,7 @@
     {
       "id": "hearthkin",
       "name": "Hearth Wardens",
-      "emblem": "⌂",
+      "emblem": "⚒",
       "color": "#ff9b6a",
       "glow": "rgba(255, 155, 106, 0.35)",
       "colorVars": {
@@ -50,7 +50,7 @@
     {
       "id": "roadsinger",
       "name": "Open Roads Chorus",
-      "emblem": "∞",
+      "emblem": "✵",
       "color": "#68d9c0",
       "glow": "rgba(104, 217, 192, 0.35)",
       "colorVars": {
