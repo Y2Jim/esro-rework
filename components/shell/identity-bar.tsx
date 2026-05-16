@@ -18,11 +18,15 @@ const screenLabel: Record<string, string> = {
 
 export function IdentityBar() {
   const identity = useEsroStore((s) => s.identity)
+  const profile = useEsroStore((s) => s.profile)
   const screen = useEsroStore((s) => s.screen)
   const setScreen = useEsroStore((s) => s.setScreen)
   const inventory = useEsroStore((s) => s.inventory)
 
-  const titleClass = getTitleClass(identity.titleRarity)
+  // Use the equipped title from profile, fallback to identity
+  const activeTitle = profile.title?.label || identity.title
+  const activeRarity = profile.title?.rarity || identity.titleRarity
+  const titleClass = getTitleClass(activeRarity)
   const itemCount = inventory.reduce((sum, item) => sum + item.qty, 0)
 
   return (
@@ -71,7 +75,7 @@ export function IdentityBar() {
               titleClass,
             )}
           >
-            {identity.title}
+            {activeTitle}
           </div>
         </div>
       </div>
