@@ -32,17 +32,28 @@ const rarityGlows: Record<string, string> = {
   mythic: "shadow-[0_0_30px_rgba(251,191,36,0.6)]",
 }
 
+/** Type labels and colors for recovered items */
+const typeLabels: Record<string, { label: string; color: string; bg: string }> = {
+  title: { label: "Title", color: "text-amber-300", bg: "bg-amber-500/20 border-amber-500/30" },
+  schematic: { label: "Schematic", color: "text-cyan-300", bg: "bg-cyan-500/20 border-cyan-500/30" },
+  modifier: { label: "Modifier", color: "text-rose-300", bg: "bg-rose-500/20 border-rose-500/30" },
+  cosmetic: { label: "Cosmetic", color: "text-violet-300", bg: "bg-violet-500/20 border-violet-500/30" },
+  badge: { label: "Badge", color: "text-emerald-300", bg: "bg-emerald-500/20 border-emerald-500/30" },
+  blueprint: { label: "Blueprint", color: "text-blue-300", bg: "bg-blue-500/20 border-blue-500/30" },
+  chat_flair: { label: "Chat Flair", color: "text-pink-300", bg: "bg-pink-500/20 border-pink-500/30" },
+}
+
 /** Fake items to cycle through during animation */
 const ROLL_POOL = [
-  { label: "Signal Fragment", rarity: "common" },
-  { label: "Relay Shard", rarity: "common" },
-  { label: "Data Core", rarity: "uncommon" },
-  { label: "Echo Remnant", rarity: "uncommon" },
-  { label: "Pulse Crystal", rarity: "rare" },
-  { label: "Void Fragment", rarity: "rare" },
-  { label: "Stellar Core", rarity: "epic" },
-  { label: "Aether Shard", rarity: "epic" },
-  { label: "Nova Fragment", rarity: "legendary" },
+  { label: "Signal Fragment", rarity: "common", type: "schematic" },
+  { label: "Relay Shard", rarity: "common", type: "modifier" },
+  { label: "Data Core", rarity: "uncommon", type: "schematic" },
+  { label: "Echo Remnant", rarity: "uncommon", type: "badge" },
+  { label: "Pulse Crystal", rarity: "rare", type: "cosmetic" },
+  { label: "Void Fragment", rarity: "rare", type: "blueprint" },
+  { label: "Stellar Core", rarity: "epic", type: "title" },
+  { label: "Aether Shard", rarity: "epic", type: "chat_flair" },
+  { label: "Nova Fragment", rarity: "legendary", type: "title" },
 ]
 
 export function RollingTab() {
@@ -178,6 +189,15 @@ export function RollingTab() {
                         transition={{ duration: 0.05 }}
                         className="text-center"
                       >
+                        {/* Type badge */}
+                        <div className={cn(
+                          "mx-auto mb-2 inline-block rounded border px-2 py-0.5 text-[8px] font-mono uppercase tracking-wider",
+                          typeLabels[currentItem.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]"
+                        )}>
+                          <span className={typeLabels[currentItem.type]?.color || "text-[color:var(--color-muted)]"}>
+                            {typeLabels[currentItem.type]?.label || currentItem.type}
+                          </span>
+                        </div>
                         <div className={cn("text-[14px] font-medium", rarityColors[currentItem.rarity])}>
                           {currentItem.label}
                         </div>
@@ -193,6 +213,20 @@ export function RollingTab() {
                         transition={{ type: "spring", damping: 15, stiffness: 300 }}
                         className="text-center"
                       >
+                        {/* Type badge */}
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className={cn(
+                            "mx-auto mb-2 inline-block rounded border px-2.5 py-1 text-[9px] font-mono uppercase tracking-wider",
+                            typeLabels[finalResult.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]"
+                          )}
+                        >
+                          <span className={typeLabels[finalResult.type]?.color || "text-[color:var(--color-muted)]"}>
+                            {typeLabels[finalResult.type]?.label || finalResult.type}
+                          </span>
+                        </motion.div>
                         <motion.div 
                           className={cn("text-[16px] font-bold", rarityColors[finalResult.rarity])}
                           animate={finalResult.rarity === "legendary" || finalResult.rarity === "mythic" 
@@ -299,9 +333,19 @@ export function RollingTab() {
                 key={item.id}
                 className="flex items-center justify-between rounded-lg border border-[color:var(--color-border)] px-3 py-2"
               >
-                <span className={cn("text-[11px]", rarityColors[item.rarity])}>
-                  {item.label}
-                </span>
+                <div className="flex items-center gap-2">
+                  {/* Type badge */}
+                  <span className={cn(
+                    "rounded border px-1.5 py-0.5 text-[7px] font-mono uppercase tracking-wider",
+                    typeLabels[item.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]",
+                    typeLabels[item.type]?.color || "text-[color:var(--color-muted)]"
+                  )}>
+                    {typeLabels[item.type]?.label || item.type}
+                  </span>
+                  <span className={cn("text-[11px]", rarityColors[item.rarity])}>
+                    {item.label}
+                  </span>
+                </div>
                 <span className="text-[9px] capitalize text-[color:var(--color-muted)]">
                   {item.rarity}
                 </span>
