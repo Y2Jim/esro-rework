@@ -480,13 +480,26 @@ function SettingsTab() {
 function NotificationsTab() {
   const profile = useEsroStore((s) => s.profile)
   const openNotification = useEsroStore((s) => s.openNotification)
+  const clearNotification = useEsroStore((s) => s.clearNotification)
+  const clearAllNotifications = useEsroStore((s) => s.clearAllNotifications)
 
   const notifications = profile.notifications || []
 
   return (
     <div className="space-y-3">
-      <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
-        Notifications ({notifications.filter(n => n.state === "unread").length} unread)
+      <div className="flex items-center justify-between">
+        <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Notifications ({notifications.filter(n => n.state === "unread").length} unread)
+        </div>
+        {notifications.length > 0 && (
+          <button
+            type="button"
+            onClick={clearAllNotifications}
+            className="text-[9px] text-[color:var(--color-danger)] transition-colors hover:text-[color:var(--color-danger-bright)]"
+          >
+            Clear All
+          </button>
+        )}
       </div>
 
       {notifications.length === 0 ? (
@@ -496,12 +509,10 @@ function NotificationsTab() {
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => (
-            <button
+            <div
               key={n.id}
-              type="button"
-              onClick={() => openNotification(n)}
               className={cn(
-                "flex w-full items-start gap-2 rounded-lg border px-3 py-2 text-left transition-colors",
+                "flex w-full items-start gap-2 rounded-lg border px-3 py-2 transition-colors",
                 n.state === "unread"
                   ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/5"
                   : "border-[color:var(--color-border)]"
@@ -510,7 +521,11 @@ function NotificationsTab() {
               {n.state === "unread" && (
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-accent)]" />
               )}
-              <div className="min-w-0 flex-1">
+              <button
+                type="button"
+                onClick={() => openNotification(n)}
+                className="min-w-0 flex-1 text-left"
+              >
                 <div className="text-[11px] text-[color:var(--color-text)]">{n.title}</div>
                 <div className="text-[10px] text-[color:var(--color-muted)]">{n.body}</div>
                 {n.deeplink && (
@@ -518,8 +533,16 @@ function NotificationsTab() {
                     Tap to view
                   </div>
                 )}
-              </div>
-            </button>
+              </button>
+              <button
+                type="button"
+                onClick={() => clearNotification(n.id)}
+                className="shrink-0 p-1 text-[10px] text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-danger)]"
+                title="Clear notification"
+              >
+                x
+              </button>
+            </div>
           ))}
         </div>
       )}

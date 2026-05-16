@@ -125,6 +125,8 @@ interface EsroState {
   setActiveTitle: (titleId: string) => void
   markNotificationRead: (id: number) => void
   openNotification: (notification: ProfileNotification) => void
+  clearNotification: (id: number) => void
+  clearAllNotifications: () => void
   
   // Avatar & Vanity
   equipVanity: (vanityId: string) => void
@@ -579,6 +581,18 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     }
   },
+  clearNotification: (id) => set((s) => ({
+    profile: {
+      ...s.profile,
+      notifications: s.profile.notifications.filter((n) => n.id !== id),
+    },
+  })),
+  clearAllNotifications: () => set((s) => ({
+    profile: {
+      ...s.profile,
+      notifications: [],
+    },
+  })),
   
   // Avatar & Vanity
   equipVanity: (vanityId) => {
