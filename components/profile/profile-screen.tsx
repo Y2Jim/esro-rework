@@ -561,7 +561,7 @@ function SettingsTab() {
                         {theme.label}
                       </span>
                     </div>
-                    <div className="text-[9px] text-[color:var(--color-muted)] line-clamp-1">
+                    <div className="text-[9px] text-[color:var(--color-muted)] leading-relaxed">
                       {theme.description}
                     </div>
                     {/* Effects indicators for higher rarity themes */}
