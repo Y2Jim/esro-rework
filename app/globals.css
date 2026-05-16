@@ -233,26 +233,26 @@
     box-shadow: 0 0 10px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
   }
   
-  /* Shimmer sweep layer - subtle background effect */
+  /* Shimmer sweep layer - visible but not overwhelming */
   .theme-effect-shimmer .theme-effect-shimmer-layer {
     display: block;
     background: linear-gradient(
       90deg, 
       transparent 0%,
-      transparent 42%,
-      color-mix(in srgb, var(--rollable-accent) 3%, transparent) 47%,
-      color-mix(in srgb, var(--rollable-accent) 6%, transparent) 50%,
-      color-mix(in srgb, var(--rollable-accent) 3%, transparent) 53%,
-      transparent 58%,
+      transparent 38%,
+      color-mix(in srgb, var(--rollable-accent) 12%, transparent) 45%,
+      color-mix(in srgb, var(--rollable-accent) 20%, transparent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 12%, transparent) 55%,
+      transparent 62%,
       transparent 100%
     );
     background-size: 200% 100%;
-    animation: theme-shimmer-sweep 16s ease-in-out infinite;
-    opacity: 0.5;
+    animation: theme-shimmer-sweep 8s ease-in-out infinite;
+    opacity: 0.8;
   }
   
   @keyframes theme-shimmer-sweep {
-    0%, 60% { background-position: 200% 0; }
+    0%, 30% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
   
