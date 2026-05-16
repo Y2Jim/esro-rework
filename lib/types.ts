@@ -30,6 +30,8 @@ export interface QuickAction {
   }
 }
 
+export type ContractType = "faction" | "neutral" | "event"
+
 export interface Contract {
   id: string
   label: string
@@ -38,7 +40,9 @@ export interface Contract {
   reward: string
   deadline?: string
   status: "available" | "active" | "completed"
-}
+  type: ContractType
+  difficulty?: "easy" | "medium" | "hard"
+  }
 
 export interface FactionProject {
   id: string

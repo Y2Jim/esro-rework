@@ -971,7 +971,7 @@ export const quickActions: QuickAction[] = [
 ]
 
 export const contracts: Contract[] = [
-  // Expedition-aligned contracts
+  // Faction contracts
   {
     id: "c1",
     label: "Scavenger Sweep: Western Depot",
@@ -980,6 +980,8 @@ export const contracts: Contract[] = [
     reward: "40 XP, 2 Relay Tokens, Salvage Plate x2",
     deadline: "4h",
     status: "active",
+    type: "faction",
+    difficulty: "medium",
   },
   {
     id: "c2",
@@ -989,6 +991,8 @@ export const contracts: Contract[] = [
     reward: "35 XP, 1 Relay Token, Scrap Wire x3",
     deadline: "2h",
     status: "available",
+    type: "faction",
+    difficulty: "easy",
   },
   {
     id: "c3",
@@ -997,6 +1001,8 @@ export const contracts: Contract[] = [
     description: "Complete a Courier Run along the northern supply line. Logistics skill will improve delivery time.",
     reward: "30 XP, 1 Relay Token, Route Stamps x2",
     status: "available",
+    type: "faction",
+    difficulty: "easy",
   },
   {
     id: "c4",
@@ -1006,6 +1012,8 @@ export const contracts: Contract[] = [
     reward: "45 XP, 2 Relay Tokens, Archive Fragments x2",
     deadline: "6h",
     status: "available",
+    type: "faction",
+    difficulty: "medium",
   },
   {
     id: "c5",
@@ -1015,8 +1023,9 @@ export const contracts: Contract[] = [
     reward: "120 XP, 5 Relay Tokens, Deep Fragment x2",
     deadline: "12h",
     status: "available",
+    type: "faction",
+    difficulty: "hard",
   },
-  // Faction-specific contracts
   {
     id: "c6",
     label: "Relay Network Repairs",
@@ -1025,8 +1034,9 @@ export const contracts: Contract[] = [
     reward: "55 XP, 2 Relay Tokens, +25 Faction Standing",
     deadline: "8h",
     status: "available",
+    type: "faction",
+    difficulty: "medium",
   },
-  // Crafting/Materials contracts
   {
     id: "c7",
     label: "Fabrication Supply Run",
@@ -1035,6 +1045,8 @@ export const contracts: Contract[] = [
     reward: "50 XP, 3 Relay Tokens, Salvage Plate x3",
     deadline: "10h",
     status: "available",
+    type: "faction",
+    difficulty: "medium",
   },
   {
     id: "c8",
@@ -1044,6 +1056,96 @@ export const contracts: Contract[] = [
     reward: "60 XP, 2 Deep Signals, Archive Core",
     deadline: "24h",
     status: "available",
+    type: "faction",
+    difficulty: "hard",
+  },
+  // Neutral contracts - available to all players regardless of faction
+  {
+    id: "n1",
+    label: "Relay Beacon Maintenance",
+    issuer: "Frontier Board",
+    description: "Service a remote relay beacon that has gone offline. Basic repair skills required. Open to all runners.",
+    reward: "25 XP, 1 Relay Token",
+    status: "available",
+    type: "neutral",
+    difficulty: "easy",
+  },
+  {
+    id: "n2",
+    label: "Supply Cache Retrieval",
+    issuer: "Frontier Board",
+    description: "Locate and recover a supply cache marked on the network. Contents unknown. First-come, first-served.",
+    reward: "30 XP, 2 Relay Tokens, Random Materials",
+    deadline: "6h",
+    status: "available",
+    type: "neutral",
+    difficulty: "easy",
+  },
+  {
+    id: "n3",
+    label: "Lost Signal Investigation",
+    issuer: "Frontier Board",
+    description: "A relay node went dark in sector 4. Investigate the cause and report findings. Surveying recommended.",
+    reward: "45 XP, 2 Relay Tokens, Signal Salvage",
+    deadline: "8h",
+    status: "available",
+    type: "neutral",
+    difficulty: "medium",
+  },
+  {
+    id: "n4",
+    label: "Emergency Escort",
+    issuer: "Independent Trader",
+    description: "An independent trader needs safe passage through unstable territory. Combat readiness advised.",
+    reward: "50 XP, 3 Relay Tokens, Trader's Favor",
+    deadline: "3h",
+    status: "available",
+    type: "neutral",
+    difficulty: "medium",
+  },
+  {
+    id: "n5",
+    label: "Anomaly Documentation",
+    issuer: "Frontier Board",
+    description: "Document a reported anomaly in the northern wastes. High risk, unknown conditions. Bring a full party.",
+    reward: "80 XP, 4 Relay Tokens, 1 Deep Signal, Anomaly Data",
+    deadline: "12h",
+    status: "available",
+    type: "neutral",
+    difficulty: "hard",
+  },
+  {
+    id: "n6",
+    label: "Resource Survey",
+    issuer: "Mining Consortium",
+    description: "Survey potential mining sites in unmarked territory. Scavenging and Analysis skills improve payout.",
+    reward: "35 XP, 2 Relay Tokens, Mineral Samples",
+    status: "available",
+    type: "neutral",
+    difficulty: "easy",
+  },
+  {
+    id: "n7",
+    label: "Bounty: Rogue Signal",
+    issuer: "Frontier Board",
+    description: "Track and disable a rogue signal disrupting local relay traffic. Combat and Networking skills essential.",
+    reward: "100 XP, 5 Relay Tokens, 2 Deep Signals",
+    deadline: "24h",
+    status: "available",
+    type: "neutral",
+    difficulty: "hard",
+  },
+  // Event contracts - limited time
+  {
+    id: "e1",
+    label: "Convergence Relay Challenge",
+    issuer: "EVENT",
+    description: "Special event: Complete relay challenges across all sectors. Bonus rewards for speed completion.",
+    reward: "150 XP, 8 Relay Tokens, Event Badge",
+    deadline: "48h",
+    status: "available",
+    type: "event",
+    difficulty: "hard",
   },
 ]
 
