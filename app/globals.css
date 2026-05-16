@@ -326,38 +326,36 @@
     box-shadow: 0 0 4px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
   }
   
-  /* ===== MYTHIC: Radiant Aether - Ethereal white-gold with subtle ambiance ===== */
+  /* ===== MYTHIC: Radiant Aether - Very subtle ethereal ambiance ===== */
   .theme-effect-radiant {
-    --color-border: color-mix(in srgb, var(--rollable-accent) 35%, transparent);
-    --color-accent-glow: color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    --color-border: color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    --color-accent-glow: color-mix(in srgb, var(--rollable-accent) 10%, transparent);
   }
   
-/* Mythic: Subtle border enhancement - no distracting glow */
+  /* Mythic: No border glow - keep it clean */
   .theme-effect-radiant [class*="border-"] {
-    box-shadow: 0 0 3px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    box-shadow: none;
   }
   
-  /* Mythic: Floating particles layer - subtle background ambiance */
+  /* Mythic: Very faint particles - barely visible background texture */
   .theme-effect-radiant .theme-effect-particles {
     display: block;
     background-image: 
-      radial-gradient(1px 1px at 10% 15%, color-mix(in srgb, var(--rollable-accent) 40%, transparent), transparent),
-      radial-gradient(1px 1px at 25% 75%, color-mix(in srgb, var(--rollable-accent) 30%, transparent), transparent),
-      radial-gradient(1px 1px at 45% 25%, color-mix(in srgb, var(--rollable-accent) 35%, transparent), transparent),
-      radial-gradient(1px 1px at 65% 85%, color-mix(in srgb, var(--rollable-accent) 40%, transparent), transparent),
-      radial-gradient(1px 1px at 85% 35%, color-mix(in srgb, var(--rollable-accent) 30%, transparent), transparent),
-      radial-gradient(1px 1px at 75% 5%, color-mix(in srgb, var(--rollable-accent) 35%, transparent), transparent);
-    animation: theme-radiant-particles 14s linear infinite;
-    opacity: 0.25;
+      radial-gradient(1px 1px at 10% 20%, color-mix(in srgb, var(--rollable-accent) 15%, transparent), transparent),
+      radial-gradient(1px 1px at 30% 70%, color-mix(in srgb, var(--rollable-accent) 12%, transparent), transparent),
+      radial-gradient(1px 1px at 70% 30%, color-mix(in srgb, var(--rollable-accent) 15%, transparent), transparent),
+      radial-gradient(1px 1px at 85% 80%, color-mix(in srgb, var(--rollable-accent) 12%, transparent), transparent);
+    animation: theme-radiant-particles 20s linear infinite;
+    opacity: 0.15;
   }
   
   @keyframes theme-radiant-particles {
-    0% { transform: translateY(0); opacity: 0.25; }
-    50% { transform: translateY(-6px); opacity: 0.15; }
-    100% { transform: translateY(0); opacity: 0.25; }
+    0% { transform: translateY(0); opacity: 0.15; }
+    50% { transform: translateY(-4px); opacity: 0.1; }
+    100% { transform: translateY(0); opacity: 0.15; }
   }
   
-  /* Mythic: Subtle edge glow at top and bottom */
+  /* Mythic: Very subtle edge lines - no glow */
   .theme-effect-radiant .theme-effect-halo {
     display: block;
   }
@@ -365,43 +363,42 @@
     content: "";
     position: absolute;
     top: 0;
-    left: 10%;
-    right: 10%;
+    left: 20%;
+    right: 20%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rollable-accent) 50%, transparent), color-mix(in srgb, var(--rollable-accent) 50%, transparent), transparent);
-    box-shadow: 0 0 6px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
-    animation: theme-radiant-halo 8s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rollable-accent) 20%, transparent), transparent);
+    box-shadow: none;
+    animation: theme-radiant-halo 12s ease-in-out infinite;
   }
   .theme-effect-radiant .theme-effect-halo::after {
     content: "";
     position: absolute;
     bottom: 0;
-    left: 10%;
-    right: 10%;
+    left: 20%;
+    right: 20%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rollable-accent) 50%, transparent), color-mix(in srgb, var(--rollable-accent) 50%, transparent), transparent);
-    box-shadow: 0 0 6px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
-    animation: theme-radiant-halo 8s ease-in-out infinite 1s;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rollable-accent) 20%, transparent), transparent);
+    box-shadow: none;
+    animation: theme-radiant-halo 12s ease-in-out infinite 2s;
   }
   
   @keyframes theme-radiant-halo {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.5; }
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.35; }
   }
   
-  /* Mythic: Subtle accent text enhancement - no overlapping glow */
+  /* Mythic: No text glow */
   .theme-effect-radiant .text-\[color\:var\(--color-accent\)\] {
-    text-shadow: 0 0 4px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    text-shadow: none;
   }
   
+  /* Unused keyframe kept minimal */
   @keyframes theme-radiant-text {
     0%, 100% { 
-      text-shadow: 0 0 4px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+      text-shadow: none;
     }
     50% { 
-      text-shadow: 
-        0 0 18px var(--rollable-accent),
-        0 0 36px var(--rollable-accent),
+      text-shadow: none;
         0 0 54px color-mix(in srgb, var(--rollable-accent) 80%, transparent);
     }
   }
