@@ -52,13 +52,29 @@ export const EYE_COLORS = [
   "#7a6a4a", // amber
 ]
 
+// Head shape names for UI
+export const HEAD_SHAPE_NAMES = ["Round", "Square", "Oval"]
+
+// Hair style names for UI
+export const HAIR_STYLE_NAMES = [
+  "Bald",
+  "Buzz Cut", 
+  "Spiky",
+  "Side Part",
+  "Long",
+  "Mohawk",
+  "Bangs",
+  "Curly",
+  "Slicked Back",
+  "Undercut",
+]
+
 // Layer variant counts
 export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
-  base: 3,
+  base: 3,        // head shapes: round, square, oval
   skin: SKIN_COLORS.length,
   eyes: 6,
-  mouth: 5,
-  hair: 8,
+  hair: 10,       // increased hair options
   accessory: 22,  // 0=none, 1-16 standard, 17-21 mythic
   hat: 24,        // 0=none, 1-18 standard, 19-23 mythic
   flair: 18,      // 0=none, 1-12 standard, 13-17 mythic
@@ -73,7 +89,6 @@ export function generateAvatarFromSeed(seed: string): AvatarConfig {
     { type: "base", variant: Math.floor(rand() * LAYER_VARIANTS.base) },
     { type: "skin", variant: Math.floor(rand() * LAYER_VARIANTS.skin) },
     { type: "eyes", variant: Math.floor(rand() * LAYER_VARIANTS.eyes), color: Math.floor(rand() * EYE_COLORS.length) },
-    { type: "mouth", variant: Math.floor(rand() * LAYER_VARIANTS.mouth) },
     { type: "hair", variant: Math.floor(rand() * LAYER_VARIANTS.hair), color: Math.floor(rand() * HAIR_COLORS.length) },
     { type: "accessory", variant: 0 },
     { type: "hat", variant: 0 },
@@ -111,7 +126,6 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
   const baseLayer = getLayer(config, "base")
   const skinLayer = getLayer(config, "skin")
   const eyesLayer = getLayer(config, "eyes")
-  const mouthLayer = getLayer(config, "mouth")
   const hairLayer = getLayer(config, "hair")
   const accessoryLayer = getLayer(config, "accessory")
   const hatLayer = getLayer(config, "hat")
@@ -121,12 +135,10 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
   const hairColor = HAIR_COLORS[hairLayer?.color ?? 0]
   const eyeColor = EYE_COLORS[eyesLayer?.color ?? 0]
   const eyeWhite = "#f0f0f0"
-  const mouthColor = "#4a2a2a"
-  const outlineColor = "#1a1a1a"
+  const mouthColor = "#4a2a2a" // Still used for default mouth drawn on face
   
   const baseVariant = baseLayer?.variant ?? 0
   const eyesVariant = eyesLayer?.variant ?? 0
-  const mouthVariant = mouthLayer?.variant ?? 0
   const hairVariant = hairLayer?.variant ?? 0
   const accVariant = accessoryLayer?.variant ?? 0
   const hatVariant = hatLayer?.variant ?? 0
@@ -222,109 +234,128 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
   }
   
-  // Draw mouth - clear shapes
-  // Mouth variants: 0=neutral, 1=smile, 2=small, 3=open, 4=frown
+  // Draw mouth - simple neutral line (no longer customizable)
   const mouthY = 8
-  
-  if (mouthVariant === 0) {
-    // Neutral line
-    setPixel(grid, 5, mouthY, mouthColor)
-    setPixel(grid, 6, mouthY, mouthColor)
-    setPixel(grid, 7, mouthY, mouthColor)
-    setPixel(grid, 8, mouthY, mouthColor)
-  } else if (mouthVariant === 1) {
-    // Smile - curved up
-    setPixel(grid, 5, mouthY, mouthColor)
-    setPixel(grid, 6, mouthY + 1, mouthColor)
-    setPixel(grid, 7, mouthY + 1, mouthColor)
-    setPixel(grid, 8, mouthY, mouthColor)
-  } else if (mouthVariant === 2) {
-    // Small/pursed
-    setPixel(grid, 6, mouthY, mouthColor)
-    setPixel(grid, 7, mouthY, mouthColor)
-  } else if (mouthVariant === 3) {
-    // Open mouth
-    setPixel(grid, 5, mouthY, mouthColor)
-    setPixel(grid, 6, mouthY, "#2a1a1a")
-    setPixel(grid, 7, mouthY, "#2a1a1a")
-    setPixel(grid, 8, mouthY, mouthColor)
-    setPixel(grid, 6, mouthY + 1, mouthColor)
-    setPixel(grid, 7, mouthY + 1, mouthColor)
-  } else {
-    // Frown - curved down
-    setPixel(grid, 5, mouthY + 1, mouthColor)
-    setPixel(grid, 6, mouthY, mouthColor)
-    setPixel(grid, 7, mouthY, mouthColor)
-    setPixel(grid, 8, mouthY + 1, mouthColor)
-  }
+  setPixel(grid, 5, mouthY, mouthColor)
+  setPixel(grid, 6, mouthY, mouthColor)
+  setPixel(grid, 7, mouthY, mouthColor)
+  setPixel(grid, 8, mouthY, mouthColor)
   
   // Draw hair
-  // Hair variants: 0=none, 1=short, 2=spiky, 3=side part, 4=long, 5=mohawk, 6=bangs, 7=curly
+  // Hair variants: 0=bald, 1=buzz cut, 2=spiky, 3=side part, 4=long, 5=mohawk, 6=bangs, 7=curly, 8=slicked back, 9=undercut
   if (hairVariant === 1) {
-    // Short hair - top coverage
+    // Buzz Cut - very short, close to head
     for (let x = 4; x < 10; x++) {
-      setPixel(grid, x, 1, hairColor)
       setPixel(grid, x, 2, hairColor)
     }
     setPixel(grid, 3, 2, hairColor)
     setPixel(grid, 10, 2, hairColor)
+    setPixel(grid, 4, 1, hairColor)
+    setPixel(grid, 9, 1, hairColor)
   } else if (hairVariant === 2) {
-    // Spiky hair
+    // Spiky - pointed upward spikes
     for (let x = 4; x < 10; x++) {
       setPixel(grid, x, 2, hairColor)
     }
-    setPixel(grid, 4, 1, hairColor)
+    setPixel(grid, 3, 2, hairColor)
+    setPixel(grid, 10, 2, hairColor)
+    // Spikes pointing up
+    setPixel(grid, 4, 0, hairColor)
+    setPixel(grid, 5, 1, hairColor)
     setPixel(grid, 6, 0, hairColor)
     setPixel(grid, 7, 1, hairColor)
-    setPixel(grid, 9, 0, hairColor)
+    setPixel(grid, 8, 0, hairColor)
+    setPixel(grid, 9, 1, hairColor)
   } else if (hairVariant === 3) {
-    // Side part
+    // Side Part - swept to one side
     for (let x = 3; x < 11; x++) {
       setPixel(grid, x, 1, hairColor)
       setPixel(grid, x, 2, hairColor)
     }
+    // Hair falls on left side
+    setPixel(grid, 2, 2, hairColor)
+    setPixel(grid, 2, 3, hairColor)
+    setPixel(grid, 2, 4, hairColor)
     setPixel(grid, 3, 3, hairColor)
-    setPixel(grid, 3, 4, hairColor)
   } else if (hairVariant === 4) {
-    // Long hair
+    // Long - shoulder length hair
     for (let x = 3; x < 11; x++) {
       setPixel(grid, x, 1, hairColor)
       setPixel(grid, x, 2, hairColor)
     }
-    for (let y = 2; y < 11; y++) {
+    // Hair hanging down both sides
+    for (let y = 2; y < 12; y++) {
       setPixel(grid, 2, y, hairColor)
       setPixel(grid, 11, y, hairColor)
     }
+    setPixel(grid, 3, 11, hairColor)
+    setPixel(grid, 10, 11, hairColor)
   } else if (hairVariant === 5) {
-    // Mohawk
-    setPixel(grid, 6, 0, hairColor)
-    setPixel(grid, 7, 0, hairColor)
-    setPixel(grid, 6, 1, hairColor)
-    setPixel(grid, 7, 1, hairColor)
-    setPixel(grid, 6, 2, hairColor)
-    setPixel(grid, 7, 2, hairColor)
+    // Mohawk - tall center strip
+    for (let x = 5; x < 9; x++) {
+      setPixel(grid, x, 0, hairColor)
+      setPixel(grid, x, 1, hairColor)
+      setPixel(grid, x, 2, hairColor)
+    }
+    // Shaved sides hint
+    setPixel(grid, 4, 2, darkenColor(hairColor, 0.4))
+    setPixel(grid, 9, 2, darkenColor(hairColor, 0.4))
   } else if (hairVariant === 6) {
-    // Bangs
+    // Bangs - fringe covering forehead
     for (let x = 3; x < 11; x++) {
       setPixel(grid, x, 1, hairColor)
       setPixel(grid, x, 2, hairColor)
     }
+    // Fringe hanging over forehead
     setPixel(grid, 4, 3, hairColor)
     setPixel(grid, 5, 3, hairColor)
+    setPixel(grid, 6, 3, hairColor)
+    setPixel(grid, 7, 3, hairColor)
+    setPixel(grid, 5, 4, hairColor)
     setPixel(grid, 6, 4, hairColor)
   } else if (hairVariant === 7) {
-    // Curly/afro
+    // Curly/Afro - big rounded hair
     for (let x = 2; x < 12; x++) {
       setPixel(grid, x, 0, hairColor)
       setPixel(grid, x, 1, hairColor)
     }
-    for (let x = 3; x < 11; x++) {
+    for (let x = 2; x < 12; x++) {
       setPixel(grid, x, 2, hairColor)
     }
-    setPixel(grid, 2, 2, hairColor)
-    setPixel(grid, 11, 2, hairColor)
+    // Volume on sides
+    setPixel(grid, 1, 1, hairColor)
+    setPixel(grid, 12, 1, hairColor)
+    setPixel(grid, 1, 2, hairColor)
+    setPixel(grid, 12, 2, hairColor)
     setPixel(grid, 2, 3, hairColor)
     setPixel(grid, 11, 3, hairColor)
+  } else if (hairVariant === 8) {
+    // Slicked Back - combed back from forehead
+    for (let x = 3; x < 11; x++) {
+      setPixel(grid, x, 1, hairColor)
+    }
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 2, hairColor)
+    }
+    // Combed lines
+    setPixel(grid, 3, 2, darkenColor(hairColor, 0.2))
+    setPixel(grid, 10, 2, darkenColor(hairColor, 0.2))
+    setPixel(grid, 5, 1, darkenColor(hairColor, 0.15))
+    setPixel(grid, 8, 1, darkenColor(hairColor, 0.15))
+  } else if (hairVariant === 9) {
+    // Undercut - long on top, shaved sides
+    for (let x = 4; x < 10; x++) {
+      setPixel(grid, x, 1, hairColor)
+      setPixel(grid, x, 2, hairColor)
+    }
+    // Swept to one side on top
+    setPixel(grid, 3, 2, hairColor)
+    setPixel(grid, 3, 1, hairColor)
+    setPixel(grid, 2, 2, hairColor)
+    // Shaved sides (darker)
+    setPixel(grid, 3, 3, darkenColor(hairColor, 0.4))
+    setPixel(grid, 10, 2, darkenColor(hairColor, 0.4))
+    setPixel(grid, 10, 3, darkenColor(hairColor, 0.4))
   }
   
   // Draw accessory

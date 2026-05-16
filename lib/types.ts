@@ -136,7 +136,7 @@ export interface RollableUITheme {
   | "admin"
 
 // Avatar system
-export type AvatarLayerType = "base" | "skin" | "eyes" | "mouth" | "hair" | "accessory" | "hat" | "flair"
+export type AvatarLayerType = "base" | "skin" | "eyes" | "hair" | "accessory" | "hat" | "flair"
 
 export interface AvatarLayer {
   type: AvatarLayerType

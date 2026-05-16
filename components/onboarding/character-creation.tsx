@@ -137,7 +137,7 @@ function generateHandle(): string {
   return base
 }
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
-import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS } from "@/lib/avatar-generator"
+import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS, HEAD_SHAPE_NAMES, HAIR_STYLE_NAMES } from "@/lib/avatar-generator"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import type { Race, Courier, CharacterCreationStep, BaseStats, AvatarConfig, AvatarLayer } from "@/lib/types"
 
@@ -695,19 +695,19 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                     Hair Style
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-2">
-                    {Array.from({ length: LAYER_VARIANTS.hair }, (_, i) => {
+                    {HAIR_STYLE_NAMES.map((name, i) => {
                       const currentHair = avatar.layers.find(l => l.type === "hair")?.variant ?? 0
                       return (
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("hair", i)}
-                          className={`h-7 w-7 rounded border text-[10px] font-mono transition-all ${
+                          className={`rounded border px-2 py-1 text-[9px] font-mono transition-all ${
                             currentHair === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
                           }`}
                         >
-                          {i + 1}
+                          {name}
                         </button>
                       )
                     })}
@@ -781,25 +781,25 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                   </div>
                 </div>
 
-                {/* Mouth */}
+                {/* Head Shape */}
                 <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
                   <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
-                    Mouth
+                    Head Shape
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {Array.from({ length: LAYER_VARIANTS.mouth }, (_, i) => {
-                      const currentMouth = avatar.layers.find(l => l.type === "mouth")?.variant ?? 0
+                    {HEAD_SHAPE_NAMES.map((name, i) => {
+                      const currentBase = avatar.layers.find(l => l.type === "base")?.variant ?? 0
                       return (
                         <button
                           key={i}
-                          onClick={() => updateAvatarLayer("mouth", i)}
-                          className={`h-7 w-7 rounded border text-[10px] font-mono transition-all ${
-                            currentMouth === i
+                          onClick={() => updateAvatarLayer("base", i)}
+                          className={`rounded border px-2.5 py-1.5 text-[10px] font-mono transition-all ${
+                            currentBase === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
                           }`}
                         >
-                          {i + 1}
+                          {name}
                         </button>
                       )
                     })}
