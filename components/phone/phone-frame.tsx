@@ -42,8 +42,8 @@ export function PhoneFrame({
                 "inset 0 0 0 1px rgba(168,123,255,0.08), inset 0 0 40px rgba(168,123,255,0.04)",
             }}
           />
-          {/* scanlines + vignette wrapper */}
-          <div className="scanlines vignette relative h-full w-full">
+          {/* scanlines + vignette wrapper + theme effects target */}
+          <div className="phone-screen scanlines vignette relative h-full w-full">
             {children}
           </div>
         </div>

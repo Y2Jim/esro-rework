@@ -143,89 +143,306 @@
   
   /* ============ THEME EFFECT CLASSES ============ */
   
-  /* Epic: Subtle pulse animation on borders */
+  /* Epic: Storm Violet - Electric crackling pulse */
+  .theme-effect-pulse {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 55%, transparent);
+  }
+  
   .theme-effect-pulse [class*="border-"] {
-    animation: theme-border-pulse 3s ease-in-out infinite;
+    animation: theme-border-pulse 2s ease-in-out infinite;
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+      inset 0 0 3px color-mix(in srgb, var(--rollable-accent) 8%, transparent);
   }
   
   @keyframes theme-border-pulse {
-    0%, 100% { opacity: 1; }
+    0%, 100% { 
+      opacity: 1;
+      box-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+        inset 0 0 3px color-mix(in srgb, var(--rollable-accent) 8%, transparent);
+    }
+    50% { 
+      opacity: 0.85;
+      box-shadow: 
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+        inset 0 0 6px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    }
+  }
+  
+  /* Epic pulse: Accent text gets subtle glow */
+  .theme-effect-pulse .text-\[color\:var\(--color-accent\)\],
+  .theme-effect-pulse [class*="text-accent"] {
+    text-shadow: 0 0 8px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  /* Epic: Corner accent markers */
+  .theme-effect-pulse .phone-screen::before,
+  .theme-effect-pulse .phone-screen::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--rollable-accent);
+    opacity: 0.4;
+    animation: theme-corner-pulse 2s ease-in-out infinite;
+  }
+  .theme-effect-pulse .phone-screen::before {
+    top: 8px;
+    left: 8px;
+    border-right: none;
+    border-bottom: none;
+  }
+  .theme-effect-pulse .phone-screen::after {
+    bottom: 8px;
+    right: 8px;
+    border-left: none;
+    border-top: none;
+  }
+  @keyframes theme-corner-pulse {
+    0%, 100% { opacity: 0.4; }
     50% { opacity: 0.7; }
   }
   
-  /* Epic: Shimmer effect on panels */
-  .theme-effect-shimmer .rounded-lg,
-  .theme-effect-shimmer .rounded-md {
+  /* Epic: Rose Bloom - Warm shimmer sweep */
+  .theme-effect-shimmer {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  .theme-effect-shimmer [class*="border-"] {
+    box-shadow: 
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+  }
+  
+  .theme-effect-shimmer .phone-screen {
     position: relative;
     overflow: hidden;
   }
   
-  .theme-effect-shimmer .rounded-lg::before,
-  .theme-effect-shimmer .rounded-md::before {
+  .theme-effect-shimmer .phone-screen::before {
     content: "";
     position: absolute;
     top: 0;
     left: -100%;
-    width: 50%;
+    width: 60%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
-    animation: theme-shimmer 8s ease-in-out infinite;
+    background: linear-gradient(
+      90deg, 
+      transparent, 
+      color-mix(in srgb, var(--rollable-accent) 6%, transparent),
+      color-mix(in srgb, var(--rollable-accent) 12%, transparent),
+      color-mix(in srgb, var(--rollable-accent) 6%, transparent),
+      transparent
+    );
+    animation: theme-shimmer 6s ease-in-out infinite;
     pointer-events: none;
+    z-index: 50;
   }
   
   @keyframes theme-shimmer {
-    0%, 100% { left: -100%; }
-    50% { left: 200%; }
+    0% { left: -100%; }
+    100% { left: 200%; }
   }
   
-  /* Legendary: Glow effect - enhanced borders and text glow */
+  /* Epic shimmer: Soft bloom on buttons */
+  .theme-effect-shimmer button[class*="bg-"] {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+  }
+  
+  /* Legendary: Neon Plasma - Intense cyan glow with scan lines */
   .theme-effect-glow {
-    --color-border: color-mix(in srgb, var(--rollable-accent) 60%, transparent);
-    --color-border-soft: color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+    --color-border: color-mix(in srgb, var(--rollable-accent) 70%, transparent);
+    --color-border-soft: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
   }
   
   .theme-effect-glow [class*="border-"] {
     box-shadow: 
-      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
-      inset 0 0 4px color-mix(in srgb, var(--rollable-accent) 10%, transparent);
+      0 0 10px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 20%, transparent),
+      inset 0 0 5px color-mix(in srgb, var(--rollable-accent) 12%, transparent);
+    animation: theme-glow-border 2.5s ease-in-out infinite;
   }
   
-  .theme-effect-glow .text-glow {
+  @keyframes theme-glow-border {
+    0%, 100% {
+      box-shadow: 
+        0 0 10px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 20%, transparent),
+        inset 0 0 5px color-mix(in srgb, var(--rollable-accent) 12%, transparent);
+    }
+    50% {
+      box-shadow: 
+        0 0 14px color-mix(in srgb, var(--rollable-accent) 55%, transparent),
+        0 0 28px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+        inset 0 0 8px color-mix(in srgb, var(--rollable-accent) 18%, transparent);
+    }
+  }
+  
+  /* Legendary: Scan line overlay */
+  .theme-effect-glow .phone-screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      color-mix(in srgb, var(--rollable-accent) 3%, transparent) 2px,
+      color-mix(in srgb, var(--rollable-accent) 3%, transparent) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+  
+  /* Legendary: Edge glow bars */
+  .theme-effect-glow .phone-screen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--rollable-accent), transparent);
+    opacity: 0.6;
+    animation: theme-glow-bar 3s ease-in-out infinite;
+    z-index: 101;
+  }
+  
+  @keyframes theme-glow-bar {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+  
+  /* Legendary: All accent text glows */
+  .theme-effect-glow .text-\[color\:var\(--color-accent\)\],
+  .theme-effect-glow [class*="text-accent"] {
     text-shadow: 
-      0 0 8px var(--rollable-accent),
-      0 0 16px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 60%, transparent);
   }
   
-  /* Mythic: Radiant effect - everything has ethereal glow */
+  /* Legendary: Button neon effect */
+  .theme-effect-glow button[class*="bg-\[color\:var\(--color-accent\)\]"],
+  .theme-effect-glow .bg-\[color\:var\(--color-accent\)\] {
+    box-shadow: 
+      0 0 12px var(--rollable-accent),
+      0 0 24px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  /* Mythic: Radiant Aether - Ethereal white-gold with particle effect */
   .theme-effect-radiant {
-    --color-border: color-mix(in srgb, var(--rollable-accent) 70%, transparent);
-    --color-accent-glow: color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+    --color-border: color-mix(in srgb, var(--rollable-accent) 80%, transparent);
+    --color-accent-glow: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
   }
   
   .theme-effect-radiant [class*="border-"] {
     box-shadow: 
-      0 0 12px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
-      0 0 24px color-mix(in srgb, var(--rollable-accent) 20%, transparent),
-      inset 0 0 6px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
-    animation: theme-radiant-border 4s ease-in-out infinite;
+      0 0 14px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 28px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+      0 0 42px color-mix(in srgb, var(--rollable-accent) 12%, transparent),
+      inset 0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    animation: theme-radiant-border 3s ease-in-out infinite;
   }
   
   @keyframes theme-radiant-border {
     0%, 100% { 
       box-shadow: 
-        0 0 12px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
-        0 0 24px color-mix(in srgb, var(--rollable-accent) 20%, transparent),
-        inset 0 0 6px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+        0 0 14px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+        0 0 28px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+        0 0 42px color-mix(in srgb, var(--rollable-accent) 12%, transparent),
+        inset 0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
     }
     50% { 
       box-shadow: 
-        0 0 16px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
-        0 0 32px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
-        inset 0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+        0 0 40px color-mix(in srgb, var(--rollable-accent) 35%, transparent),
+        0 0 60px color-mix(in srgb, var(--rollable-accent) 18%, transparent),
+        inset 0 0 12px color-mix(in srgb, var(--rollable-accent) 28%, transparent);
     }
   }
   
-  .theme-effect-radiant .text-glow {
+  /* Mythic: Floating particles effect */
+  .theme-effect-radiant .phone-screen {
+    position: relative;
+  }
+  
+  .theme-effect-radiant .phone-screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: 
+      radial-gradient(1px 1px at 10% 20%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 30% 70%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 50% 30%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 70% 80%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 90% 40%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 20% 90%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 80% 10%, var(--rollable-accent), transparent),
+      radial-gradient(1px 1px at 40% 50%, var(--rollable-accent), transparent);
+    animation: theme-radiant-particles 8s linear infinite;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.6;
+  }
+  
+  @keyframes theme-radiant-particles {
+    0% { 
+      transform: translateY(0);
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.3;
+    }
+    100% { 
+      transform: translateY(-20px);
+      opacity: 0.6;
+    }
+  }
+  
+  /* Mythic: Golden halo on top edge */
+  .theme-effect-radiant .phone-screen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rollable-accent), var(--rollable-secondary, var(--rollable-accent)), var(--rollable-accent), transparent);
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px var(--rollable-accent),
+      0 0 30px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-radiant-halo 4s ease-in-out infinite;
+    z-index: 101;
+  }
+  
+  @keyframes theme-radiant-halo {
+    0%, 100% { 
+      opacity: 0.7;
+      box-shadow: 
+        0 0 10px var(--rollable-accent),
+        0 0 20px var(--rollable-accent),
+        0 0 30px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    }
+    50% { 
+      opacity: 1;
+      box-shadow: 
+        0 0 15px var(--rollable-accent),
+        0 0 30px var(--rollable-accent),
+        0 0 45px color-mix(in srgb, var(--rollable-accent) 70%, transparent);
+    }
+  }
+  
+  /* Mythic: All text has divine glow */
+  .theme-effect-radiant .text-\[color\:var\(--color-accent\)\],
+  .theme-effect-radiant [class*="text-accent"],
+  .theme-effect-radiant .text-\[color\:var\(--color-text\)\] {
+    text-shadow: 
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+  }
+  
+  /* Mythic: Accent text extra divine */
+  .theme-effect-radiant .text-\[color\:var\(--color-accent\)\] {
     text-shadow: 
       0 0 10px var(--rollable-accent),
       0 0 20px var(--rollable-accent),
@@ -244,7 +461,32 @@
       text-shadow: 
         0 0 14px var(--rollable-accent),
         0 0 28px var(--rollable-accent),
-        0 0 42px color-mix(in srgb, var(--rollable-accent) 70%, transparent);
+        0 0 42px color-mix(in srgb, var(--rollable-accent) 75%, transparent);
+    }
+  }
+  
+  /* Mythic: Buttons have divine radiance */
+  .theme-effect-radiant button[class*="bg-\[color\:var\(--color-accent\)\]"],
+  .theme-effect-radiant .bg-\[color\:var\(--color-accent\)\] {
+    box-shadow: 
+      0 0 16px var(--rollable-accent),
+      0 0 32px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+      0 0 48px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
+    animation: theme-radiant-button 2.5s ease-in-out infinite;
+  }
+  
+  @keyframes theme-radiant-button {
+    0%, 100% {
+      box-shadow: 
+        0 0 16px var(--rollable-accent),
+        0 0 32px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+        0 0 48px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
+    }
+    50% {
+      box-shadow: 
+        0 0 22px var(--rollable-accent),
+        0 0 44px color-mix(in srgb, var(--rollable-accent) 70%, transparent),
+        0 0 66px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
     }
   }
 
