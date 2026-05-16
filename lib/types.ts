@@ -93,6 +93,7 @@ export type Rarity =
   | "rare"
   | "epic"
   | "legendary"
+  | "mythic"
 
 // Avatar system
 export type AvatarLayerType = "base" | "skin" | "eyes" | "mouth" | "hair" | "accessory" | "hat" | "flair"

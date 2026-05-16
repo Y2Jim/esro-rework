@@ -3,8 +3,9 @@
 import { useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
-import { rarityColor } from "@/lib/rarity"
+import { rarityColor, rarityAnimation } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
+import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 
 import { FACTIONS } from "@/lib/game-data"
 import type { RaceId } from "@/lib/types"
@@ -104,7 +105,11 @@ function SummaryTab() {
         <div className="flex-1">
           <div className="text-[14px] font-medium text-[color:var(--color-text)]">{identity.handle}</div>
           {identity.title && (
-            <div className={cn("text-[11px]", rarityColor[identity.titleRarity])}>{identity.title}</div>
+            <TitleDisplay 
+              title={identity.title} 
+              rarity={identity.titleRarity} 
+              className="text-[11px]" 
+            />
           )}
           {/* Race/Courier info */}
           {(characterRace || characterCourier) && (
@@ -213,6 +218,12 @@ function TitlesTab() {
   const ownedTitles = profile.ownedTitles || []
   const equippedTitle = profile.title
 
+  // Sort by rarity (highest first)
+  const sortedTitles = [...ownedTitles].sort((a, b) => {
+    const order = ["mythic", "legendary", "epic", "rare", "uncommon", "common"]
+    return order.indexOf(a.rarity) - order.indexOf(b.rarity)
+  })
+
   return (
     <div className="space-y-3">
       <div className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
@@ -228,36 +239,17 @@ function TitlesTab() {
         </div>
       ) : (
         <div className="space-y-2">
-          {ownedTitles.map((title) => {
+          {sortedTitles.map((title) => {
             const isEquipped = equippedTitle?.id === title.id
             return (
-              <button
+              <TitleBadgeRow
                 key={title.id}
-                type="button"
+                title={title.label}
+                rarity={title.rarity}
+                source={title.source}
+                isEquipped={isEquipped}
                 onClick={() => setActiveTitle(title.id)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-lg border p-3 text-left transition-all",
-                  isEquipped
-                    ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10"
-                    : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
-                )}
-              >
-                <div>
-                  <div className={cn("text-[12px] font-medium", rarityColor[title.rarity])}>
-                    {title.label}
-                  </div>
-                  {title.source && (
-                    <div className="mt-0.5 text-[9px] text-[color:var(--color-muted)]">
-                      {title.source}
-                    </div>
-                  )}
-                </div>
-                {isEquipped && (
-                  <span className="rounded bg-[color:var(--color-accent)]/20 px-2 py-0.5 text-[8px] uppercase text-[color:var(--color-accent)]">
-                    active
-                  </span>
-                )}
-              </button>
+              />
             )
           })}
         </div>

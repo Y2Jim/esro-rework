@@ -1,5 +1,5 @@
 import type { ChatMessage } from "@/lib/types"
-import { rarityColor } from "@/lib/rarity"
+import { rarityColor, rarityAnimation, rarityBorder, rarityBg } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
 function formatClock(ts: number) {
@@ -74,12 +74,10 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
     )
   }
 
-  const titleClass =
-    msg.titleRarity === "legendary"
-      ? "prismatic-text"
-      : msg.titleRarity
-        ? rarityColor[msg.titleRarity]
-        : "text-[color:var(--color-muted)]"
+  const titleColorClass = msg.titleRarity ? rarityColor[msg.titleRarity] : "text-[color:var(--color-muted)]"
+  const titleAnimClass = msg.titleRarity ? rarityAnimation[msg.titleRarity] : ""
+  const titleBorderClass = msg.titleRarity ? rarityBorder[msg.titleRarity] : "border-[color:var(--color-border)]"
+  const titleBgClass = msg.titleRarity ? rarityBg[msg.titleRarity] : "bg-[color:var(--color-panel-2)]/80"
 
   return (
     <div className={cn(
@@ -101,8 +99,11 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
         {msg.title && (
           <span
             className={cn(
-              "rounded-sm border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)]/80 px-1.5 py-[2px] text-[9px] uppercase tracking-[0.15em] font-medium",
-              titleClass,
+              "rounded-sm border px-1.5 py-[2px] text-[9px] uppercase tracking-[0.15em] font-medium",
+              titleColorClass,
+              titleAnimClass,
+              titleBorderClass,
+              titleBgClass,
             )}
           >
             {msg.title}

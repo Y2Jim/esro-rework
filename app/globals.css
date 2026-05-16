@@ -31,6 +31,14 @@
   /* Special */
   --color-prismatic: #f3d58a;
 
+  /* Rarity Colors */
+  --color-rarity-common: #a791c7;
+  --color-rarity-uncommon: #5dd0ff;
+  --color-rarity-rare: #bb81ff;
+  --color-rarity-epic: #ffb347;
+  --color-rarity-legendary: #f3d58a;
+  --color-rarity-mythic: #ff6b9d;
+
   --radius-panel: 14px;
   --radius-button: 999px;
   --radius-input: 10px;
@@ -395,6 +403,108 @@
   background-clip: text;
   color: transparent;
   animation: prismatic-shift 4s linear infinite;
+}
+
+/* ============ TITLE RARITY ANIMATIONS ============ */
+
+/* Legendary - Golden shimmer pulse */
+@keyframes legendary-shimmer {
+  0%, 100% {
+    text-shadow: 0 0 4px rgba(243, 213, 138, 0.5), 0 0 8px rgba(243, 213, 138, 0.3);
+    filter: brightness(1);
+  }
+  50% {
+    text-shadow: 0 0 8px rgba(243, 213, 138, 0.8), 0 0 16px rgba(243, 213, 138, 0.5), 0 0 24px rgba(243, 213, 138, 0.3);
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes legendary-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.title-legendary {
+  background: linear-gradient(
+    90deg,
+    #f3d58a 0%,
+    #ffe4a8 25%,
+    #f3d58a 50%,
+    #d4a855 75%,
+    #f3d58a 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: legendary-gradient 3s ease-in-out infinite, legendary-shimmer 2.5s ease-in-out infinite;
+}
+
+/* Mythic - Aurora borealis / cosmic effect */
+@keyframes mythic-aurora {
+  0% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  25% {
+    filter: hue-rotate(15deg) brightness(1.1);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: hue-rotate(30deg) brightness(1.2);
+  }
+  75% {
+    filter: hue-rotate(15deg) brightness(1.1);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) brightness(1);
+  }
+}
+
+@keyframes mythic-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 4px rgba(255, 107, 157, 0.6),
+      0 0 8px rgba(187, 129, 255, 0.4),
+      0 0 12px rgba(93, 208, 255, 0.3);
+  }
+  33% {
+    text-shadow: 
+      0 0 6px rgba(187, 129, 255, 0.7),
+      0 0 12px rgba(93, 208, 255, 0.5),
+      0 0 18px rgba(255, 107, 157, 0.3);
+  }
+  66% {
+    text-shadow: 
+      0 0 6px rgba(93, 208, 255, 0.7),
+      0 0 12px rgba(255, 107, 157, 0.5),
+      0 0 18px rgba(187, 129, 255, 0.3);
+  }
+}
+
+.title-mythic {
+  background: linear-gradient(
+    90deg,
+    #ff6b9d 0%,
+    #bb81ff 20%,
+    #5dd0ff 40%,
+    #5dff9a 60%,
+    #ffb347 80%,
+    #ff6b9d 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mythic-aurora 4s ease-in-out infinite, mythic-glow 3s ease-in-out infinite;
+}
+
+/* Rarity badge hover enhancement */
+.title-legendary:hover,
+.title-mythic:hover {
+  animation-duration: 1.5s, 1s;
 }
 
 /* Empty state */

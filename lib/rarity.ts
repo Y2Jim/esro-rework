@@ -10,6 +10,7 @@ export const rarityLabel: Record<Rarity, string> = {
   rare: "Refined",
   epic: "Prismatic",
   legendary: "Singular",
+  mythic: "Transcendent",
 }
 
 export const rarityOrder: Rarity[] = [
@@ -18,21 +19,77 @@ export const rarityOrder: Rarity[] = [
   "rare",
   "epic",
   "legendary",
+  "mythic",
 ]
 
+/** Base text colors for each rarity */
 export const rarityColor: Record<Rarity, string> = {
-  common: "text-[color:var(--color-muted)]",
-  uncommon: "text-[color:var(--color-cyan)]",
-  rare: "text-[color:var(--color-violet-bright)]",
-  epic: "text-[color:var(--color-amber)]",
-  legendary: "text-[color:var(--color-prismatic)]",
+  common: "text-[color:var(--color-rarity-common)]",
+  uncommon: "text-[color:var(--color-rarity-uncommon)]",
+  rare: "text-[color:var(--color-rarity-rare)]",
+  epic: "text-[color:var(--color-rarity-epic)]",
+  legendary: "text-[color:var(--color-rarity-legendary)]",
+  mythic: "text-[color:var(--color-rarity-mythic)]",
 }
 
+/** Border colors for rarity-themed containers */
 export const rarityBorder: Record<Rarity, string> = {
-  common: "border-[color:var(--color-border-soft)]",
-  uncommon: "border-[color:color-mix(in_oklab,var(--color-cyan)_40%,transparent)]",
-  rare: "border-[color:color-mix(in_oklab,var(--color-violet)_55%,transparent)]",
-  epic: "border-[color:color-mix(in_oklab,var(--color-amber)_55%,transparent)]",
-  legendary:
-    "border-[color:color-mix(in_oklab,var(--color-prismatic)_60%,transparent)]",
+  common: "border-[color:var(--color-rarity-common)]/30",
+  uncommon: "border-[color:var(--color-rarity-uncommon)]/40",
+  rare: "border-[color:var(--color-rarity-rare)]/50",
+  epic: "border-[color:var(--color-rarity-epic)]/50",
+  legendary: "border-[color:var(--color-rarity-legendary)]/60",
+  mythic: "border-[color:var(--color-rarity-mythic)]/70",
+}
+
+/** Background colors for rarity-themed containers */
+export const rarityBg: Record<Rarity, string> = {
+  common: "bg-[color:var(--color-rarity-common)]/5",
+  uncommon: "bg-[color:var(--color-rarity-uncommon)]/8",
+  rare: "bg-[color:var(--color-rarity-rare)]/10",
+  epic: "bg-[color:var(--color-rarity-epic)]/10",
+  legendary: "bg-[color:var(--color-rarity-legendary)]/12",
+  mythic: "bg-[color:var(--color-rarity-mythic)]/15",
+}
+
+/** Glow/shadow effects for each rarity */
+export const rarityGlow: Record<Rarity, string> = {
+  common: "",
+  uncommon: "drop-shadow-[0_0_3px_var(--color-rarity-uncommon)]",
+  rare: "drop-shadow-[0_0_4px_var(--color-rarity-rare)]",
+  epic: "drop-shadow-[0_0_6px_var(--color-rarity-epic)]",
+  legendary: "drop-shadow-[0_0_8px_var(--color-rarity-legendary)]",
+  mythic: "drop-shadow-[0_0_10px_var(--color-rarity-mythic)]",
+}
+
+/** Animation classes for legendary/mythic titles */
+export const rarityAnimation: Record<Rarity, string> = {
+  common: "",
+  uncommon: "",
+  rare: "",
+  epic: "",
+  legendary: "title-legendary",
+  mythic: "title-mythic",
+}
+
+/** Combined title class - color + animation */
+export function getTitleClass(rarity: Rarity): string {
+  const base = rarityColor[rarity]
+  const anim = rarityAnimation[rarity]
+  return anim ? `${base} ${anim}` : base
+}
+
+/** Get all styling for a title badge */
+export function getTitleBadgeClasses(rarity: Rarity): string {
+  const classes = [
+    rarityColor[rarity],
+    rarityBorder[rarity],
+    rarityBg[rarity],
+  ]
+  
+  if (rarity === "legendary" || rarity === "mythic") {
+    classes.push(rarityAnimation[rarity])
+  }
+  
+  return classes.filter(Boolean).join(" ")
 }
