@@ -191,6 +191,7 @@ function StatBar({ stat, value, max = 20, highlight = false }: { stat: keyof Bas
 export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   const [step, setStep] = useState<CharacterCreationStep>("incoming")
   const [briefingIndex, setBriefingIndex] = useState(0)
+  const [titleComplete, setTitleComplete] = useState(false)
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
@@ -253,8 +254,9 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
         setStep("briefing")
         break
       case "briefing":
-        if (briefingIndex < ONBOARDING_PANELS.length - 1) {
-          setBriefingIndex(i => i + 1)
+if (briefingIndex < ONBOARDING_PANELS.length - 1) {
+        setTitleComplete(false)
+        setBriefingIndex(i => i + 1)
         } else {
           setStep("race")
         }
@@ -294,8 +296,9 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
         // Can't go back from incoming
         break
       case "briefing":
-        if (briefingIndex > 0) {
-          setBriefingIndex(i => i - 1)
+if (briefingIndex > 0) {
+        setTitleComplete(false)
+        setBriefingIndex(i => i - 1)
         } else {
           setStep("incoming")
         }
@@ -463,14 +466,17 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                     key={`title-${briefingIndex}`}
                     text={ONBOARDING_PANELS[briefingIndex].title} 
                     speed={40}
+                    onComplete={() => setTitleComplete(true)}
                   />
                 </h2>
                 <p className="text-[13px] leading-relaxed text-[color:var(--color-text-secondary)] min-h-[120px]">
-                  <RollingText 
-                    key={`body-${briefingIndex}`}
-                    text={ONBOARDING_PANELS[briefingIndex].body} 
-                    speed={18}
-                  />
+                  {titleComplete && (
+                    <RollingText 
+                      key={`body-${briefingIndex}`}
+                      text={ONBOARDING_PANELS[briefingIndex].body} 
+                      speed={18}
+                    />
+                  )}
                 </p>
               </div>
               
