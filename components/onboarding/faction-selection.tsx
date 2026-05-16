@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, ChevronRight, Check, Lock } from "lucide-react"
+import { ChevronLeft, ChevronRight, Check, Lock, Zap } from "lucide-react"
 import { FACTIONS, FACTION_UNLOCK_LEVEL } from "@/lib/game-data"
 import type { FactionData, FactionSelectionStep, RaceId } from "@/lib/types"
 
@@ -80,11 +80,24 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
         break
       case "confirm":
         if (selectedFaction) {
-          onComplete(selectedFaction.id)
+          setStep("pledged")
         }
+        break
+      case "pledged":
+        // Handled by useEffect timer
         break
     }
   }
+  
+  // Auto-complete after pledged animation
+  useEffect(() => {
+    if (step === "pledged" && selectedFaction) {
+      const timer = setTimeout(() => {
+        onComplete(selectedFaction.id)
+      }, 3500) // Let the animation play out
+      return () => clearTimeout(timer)
+    }
+  }, [step, selectedFaction, onComplete])
 
   const prevStep = () => {
     switch (step) {
@@ -102,10 +115,11 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
 
   return (
     <div className="flex h-full flex-col bg-[color:var(--color-bg)]">
-      {/* Header with progress */}
-      <div className="shrink-0 border-b border-[color:var(--color-border)] px-3 py-2">
-        <div className="flex items-center justify-center gap-1.5">
-          {["intro", "selection", "confirm"].map((s, i) => (
+      {/* Header with progress - hidden during pledged */}
+      {step !== "pledged" && (
+        <div className="shrink-0 border-b border-[color:var(--color-border)] px-3 py-2">
+          <div className="flex items-center justify-center gap-1.5">
+            {["intro", "selection", "confirm"].map((s, i) => (
             <div
               key={s}
               className={`h-1 w-8 rounded-full transition-colors ${
@@ -123,7 +137,8 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
           {step === "selection" && "Choose Allegiance"}
           {step === "confirm" && "Confirm Faction"}
         </p>
-      </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3">
@@ -283,6 +298,158 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
             </motion.div>
           )}
 
+          {/* Pledged - Initiation Animation */}
+          {step === "pledged" && selectedFaction && (
+            <motion.div
+              key="pledged"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
+              style={{ backgroundColor: "var(--color-bg)" }}
+            >
+              {/* Background pulse rings */}
+              {[0, 1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full border"
+                  style={{ borderColor: `${selectedFaction.color}30` }}
+                  initial={{ width: 50, height: 50, opacity: 0 }}
+                  animate={{ 
+                    width: [50, 300 + i * 80], 
+                    height: [50, 300 + i * 80], 
+                    opacity: [0, 0.6, 0] 
+                  }}
+                  transition={{ 
+                    duration: 2, 
+                    delay: 0.3 + i * 0.3, 
+                    ease: "easeOut",
+                  }}
+                />
+              ))}
+
+              {/* Central emblem - scales up dramatically */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{ 
+                  type: "spring", 
+                  damping: 12, 
+                  stiffness: 100,
+                  delay: 0.2 
+                }}
+                className="relative z-10"
+              >
+                <motion.div
+                  className="flex h-28 w-28 items-center justify-center rounded-xl text-5xl font-bold"
+                  style={{ 
+                    backgroundColor: `${selectedFaction.color}20`,
+                    color: selectedFaction.color,
+                    border: `3px solid ${selectedFaction.color}`,
+                    boxShadow: `0 0 40px ${selectedFaction.glow}, 0 0 80px ${selectedFaction.glow}`,
+                  }}
+                  animate={{ 
+                    boxShadow: [
+                      `0 0 40px ${selectedFaction.glow}, 0 0 80px ${selectedFaction.glow}`,
+                      `0 0 60px ${selectedFaction.glow}, 0 0 120px ${selectedFaction.glow}`,
+                      `0 0 40px ${selectedFaction.glow}, 0 0 80px ${selectedFaction.glow}`,
+                    ]
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  {selectedFaction.emblem}
+                </motion.div>
+                
+                {/* Orbiting particles */}
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute h-2 w-2 rounded-full"
+                    style={{ 
+                      backgroundColor: selectedFaction.color,
+                      boxShadow: `0 0 8px ${selectedFaction.color}`,
+                      top: "50%",
+                      left: "50%",
+                    }}
+                    animate={{
+                      x: [0, Math.cos((i / 6) * Math.PI * 2) * 70],
+                      y: [0, Math.sin((i / 6) * Math.PI * 2) * 70],
+                      opacity: [0, 1, 1, 0],
+                      scale: [0, 1, 1, 0.5],
+                    }}
+                    transition={{
+                      duration: 2,
+                      delay: 0.8 + i * 0.1,
+                      ease: "easeOut",
+                    }}
+                  />
+                ))}
+              </motion.div>
+
+              {/* Faction name reveal */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.6 }}
+                className="relative z-10 mt-8 text-center"
+              >
+                <motion.div
+                  className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  <Zap className="h-3 w-3" style={{ color: selectedFaction.color }} />
+                  Allegiance Forged
+                  <Zap className="h-3 w-3" style={{ color: selectedFaction.color }} />
+                </motion.div>
+                
+                <motion.h2
+                  className="mt-2 text-2xl font-bold"
+                  style={{ color: selectedFaction.color }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.4, type: "spring", stiffness: 200 }}
+                >
+                  {selectedFaction.name}
+                </motion.h2>
+                
+                <motion.p
+                  className="mt-2 text-[11px] italic text-[color:var(--color-text-secondary)]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.8 }}
+                >
+                  &quot;{selectedFaction.motto}&quot;
+                </motion.p>
+              </motion.div>
+
+              {/* Bottom loading bar */}
+              <motion.div
+                className="absolute bottom-8 left-1/2 h-1 w-48 -translate-x-1/2 overflow-hidden rounded-full bg-[color:var(--color-border)]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.2 }}
+              >
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: selectedFaction.color }}
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ delay: 2.4, duration: 1, ease: "easeInOut" }}
+                />
+              </motion.div>
+              
+              <motion.p
+                className="absolute bottom-4 text-[9px] text-[color:var(--color-muted)]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.2 }}
+              >
+                Synchronizing faction data...
+              </motion.p>
+            </motion.div>
+          )}
+
           {/* Confirm */}
           {step === "confirm" && selectedFaction && (
             <motion.div
@@ -374,31 +541,33 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <div className="shrink-0 border-t border-[color:var(--color-border)] p-3">
-        <div className="flex items-center justify-between gap-3">
-          <button
-            onClick={prevStep}
-            className="flex items-center gap-1 rounded-lg border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50"
-          >
-            <ChevronLeft className="h-3 w-3" />
-            {step === "intro" ? "Cancel" : "Back"}
-          </button>
-          <button
-            onClick={nextStep}
-            disabled={isLocked || (step === "selection" && !selectedFaction)}
-            className="flex items-center gap-1 rounded-lg px-4 py-1.5 text-[10px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: step === "confirm" && selectedFaction 
-                ? selectedFaction.color 
-                : "var(--color-accent)",
-            }}
-          >
-            {step === "confirm" ? "Pledge Allegiance" : "Continue"}
-            {step !== "confirm" && <ChevronRight className="h-3 w-3" />}
-          </button>
+      {/* Navigation - hidden during pledged */}
+      {step !== "pledged" && (
+        <div className="shrink-0 border-t border-[color:var(--color-border)] p-3">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={prevStep}
+              className="flex items-center gap-1 rounded-lg border border-[color:var(--color-border)] px-3 py-1.5 text-[10px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50"
+            >
+              <ChevronLeft className="h-3 w-3" />
+              {step === "intro" ? "Cancel" : "Back"}
+            </button>
+            <button
+              onClick={nextStep}
+              disabled={isLocked || (step === "selection" && !selectedFaction)}
+              className="flex items-center gap-1 rounded-lg px-4 py-1.5 text-[10px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: step === "confirm" && selectedFaction 
+                  ? selectedFaction.color 
+                  : "var(--color-accent)",
+              }}
+            >
+              {step === "confirm" ? "Pledge Allegiance" : "Continue"}
+              {step !== "confirm" && <ChevronRight className="h-3 w-3" />}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

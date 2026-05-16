@@ -542,4 +542,5 @@ export type FactionSelectionStep =
   | "intro"
   | "selection"
   | "confirm"
+  | "pledged"
   | "complete"
