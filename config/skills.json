@@ -6,165 +6,150 @@
       "name": "Conditioning",
       "linkedStat": "hp",
       "summary": "Long-haul stamina, recovery discipline, and carrying strength under pressure.",
-      "expeditionRole": "Sustain through long routes with reduced condition loss and better recovery.",
       "stats": [
-        { "id": "marching", "name": "Marching", "effect": "Reduces condition loss per stage, builds Conditioning faster" },
-        { "id": "recovery", "name": "Recovery", "effect": "Restores condition after stable stages, boosts skill growth" },
-        { "id": "loadbearing", "name": "Loadbearing", "effect": "Bonus expedition rewards, protects loot on close calls" }
+        { "id": "marching", "name": "Marching" },
+        { "id": "recovery", "name": "Recovery" },
+        { "id": "loadbearing", "name": "Loadbearing" }
       ]
     },
     {
       "name": "Field Medicine",
       "linkedStat": "hp",
       "summary": "Keeping bodies standing with triage, stabilization, and practical frontier care.",
-      "expeditionRole": "Prevent injury complications and recover from near-failures.",
       "stats": [
-        { "id": "triage", "name": "Triage", "effect": "Prevents injury complications on failed stages" },
-        { "id": "stabilization", "name": "Stabilization", "effect": "Large close-call buffer, converts failures to mixed results" },
-        { "id": "remedies", "name": "Remedies", "effect": "Condition recovery on stable stages, bonus rewards on rest stops" }
+        { "id": "triage", "name": "Triage" },
+        { "id": "stabilization", "name": "Stabilization" },
+        { "id": "remedies", "name": "Remedies" }
       ]
     },
     {
       "name": "Beast Tending",
       "linkedStat": "hp",
       "summary": "Managing mounts, pack beasts, and living cargo through stress and fatigue.",
-      "expeditionRole": "Control cargo routes and prevent diversions on beast-related stages.",
       "stats": [
-        { "id": "handling", "name": "Handling", "effect": "Lowers skill check thresholds, prevents route diversions" },
-        { "id": "soothing", "name": "Soothing", "effect": "Prevents injury on beast stages, passive condition recovery" },
-        { "id": "harnessing", "name": "Harnessing", "effect": "Bonus rewards on cargo stages, reduces condition loss" }
+        { "id": "handling", "name": "Handling" },
+        { "id": "soothing", "name": "Soothing" },
+        { "id": "harnessing", "name": "Harnessing" }
       ]
     },
     {
       "name": "Bladecraft",
       "linkedStat": "atk",
       "summary": "Close-range offense built on edge control, tempo, and committed finishing blows.",
-      "expeditionRole": "Excel in combat encounters with better thresholds and salvage from victories.",
       "stats": [
-        { "id": "edgework", "name": "Edgework", "effect": "Significant threshold bonus on combat stages" },
-        { "id": "riposte", "name": "Riposte", "effect": "Reduces penalty from failed combat, close-call protection" },
-        { "id": "finishing", "name": "Finishing", "effect": "Threshold bonus on final stages, bonus rewards on clean wins" }
+        { "id": "edgework", "name": "Edgework" },
+        { "id": "riposte", "name": "Riposte" },
+        { "id": "finishing", "name": "Finishing" }
       ]
     },
     {
       "name": "Marksmanship",
       "linkedStat": "atk",
       "summary": "Ranged pressure through sight discipline, shot preparation, and precision release.",
-      "expeditionRole": "Improve early-stage tempo and convert precision into better rewards.",
       "stats": [
-        { "id": "sighting", "name": "Sighting", "effect": "Threshold bonus on ranged stages, stat-based threshold reduction" },
-        { "id": "draw", "name": "Draw", "effect": "Large threshold bonus on opening stages, better initiative" },
-        { "id": "precision", "name": "Precision", "effect": "Close-call buffer, bonus rewards on precise executions" }
+        { "id": "sighting", "name": "Sighting" },
+        { "id": "draw", "name": "Draw" },
+        { "id": "precision", "name": "Precision" }
       ]
     },
     {
       "name": "Brawling",
       "linkedStat": "atk",
       "summary": "Raw physical offense built on leverage, breaks, and punishing impact.",
-      "expeditionRole": "Stabilize melee encounters and push through with raw impact.",
       "stats": [
-        { "id": "clinch", "name": "Clinch", "effect": "Reduces condition loss in melee, close-call buffer on brawl stages" },
-        { "id": "breaks", "name": "Breaks", "effect": "Threshold bonus on grapple stages, reduces failure penalties" },
-        { "id": "impact", "name": "Impact", "effect": "Threshold bonus on impact stages, bonus expedition rewards" }
+        { "id": "clinch", "name": "Clinch" },
+        { "id": "breaks", "name": "Breaks" },
+        { "id": "impact", "name": "Impact" }
       ]
     },
     {
       "name": "Bulwark",
       "linkedStat": "def",
       "summary": "Direct protection through bracing, shield discipline, and body-line interception.",
-      "expeditionRole": "Reduce incoming damage and prevent cascade failures.",
       "stats": [
-        { "id": "shielding", "name": "Shielding", "effect": "Significant condition loss reduction, higher skill growth on defense" },
-        { "id": "bracing", "name": "Bracing", "effect": "Large failure recovery bonus, prevents cascade failures" },
-        { "id": "interception", "name": "Interception", "effect": "Prevents injury complications, threshold bonus on intercepts" }
+        { "id": "shielding", "name": "Shielding" },
+        { "id": "bracing", "name": "Bracing" },
+        { "id": "interception", "name": "Interception" }
       ]
     },
     {
       "name": "Guardwork",
       "linkedStat": "def",
       "summary": "Defensive positioning, watch discipline, and safe escort through hostile ground.",
-      "expeditionRole": "Tighten escort routes and improve safe withdrawal.",
       "stats": [
-        { "id": "formation", "name": "Formation", "effect": "Skill threshold bonus on formation stages, reduces escort condition loss" },
-        { "id": "watchkeeping", "name": "Watchkeeping", "effect": "Large close-call buffer, prevents route diversions" },
-        { "id": "escorting", "name": "Escorting", "effect": "Bonus rewards on escort stages, condition recovery on completion" }
+        { "id": "formation", "name": "Formation" },
+        { "id": "watchkeeping", "name": "Watchkeeping" },
+        { "id": "escorting", "name": "Escorting" }
       ]
     },
     {
       "name": "Warding",
       "linkedStat": "def",
       "summary": "Arcane or technical protection through barriers, anchors, and disruption control.",
-      "expeditionRole": "Prevent route instability and endure hostile complications.",
       "stats": [
-        { "id": "barriers", "name": "Barriers", "effect": "Reduces condition loss, close-call buffer on ward stages" },
-        { "id": "anchors", "name": "Anchors", "effect": "Prevents route diversions, reduces condition loss on unstable routes" },
-        { "id": "resistance", "name": "Resistance", "effect": "Prevents injury from hostile effects, failure recovery bonus" }
+        { "id": "barriers", "name": "Barriers" },
+        { "id": "anchors", "name": "Anchors" },
+        { "id": "resistance", "name": "Resistance" }
       ]
     },
     {
       "name": "Gathering",
       "linkedStat": "luck",
       "summary": "Field retrieval, harvest timing, and salvage appraisal.",
-      "expeditionRole": "Extract bonus rewards from stable terrain and mixed outcomes.",
       "stats": [
-        { "id": "foraging", "name": "Foraging", "effect": "Bonus rewards on stable terrain, bonus on mixed results" },
-        { "id": "harvesting", "name": "Harvesting", "effect": "Bonus rewards on successful completions, threshold bonus on harvest" },
-        { "id": "appraisal", "name": "Appraisal", "effect": "Bonus expedition rewards, close-call buffer on loot stages" }
+        { "id": "foraging", "name": "Foraging" },
+        { "id": "harvesting", "name": "Harvesting" },
+        { "id": "appraisal", "name": "Appraisal" }
       ]
     },
     {
       "name": "Fishing",
       "linkedStat": "luck",
       "summary": "Line placement, tension control, and wreck salvage handling.",
-      "expeditionRole": "Open routes cleanly and preserve haul even on bad stages.",
       "stats": [
-        { "id": "casting", "name": "Casting", "effect": "Threshold bonus on opening stages, higher overall skill growth" },
-        { "id": "tension", "name": "Tension", "effect": "Large close-call buffer, reduces condition loss on risky stages" },
-        { "id": "salvage", "name": "Salvage", "effect": "Bonus rewards even on failures, failure recovery bonus" }
+        { "id": "casting", "name": "Casting" },
+        { "id": "tension", "name": "Tension" },
+        { "id": "salvage", "name": "Salvage" }
       ]
     },
     {
       "name": "Scavenging",
       "linkedStat": "luck",
       "summary": "Finding overlooked value through spotting, extraction, and deal-making instinct.",
-      "expeditionRole": "Find hidden caches and maximize expedition payoff.",
       "stats": [
-        { "id": "spotting", "name": "Spotting", "effect": "Threshold bonus on scouting, bonus expedition rewards" },
-        { "id": "extraction", "name": "Extraction", "effect": "Bonus rewards on extraction, prevents route diversions" },
-        { "id": "haggling", "name": "Haggling", "effect": "Bonus expedition rewards, close-call buffer on trade stages" }
+        { "id": "spotting", "name": "Spotting" },
+        { "id": "extraction", "name": "Extraction" },
+        { "id": "haggling", "name": "Haggling" }
       ]
     },
     {
       "name": "Pathfinding",
       "linkedStat": "focus",
       "summary": "Route surveying, traversal planning, and survival reads.",
-      "expeditionRole": "Navigate efficiently and sustain through difficult terrain.",
       "stats": [
-        { "id": "surveying", "name": "Surveying", "effect": "Large threshold bonus on survey stages, stat-based threshold reduction" },
-        { "id": "routing", "name": "Routing", "effect": "Prevents route diversions, threshold bonus on navigation" },
-        { "id": "survival", "name": "Survival", "effect": "Reduces condition loss, restores condition after hard stages" }
+        { "id": "surveying", "name": "Surveying" },
+        { "id": "routing", "name": "Routing" },
+        { "id": "survival", "name": "Survival" }
       ]
     },
     {
       "name": "Ritualism",
       "linkedStat": "focus",
       "summary": "Measured spellwork and ceremonial execution through channels, sigils, and invocations.",
-      "expeditionRole": "Excel on focus-heavy stages and suppress route instability.",
       "stats": [
-        { "id": "channeling", "name": "Channeling", "effect": "Skill threshold bonus on ritual stages, highest skill growth bonus" },
-        { "id": "sigils", "name": "Sigils", "effect": "Prevents injury complications, prevents route diversions" },
-        { "id": "invocation", "name": "Invocation", "effect": "Bonus rewards on ritual completion, threshold bonus on invoke stages" }
+        { "id": "channeling", "name": "Channeling" },
+        { "id": "sigils", "name": "Sigils" },
+        { "id": "invocation", "name": "Invocation" }
       ]
     },
     {
       "name": "Lorekeeping",
       "linkedStat": "focus",
       "summary": "Focused knowledge work through recall, translation, and sharp analysis.",
-      "expeditionRole": "Excel in archive expeditions and unlock hidden route paths.",
       "stats": [
-        { "id": "recall", "name": "Recall", "effect": "Skill threshold bonus on archive stages, higher lore skill growth" },
-        { "id": "translation", "name": "Translation", "effect": "Bonus rewards on translation stages, prevents route diversions" },
-        { "id": "analysis", "name": "Analysis", "effect": "Threshold bonus on analysis stages, bonus rewards on data extraction" }
+        { "id": "recall", "name": "Recall" },
+        { "id": "translation", "name": "Translation" },
+        { "id": "analysis", "name": "Analysis" }
       ]
     }
   ]
