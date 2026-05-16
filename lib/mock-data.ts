@@ -639,6 +639,12 @@ export const skills: Skill[] = [
     level: 6,
     maxLevel: 10,
     locked: false,
+    activeVariant: "ruin_crawler",
+    variants: [
+      { id: "ruin_crawler", label: "Ruin Crawler", description: "Focus on structural salvage from collapsed buildings.", unlocked: true, effects: [{ type: "material_yield", value: 8, description: "+8% yield from ruins" }] },
+      { id: "tech_stripper", label: "Tech Stripper", description: "Extract rare components from old machinery.", unlocked: true, effects: [{ type: "rare_chance", value: 5, description: "+5% rare tech find chance" }] },
+      { id: "ghost_picker", label: "Ghost Picker", description: "Salvage from anomaly-touched zones safely.", unlocked: false, effects: [{ type: "risk_reduction", value: 6, description: "-6% anomaly exposure" }] },
+    ],
     primaryExpeditions: ["scavenger_sweep"],
     effects: [
       { type: "material_yield", value: 5, description: "+5% material yield per level", appliesTo: ["scavenger_sweep"] },
@@ -652,7 +658,13 @@ export const skills: Skill[] = [
     level: 8,
     maxLevel: 10,
     locked: false,
-    variant: "Deep Read",
+    activeVariant: "deep_read",
+    variants: [
+      { id: "deep_read", label: "Deep Read", description: "Extract meaning from heavily corrupted data.", unlocked: true, effects: [{ type: "rare_chance", value: 5, description: "+5% pristine recovery" }] },
+      { id: "pattern_sync", label: "Pattern Sync", description: "Quickly identify recurring archive signatures.", unlocked: true, effects: [{ type: "expedition_time", value: -5, description: "-5% analysis time" }] },
+      { id: "echo_trace", label: "Echo Trace", description: "Recover data echoes from damaged fragments.", unlocked: true, effects: [{ type: "xp_bonus", value: 6, description: "+6% archive XP" }] },
+      { id: "void_parse", label: "Void Parse", description: "Read data touched by void anomalies.", unlocked: false, effects: [{ type: "rare_chance", value: 10, description: "+10% void artifact chance" }] },
+    ],
     primaryExpeditions: ["archive_dive", "deep_archive"],
     effects: [
       { type: "rare_chance", value: 3, description: "+3% pristine fragment chance per level", appliesTo: ["archive_dive", "deep_archive"] },
@@ -705,7 +717,12 @@ export const skills: Skill[] = [
     level: 7,
     maxLevel: 10,
     locked: false,
-    variant: "Long Sight",
+    activeVariant: "long_sight",
+    variants: [
+      { id: "long_sight", label: "Long Sight", description: "See further into uncharted territories.", unlocked: true, effects: [{ type: "rare_chance", value: 5, description: "+5% hidden path discovery" }] },
+      { id: "signal_weave", label: "Signal Weave", description: "Track relay echoes across zones.", unlocked: true, effects: [{ type: "expedition_time", value: -6, description: "-6% travel time" }] },
+      { id: "threat_map", label: "Threat Map", description: "Predict hostile movements in advance.", unlocked: false, effects: [{ type: "risk_reduction", value: 7, description: "-7% ambush chance" }] },
+    ],
     primaryExpeditions: ["signal_trace"],
     effects: [
       { type: "expedition_time", value: -4, description: "-4% exploration time per level", appliesTo: ["signal_trace"] },

@@ -105,6 +105,7 @@ interface EsroState {
   skills: Skill[]
   loadout: string[]
   toggleLoadout: (id: string) => void
+  setSkillVariant: (skillId: string, variantId: string) => void
 
   // Ops - Crafting/Rolling
   inventory: InventoryItem[]
@@ -500,6 +501,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       if (s.loadout.length >= 4) return s
       return { loadout: [...s.loadout, id] }
     }),
+  setSkillVariant: (skillId, variantId) =>
+    set((s) => ({
+      skills: s.skills.map((skill) =>
+        skill.id === skillId ? { ...skill, activeVariant: variantId } : skill
+      ),
+    })),
 
   // Inventory & Recovery
   inventory: seedInventory,

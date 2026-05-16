@@ -167,6 +167,14 @@ export interface SkillEffect {
   appliesTo?: string[] // expedition types or categories this applies to
 }
 
+export interface SkillVariant {
+  id: string
+  label: string
+  description: string
+  unlocked: boolean
+  effects?: SkillEffect[]
+}
+
 export interface Skill {
   id: string
   label: string
@@ -174,7 +182,10 @@ export interface Skill {
   level: number
   maxLevel: number
   locked: boolean
-  variant?: string
+  /** Currently active variant id */
+  activeVariant?: string
+  /** All available variants for this skill */
+  variants?: SkillVariant[]
   /** What expeditions this skill is primary for */
   primaryExpeditions?: string[]
   /** Effects granted per level */
