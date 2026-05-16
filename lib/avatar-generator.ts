@@ -193,19 +193,21 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
   const rightEyeX = 8
   
   if (eyesVariant === 0) {
-    // Normal eyes - 2 wide with pupil
+    // Normal eyes - 2 wide with pupil on outer edge
     setPixel(grid, leftEyeX, eyeY, eyeWhite)
     setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
     setPixel(grid, rightEyeX, eyeY, eyeColor)
     setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
   } else if (eyesVariant === 1) {
-    // Wide eyes - larger whites
+    // Wide eyes - 2x2 with centered pupil
+    setPixel(grid, leftEyeX, eyeY - 1, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY - 1, eyeWhite)
     setPixel(grid, leftEyeX, eyeY, eyeWhite)
-    setPixel(grid, leftEyeX + 1, eyeY, eyeWhite)
     setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
-    setPixel(grid, rightEyeX, eyeY, eyeWhite)
-    setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
+    setPixel(grid, rightEyeX, eyeY - 1, eyeWhite)
+    setPixel(grid, rightEyeX + 1, eyeY - 1, eyeWhite)
     setPixel(grid, rightEyeX, eyeY, eyeColor)
+    setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
   } else if (eyesVariant === 2) {
     // Narrow/squinting eyes - single pixel
     setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
@@ -223,12 +225,12 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, rightEyeX, eyeY, eyeColor)
     setPixel(grid, rightEyeX + 1, eyeY, skinShadow)
   } else {
-    // Big eyes - 2x2
+    // Big eyes - 2x2 with large pupils (more anime-style)
     setPixel(grid, leftEyeX, eyeY - 1, eyeWhite)
-    setPixel(grid, leftEyeX + 1, eyeY - 1, eyeWhite)
+    setPixel(grid, leftEyeX + 1, eyeY - 1, eyeColor)
     setPixel(grid, leftEyeX, eyeY, eyeWhite)
     setPixel(grid, leftEyeX + 1, eyeY, eyeColor)
-    setPixel(grid, rightEyeX, eyeY - 1, eyeWhite)
+    setPixel(grid, rightEyeX, eyeY - 1, eyeColor)
     setPixel(grid, rightEyeX + 1, eyeY - 1, eyeWhite)
     setPixel(grid, rightEyeX, eyeY, eyeColor)
     setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
