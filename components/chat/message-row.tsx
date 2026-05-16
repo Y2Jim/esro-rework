@@ -1,6 +1,32 @@
-import type { ChatMessage } from "@/lib/types"
+import type { ChatMessage, Rarity } from "@/lib/types"
 import { rarityColor, rarityAnimation, rarityBorder, rarityBg } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
+
+/** Map specific transcendent titles to their unique animation classes */
+const TRANSCENDENT_TITLE_ANIMATIONS: Record<string, string> = {
+  "Myth of the Relay Sea": "title-relay-sea",
+  "Shardheart Ascendant": "title-shardheart",
+  "Eternal Courier": "title-eternal-courier",
+  "Voidtouched Oracle": "title-voidtouched",
+  "Primordial Flame": "title-primordial-flame",
+  "Silence Between Stars": "title-silence-stars",
+  "Dreamer Unchained": "title-dreamer-unchained",
+  "Ashen Sovereign": "title-ashen-sovereign",
+}
+
+function getAnimationClass(title: string | undefined, rarity: Rarity | undefined): string {
+  if (!rarity) return ""
+  // Admin titles always use admin animation
+  if (rarity === "admin") {
+    return rarityAnimation[rarity]
+  }
+  // Check for unique transcendent animations first
+  if (rarity === "mythic" && title && TRANSCENDENT_TITLE_ANIMATIONS[title]) {
+    return TRANSCENDENT_TITLE_ANIMATIONS[title]
+  }
+  // Fall back to standard rarity animation
+  return rarityAnimation[rarity]
+}
 
 function formatClock(ts: number) {
   const d = new Date(ts)
@@ -74,8 +100,10 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
     )
   }
 
-  const titleColorClass = msg.titleRarity ? rarityColor[msg.titleRarity] : "text-[color:var(--color-muted)]"
-  const titleAnimClass = msg.titleRarity ? rarityAnimation[msg.titleRarity] : ""
+  const titleAnimClass = getAnimationClass(msg.title, msg.titleRarity)
+  // For mythic with unique animation, don't apply colorClass (animation handles colors)
+  const hasUniqueAnim = msg.titleRarity === "mythic" && msg.title && TRANSCENDENT_TITLE_ANIMATIONS[msg.title]
+  const titleColorClass = hasUniqueAnim ? "" : (msg.titleRarity ? rarityColor[msg.titleRarity] : "text-[color:var(--color-muted)]")
   const titleBorderClass = msg.titleRarity ? rarityBorder[msg.titleRarity] : "border-[color:var(--color-border)]"
   const titleBgClass = msg.titleRarity ? rarityBg[msg.titleRarity] : "bg-[color:var(--color-panel-2)]/80"
 
