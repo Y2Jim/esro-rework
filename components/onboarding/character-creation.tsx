@@ -1,8 +1,54 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles, RefreshCw } from "lucide-react"
+
+/** Typewriter/rolling text component for immersive briefings */
+function RollingText({ text, speed = 25, onComplete }: { text: string; speed?: number; onComplete?: () => void }) {
+  const [displayedText, setDisplayedText] = useState("")
+  const [isComplete, setIsComplete] = useState(false)
+
+  useEffect(() => {
+    setDisplayedText("")
+    setIsComplete(false)
+    let index = 0
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(text.slice(0, index + 1))
+        index++
+      } else {
+        clearInterval(timer)
+        setIsComplete(true)
+        onComplete?.()
+      }
+    }, speed)
+    return () => clearInterval(timer)
+  }, [text, speed, onComplete])
+
+  return (
+    <span>
+      {displayedText}
+      {!isComplete && (
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          className="inline-block w-1.5 h-3.5 ml-0.5 bg-[color:var(--color-accent)] align-middle"
+        />
+      )}
+    </span>
+  )
+}
+
+/** Generate a Relay handle suffix (5 alphanumeric chars) per Lua spec */
+function generateRelaySuffix(): string {
+  const chars = "0123456789abcdef"
+  let suffix = ""
+  for (let i = 0; i < 5; i++) {
+    suffix += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return suffix
+}
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
 import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS } from "@/lib/avatar-generator"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
@@ -61,7 +107,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
-  const [handle, setHandle] = useState("")
+  const [relaySuffix] = useState(() => generateRelaySuffix())
   const [avatarSeed, setAvatarSeed] = useState(() => `seed-${Date.now()}`)
   const [avatar, setAvatar] = useState<AvatarConfig>(() => generateAvatarFromSeed(`seed-${Date.now()}`))
   
@@ -104,7 +150,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       case "skills":
         return selectedSkills.length === STARTER_SKILL_COUNT
       case "name":
-        return handle.trim().length >= 3
+        return true // Handle is auto-generated as Relay[suffix]
       case "confirm":
         return true
       default:
@@ -142,7 +188,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             race: selectedRace,
             courier: selectedCourier,
             starterSkills: selectedSkills,
-            handle: handle.trim(),
+            handle: `Relay${relaySuffix}`,
             avatar: avatar,
           })
         }
@@ -188,10 +234,10 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0b0f]">
+    <div className="absolute inset-0 z-50 flex flex-col bg-[#0a0b0f] overflow-hidden">
       {/* Scanline */}
       <div 
-        className="pointer-events-none fixed inset-0"
+        className="pointer-events-none absolute inset-0"
         style={{
           background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(168, 123, 255, 0.015) 2px, rgba(168, 123, 255, 0.015) 4px)",
           zIndex: 100,
@@ -199,12 +245,12 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       />
 
       {/* Progress indicator */}
-      <div className="p-4 border-b border-[rgba(168,123,255,0.1)]">
-        <div className="flex items-center justify-center gap-2">
+      <div className="px-4 py-3 border-b border-[rgba(168,123,255,0.1)]">
+        <div className="flex items-center justify-center gap-1.5">
           {["briefing", "race", "courier", "avatar", "skills", "name", "confirm"].map((s, i) => (
             <div
               key={s}
-              className={`h-1.5 w-6 rounded-full transition-colors ${
+              className={`h-1 w-5 rounded-full transition-colors ${
                 step === s
                   ? "bg-[color:var(--color-accent)]"
                   : ["briefing", "race", "courier", "avatar", "skills", "name", "confirm"].indexOf(step) > i
@@ -214,13 +260,13 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             />
           ))}
         </div>
-        <p className="mt-2 text-center text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
-          {step === "briefing" && `Briefing ${briefingIndex + 1}/${ONBOARDING_PANELS.length}`}
+        <p className="mt-1.5 text-center text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-widest">
+          {step === "briefing" && `Transmission ${briefingIndex + 1}/${ONBOARDING_PANELS.length}`}
           {step === "race" && "Select Lineage"}
           {step === "courier" && "Select Role"}
           {step === "avatar" && "Customize Avatar"}
           {step === "skills" && `Choose Skills (${selectedSkills.length}/${STARTER_SKILL_COUNT})`}
-          {step === "name" && "Set Handle"}
+          {step === "name" && "Relay Assignment"}
           {step === "confirm" && "Confirm Identity"}
         </p>
       </div>
@@ -232,22 +278,51 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "briefing" && (
             <motion.div
               key={`briefing-${briefingIndex}`}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-md"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="mx-auto max-w-sm"
             >
-              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-6">
-                <div className="mb-4 flex items-center gap-2 text-xs text-[color:var(--color-accent)]">
-                  <span className="h-2 w-2 rounded-full bg-[color:var(--color-accent)]" />
-                  <span className="font-mono uppercase tracking-wider">Relay Briefing</span>
+              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.95)] p-5">
+                <div className="mb-3 flex items-center gap-2 text-[10px] text-[color:var(--color-accent)]">
+                  <motion.span 
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent)]" 
+                  />
+                  <span className="font-mono uppercase tracking-widest">Incoming Transmission</span>
                 </div>
-                <h2 className="mb-4 text-xl font-bold text-[color:var(--color-text-primary)]">
-                  {ONBOARDING_PANELS[briefingIndex].title}
+                <h2 className="mb-3 text-lg font-bold text-[color:var(--color-text-primary)]">
+                  <RollingText 
+                    key={`title-${briefingIndex}`}
+                    text={ONBOARDING_PANELS[briefingIndex].title} 
+                    speed={40}
+                  />
                 </h2>
-                <p className="text-sm leading-relaxed text-[color:var(--color-text-secondary)]">
-                  {ONBOARDING_PANELS[briefingIndex].body}
+                <p className="text-[13px] leading-relaxed text-[color:var(--color-text-secondary)] min-h-[120px]">
+                  <RollingText 
+                    key={`body-${briefingIndex}`}
+                    text={ONBOARDING_PANELS[briefingIndex].body} 
+                    speed={18}
+                  />
                 </p>
+              </div>
+              
+              {/* Briefing progress dots */}
+              <div className="mt-4 flex justify-center gap-1.5">
+                {ONBOARDING_PANELS.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                      i === briefingIndex
+                        ? "bg-[color:var(--color-accent)]"
+                        : i < briefingIndex
+                        ? "bg-[color:var(--color-accent)]/40"
+                        : "bg-[rgba(255,255,255,0.15)]"
+                    }`}
+                  />
+                ))}
               </div>
             </motion.div>
           )}
@@ -256,46 +331,46 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "race" && (
             <motion.div
               key="race"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-lg space-y-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto max-w-sm space-y-2"
             >
               {RACES.map((race) => (
                 <button
                   key={race.id}
                   onClick={() => setSelectedRace(race)}
-                  className={`w-full rounded-lg border p-4 text-left transition-all ${
+                  className={`w-full rounded-lg border p-3 text-left transition-all ${
                     selectedRace?.id === race.id
-                      ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)] shadow-[0_0_20px_rgba(168,123,255,0.15)]"
+                      ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)] shadow-[0_0_16px_rgba(168,123,255,0.15)]"
                       : "border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] hover:border-[rgba(168,123,255,0.3)]"
                   }`}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3">
                     <div 
-                      className="flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg font-bold"
                       style={{ 
                         backgroundColor: `${race.color}20`,
                         color: race.color,
-                        boxShadow: selectedRace?.id === race.id ? `0 0 20px ${race.glow}` : undefined
+                        boxShadow: selectedRace?.id === race.id ? `0 0 16px ${race.glow}` : undefined
                       }}
                     >
                       {race.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-[color:var(--color-text-primary)]">{race.name}</h3>
-                        <span className="text-xs text-[color:var(--color-text-muted)]">/ {race.role}</span>
+                        <h3 className="font-bold text-[13px] text-[color:var(--color-text-primary)]">{race.name}</h3>
+                        <span className="text-[10px] text-[color:var(--color-text-muted)]">/ {race.role}</span>
                       </div>
-                      <p className="mt-1 text-sm text-[color:var(--color-text-secondary)] line-clamp-2">
+                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)] line-clamp-2">
                         {race.summary}
                       </p>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
                         {(Object.keys(race.stats) as (keyof BaseStats)[]).map(stat => (
                           race.stats[stat] !== 0 && (
                             <span 
                               key={stat} 
-                              className="text-xs font-mono"
+                              className="text-[10px] font-mono"
                               style={{ color: race.stats[stat] > 0 ? race.color : "#888" }}
                             >
                               {STAT_LABELS[stat]} {race.stats[stat] > 0 ? "+" : ""}{race.stats[stat]}
@@ -305,8 +380,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                       </div>
                     </div>
                     {selectedRace?.id === race.id && (
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
-                        <Check className="h-4 w-4 text-black" />
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
+                        <Check className="h-3 w-3 text-black" />
                       </div>
                     )}
                   </div>
@@ -319,43 +394,43 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "courier" && (
             <motion.div
               key="courier"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-lg space-y-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto max-w-sm space-y-2"
             >
               {COURIERS.map((courier) => (
                 <button
                   key={courier.id}
                   onClick={() => setSelectedCourier(courier)}
-                  className={`w-full rounded-lg border p-4 text-left transition-all ${
+                  className={`w-full rounded-lg border p-3 text-left transition-all ${
                     selectedCourier?.id === courier.id
-                      ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)] shadow-[0_0_20px_rgba(168,123,255,0.15)]"
+                      ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)] shadow-[0_0_16px_rgba(168,123,255,0.15)]"
                       : "border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] hover:border-[rgba(168,123,255,0.3)]"
                   }`}
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-start gap-3">
                     <div 
-                      className="flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg font-bold"
                       style={{ 
                         backgroundColor: `${courier.color}20`,
                         color: courier.color,
-                        boxShadow: selectedCourier?.id === courier.id ? `0 0 20px ${courier.glow}` : undefined
+                        boxShadow: selectedCourier?.id === courier.id ? `0 0 16px ${courier.glow}` : undefined
                       }}
                     >
                       {courier.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-[color:var(--color-text-primary)]">{courier.name}</h3>
-                      <p className="mt-1 text-sm text-[color:var(--color-text-secondary)] line-clamp-2">
+                      <h3 className="font-bold text-[13px] text-[color:var(--color-text-primary)]">{courier.name}</h3>
+                      <p className="mt-0.5 text-[11px] text-[color:var(--color-text-secondary)] line-clamp-2">
                         {courier.summary}
                       </p>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
                         {(Object.keys(courier.stats) as (keyof BaseStats)[]).map(stat => (
                           courier.stats[stat] !== 0 && (
                             <span 
                               key={stat} 
-                              className="text-xs font-mono"
+                              className="text-[10px] font-mono"
                               style={{ color: courier.stats[stat] > 0 ? courier.color : "#888" }}
                             >
                               {STAT_LABELS[stat]} {courier.stats[stat] > 0 ? "+" : ""}{courier.stats[stat]}
@@ -365,8 +440,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                       </div>
                     </div>
                     {selectedCourier?.id === courier.id && (
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
-                        <Check className="h-4 w-4 text-black" />
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
+                        <Check className="h-3 w-3 text-black" />
                       </div>
                     )}
                   </div>
@@ -375,11 +450,11 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
 
               {/* Combined stats preview */}
               {combinedStats && (
-                <div className="mt-4 rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-4">
-                  <div className="mb-3 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
-                    Combined Stats Preview
+                <div className="mt-3 rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-3">
+                  <div className="mb-2 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                    Combined Stats
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {(Object.keys(combinedStats) as (keyof BaseStats)[]).map(stat => (
                       <StatBar 
                         key={stat} 
@@ -401,43 +476,43 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "avatar" && (
             <motion.div
               key="avatar"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-md space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto max-w-sm space-y-3"
             >
               {/* Avatar preview */}
-              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-6">
-                <div className="flex flex-col items-center gap-4">
+              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-4">
+                <div className="flex items-center justify-center gap-4">
                   <div className="relative">
-                    <PixelAvatar config={avatar} size="lg" />
+                    <PixelAvatar config={avatar} size="md" />
                   </div>
                   <button
                     type="button"
                     onClick={randomizeAvatar}
-                    className="flex items-center gap-2 rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(168,123,255,0.1)] px-4 py-2 text-sm text-[color:var(--color-accent)] transition-colors hover:bg-[rgba(168,123,255,0.2)]"
+                    className="flex items-center gap-1.5 rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(168,123,255,0.1)] px-3 py-1.5 text-[11px] text-[color:var(--color-accent)] transition-colors hover:bg-[rgba(168,123,255,0.2)]"
                   >
-                    <RefreshCw className="h-4 w-4" />
+                    <RefreshCw className="h-3.5 w-3.5" />
                     Randomize
                   </button>
                 </div>
               </div>
 
               {/* Customization options */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Skin */}
-                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
-                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
+                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Skin Tone
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {SKIN_COLORS.map((color, i) => {
                       const currentSkin = avatar.layers.find(l => l.type === "skin")?.variant ?? 0
                       return (
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("skin", i)}
-                          className={`h-7 w-7 rounded-full border-2 transition-all ${
+                          className={`h-6 w-6 rounded-full border-2 transition-all ${
                             currentSkin === i
                               ? "border-[color:var(--color-accent)] scale-110"
                               : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
@@ -450,18 +525,18 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                 </div>
 
                 {/* Hair */}
-                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
-                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
+                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Hair Style
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
                     {Array.from({ length: LAYER_VARIANTS.hair }, (_, i) => {
                       const currentHair = avatar.layers.find(l => l.type === "hair")?.variant ?? 0
                       return (
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("hair", i)}
-                          className={`h-8 w-8 rounded border text-xs font-mono transition-all ${
+                          className={`h-7 w-7 rounded border text-[10px] font-mono transition-all ${
                             currentHair === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
@@ -472,8 +547,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                       )
                     })}
                   </div>
-                  <div className="text-xs text-[color:var(--color-text-muted)] mb-2">Hair Color</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="text-[10px] text-[color:var(--color-text-muted)] mb-1.5">Hair Color</div>
+                  <div className="flex flex-wrap gap-1.5">
                     {HAIR_COLORS.map((color, i) => {
                       const currentColor = avatar.layers.find(l => l.type === "hair")?.color ?? 0
                       return (
@@ -483,7 +558,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                             const hairLayer = avatar.layers.find(l => l.type === "hair")
                             if (hairLayer) updateAvatarLayer("hair", hairLayer.variant, i)
                           }}
-                          className={`h-6 w-6 rounded-full border-2 transition-all ${
+                          className={`h-5 w-5 rounded-full border-2 transition-all ${
                             currentColor === i
                               ? "border-[color:var(--color-accent)] scale-110"
                               : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
@@ -496,18 +571,18 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                 </div>
 
                 {/* Eyes */}
-                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
-                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
+                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Eyes
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
                     {Array.from({ length: LAYER_VARIANTS.eyes }, (_, i) => {
                       const currentEyes = avatar.layers.find(l => l.type === "eyes")?.variant ?? 0
                       return (
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("eyes", i)}
-                          className={`h-8 w-8 rounded border text-xs font-mono transition-all ${
+                          className={`h-7 w-7 rounded border text-[10px] font-mono transition-all ${
                             currentEyes === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
@@ -518,8 +593,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                       )
                     })}
                   </div>
-                  <div className="text-xs text-[color:var(--color-text-muted)] mb-2">Eye Color</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="text-[10px] text-[color:var(--color-text-muted)] mb-1.5">Eye Color</div>
+                  <div className="flex flex-wrap gap-1.5">
                     {EYE_COLORS.map((color, i) => {
                       const currentColor = avatar.layers.find(l => l.type === "eyes")?.color ?? 0
                       return (
@@ -529,7 +604,7 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                             const eyesLayer = avatar.layers.find(l => l.type === "eyes")
                             if (eyesLayer) updateAvatarLayer("eyes", eyesLayer.variant, i)
                           }}
-                          className={`h-6 w-6 rounded-full border-2 transition-all ${
+                          className={`h-5 w-5 rounded-full border-2 transition-all ${
                             currentColor === i
                               ? "border-[color:var(--color-accent)] scale-110"
                               : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
@@ -542,18 +617,18 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                 </div>
 
                 {/* Mouth */}
-                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
-                  <div className="mb-2 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
+                  <div className="mb-1.5 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Mouth
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {Array.from({ length: LAYER_VARIANTS.mouth }, (_, i) => {
                       const currentMouth = avatar.layers.find(l => l.type === "mouth")?.variant ?? 0
                       return (
                         <button
                           key={i}
                           onClick={() => updateAvatarLayer("mouth", i)}
-                          className={`h-8 w-8 rounded border text-xs font-mono transition-all ${
+                          className={`h-7 w-7 rounded border text-[10px] font-mono transition-all ${
                             currentMouth === i
                               ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
                               : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
@@ -573,21 +648,21 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "skills" && (
             <motion.div
               key="skills"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-lg"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto max-w-sm"
             >
-              <p className="mb-4 text-sm text-[color:var(--color-text-secondary)]">
-                Choose {STARTER_SKILL_COUNT} starting skills to begin with at level 1. Other skills start at level 0.
+              <p className="mb-3 text-[11px] text-[color:var(--color-text-secondary)]">
+                Choose {STARTER_SKILL_COUNT} starting skills at level 1. Others start locked.
               </p>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {SKILL_DEFINITIONS.map((skill) => (
                   <button
                     key={skill.name}
                     onClick={() => toggleSkill(skill.name)}
                     disabled={!selectedSkills.includes(skill.name) && selectedSkills.length >= STARTER_SKILL_COUNT}
-                    className={`w-full rounded-lg border p-3 text-left transition-all ${
+                    className={`w-full rounded-lg border p-2.5 text-left transition-all ${
                       selectedSkills.includes(skill.name)
                         ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)]"
                         : selectedSkills.length >= STARTER_SKILL_COUNT
@@ -596,18 +671,18 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded bg-[rgba(255,255,255,0.05)]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded bg-[rgba(255,255,255,0.05)]">
                           {STAT_ICONS[skill.linkedStat]}
                         </div>
                         <div>
-                          <h4 className="font-medium text-[color:var(--color-text-primary)] text-sm">{skill.name}</h4>
-                          <p className="text-xs text-[color:var(--color-text-muted)]">{STAT_LABELS[skill.linkedStat]} linked</p>
+                          <h4 className="font-medium text-[color:var(--color-text-primary)] text-[12px]">{skill.name}</h4>
+                          <p className="text-[10px] text-[color:var(--color-text-muted)]">{STAT_LABELS[skill.linkedStat]} linked</p>
                         </div>
                       </div>
                       {selectedSkills.includes(skill.name) && (
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
-                          <Check className="h-3 w-3 text-black" />
+                        <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
+                          <Check className="h-2.5 w-2.5 text-black" />
                         </div>
                       )}
                     </div>
@@ -617,35 +692,46 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
             </motion.div>
           )}
 
-          {/* Name Input */}
+          {/* Handle Assignment */}
           {step === "name" && (
             <motion.div
               key="name"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-md"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto max-w-sm"
             >
-              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.9)] p-6">
-                <label className="block">
-                  <span className="text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
-                    Relay Handle
-                  </span>
-                  <div className="mt-2 flex items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(0,0,0,0.3)] px-4 py-3">
-                    <span className="text-[color:var(--color-accent)]">@</span>
-                    <input
-                      type="text"
-                      value={handle}
-                      onChange={(e) => setHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20))}
-                      placeholder="your_handle"
-                      className="flex-1 bg-transparent text-[color:var(--color-text-primary)] placeholder-[color:var(--color-text-muted)] outline-none font-mono"
-                      autoFocus
-                    />
+              <div className="rounded-lg border border-[rgba(168,123,255,0.2)] bg-[rgba(15,16,22,0.95)] p-5">
+                <div className="mb-3 flex items-center gap-2 text-[10px] text-[color:var(--color-accent)]">
+                  <motion.span 
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent)]" 
+                  />
+                  <span className="font-mono uppercase tracking-widest">Relay Assignment</span>
+                </div>
+                
+                <p className="mb-4 text-[12px] text-[color:var(--color-text-secondary)] leading-relaxed">
+                  Your unique relay identifier has been generated from your signal signature. This handle will identify you across all relay networks.
+                </p>
+                
+                <div className="rounded-lg border border-[color:var(--color-accent)]/30 bg-[rgba(168,123,255,0.08)] p-4 text-center">
+                  <div className="text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider mb-2">
+                    Your Relay Handle
                   </div>
-                  <p className="mt-2 text-xs text-[color:var(--color-text-muted)]">
-                    3-20 characters, letters, numbers, and underscores only.
-                  </p>
-                </label>
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, type: "spring" }}
+                    className="text-xl font-bold text-[color:var(--color-accent)] font-mono"
+                  >
+                    @Relay{relaySuffix}
+                  </motion.div>
+                </div>
+                
+                <p className="mt-3 text-[10px] text-[color:var(--color-text-muted)] text-center">
+                  Handle format follows standard relay protocol.
+                </p>
               </div>
             </motion.div>
           )}
@@ -654,41 +740,41 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
           {step === "confirm" && selectedRace && selectedCourier && combinedStats && (
             <motion.div
               key="confirm"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="mx-auto max-w-md space-y-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto max-w-sm space-y-3"
             >
-              <div className="rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(15,16,22,0.9)] p-6 text-center">
-                <div className="mx-auto mb-4">
-                  <PixelAvatar config={avatar} size="lg" />
+              <div className="rounded-lg border border-[rgba(168,123,255,0.3)] bg-[rgba(15,16,22,0.95)] p-4 text-center">
+                <div className="mx-auto mb-3">
+                  <PixelAvatar config={avatar} size="md" />
                 </div>
-                <h2 className="text-2xl font-bold text-[color:var(--color-accent)]">@{handle}</h2>
-                <p className="mt-1 text-sm text-[color:var(--color-text-secondary)]" style={{ color: selectedRace.color }}>
+                <h2 className="text-lg font-bold text-[color:var(--color-accent)] font-mono">@Relay{relaySuffix}</h2>
+                <p className="mt-0.5 text-[12px]" style={{ color: selectedRace.color }}>
                   {selectedRace.name} {selectedCourier.name}
                 </p>
               </div>
 
-              <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-4">
-                <div className="mb-3 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+              <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
+                <div className="mb-2 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                   Final Stats
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {(Object.keys(combinedStats) as (keyof BaseStats)[]).map(stat => (
                     <StatBar key={stat} stat={stat} value={combinedStats[stat]} />
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-4">
-                <div className="mb-3 text-xs text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+              <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-3">
+                <div className="mb-2 text-[10px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                   Starting Skills
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {selectedSkills.map(skill => (
                     <span 
                       key={skill}
-                      className="rounded-full bg-[rgba(168,123,255,0.2)] px-3 py-1 text-xs font-medium text-[color:var(--color-accent)]"
+                      className="rounded-full bg-[rgba(168,123,255,0.2)] px-2.5 py-0.5 text-[10px] font-medium text-[color:var(--color-accent)]"
                     >
                       {skill}
                     </span>
@@ -701,23 +787,23 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
       </div>
 
       {/* Navigation */}
-      <div className="border-t border-[rgba(168,123,255,0.1)] p-4">
-        <div className="mx-auto flex max-w-md items-center justify-between gap-4">
+      <div className="border-t border-[rgba(168,123,255,0.1)] p-3">
+        <div className="mx-auto flex max-w-sm items-center justify-between gap-3">
           <button
             onClick={prevStep}
             disabled={step === "briefing" && briefingIndex === 0}
-            className="flex items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.1)] px-4 py-2 text-sm text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 rounded-lg border border-[rgba(255,255,255,0.1)] px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[rgba(255,255,255,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
             Back
           </button>
           <button
             onClick={nextStep}
             disabled={!canProceed()}
-            className="flex items-center gap-2 rounded-lg bg-[color:var(--color-accent)] px-6 py-2 text-sm font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 rounded-lg bg-[color:var(--color-accent)] px-5 py-2 text-[12px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {step === "confirm" ? "Initialize" : "Continue"}
-            {step !== "confirm" && <ChevronRight className="h-4 w-4" />}
+            {step !== "confirm" && <ChevronRight className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>

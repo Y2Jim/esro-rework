@@ -282,8 +282,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   setBooted: (v) => set({ booted: v }),
 
   // Character Creation & Onboarding
-  isNewUser: false, // Set to true to trigger onboarding
-  characterCreated: true, // Set to false for new users
+  isNewUser: true, // Set to true to trigger onboarding
+  characterCreated: false, // Set to false for new users
   characterRace: null,
   characterCourier: null,
   characterFaction: null,
