@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles, RefreshCw } from "lucide-react"
 
@@ -8,6 +8,10 @@ import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles, Re
 function RollingText({ text, speed = 25, onComplete }: { text: string; speed?: number; onComplete?: () => void }) {
   const [displayedText, setDisplayedText] = useState("")
   const [isComplete, setIsComplete] = useState(false)
+  
+  // Store onComplete in a ref to avoid resetting the animation when callback changes
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
 
   useEffect(() => {
     setDisplayedText("")
@@ -20,11 +24,11 @@ function RollingText({ text, speed = 25, onComplete }: { text: string; speed?: n
       } else {
         clearInterval(timer)
         setIsComplete(true)
-        onComplete?.()
+        onCompleteRef.current?.()
       }
     }, speed)
     return () => clearInterval(timer)
-  }, [text, speed, onComplete])
+  }, [text, speed])
 
   return (
     <span>
