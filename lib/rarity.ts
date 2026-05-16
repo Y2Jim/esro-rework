@@ -81,9 +81,10 @@ export const rarityAnimation: Record<Rarity, string> = {
 
 /** Combined title class - color + animation */
 export function getTitleClass(rarity: Rarity): string {
-  const base = rarityColor[rarity]
   const anim = rarityAnimation[rarity]
-  return anim ? `${base} ${anim}` : base
+  // Admin, legendary, mythic use animation class which sets its own color
+  if (anim) return anim
+  return rarityColor[rarity]
 }
 
 /** Get all styling for a title badge */
