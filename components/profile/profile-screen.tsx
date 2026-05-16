@@ -523,12 +523,23 @@ function SettingsTab() {
                     }}
                   />
                   <div className="flex-1 min-w-0">
+                    {/* Category badge */}
+                    <div className="mb-1">
+                      <span className={cn(
+                        "inline-block rounded px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-wider",
+                        theme.rarity === "mythic" ? "bg-[#f0e0a0]/20 text-[#f0e0a0] border border-[#f0e0a0]/30" :
+                        theme.rarity === "legendary" ? "bg-[#00d0ff]/20 text-[#00d0ff] border border-[#00d0ff]/30" :
+                        theme.rarity === "epic" ? "bg-[#a060ff]/20 text-[#a060ff] border border-[#a060ff]/30" :
+                        theme.rarity === "rare" ? "bg-[#c06030]/20 text-[#c06030] border border-[#c06030]/30" :
+                        theme.rarity === "uncommon" ? "bg-[#60b060]/20 text-[#60b060] border border-[#60b060]/30" :
+                        "bg-[#9aaa9a]/20 text-[#9aaa9a] border border-[#9aaa9a]/30"
+                      )}>
+                        {theme.rarity}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2">
                       <span className={cn("text-[11px] font-medium", rarityColor[theme.rarity])}>
                         {theme.label}
-                      </span>
-                      <span className="text-[8px] uppercase tracking-wider text-[color:var(--color-muted)]">
-                        {theme.rarity}
                       </span>
                     </div>
                     <div className="text-[9px] text-[color:var(--color-muted)] line-clamp-1">

@@ -95,6 +95,10 @@ export type Rarity =
   | "common"
   | "uncommon"
   | "rare"
+  | "epic"
+  | "legendary"
+  | "mythic"
+  | "admin"
 
 // Rollable UI Themes (separate from faction themes)
 export type RollableThemeId =
@@ -130,10 +134,6 @@ export interface RollableUITheme {
   borderStyle?: "solid" | "glow" | "pulse" | "shimmer"
   unlocked: boolean
 }
-  | "epic"
-  | "legendary"
-  | "mythic"
-  | "admin"
 
 // Avatar system
 export type AvatarLayerType = "base" | "skin" | "eyes" | "hair" | "accessory" | "hat" | "flair"
