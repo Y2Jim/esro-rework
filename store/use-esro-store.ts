@@ -515,12 +515,88 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   lastRecovered: null,
   runRecovery: (mode) => {
     const cost = mode === "focused" ? 2 : 1
-    const currencyKey = mode === "focused" ? "deep_signals" : "relay_tokens"
-    const { shards, recovery, profile } = get()
+    const currencyKey = mode === "focused" ? "resonance" : "relay_tokens"
+    const { shards, recovery, profile, inventory } = get()
     if ((shards as any)[currencyKey] < cost) return
     const rarity = rollRarity(mode === "focused")
     const pool = POOL[rarity]
     const pick = pool[Math.floor(Math.random() * pool.length)]
+    
+    // Salvage rewards by rarity for duplicates
+    const SALVAGE_REWARDS: Record<string, { label: string; qty: number }> = {
+      common: { label: "Scrap Metal", qty: 1 },
+      uncommon: { label: "Signal Dust", qty: 2 },
+      rare: { label: "Relay Fragment", qty: 3 },
+      epic: { label: "Echo Crystal", qty: 4 },
+      legendary: { label: "Void Shard", qty: 5 },
+      mythic: { label: "Transcendent Core", qty: 8 },
+    }
+    
+    // Check if this is a duplicate
+    let isDuplicate = false
+    if (pick.type === "cosmetic" && pick.vanityData) {
+      // Check if cosmetic already owned
+      const existingVanity = profile.vanityItems.find(
+        v => v.layerType === pick.vanityData!.layerType && v.variant === pick.vanityData!.variant && v.unlocked
+      )
+      isDuplicate = !!existingVanity
+    } else if (pick.type === "title") {
+      // Check if title already owned
+      const existingTitle = profile.titles.find(t => t.label === pick.label)
+      isDuplicate = !!existingTitle
+    } else if (pick.type === "badge") {
+      // Check previous recoveries for same badge
+      isDuplicate = recovery.some(r => r.label === pick.label && r.type === "badge")
+    }
+    
+    // If duplicate, convert to salvage
+    if (isDuplicate) {
+      const salvageReward = SALVAGE_REWARDS[rarity] || SALVAGE_REWARDS.common
+      const result: RecoveryResult = {
+        id: `rec-${Date.now()}`,
+        label: salvageReward.label,
+        type: "salvage",
+        rarity,
+        recoveredAt: Date.now(),
+        isDuplicate: true,
+        duplicateOf: pick.label,
+        salvageReward,
+      }
+      
+      // Add salvage to inventory
+      const existingItem = inventory.find(i => i.label === salvageReward.label)
+      let updatedInventory = inventory
+      if (existingItem) {
+        updatedInventory = inventory.map(i =>
+          i.label === salvageReward.label ? { ...i, qty: i.qty + salvageReward.qty } : i
+        )
+      } else {
+        const newItem: InventoryItem = {
+          id: `salvage-${Date.now()}`,
+          label: salvageReward.label,
+          aspect: "salvage",
+          rarity,
+          qty: salvageReward.qty,
+          identified: true,
+          description: `Salvage material from a duplicate ${pick.type}.`,
+          type: "material",
+        }
+        updatedInventory = [...inventory, newItem]
+      }
+      
+      set({
+        shards: {
+          ...shards,
+          [currencyKey]: (shards as any)[currencyKey] - cost,
+        } as typeof seedShards,
+        recovery: [result, ...recovery].slice(0, 8),
+        lastRecovered: result,
+        inventory: updatedInventory,
+      })
+      return
+    }
+    
+    // Not a duplicate - normal recovery
     const result: RecoveryResult = {
       id: `rec-${Date.now()}`,
       label: pick.label,

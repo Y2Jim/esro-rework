@@ -41,8 +41,8 @@ export function ArchiveScreen() {
           <div className="grid grid-cols-3 gap-1.5">
             <ShardTile label="relay" value={shards.relay_tokens} tone="amber" />
             <ShardTile
-              label="deep"
-              value={shards.deep_signals}
+              label="resonance"
+              value={shards.resonance}
               tone="cyan"
             />
             <ShardTile

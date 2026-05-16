@@ -20,8 +20,8 @@ export function RecoveryPanel() {
       <PullRow
         title="focused reconstruction"
         detail="deeper index pass · higher refined odds"
-        cost="2 deep"
-        canPull={shards.deep_signals >= 2}
+        cost="2 resonance"
+        canPull={shards.resonance >= 2}
         onPull={() => run("focused")}
         tone="cyan"
       />

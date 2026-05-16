@@ -73,7 +73,7 @@ export function RollingTab() {
   const pendingResultRef = useRef<typeof lastRecovered>(null)
 
   const canStandard = shards.relay_tokens >= 1 && !isRolling
-  const canFocused = shards.deep_signals >= 2 && !isRolling
+  const canFocused = shards.resonance >= 2 && !isRolling
 
   const startRoll = useCallback((mode: "standard" | "focused") => {
     setIsRolling(true)
@@ -144,7 +144,7 @@ export function RollingTab() {
           Relay <span className="text-[color:var(--color-text)]">{shards.relay_tokens}</span>
         </span>
         <span className="text-[color:var(--color-muted)]">
-          Deep <span className="text-[color:var(--color-text)]">{shards.deep_signals}</span>
+          Resonance <span className="text-[color:var(--color-text)]">{shards.resonance}</span>
         </span>
       </div>
 
@@ -341,7 +341,7 @@ export function RollingTab() {
           )}
         >
           <div className="text-[11px] font-medium text-[color:var(--color-text)]">Focused</div>
-          <div className="text-[9px] text-[color:var(--color-muted)]">2 Deep</div>
+          <div className="text-[9px] text-[color:var(--color-muted)]">2 Resonance</div>
         </button>
       </div>
 

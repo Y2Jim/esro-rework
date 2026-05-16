@@ -80,7 +80,7 @@ export function CraftingTab() {
           Relay <span className="text-[color:var(--color-text)]">{shards.relay_tokens}</span>
         </span>
         <span className="text-[color:var(--color-muted)]">
-          Deep <span className="text-[color:var(--color-text)]">{shards.deep_signals}</span>
+          Resonance <span className="text-[color:var(--color-text)]">{shards.resonance}</span>
         </span>
         <span className="text-[color:var(--color-muted)]">
           Materials <span className="text-[color:var(--color-text)]">{materials.length}</span>

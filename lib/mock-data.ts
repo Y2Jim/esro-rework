@@ -835,6 +835,67 @@ export const inventory: InventoryItem[] = [
     identified: true,
     description: "A chat flair. Your handle rings softly when you speak.",
   },
+  // Salvage materials (from duplicate rolls)
+  {
+    id: "scrap_metal",
+    label: "Scrap Metal",
+    aspect: "salvage",
+    rarity: "common",
+    qty: 5,
+    identified: true,
+    description: "Basic salvage from duplicate common items. Can be traded or refined.",
+    type: "material",
+  },
+  {
+    id: "signal_dust",
+    label: "Signal Dust",
+    aspect: "salvage",
+    rarity: "uncommon",
+    qty: 3,
+    identified: true,
+    description: "Fine particles carrying faint relay echoes. Used in signal crafting.",
+    type: "material",
+  },
+  {
+    id: "relay_fragment",
+    label: "Relay Fragment",
+    aspect: "salvage",
+    rarity: "rare",
+    qty: 2,
+    identified: true,
+    description: "A broken piece of relay hardware. Valuable for repairs and upgrades.",
+    type: "material",
+  },
+  {
+    id: "echo_crystal",
+    label: "Echo Crystal",
+    aspect: "salvage",
+    rarity: "epic",
+    qty: 1,
+    identified: true,
+    description: "Crystallized signal echo. Resonates with archived frequencies.",
+    type: "material",
+  },
+  {
+    id: "void_shard",
+    label: "Void Shard",
+    aspect: "salvage",
+    rarity: "legendary",
+    qty: 0,
+    identified: true,
+    description: "Fragment touched by the void between relays. Extremely rare and powerful.",
+    type: "material",
+  },
+  {
+    id: "transcendent_core",
+    label: "Transcendent Core",
+    aspect: "salvage",
+    rarity: "mythic",
+    qty: 0,
+    identified: true,
+    description: "The heart of a transcendent artifact. Holds immense potential.",
+    type: "material",
+  },
 ]
 
 // Pre-defined static avatar configs to avoid hydration issues
@@ -959,7 +1020,7 @@ export const identity: Identity = {
 /** Shard currencies surfaced on the Archive page. */
 export const shards = {
   relay_tokens: 14,
-  deep_signals: 2,
+  resonance: 2,
   signal_salvage: 6,
 }
 
