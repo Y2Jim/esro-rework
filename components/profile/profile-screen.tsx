@@ -562,11 +562,13 @@ function AdminUnlockButton() {
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
   const addMaterials = useEsroStore((s) => s.addMaterials)
+  const injectTestChatMessages = useEsroStore((s) => s.injectTestChatMessages)
   
-  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean }>({
+  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean }>({
     cosmetics: false,
     titles: false,
     materials: false,
+    chat: false,
   })
 
   const handleUnlockCosmetics = () => {
@@ -607,6 +609,31 @@ function AdminUnlockButton() {
       >
         {unlocked.titles ? "All Titles Unlocked" : "Unlock All Titles"}
       </button>
+      
+      {/* Chat title testing */}
+      <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">
+        <div className="mb-1.5 text-[9px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Chat Testing
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            injectTestChatMessages()
+            setUnlocked((prev) => ({ ...prev, chat: true }))
+          }}
+          className={cn(
+            "w-full rounded border px-3 py-2 text-[10px] transition-colors",
+            unlocked.chat
+              ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
+              : "border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 text-[color:var(--color-violet-bright)] hover:bg-[color:var(--color-violet-bright)]/20"
+          )}
+        >
+          {unlocked.chat ? "Test Messages Sent" : "Inject Title Test Messages"}
+        </button>
+        <p className="mt-1 text-[8px] text-[color:var(--color-muted)]">
+          Adds messages with all rarity titles to current channel
+        </p>
+      </div>
       
       {/* Crafting materials */}
       <div className="border-t border-[color:var(--color-border)] pt-2 mt-2">

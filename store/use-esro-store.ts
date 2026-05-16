@@ -142,6 +142,7 @@ interface EsroState {
   unlockAllTitles: () => void
   simulateExpedition: (expeditionId?: string) => void
   completeActiveExpedition: () => void
+  injectTestChatMessages: () => void
 }
 
 function rollRarity(focused: boolean): Rarity {
@@ -912,5 +913,76 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         tokens: get().profile.tokens + tokenReward,
       },
     })
+  },
+  
+  // Admin/Debug - inject test chat messages with all title rarities
+  injectTestChatMessages: () => {
+    const { messages, channel } = get()
+    const now = Date.now()
+    
+    const testMessages: ChatMessage[] = [
+      {
+        id: `test-common-${now}`,
+        channel: channel,
+        kind: "player",
+        handle: "@faded_one",
+        title: "Faded Echo",
+        titleRarity: "common",
+        body: "This is a common title - simple gray styling.",
+        at: now - 5000,
+      },
+      {
+        id: `test-uncommon-${now}`,
+        channel: channel,
+        kind: "player",
+        handle: "@signal_keeper",
+        title: "Signal Keeper",
+        titleRarity: "uncommon",
+        body: "Uncommon titles have a cyan/teal color.",
+        at: now - 4000,
+      },
+      {
+        id: `test-rare-${now}`,
+        channel: channel,
+        kind: "player",
+        handle: "@archive_seeker",
+        title: "Archive Listener",
+        titleRarity: "rare",
+        body: "Rare titles glow with violet energy.",
+        at: now - 3000,
+      },
+      {
+        id: `test-epic-${now}`,
+        channel: channel,
+        kind: "player",
+        handle: "@depth_walker",
+        title: "Void Speaker",
+        titleRarity: "epic",
+        body: "Epic titles shine with amber radiance.",
+        at: now - 2000,
+      },
+      {
+        id: `test-legendary-${now}`,
+        channel: channel,
+        kind: "player",
+        handle: "@golden_regent",
+        title: "Deep Pull Regent",
+        titleRarity: "legendary",
+        body: "Legendary titles shimmer with golden light and have animated effects.",
+        at: now - 1000,
+      },
+      {
+        id: `test-mythic-${now}`,
+        channel: channel,
+        kind: "player",
+        handle: "@ascendant",
+        title: "Shardheart Ascendant",
+        titleRarity: "mythic",
+        body: "Mythic titles display aurora-like color shifts and cosmic glow effects.",
+        at: now,
+      },
+    ]
+    
+    set({ messages: [...messages, ...testMessages] })
   },
 }))
