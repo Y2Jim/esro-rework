@@ -30,14 +30,17 @@ export function SocialScreen() {
   return (
     <div className="flex h-full flex-col">
       {/* Tab bar */}
-      <div className="flex gap-1 border-b border-[color:var(--color-border)] px-2 py-1.5">
+      <div 
+        className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-2 py-1.5"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
+      >
         {socialTabs.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "flex items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
               t.hover,
               tab === t.id
                 ? cn(t.bgColor, t.color)

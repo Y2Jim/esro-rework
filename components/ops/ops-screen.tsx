@@ -22,14 +22,17 @@ export function OpsScreen() {
   return (
     <div className="flex h-full flex-col">
       {/* Inline sub-tabs */}
-      <div className="flex gap-1 border-b border-[color:var(--color-border)] px-3 py-2">
+      <div 
+        className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-3 py-2"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setOpsTab(tab.id)}
             className={cn(
-              "flex items-center gap-1.5 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
+              "flex shrink-0 items-center gap-1.5 rounded px-2 py-1 text-[10px] uppercase tracking-wider transition-colors",
               tab.hover,
               opsTab === tab.id
                 ? cn(tab.bgColor, tab.color)
