@@ -1,7 +1,6 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { ThemeProvider } from "@/components/theme-provider"
 
 const PhoneStage = dynamic(
   () => import("@/components/phone/phone-stage").then((mod) => mod.PhoneStage),
@@ -18,9 +17,5 @@ const PhoneStage = dynamic(
 )
 
 export default function Page() {
-  return (
-    <ThemeProvider>
-      <PhoneStage />
-    </ThemeProvider>
-  )
+  return <PhoneStage />
 }

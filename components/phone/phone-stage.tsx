@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { PhoneFrame } from "./phone-frame"
 import { BootSplash } from "@/components/boot/boot-splash"
 import { AppShell } from "@/components/shell/app-shell"
+import { ThemeProvider } from "@/components/theme-provider"
 import { useEsroStore } from "@/store/use-esro-store"
 import { AnimatePresence, motion } from "framer-motion"
 
@@ -24,53 +25,55 @@ export function PhoneStage() {
   }, [])
 
   return (
-    <main className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-[var(--color-bg)]">
-      {/* stage ambient */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{
-          background:
-            "radial-gradient(60% 50% at 50% 40%, rgba(168,123,255,0.09) 0%, transparent 70%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pixel-grid pointer-events-none absolute inset-0 opacity-40"
-      />
+    <ThemeProvider>
+      <main className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-hidden bg-[var(--color-bg)]">
+        {/* stage ambient */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 50% 40%, rgba(168,123,255,0.09) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pixel-grid pointer-events-none absolute inset-0 opacity-40"
+        />
 
-      <PhoneFrame>
-        <AnimatePresence mode="wait" initial={false}>
-          {!booted ? (
-            <motion.div
-              key="boot"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="absolute inset-0"
-            >
-              <BootSplash />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="app"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0"
-            >
-              <AppShell />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </PhoneFrame>
+        <PhoneFrame>
+          <AnimatePresence mode="wait" initial={false}>
+            {!booted ? (
+              <motion.div
+                key="boot"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="absolute inset-0"
+              >
+                <BootSplash />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="app"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0"
+              >
+                <AppShell />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </PhoneFrame>
 
-      {/* tiny footer caption, easy to remove when ported */}
-      <p className="pointer-events-none absolute bottom-3 left-1/2 z-0 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-muted-2)]">
-        esro prototype · phone viewport
-      </p>
-    </main>
+        {/* tiny footer caption, easy to remove when ported */}
+        <p className="pointer-events-none absolute bottom-3 left-1/2 z-0 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em] text-[color:var(--color-muted-2)]">
+          esro prototype · phone viewport
+        </p>
+      </main>
+    </ThemeProvider>
   )
 }
