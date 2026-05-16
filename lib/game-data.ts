@@ -29,11 +29,18 @@ export const FACTIONS: FactionData[] = factionsConfig.factions.map(f => ({
 export const FACTION_UNLOCK_LEVEL = factionsConfig.unlockLevel
 
 // ============ SKILLS ============
+export interface SkillStatDefinition {
+  id: string
+  name: string
+  effect: string
+}
+
 export interface SkillDefinition {
   name: string
   linkedStat: keyof BaseStats
   summary: string
-  stats: { id: string; name: string }[]
+  expeditionRole: string
+  stats: SkillStatDefinition[]
 }
 
 export const SKILL_DEFINITIONS: SkillDefinition[] = skillsConfig.skills as SkillDefinition[]
