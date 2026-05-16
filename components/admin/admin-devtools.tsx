@@ -19,6 +19,7 @@ export function AdminDevTools() {
   const unlockTheme = useEsroStore((s) => s.unlockTheme)
   const identity = useEsroStore((s) => s.identity)
   const logAdminAction = useEsroStore((s) => s.logAdminAction)
+  const setHandle = useEsroStore((s) => s.setHandle)
   
   const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean }>({
     cosmetics: false,
@@ -27,6 +28,8 @@ export function AdminDevTools() {
     chat: false,
     themes: false,
   })
+  
+  const [newHandle, setNewHandle] = useState(identity.handle.replace("@", ""))
   
   const [previewFlair, setPreviewFlair] = useState(0)
   const flairNames = [
@@ -81,6 +84,47 @@ export function AdminDevTools() {
         <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Developer Tools
         </span>
+      </div>
+
+      {/* Username Change */}
+      <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
+        <div className="mb-2 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Change Username
+        </div>
+        <div className="flex gap-2">
+          <div className="flex flex-1 items-center rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2">
+            <span className="text-[11px] text-[color:var(--color-muted)]">@</span>
+            <input
+              type="text"
+              value={newHandle}
+              onChange={(e) => setNewHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+              maxLength={20}
+              className="flex-1 bg-transparent px-1 py-1.5 text-[11px] text-[color:var(--color-text)] outline-none"
+              placeholder="new_username"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (newHandle.trim()) {
+                setHandle(newHandle.trim())
+                logAdminAction("edit_player", identity.handle, `Changed username to @${newHandle.trim()}`)
+              }
+            }}
+            disabled={!newHandle.trim() || `@${newHandle}` === identity.handle}
+            className={cn(
+              "rounded border px-3 py-1.5 text-[10px] transition-colors",
+              !newHandle.trim() || `@${newHandle}` === identity.handle
+                ? "border-[color:var(--color-border)] bg-[color:var(--color-panel)] text-[color:var(--color-muted)]"
+                : "border-[#5dd0ff]/50 bg-[#5dd0ff]/10 text-[#5dd0ff] hover:bg-[#5dd0ff]/20"
+            )}
+          >
+            Apply
+          </button>
+        </div>
+        <p className="text-[8px] text-[color:var(--color-muted)]">
+          Admin override - no restrictions on username changes
+        </p>
       </div>
 
       {/* Unlock Buttons */}

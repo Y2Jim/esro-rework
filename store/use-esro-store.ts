@@ -153,6 +153,7 @@ interface EsroState {
   unequipVanity: (layerType: AvatarLayerType) => void
   
   // Admin/Debug
+  setHandle: (newHandle: string) => void
   unlockAllCosmetics: () => void
   unlockAllTitles: () => void
   simulateExpedition: (expeditionId?: string) => void
@@ -980,6 +981,16 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   
+  // Admin/Debug - set handle (admin only)
+  setHandle: (newHandle) => {
+    const { identity, profile } = get()
+    const formattedHandle = newHandle.startsWith("@") ? newHandle : `@${newHandle}`
+    set({
+      identity: { ...identity, handle: formattedHandle },
+      profile: { ...profile, handle: formattedHandle },
+    })
+  },
+
   // Admin/Debug - unlock all cosmetics
   unlockAllCosmetics: () => {
     const { profile } = get()
