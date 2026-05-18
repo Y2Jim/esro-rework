@@ -33,7 +33,7 @@ export function ChatInput() {
           readOnly && "opacity-60",
         )}
       >
-        <span className="select-none text-[12px] text-[color:var(--color-cyan)]">
+        <span className="select-none text-[14px] text-[color:var(--color-cyan)]">
           &gt;
         </span>
         <input
@@ -48,17 +48,17 @@ export function ChatInput() {
           }
           disabled={readOnly}
           maxLength={220}
-          className="min-w-0 flex-1 bg-transparent text-[12px] text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted-2)] outline-none"
+          className="min-w-0 flex-1 bg-transparent text-[14px] text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted-2)] outline-none"
           aria-label="chat input"
         />
-        <span className="select-none text-[11px] uppercase tracking-[0.2em] text-[color:var(--color-muted-2)]">
+        <span className="select-none text-[13px] uppercase tracking-[0.2em] text-[color:var(--color-muted-2)]">
           {value.length}/220
         </span>
         <button
           type="submit"
           disabled={readOnly || !value.trim()}
           className={cn(
-            "rounded-sm border px-2 py-[3px] text-[9.5px] uppercase tracking-[0.25em] transition-all",
+            "rounded-sm border px-2 py-[3px] text-[11px] uppercase tracking-[0.25em] transition-all",
             "border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)]",
             "hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20 hover:text-glow-cyan",
             "disabled:opacity-30 disabled:bg-transparent disabled:hover:border-[color:var(--color-border)] disabled:hover:text-[color:var(--color-muted)]",
@@ -67,7 +67,7 @@ export function ChatInput() {
           send
         </button>
       </div>
-      <div className="mt-1 px-0.5 text-[8.5px] uppercase tracking-[0.25em] text-[color:var(--color-muted-2)]">
+      <div className="mt-1 px-0.5 text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-muted-2)]">
         {def?.restricted
           ? "traffic not logged to registry"
           : "enter to send · 220 char limit"}

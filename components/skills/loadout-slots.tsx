@@ -23,7 +23,7 @@ export function LoadoutSlots({ loadout }: { loadout: string[] }) {
               <span className="text-[18px] text-[color:var(--color-muted-2)]">
                 +
               </span>
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-muted-2)]">
+              <span className="text-[12px] uppercase tracking-[0.25em] text-[color:var(--color-muted-2)]">
                 slot {i + 1}
               </span>
             </div>
@@ -46,10 +46,10 @@ export function LoadoutSlots({ loadout }: { loadout: string[] }) {
                 className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[color:var(--color-violet-bright)]"
               />
             )}
-            <span className="text-[9.5px] uppercase tracking-[0.18em] text-[color:var(--color-violet-bright)] text-glow">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-violet-bright)] text-glow">
               {s.label.slice(0, 7)}
             </span>
-            <span className="mt-0.5 text-[11px] text-[color:var(--color-lilac)]">
+            <span className="mt-0.5 text-[13px] text-[color:var(--color-lilac)]">
               lv {s.level}
             </span>
           </button>

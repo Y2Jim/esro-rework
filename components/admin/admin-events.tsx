@@ -41,13 +41,13 @@ export function AdminEvents() {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="text-[15px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Game Events ({events.length})
         </div>
         <button
           type="button"
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1 rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-2 py-1 text-[12px] uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
+          className="flex items-center gap-1 rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-2 py-1 text-[14px] uppercase tracking-wider text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
         >
           <Plus className="h-3 w-3" />
           New Event
@@ -58,7 +58,7 @@ export function AdminEvents() {
       {showForm && (
         <div className="rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/5 p-3 space-y-3">
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="mb-1 block text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Event Name
             </label>
             <input
@@ -66,12 +66,12 @@ export function AdminEvents() {
               value={form.label}
               onChange={(e) => setForm({ ...form, label: e.target.value })}
               placeholder="Summer Festival"
-              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[15px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
             />
           </div>
           
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="mb-1 block text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Description
             </label>
             <textarea
@@ -79,19 +79,19 @@ export function AdminEvents() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Event description..."
               rows={2}
-              className="w-full resize-none rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+              className="w-full resize-none rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[15px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Type
               </label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value as EventType })}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[15px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               >
                 <option value="seasonal">Seasonal</option>
                 <option value="limited">Limited</option>
@@ -99,7 +99,7 @@ export function AdminEvents() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              <label className="mb-1 block text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Duration (days)
               </label>
               <input
@@ -108,13 +108,13 @@ export function AdminEvents() {
                 onChange={(e) => setForm({ ...form, durationDays: parseInt(e.target.value) || 1 })}
                 min={1}
                 max={365}
-                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
+                className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[15px] text-[color:var(--color-text)] focus:border-[#ff6b4a] focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            <label className="mb-1 block text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
               Rewards (comma-separated)
             </label>
             <input
@@ -122,7 +122,7 @@ export function AdminEvents() {
               value={form.rewards}
               onChange={(e) => setForm({ ...form, rewards: e.target.value })}
               placeholder="Exclusive Title, Rare Cosmetic, 500 Tokens"
-              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[13px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)] px-2 py-1.5 font-mono text-[15px] text-[color:var(--color-text)] placeholder:text-[color:var(--color-muted)]/50 focus:border-[#ff6b4a] focus:outline-none"
             />
           </div>
 
@@ -130,7 +130,7 @@ export function AdminEvents() {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+              className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             >
               Cancel
             </button>
@@ -138,7 +138,7 @@ export function AdminEvents() {
               type="button"
               onClick={handleCreate}
               disabled={!form.label.trim()}
-              className="rounded bg-[#ff6b4a] px-3 py-1.5 text-[12px] font-medium uppercase tracking-wider text-black disabled:opacity-50"
+              className="rounded bg-[#ff6b4a] px-3 py-1.5 text-[14px] font-medium uppercase tracking-wider text-black disabled:opacity-50"
             >
               Create Event
             </button>
@@ -149,7 +149,7 @@ export function AdminEvents() {
       {/* Events List */}
       {events.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-          <p className="text-[13px] text-[color:var(--color-muted)]">No events created yet</p>
+          <p className="text-[15px] text-[color:var(--color-muted)]">No events created yet</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -166,12 +166,12 @@ export function AdminEvents() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[12px] font-medium text-[color:var(--color-text)]">
+                    <span className="font-mono text-[14px] font-medium text-[color:var(--color-text)]">
                       {event.label}
                     </span>
                     <span
                       className={cn(
-                        "rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider",
+                        "rounded px-1.5 py-0.5 text-[12px] uppercase tracking-wider",
                         event.type === "seasonal" && "bg-[#5dd0ff]/20 text-[#5dd0ff]",
                         event.type === "limited" && "bg-[#ff6b4a]/20 text-[#ff6b4a]",
                         event.type === "special" && "bg-[#bb81ff]/20 text-[#bb81ff]"
@@ -180,12 +180,12 @@ export function AdminEvents() {
                       {event.type}
                     </span>
                     {event.active && (
-                      <span className="rounded bg-[#60d060]/20 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-[#60d060]">
+                      <span className="rounded bg-[#60d060]/20 px-1.5 py-0.5 text-[12px] uppercase tracking-wider text-[#60d060]">
                         Active
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-[12px] text-[color:var(--color-muted)]">
+                  <p className="mt-1 text-[14px] text-[color:var(--color-muted)]">
                     {event.description}
                   </p>
                   {event.rewards.length > 0 && (
@@ -193,7 +193,7 @@ export function AdminEvents() {
                       {event.rewards.map((reward, i) => (
                         <span
                           key={i}
-                          className="rounded bg-[color:var(--color-bg)] px-1.5 py-0.5 text-[11px] text-[color:var(--color-text)]"
+                          className="rounded bg-[color:var(--color-bg)] px-1.5 py-0.5 text-[13px] text-[color:var(--color-text)]"
                         >
                           {reward}
                         </span>

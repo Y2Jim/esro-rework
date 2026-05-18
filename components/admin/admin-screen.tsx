@@ -36,14 +36,14 @@ export function AdminScreen() {
         <button
           type="button"
           onClick={() => setScreen("profile")}
-          className="flex items-center gap-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-text)]"
+          className="flex items-center gap-1 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-text)]"
         >
           <ChevronLeft className="h-3 w-3" />
           Back
         </button>
         <div className="flex items-center gap-1.5">
           <Shield className="h-3.5 w-3.5 text-[#ff6b4a]" />
-          <span className="font-mono text-[13px] font-bold uppercase tracking-wider text-[#ff6b4a]">
+          <span className="font-mono text-[15px] font-bold uppercase tracking-wider text-[#ff6b4a]">
             Admin Panel
           </span>
         </div>
@@ -61,13 +61,13 @@ export function AdminScreen() {
             type="button"
             onClick={() => setAdminTab(tab.id)}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded px-2 py-1 text-[12px] uppercase tracking-wider transition-colors",
+              "flex shrink-0 items-center gap-1.5 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
               adminTab === tab.id
                 ? "bg-[#ff6b4a]/15 text-[#ff6b4a]"
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
             )}
           >
-            <span className="text-[13px]">{tab.icon}</span>
+            <span className="text-[15px]">{tab.icon}</span>
             {tab.label}
           </button>
         ))}

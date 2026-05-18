@@ -27,7 +27,7 @@ export function TerminalScreen() {
               type="button"
               onClick={() => setChannel(c.id)}
               className={cn(
-                "flex items-center gap-1.5 rounded px-2 py-1 text-[12px] uppercase tracking-wider transition-colors",
+                "flex items-center gap-1.5 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
                 isActive
                   ? "bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)]"
                   : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
@@ -35,7 +35,7 @@ export function TerminalScreen() {
             >
               {c.label}
               {u > 0 && (
-                <span className="rounded-full bg-[color:var(--color-accent)]/30 px-1.5 text-[10px] text-[color:var(--color-accent)]">
+                <span className="rounded-full bg-[color:var(--color-accent)]/30 px-1.5 text-[12px] text-[color:var(--color-accent)]">
                   {u}
                 </span>
               )}

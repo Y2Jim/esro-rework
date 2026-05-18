@@ -40,10 +40,10 @@ export function IdentityBar() {
           />
         </div>
         <div className="leading-tight">
-          <div className="text-[12px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+          <div className="text-[14px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
             esro
           </div>
-          <div className="text-[13px] text-[color:var(--color-foreground)]/90">
+          <div className="text-[15px] text-[color:var(--color-foreground)]/90">
             {screenLabel[screen] ?? "relay"}
           </div>
         </div>
@@ -62,16 +62,16 @@ export function IdentityBar() {
           )}
         >
           <Package className="h-3.5 w-3.5" />
-          <span className="text-[12px] uppercase tracking-wider">{itemCount}</span>
+          <span className="text-[14px] uppercase tracking-wider">{itemCount}</span>
         </button>
 
         <div className="flex flex-col items-end leading-tight">
-          <div className="text-[12px] font-medium text-[color:var(--color-foreground)] text-glow-soft">
+          <div className="text-[14px] font-medium text-[color:var(--color-foreground)] text-glow-soft">
             {identity.handle}
           </div>
           <div
             className={cn(
-              "text-[11px] uppercase tracking-[0.25em]",
+              "text-[13px] uppercase tracking-[0.25em]",
               titleClass,
             )}
           >

@@ -8,7 +8,7 @@ export function PageControls() {
   const pageOffset = useEsroStore((s) => s.pageOffset)
 
   return (
-    <div className="flex items-center gap-0.5 text-[11px] uppercase tracking-[0.2em]">
+    <div className="flex items-center gap-0.5 text-[13px] uppercase tracking-[0.2em]">
       <button
         type="button"
         onClick={() => nudgePage(1)}

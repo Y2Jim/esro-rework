@@ -8,20 +8,20 @@
   --color-panel-soft: rgba(18, 11, 28, 0.82);
   --color-panel-gradient: linear-gradient(180deg, rgba(24, 13, 39, 0.96), rgba(12, 8, 19, 0.92));
   
-  /* Borders */
-  --color-border: rgba(154, 84, 255, 0.42);
-  --color-border-soft: rgba(154, 84, 255, 0.25);
-  --color-border-strong: rgba(187, 129, 255, 0.46);
+  /* Borders - increased visibility */
+  --color-border: rgba(154, 84, 255, 0.52);
+  --color-border-soft: rgba(154, 84, 255, 0.35);
+  --color-border-strong: rgba(187, 129, 255, 0.58);
   
   /* Primary - Violet */
   --color-accent: #a45dff;
   --color-accent-strong: #bb81ff;
   --color-accent-glow: rgba(125, 52, 234, 0.24);
   
-  /* Text Colors */
-  --color-text: #efe6ff;
-  --color-muted: #a791c7;
-  --color-muted-2: #7a6699;
+  /* Text Colors - brightened significantly for in-game readability */
+  --color-text: #ffffff;
+  --color-muted: #d8c9f0;
+  --color-muted-2: #b8a5d4;
   
   /* Functional */
   --color-danger: #ff4d8d;
@@ -32,7 +32,7 @@
   --color-prismatic: #f3d58a;
 
   /* Rarity Colors */
-  --color-rarity-common: #a791c7;
+  --color-rarity-common: #c9b8e0;
   --color-rarity-uncommon: #5dd0ff;
   --color-rarity-rare: #bb81ff;
   --color-rarity-epic: #ffb347;
@@ -61,7 +61,7 @@
     --color-text-muted: var(--color-muted-2);
     
     /* Rarity Colors - duplicated from @theme for CSS var() access */
-    --color-rarity-common: #a791c7;
+    --color-rarity-common: #c9b8e0;
     --color-rarity-uncommon: #5dd0ff;
     --color-rarity-rare: #bb81ff;
     --color-rarity-epic: #ffb347;
@@ -423,11 +423,12 @@
 
   html,
   body {
-    height: 100%;
-    background: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
-    -webkit-font-smoothing: antialiased;
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
   }
 
@@ -457,13 +458,14 @@
 
 /* Button styles */
 .esro-button {
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-button);
   background: rgba(255, 255, 255, 0.02);
   color: var(--color-text);
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -490,12 +492,13 @@
 
 /* Chip/Tag styles */
 .esro-chip {
-  padding: 5px 10px;
+  padding: 6px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-button);
   background: rgba(255, 255, 255, 0.02);
   color: var(--color-text);
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .esro-chip-status {
@@ -522,9 +525,9 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-input);
   color: var(--color-text);
-  padding: 10px 12px;
+  padding: 12px 14px;
   font: inherit;
-  font-size: 13px;
+  font-size: 15px;
   outline: none;
 }
 
@@ -540,7 +543,7 @@
 
 /* Metric card */
 .esro-metric {
-  padding: 10px;
+  padding: 14px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-panel-soft);

@@ -31,7 +31,7 @@ export function AdminLogs() {
       {/* Header */}
       <div className="flex items-center gap-2">
         <ClipboardList className="h-4 w-4 text-[#ff6b4a]" />
-        <span className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <span className="text-[15px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Admin Activity Log ({adminLogs.length})
         </span>
       </div>
@@ -39,8 +39,8 @@ export function AdminLogs() {
       {/* Logs List */}
       {adminLogs.length === 0 ? (
         <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-6 text-center">
-          <p className="text-[13px] text-[color:var(--color-muted)]">No admin actions logged yet</p>
-          <p className="mt-1 text-[11px] text-[color:var(--color-muted)]/70">
+          <p className="text-[15px] text-[color:var(--color-muted)]">No admin actions logged yet</p>
+          <p className="mt-1 text-[13px] text-[color:var(--color-muted)]/70">
             Actions will appear here as you use admin tools
           </p>
         </div>
@@ -56,29 +56,29 @@ export function AdminLogs() {
                   <div className="flex items-center gap-2">
                     <span
                       className={cn(
-                        "font-mono text-[12px] font-medium uppercase",
+                        "font-mono text-[14px] font-medium uppercase",
                         ACTION_COLORS[log.action] || "text-[color:var(--color-text)]"
                       )}
                     >
                       {log.action.replace(/_/g, " ")}
                     </span>
                     {log.target && (
-                      <span className="text-[12px] text-[color:var(--color-text)]">
+                      <span className="text-[14px] text-[color:var(--color-text)]">
                         {log.target}
                       </span>
                     )}
                   </div>
                   {log.details && (
-                    <p className="mt-0.5 text-[11px] text-[color:var(--color-muted)]">
+                    <p className="mt-0.5 text-[13px] text-[color:var(--color-muted)]">
                       {log.details}
                     </p>
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] text-[color:var(--color-muted)]">
+                  <div className="text-[12px] text-[color:var(--color-muted)]">
                     {formatTimeAgo(log.timestamp)}
                   </div>
-                  <div className="text-[10px] text-[color:var(--color-muted)]/70">
+                  <div className="text-[12px] text-[color:var(--color-muted)]/70">
                     {log.adminHandle}
                   </div>
                 </div>
@@ -91,7 +91,7 @@ export function AdminLogs() {
       {/* Info */}
       {adminLogs.length > 0 && (
         <div className="rounded-lg border border-[color:var(--color-border)]/50 bg-[color:var(--color-panel)]/30 p-3">
-          <p className="text-[11px] text-[color:var(--color-muted)]">
+          <p className="text-[13px] text-[color:var(--color-muted)]">
             Showing last {Math.min(adminLogs.length, 100)} actions. Logs are kept for accountability and can be reviewed by system administrators.
           </p>
         </div>

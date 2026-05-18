@@ -37,7 +37,7 @@ interface ListCardTitleProps {
 export function ListCardTitle({ children, action }: ListCardTitleProps) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[12px] text-[color:var(--color-text)]">{children}</span>
+      <span className="text-[14px] text-[color:var(--color-text)]">{children}</span>
       {action}
     </div>
   )
@@ -49,7 +49,7 @@ interface ListCardMetaProps {
 
 export function ListCardMeta({ children }: ListCardMetaProps) {
   return (
-    <div className="flex items-center justify-between gap-2 text-[12px] text-[color:var(--color-muted)]">
+    <div className="flex items-center justify-between gap-2 text-[14px] text-[color:var(--color-muted)]">
       {children}
     </div>
   )
@@ -61,7 +61,7 @@ interface ListCardDescriptionProps {
 
 export function ListCardDescription({ children }: ListCardDescriptionProps) {
   return (
-    <p className="text-[12px] leading-relaxed text-[color:var(--color-muted)]">
+    <p className="text-[14px] leading-relaxed text-[color:var(--color-muted)]">
       {children}
     </p>
   )

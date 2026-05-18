@@ -29,15 +29,15 @@ export function PartySlot({
             +
           </div>
           <div className="leading-tight">
-            <div className="text-[13px] text-[color:var(--color-muted)]">
+            <div className="text-[15px] text-[color:var(--color-muted)]">
               slot {slot} · empty
             </div>
-            <div className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
+            <div className="text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
               send invite
             </div>
           </div>
         </div>
-        <span className="text-[9.5px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
+        <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
           invite
         </span>
       </button>
@@ -59,7 +59,7 @@ export function PartySlot({
     >
       <div
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border text-[13px]",
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border text-[15px]",
           member.leader
             ? "border-[color:var(--color-green)] text-[color:var(--color-green)] text-glow-green"
             : "border-[color:var(--color-border)] text-[color:var(--color-green-muted)]",
@@ -71,25 +71,25 @@ export function PartySlot({
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <div className="flex min-w-0 items-baseline gap-1.5">
-            <span className="truncate text-[12px] text-[color:var(--color-foreground)] text-glow-soft">
+            <span className="truncate text-[14px] text-[color:var(--color-foreground)] text-glow-soft">
               {member.handle}
             </span>
             {member.leader && (
-              <span className="text-[8.5px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
                 lead
               </span>
             )}
           </div>
           <span
             className={cn(
-              "shrink-0 text-[11px] uppercase tracking-[0.22em]",
+              "shrink-0 text-[13px] uppercase tracking-[0.22em]",
               statusTone[member.status],
             )}
           >
             {member.status}
           </span>
         </div>
-        <div className="mt-0.5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
+        <div className="mt-0.5 flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">
           {member.title && <span className={titleCls}>{member.title}</span>}
           {member.title && (
             <span className="text-[color:var(--color-muted-2)]">·</span>

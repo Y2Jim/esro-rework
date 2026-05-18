@@ -107,7 +107,7 @@ export function ChannelTabs() {
               aria-selected={active}
               onClick={() => setChannel(c.id)}
               className={cn(
-                "relative flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] uppercase tracking-[0.15em] transition-all",
+                "relative flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[14px] uppercase tracking-[0.15em] transition-all",
                 style.hover,
                 active
                   ? cn(style.text, style.activeBg, style.activeBorder)
@@ -118,7 +118,7 @@ export function ChannelTabs() {
               <span
                 aria-hidden
                 className={cn(
-                  "text-[13px] leading-none",
+                  "text-[15px] leading-none",
                   active ? style.text : "text-[color:var(--color-muted-2)]",
                 )}
               >
@@ -143,7 +143,7 @@ export function ChannelTabs() {
               {u > 0 && (
                 <span
                   className={cn(
-                    "inline-flex min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-medium leading-[14px]",
+                    "inline-flex min-w-[16px] items-center justify-center rounded-full px-1 text-[12px] font-medium leading-[14px]",
                     active
                       ? "bg-current/20 text-current"
                       : "bg-[color:var(--color-panel-2)] text-[color:var(--color-foreground)]",

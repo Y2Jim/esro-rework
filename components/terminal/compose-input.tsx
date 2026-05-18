@@ -21,7 +21,7 @@ export function ComposeInput({ readOnly }: ComposeInputProps) {
 
   if (readOnly) {
     return (
-      <div className="esro-input flex items-center justify-center text-[12px] text-[color:var(--color-muted)]">
+      <div className="esro-input flex items-center justify-center text-[14px] text-[color:var(--color-muted)]">
         This channel is read-only
       </div>
     )

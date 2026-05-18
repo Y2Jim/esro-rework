@@ -22,11 +22,11 @@ export function AdminDashboard() {
       <div className="rounded-lg border border-[#ff6b4a]/30 bg-[#ff6b4a]/5 p-3">
         <div className="flex items-center gap-2">
           <Shield className="h-4 w-4 text-[#ff6b4a]" />
-          <span className="font-mono text-[13px] font-medium text-[#ff6b4a]">
+          <span className="font-mono text-[15px] font-medium text-[#ff6b4a]">
             Admin Mode Active
           </span>
         </div>
-        <p className="mt-1 text-[12px] text-[color:var(--color-muted)]">
+        <p className="mt-1 text-[14px] text-[color:var(--color-muted)]">
           Logged in as {identity.handle}
         </p>
       </div>
@@ -62,7 +62,7 @@ export function AdminDashboard() {
 
       {/* Quick Stats */}
       <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3">
-        <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
           System Overview
         </div>
         <div className="grid grid-cols-3 gap-3 text-center">
@@ -70,30 +70,30 @@ export function AdminDashboard() {
             <div className="font-mono text-lg font-bold text-[color:var(--color-text)]">
               {expeditions.length}
             </div>
-            <div className="text-[11px] text-[color:var(--color-muted)]">Expeditions</div>
+            <div className="text-[13px] text-[color:var(--color-muted)]">Expeditions</div>
           </div>
           <div>
             <div className="font-mono text-lg font-bold text-[color:var(--color-text)]">
               {contracts.filter((c) => c.status === "active").length}
             </div>
-            <div className="text-[11px] text-[color:var(--color-muted)]">Active Contracts</div>
+            <div className="text-[13px] text-[color:var(--color-muted)]">Active Contracts</div>
           </div>
           <div>
             <div className="font-mono text-lg font-bold text-[color:var(--color-text)]">
               {adminLogs.length}
             </div>
-            <div className="text-[11px] text-[color:var(--color-muted)]">Admin Actions</div>
+            <div className="text-[13px] text-[color:var(--color-muted)]">Admin Actions</div>
           </div>
         </div>
       </div>
 
       {/* Recent Activity */}
       <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3">
-        <div className="mb-2 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Recent Admin Activity
         </div>
         {recentLogs.length === 0 ? (
-          <p className="text-[12px] text-[color:var(--color-muted)]">No recent activity</p>
+          <p className="text-[14px] text-[color:var(--color-muted)]">No recent activity</p>
         ) : (
           <div className="space-y-1.5">
             {recentLogs.map((log) => (
@@ -102,19 +102,19 @@ export function AdminDashboard() {
                 className="flex items-start justify-between rounded border border-[color:var(--color-border)]/50 bg-[color:var(--color-bg)]/50 px-2 py-1.5"
               >
                 <div className="flex-1">
-                  <span className="font-mono text-[12px] text-[#ff6b4a]">
+                  <span className="font-mono text-[14px] text-[#ff6b4a]">
                     {log.action.replace(/_/g, " ")}
                   </span>
                   {log.target && (
-                    <span className="ml-1 text-[12px] text-[color:var(--color-text)]">
+                    <span className="ml-1 text-[14px] text-[color:var(--color-text)]">
                       {log.target}
                     </span>
                   )}
                   {log.details && (
-                    <p className="text-[11px] text-[color:var(--color-muted)]">{log.details}</p>
+                    <p className="text-[13px] text-[color:var(--color-muted)]">{log.details}</p>
                   )}
                 </div>
-                <span className="text-[10px] text-[color:var(--color-muted)]">
+                <span className="text-[12px] text-[color:var(--color-muted)]">
                   {formatTimeAgo(log.timestamp)}
                 </span>
               </div>
@@ -143,7 +143,7 @@ function StatCard({
     <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-2.5">
       <div className="flex items-center gap-1.5" style={{ color }}>
         {icon}
-        <span className="text-[11px] uppercase tracking-wider">{label}</span>
+        <span className="text-[13px] uppercase tracking-wider">{label}</span>
       </div>
       <div className="mt-1 font-mono text-xl font-bold" style={{ color }}>
         {value}

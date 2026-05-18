@@ -9,10 +9,10 @@ interface MetricCardProps {
 export function MetricCard({ label, value, valueClass }: MetricCardProps) {
   return (
     <div className="esro-metric">
-      <div className="mb-1.5 text-[12px] text-[color:var(--color-muted)]">
+      <div className="mb-1.5 text-[14px] text-[color:var(--color-muted)]">
         {label}
       </div>
-      <div className={cn("text-[13px] text-[color:var(--color-text)]", valueClass)}>
+      <div className={cn("text-[15px] text-[color:var(--color-text)]", valueClass)}>
         {value}
       </div>
     </div>

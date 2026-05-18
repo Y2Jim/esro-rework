@@ -132,7 +132,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
             />
           ))}
         </div>
-        <p className="mt-1 text-center text-[11px] text-[color:var(--color-muted)] uppercase tracking-wider">
+        <p className="mt-1 text-center text-[13px] text-[color:var(--color-muted)] uppercase tracking-wider">
           {step === "intro" && "Faction Introduction"}
           {step === "selection" && "Choose Allegiance"}
           {step === "confirm" && "Confirm Faction"}
@@ -177,7 +177,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                       <Lock className="h-4 w-4" />
                       <span className="font-medium">Locked until Level {FACTION_UNLOCK_LEVEL}</span>
                     </div>
-                    <p className="text-[13px] text-[color:var(--color-muted)] leading-relaxed">
+                    <p className="text-[15px] text-[color:var(--color-muted)] leading-relaxed">
                       Faction allegiance becomes available once you reach Level {FACTION_UNLOCK_LEVEL}. 
                       Continue running expeditions to unlock.
                     </p>
@@ -187,13 +187,13 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                         style={{ width: `${(playerLevel / FACTION_UNLOCK_LEVEL) * 100}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-[11px] text-[color:var(--color-muted)]">
+                    <p className="mt-1 text-[13px] text-[color:var(--color-muted)]">
                       Level {playerLevel} / {FACTION_UNLOCK_LEVEL}
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-[13px] text-[color:var(--color-text-secondary)] leading-relaxed">
+                    <p className="text-[15px] text-[color:var(--color-text-secondary)] leading-relaxed">
                       Your journey has proven your worth. The time has come to pledge allegiance to one of the four great factions. 
                       Each offers unique bonuses and themed UI.
                     </p>
@@ -215,7 +215,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-lg" style={{ color: faction.color }}>{faction.emblem}</span>
-                        <span className="text-[13px] font-medium" style={{ color: faction.color }}>{faction.name}</span>
+                        <span className="text-[15px] font-medium" style={{ color: faction.color }}>{faction.name}</span>
                       </div>
                     </div>
                   ))}
@@ -257,10 +257,10 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                         size="sm" 
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-[12px]" style={{ color: faction.color }}>
+                        <h3 className="font-bold text-[14px]" style={{ color: faction.color }}>
                           {faction.name}
                         </h3>
-                        <p className="text-[11px] text-[color:var(--color-muted)] italic">
+                        <p className="text-[13px] text-[color:var(--color-muted)] italic">
                           &quot;{faction.motto}&quot;
                         </p>
                       </div>
@@ -277,13 +277,13 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                     </div>
                     
                     {/* Full description */}
-                    <p className="mt-2 text-[12px] text-[color:var(--color-text-secondary)] leading-relaxed">
+                    <p className="mt-2 text-[14px] text-[color:var(--color-text-secondary)] leading-relaxed">
                       {faction.lore}
                     </p>
                     
                     {/* Faction bonus */}
                     <div 
-                      className="mt-2 flex items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium"
+                      className="mt-2 flex items-center gap-1.5 rounded px-2 py-1 text-[13px] font-medium"
                       style={{ 
                         backgroundColor: `${faction.color}15`,
                         color: faction.color,
@@ -393,7 +393,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                 className="relative z-10 mt-8 text-center"
               >
                 <motion.div
-                  className="flex items-center justify-center gap-2 text-[12px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]"
+                  className="flex items-center justify-center gap-2 text-[14px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2 }}
@@ -414,7 +414,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                 </motion.h2>
                 
                 <motion.p
-                  className="mt-2 text-[13px] italic text-[color:var(--color-text-secondary)]"
+                  className="mt-2 text-[15px] italic text-[color:var(--color-text-secondary)]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.8 }}
@@ -440,7 +440,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
               </motion.div>
               
               <motion.p
-                className="absolute bottom-4 text-[11px] text-[color:var(--color-muted)]"
+                className="absolute bottom-4 text-[13px] text-[color:var(--color-muted)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.2 }}
@@ -479,7 +479,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                 >
                   {selectedFaction.name}
                 </h2>
-                <p className="text-[13px] text-[color:var(--color-text-secondary)] italic">
+                <p className="text-[15px] text-[color:var(--color-text-secondary)] italic">
                   &quot;{selectedFaction.motto}&quot;
                 </p>
               </motion.div>
@@ -494,21 +494,21 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                   backgroundColor: selectedFaction.colorVars.bg,
                 }}
               >
-                <div className="mb-2 text-[11px] text-[color:var(--color-muted)] uppercase tracking-wider">
+                <div className="mb-2 text-[13px] text-[color:var(--color-muted)] uppercase tracking-wider">
                   Faction Bonus
                 </div>
                 <div 
-                  className="flex items-center gap-2 text-[13px] font-medium mb-3"
+                  className="flex items-center gap-2 text-[15px] font-medium mb-3"
                   style={{ color: selectedFaction.color }}
                 >
-                  <span className="text-[14px]">★</span>
+                  <span className="text-[16px]">★</span>
                   {selectedFaction.bonus}
                 </div>
                 
-                <div className="mb-2 text-[11px] text-[color:var(--color-muted)] uppercase tracking-wider">
+                <div className="mb-2 text-[13px] text-[color:var(--color-muted)] uppercase tracking-wider">
                   Additional Benefits
                 </div>
-                <ul className="space-y-1.5 text-[12px] text-[color:var(--color-text-secondary)]">
+                <ul className="space-y-1.5 text-[14px] text-[color:var(--color-text-secondary)]">
                   <li className="flex items-center gap-2">
                     <span style={{ color: selectedFaction.color }}>+</span>
                     Themed UI colors
@@ -532,7 +532,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-[11px] text-[color:var(--color-muted)]"
+                className="text-[13px] text-[color:var(--color-muted)]"
               >
                 Theme can be changed in Settings without changing faction.
               </motion.p>
@@ -547,7 +547,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={prevStep}
-              className="flex items-center gap-1 rounded-lg border border-[color:var(--color-border)] px-3 py-1.5 text-[12px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50"
+              className="flex items-center gap-1 rounded-lg border border-[color:var(--color-border)] px-3 py-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-accent)]/50"
             >
               <ChevronLeft className="h-3 w-3" />
               {step === "intro" ? "Cancel" : "Back"}
@@ -555,7 +555,7 @@ export function FactionSelection({ playerLevel, currentFaction, onComplete, onCa
             <button
               onClick={nextStep}
               disabled={isLocked || (step === "selection" && !selectedFaction)}
-              className="flex items-center gap-1 rounded-lg px-4 py-1.5 text-[12px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 rounded-lg px-4 py-1.5 text-[14px] font-medium text-black transition-opacity hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: step === "confirm" && selectedFaction 
                   ? selectedFaction.color 

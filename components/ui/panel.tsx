@@ -31,7 +31,7 @@ interface PanelHeaderProps {
 export function PanelHeader({ title, action }: PanelHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-2 px-2.5 pt-2.5">
-      <h3 className="text-[12px] font-medium tracking-[0.04em] text-[color:var(--color-text)]">
+      <h3 className="text-[14px] font-medium tracking-[0.04em] text-[color:var(--color-text)]">
         {title}
       </h3>
       {action}

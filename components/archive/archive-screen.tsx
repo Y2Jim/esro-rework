@@ -62,14 +62,14 @@ export function ArchiveScreen() {
         <ScreenSection
           title="recent recovered"
           right={
-            <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+            <span className="text-[13px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
               last {recovery.length}
             </span>
           }
         >
           <ul className="flex flex-col gap-1">
             {recovery.length === 0 && (
-              <li className="rounded-md border border-dashed border-[color:var(--color-border-soft)] px-2.5 py-2 text-[10.5px] text-[color:var(--color-muted)]">
+              <li className="rounded-md border border-dashed border-[color:var(--color-border-soft)] px-2.5 py-2 text-[12px] text-[color:var(--color-muted)]">
                 no packets reconstructed yet
               </li>
             )}
@@ -81,7 +81,7 @@ export function ArchiveScreen() {
                 <div className="min-w-0">
                   <div
                     className={cn(
-                      "truncate text-[11.5px]",
+                      "truncate text-[13px]",
                       r.rarity === "legendary"
                         ? "prismatic-text font-medium"
                         : "text-[color:var(--color-foreground)]",
@@ -89,7 +89,7 @@ export function ArchiveScreen() {
                   >
                     {r.label}
                   </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
+                  <div className="mt-0.5 flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">
                     <span className="text-[color:var(--color-muted)]">
                       {r.type.replace("_", " ")}
                     </span>
@@ -99,7 +99,7 @@ export function ArchiveScreen() {
                     </span>
                   </div>
                 </div>
-                <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
+                <span className="shrink-0 text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-muted-2)]">
                   {now ? formatAgo(r.recoveredAt, now) : "--"}
                 </span>
               </li>
@@ -136,8 +136,8 @@ function ShardTile({
         : "border-[color:var(--color-violet)]/30"
   return (
     <div className={cn("rounded-md border bg-[color:var(--color-panel)]/50 px-2 py-1.5 text-center", borderClass)}>
-      <div className={cn("text-[15px] tabular-nums", toneClass)}>{value}</div>
-      <div className="text-[8.5px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+      <div className={cn("text-[17px] tabular-nums", toneClass)}>{value}</div>
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
         {label}
       </div>
     </div>

@@ -75,7 +75,7 @@ export function CraftingTab() {
   return (
     <div className="flex h-full flex-col space-y-3">
       {/* Resources inline */}
-      <div className="flex flex-wrap gap-3 text-[12px]">
+      <div className="flex flex-wrap gap-3 text-[14px]">
         <span className="text-[color:var(--color-muted)]">
           Relay <span className="text-[color:var(--color-text)]">{shards.relay_tokens}</span>
         </span>
@@ -90,7 +90,7 @@ export function CraftingTab() {
       {/* Active craft progress */}
       {activeCraft && (
         <div className="rounded-lg border border-[color:var(--color-amber)]/50 bg-[color:var(--color-amber)]/10 p-3">
-          <div className="flex items-center justify-between text-[12px]">
+          <div className="flex items-center justify-between text-[14px]">
             <span className="text-[color:var(--color-amber)]">Crafting: {activeCraft.label}</span>
             <span className="text-[color:var(--color-muted)]">{Math.round(progress * 100)}%</span>
           </div>
@@ -106,7 +106,7 @@ export function CraftingTab() {
       {/* Craft message */}
       {craftMessage && (
         <div className={cn(
-          "rounded-lg border px-3 py-2 text-[12px]",
+          "rounded-lg border px-3 py-2 text-[14px]",
           craftMessage.includes("Crafted")
             ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 text-[color:var(--color-green)]"
             : "border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 text-[color:var(--color-danger)]"
@@ -129,7 +129,7 @@ export function CraftingTab() {
                 setSelectedRecipe(null)
               }}
               className={cn(
-                "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[11px] uppercase tracking-wider transition-colors",
+                "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[13px] uppercase tracking-wider transition-colors",
                 isActive
                   ? "bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)]"
                   : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
@@ -165,7 +165,7 @@ export function CraftingTab() {
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <span className={cn("text-[12px] font-medium", rarityColor[recipe.output.rarity])}>
+                  <span className={cn("text-[14px] font-medium", rarityColor[recipe.output.rarity])}>
                     {recipe.label}
                   </span>
                   {craftable && !activeCraft && (
@@ -173,7 +173,7 @@ export function CraftingTab() {
                   )}
                 </div>
                 {!recipe.unlocked && recipe.requiredSkill && (
-                  <div className="mt-0.5 text-[10px] text-[color:var(--color-muted)]">
+                  <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
                     Requires {recipe.requiredSkill} Lv.{recipe.requiredSkillLevel}
                   </div>
                 )}
@@ -188,17 +188,17 @@ export function CraftingTab() {
             <div className="space-y-3">
               {/* Header */}
               <div>
-                <h3 className={cn("text-[13px] font-bold", rarityColor[selectedRecipe.output.rarity])}>
+                <h3 className={cn("text-[15px] font-bold", rarityColor[selectedRecipe.output.rarity])}>
                   {selectedRecipe.label}
                 </h3>
-                <p className="mt-0.5 text-[11px] leading-relaxed text-[color:var(--color-muted)]">
+                <p className="mt-0.5 text-[13px] leading-relaxed text-[color:var(--color-muted)]">
                   {selectedRecipe.description}
                 </p>
               </div>
 
               {/* Ingredients */}
               <div>
-                <div className="mb-1 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
                   Ingredients
                 </div>
                 <div className="space-y-1">
@@ -208,7 +208,7 @@ export function CraftingTab() {
                     return (
                       <div
                         key={idx}
-                        className="flex items-center justify-between text-[11px]"
+                        className="flex items-center justify-between text-[13px]"
                       >
                         <span className="text-[color:var(--color-text)]">{ing.label}</span>
                         <span className={hasEnough ? "text-[color:var(--color-green)]" : "text-[color:var(--color-danger)]"}>
@@ -222,22 +222,22 @@ export function CraftingTab() {
 
               {/* Output */}
               <div>
-                <div className="mb-1 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
                   Creates
                 </div>
                 <div className="rounded bg-[color:var(--color-panel)] p-2">
                   <div className="flex items-center justify-between">
-                    <span className={cn("text-[12px] font-medium", rarityColor[selectedRecipe.output.rarity])}>
+                    <span className={cn("text-[14px] font-medium", rarityColor[selectedRecipe.output.rarity])}>
                       {selectedRecipe.output.label}
                     </span>
-                    <span className="text-[11px] text-[color:var(--color-muted)]">
+                    <span className="text-[13px] text-[color:var(--color-muted)]">
                       x{selectedRecipe.output.qty}
                     </span>
                   </div>
                   {selectedRecipe.output.effects && (
                     <div className="mt-1 space-y-0.5">
                       {selectedRecipe.output.effects.map((effect, idx) => (
-                        <div key={idx} className="text-[10px] text-[color:var(--color-green)]">
+                        <div key={idx} className="text-[12px] text-[color:var(--color-green)]">
                           {effect}
                         </div>
                       ))}
@@ -247,7 +247,7 @@ export function CraftingTab() {
               </div>
 
               {/* Craft time */}
-              <div className="text-[10px] text-[color:var(--color-muted)]">
+              <div className="text-[12px] text-[color:var(--color-muted)]">
                 Craft time: {selectedRecipe.craftTime}s
               </div>
 
@@ -257,7 +257,7 @@ export function CraftingTab() {
                 onClick={() => handleCraft(selectedRecipe)}
                 disabled={!canCraft(selectedRecipe) || !!activeCraft}
                 className={cn(
-                  "w-full rounded border py-2 text-[12px] font-medium transition-colors",
+                  "w-full rounded border py-2 text-[14px] font-medium transition-colors",
                   canCraft(selectedRecipe) && !activeCraft
                     ? "border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/15 text-[color:var(--color-green)] hover:bg-[color:var(--color-green)]/25"
                     : "border-[color:var(--color-border)] text-[color:var(--color-muted)] opacity-50"
@@ -267,7 +267,7 @@ export function CraftingTab() {
               </button>
             </div>
           ) : (
-            <div className="flex h-full items-center justify-center text-[12px] text-[color:var(--color-muted)]">
+            <div className="flex h-full items-center justify-center text-[14px] text-[color:var(--color-muted)]">
               Select a recipe
             </div>
           )}
@@ -276,11 +276,11 @@ export function CraftingTab() {
 
       {/* Materials preview */}
       <div>
-        <div className="mb-1 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+        <div className="mb-1 text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Your Materials ({materials.length})
         </div>
         {materials.length === 0 ? (
-          <div className="text-[12px] text-[color:var(--color-muted)]">
+          <div className="text-[14px] text-[color:var(--color-muted)]">
             No materials. Complete expeditions to gather resources.
           </div>
         ) : (
@@ -288,7 +288,7 @@ export function CraftingTab() {
             {materials.slice(0, 12).map((item) => (
               <div
                 key={item.id}
-                className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[10px]"
+                className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[12px]"
                 title={item.description}
               >
                 <span className={rarityColor[item.rarity]}>{item.label}</span>
@@ -296,7 +296,7 @@ export function CraftingTab() {
               </div>
             ))}
             {materials.length > 12 && (
-              <div className="rounded border border-[color:var(--color-border)]/50 px-1.5 py-0.5 text-[10px] text-[color:var(--color-muted)]">
+              <div className="rounded border border-[color:var(--color-border)]/50 px-1.5 py-0.5 text-[12px] text-[color:var(--color-muted)]">
                 +{materials.length - 12} more
               </div>
             )}

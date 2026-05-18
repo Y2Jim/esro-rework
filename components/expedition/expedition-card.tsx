@@ -19,10 +19,10 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
     <article className="group rounded-md border border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/50 p-2.5 transition-colors hover:border-[color:var(--color-border)]">
       <header className="flex items-baseline justify-between gap-2">
         <div className="min-w-0">
-          <h4 className="truncate text-[13px] font-medium text-[color:var(--color-foreground)]">
+          <h4 className="truncate text-[15px] font-medium text-[color:var(--color-foreground)]">
             {exp.label}
           </h4>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
             <span>req · {exp.requiredSkill}</span>
             <span className="text-[color:var(--color-muted-2)]">·</span>
             <span>party {exp.suggestedParty}</span>
@@ -31,13 +31,13 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
         <div className="flex flex-col items-end">
           <span
             className={cn(
-              "text-[12px] uppercase tracking-[0.2em]",
+              "text-[14px] uppercase tracking-[0.2em]",
               riskTone[exp.risk],
             )}
           >
             {exp.risk}
           </span>
-          <span className="text-[11px] text-[color:var(--color-muted)]">
+          <span className="text-[13px] text-[color:var(--color-muted)]">
             {formatDuration(exp.duration)}
           </span>
         </div>
@@ -50,7 +50,7 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
           {exp.tags.map((t) => (
             <span
               key={t}
-              className="rounded-sm border border-[color:var(--color-border-soft)] px-1.5 py-[1px] text-[8.5px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]"
+              className="rounded-sm border border-[color:var(--color-border-soft)] px-1.5 py-[1px] text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]"
             >
               {t}
             </span>
@@ -58,13 +58,13 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
         </div>
         <button
           type="button"
-          className="shrink-0 rounded-sm border border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 px-2 py-[3px] text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-cyan)] transition-all hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
+          className="shrink-0 rounded-sm border border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 px-2 py-[3px] text-[13px] uppercase tracking-[0.25em] text-[color:var(--color-cyan)] transition-all hover:text-glow-cyan hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20"
         >
           begin
         </button>
       </div>
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9.5px] text-[color:var(--color-muted)]">
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[color:var(--color-muted)]">
         <span className="uppercase tracking-[0.2em]">rewards</span>
         <span className="text-[color:var(--color-green)]">
           +{exp.rewards.xp} xp

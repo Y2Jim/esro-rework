@@ -16,21 +16,21 @@ export function ExpeditionScreen() {
       <ScreenSection
         title="loadout summary"
         right={
-          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[13px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {loadout.length}/4 equipped
           </span>
         }
       >
         <div className="flex flex-wrap gap-1">
           {loadout.length === 0 && (
-            <div className="rounded-md border border-dashed border-[color:var(--color-border-soft)] px-2.5 py-1.5 text-[12px] text-[color:var(--color-muted)]">
+            <div className="rounded-md border border-dashed border-[color:var(--color-border-soft)] px-2.5 py-1.5 text-[14px] text-[color:var(--color-muted)]">
               no skills equipped · open skills page
             </div>
           )}
           {loadout.map((id) => (
             <span
               key={id}
-              className="rounded-sm border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/60 px-2 py-[2px] text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]"
+              className="rounded-sm border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/60 px-2 py-[2px] text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]"
             >
               {id}
             </span>
@@ -41,7 +41,7 @@ export function ExpeditionScreen() {
       <ScreenSection
         title="expedition ledger"
         right={
-          <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+          <span className="text-[13px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
             {expeditions.length} runs
           </span>
         }

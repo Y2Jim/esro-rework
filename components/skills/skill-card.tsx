@@ -71,7 +71,7 @@ export function SkillCard({
         {/* slot marker */}
         <div
           className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border text-[14px]",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border text-[16px]",
             selected
               ? "border-[color:var(--color-violet-bright)] text-[color:var(--color-violet-bright)] text-glow"
               : locked
@@ -86,7 +86,7 @@ export function SkillCard({
           <div className="flex items-baseline justify-between gap-2">
             <h4
               className={cn(
-                "truncate text-[12px]",
+                "truncate text-[14px]",
                 locked
                   ? "text-[color:var(--color-muted)]"
                   : "text-[color:var(--color-foreground)]",
@@ -94,16 +94,16 @@ export function SkillCard({
             >
               {skill.label}
               {skill.variant && (
-                <span className="ml-1.5 align-middle text-[8.5px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]">
+                <span className="ml-1.5 align-middle text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]">
                   · {skill.variant}
                 </span>
               )}
             </h4>
-            <span className="shrink-0 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
+            <span className="shrink-0 text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
               {locked ? "locked" : `lv ${skill.level}/${skill.maxLevel}`}
             </span>
           </div>
-          <p className="mt-0.5 line-clamp-2 text-[10.5px] leading-snug text-[color:var(--color-foreground)]/70">
+          <p className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-[color:var(--color-foreground)]/70">
             {skill.summary}
           </p>
 
@@ -127,7 +127,7 @@ export function SkillCard({
                 {skill.effects.map((effect, i) => (
                   <span 
                     key={i} 
-                    className={cn("text-[12px]", EFFECT_COLORS[effect.type])}
+                    className={cn("text-[14px]", EFFECT_COLORS[effect.type])}
                     title={effect.description}
                   >
                     {EFFECT_ICONS[effect.type]}
@@ -137,7 +137,7 @@ export function SkillCard({
               <button
                 type="button"
                 onClick={handleExpand}
-                className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-accent)]"
+                className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)] hover:text-[color:var(--color-accent)]"
               >
                 {expanded ? "hide" : "details"}
               </button>
@@ -149,7 +149,7 @@ export function SkillCard({
       {/* Expanded effects panel */}
       {expanded && skill.effects && (
         <div className="border-t border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/30 px-3 py-2">
-          <div className="mb-1.5 text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          <div className="mb-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
             Effects at Level {skill.level}
           </div>
           <div className="space-y-1">
@@ -157,7 +157,7 @@ export function SkillCard({
               const totalBonus = effect.value * skill.level
               const sign = effect.value > 0 ? "+" : ""
               return (
-                <div key={i} className="flex items-start gap-2 text-[12px]">
+                <div key={i} className="flex items-start gap-2 text-[14px]">
                   <span className={cn("shrink-0", EFFECT_COLORS[effect.type])}>
                     {EFFECT_ICONS[effect.type]}
                   </span>
@@ -174,7 +174,7 @@ export function SkillCard({
             })}
           </div>
           {skill.primaryExpeditions && skill.primaryExpeditions.length > 0 && (
-            <div className="mt-2 text-[11px] text-[color:var(--color-muted)]">
+            <div className="mt-2 text-[13px] text-[color:var(--color-muted)]">
               Primary for: {skill.primaryExpeditions.map(e => e.replace(/_/g, " ")).join(", ")}
             </div>
           )}
