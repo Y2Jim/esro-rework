@@ -13,9 +13,9 @@ export function ScreenSection({
   className?: string
 }) {
   return (
-    <section className={cn("px-4 py-2.5", className)}>
-      <header className="mb-2 flex items-center justify-between gap-2">
-        <h3 className="text-[13px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+    <section className={cn("px-5 py-3", className)}>
+      <header className="mb-2.5 flex items-center justify-between gap-2">
+        <h3 className="text-[14px] font-semibold uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
           {title}
         </h3>
         {right}
