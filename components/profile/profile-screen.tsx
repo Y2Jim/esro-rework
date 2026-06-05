@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
-import { rarityColor, rarityAnimation } from "@/lib/rarity"
+import { rarityColor, rarityAnimation, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 
@@ -553,7 +553,7 @@ function SettingsTab() {
                         theme.rarity === "uncommon" ? "bg-[#60b060]/20 text-[#60b060] border border-[#60b060]/30" :
                         "bg-[#9aaa9a]/20 text-[#9aaa9a] border border-[#9aaa9a]/30"
                       )}>
-                        {theme.rarity}
+                        {rarityLabel[theme.rarity] || theme.rarity}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -777,7 +777,7 @@ function TitlePreviewSelector() {
       {/* Title display */}
       <div className="rounded bg-[color:var(--color-panel)]/50 p-3 text-center">
         <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
-          {currentTitle.rarity}
+          {rarityLabel[currentTitle.rarity] || currentTitle.rarity}
         </div>
         <TitleDisplay 
           title={currentTitle.label} 

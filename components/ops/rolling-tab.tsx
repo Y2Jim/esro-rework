@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { motion, AnimatePresence } from "framer-motion"
+import { rarityLabel } from "@/lib/rarity"
 
 const rarityColors: Record<string, string> = {
   common: "text-[color:var(--color-muted)]",
@@ -202,9 +203,9 @@ export function RollingTab() {
                         <div className={cn("text-[16px] font-medium", rarityColors[currentItem.rarity])}>
                           {currentItem.label}
                         </div>
-                        <div className="mt-1 text-[14px] capitalize text-[color:var(--color-muted)]">
-                          {currentItem.rarity}
-                        </div>
+        <div className="mt-1 text-[14px] text-[color:var(--color-muted)]">
+          {rarityLabel[currentItem.rarity] || currentItem.rarity}
+        </div>
                       </motion.div>
                     ) : showResult && finalResult ? (
                       <motion.div
@@ -250,10 +251,10 @@ export function RollingTab() {
                             ? `${finalResult.salvageReward.label} x${finalResult.salvageReward.qty}`
                             : finalResult.label
                           }
-                        </motion.div>
-                        <div className="mt-1 text-[15px] capitalize text-[color:var(--color-muted)]">
-                          {finalResult.rarity}
-                        </div>
+              </motion.div>
+              <div className="mt-1 text-[15px] text-[color:var(--color-muted)]">
+                {rarityLabel[finalResult.rarity] || finalResult.rarity}
+              </div>
                         {/* Salvage bonus info */}
                         {finalResult.isDuplicate && (
                           <motion.div
@@ -387,10 +388,10 @@ export function RollingTab() {
                       Duplicate: {item.duplicateOf}
                     </span>
                   )}
-                </div>
-                <span className="text-[13px] capitalize text-[color:var(--color-muted)]">
-                  {item.rarity}
-                </span>
+              </div>
+              <span className="text-[13px] text-[color:var(--color-muted)]">
+                {rarityLabel[item.rarity] || item.rarity}
+              </span>
               </div>
             ))}
           </div>
