@@ -703,18 +703,18 @@
     --color-border: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
   }
   
-  /* Void Rift: Unstable flickering border */
+  /* Void Rift: Slow pulsing border glow */
   .theme-effect-rift [class*="border-"] {
     box-shadow: 
       0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
       0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
       inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
-    animation: theme-rift-flicker 0.15s steps(2) infinite;
+    animation: theme-rift-pulse 3s ease-in-out infinite;
   }
   
-  @keyframes theme-rift-flicker {
+  @keyframes theme-rift-pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.85; }
+    50% { opacity: 0.75; }
   }
   
   /* Void Rift: Tear effect at edges */
@@ -800,19 +800,19 @@
     }
   }
   
-  /* Void Rift: Text with unstable glow */
+  /* Void Rift: Text with slow pulsing glow */
   .theme-effect-rift .text-\[color\:var\(--color-accent\)\] {
     text-shadow: 
       0 0 4px var(--rollable-accent),
       0 0 8px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
-    animation: theme-rift-flicker 0.15s steps(2) infinite;
+    animation: theme-rift-pulse 3s ease-in-out infinite;
   }
   
   .theme-effect-rift button {
     box-shadow: 
       0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
       0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
-    animation: theme-rift-flicker 0.15s steps(2) infinite;
+    animation: theme-rift-pulse 3s ease-in-out infinite;
   }
 
   /* ===== MYTHIC: Quantum Flux - Reality-bending chromatic shifts ===== */
