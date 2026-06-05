@@ -825,7 +825,7 @@
     box-shadow: 
       0 0 6px var(--rollable-accent),
       0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
-    animation: theme-quantum-shift 3s linear infinite;
+    animation: theme-quantum-shift 30s linear infinite;
   }
   
   @keyframes theme-quantum-shift {
@@ -854,9 +854,9 @@
       #8000ff,
       #ff0080
     );
-    box-shadow: 0 0 15px currentColor;
-    animation: theme-quantum-beam 2s linear infinite;
-    opacity: 0.8;
+    box-shadow: 0 0 10px currentColor;
+    animation: theme-quantum-beam 25s linear infinite;
+    opacity: 0.6;
   }
   .theme-effect-quantum .theme-effect-edge-glow::after {
     content: "";
@@ -875,17 +875,17 @@
       #ff0080,
       #8000ff
     );
-    box-shadow: 0 0 15px currentColor;
-    animation: theme-quantum-beam 2s linear infinite reverse;
-    opacity: 0.8;
+    box-shadow: 0 0 10px currentColor;
+    animation: theme-quantum-beam 25s linear infinite reverse;
+    opacity: 0.6;
   }
   
   @keyframes theme-quantum-beam {
-    0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
-    100% { background-position: 200% 50%; filter: hue-rotate(360deg); }
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
   }
   
-  /* Quantum Flux: Probability particles blinking in/out */
+  /* Quantum Flux: Gentle floating particles */
   .theme-effect-quantum .theme-effect-particles {
     display: block;
     background-image: 
@@ -894,30 +894,22 @@
       radial-gradient(2px 2px at 50% 15%, #ffff00, transparent),
       radial-gradient(2px 2px at 70% 75%, #0080ff, transparent),
       radial-gradient(2px 2px at 85% 35%, #8000ff, transparent);
-    animation: theme-quantum-blink 0.5s steps(1) infinite;
-    opacity: 0.6;
+    animation: theme-quantum-float 12s ease-in-out infinite;
+    opacity: 0.4;
   }
   
-  @keyframes theme-quantum-blink {
+  @keyframes theme-quantum-float {
     0%, 100% { 
-      opacity: 0.6;
-      transform: scale(1);
-    }
-    25% { 
-      opacity: 0;
-      transform: scale(0);
+      opacity: 0.4;
+      transform: translateY(0);
     }
     50% { 
-      opacity: 0.8;
-      transform: scale(1.2);
-    }
-    75% { 
-      opacity: 0.3;
-      transform: scale(0.8);
+      opacity: 0.6;
+      transform: translateY(-3px);
     }
   }
   
-  /* Quantum Flux: Chromatic aberration halo */
+  /* Quantum Flux: Subtle chromatic aberration halo */
   .theme-effect-quantum .theme-effect-halo {
     display: block;
   }
@@ -927,38 +919,38 @@
     inset: 0;
     border-radius: inherit;
     box-shadow: 
-      inset -2px 0 4px rgba(255, 0, 128, 0.3),
-      inset 2px 0 4px rgba(0, 128, 255, 0.3);
-    animation: theme-quantum-aberration 2s ease-in-out infinite;
+      inset -1px 0 3px rgba(255, 0, 128, 0.2),
+      inset 1px 0 3px rgba(0, 128, 255, 0.2);
+    animation: theme-quantum-aberration 8s ease-in-out infinite;
     pointer-events: none;
   }
   
   @keyframes theme-quantum-aberration {
     0%, 100% { 
       box-shadow: 
-        inset -2px 0 4px rgba(255, 0, 128, 0.3),
-        inset 2px 0 4px rgba(0, 128, 255, 0.3);
+        inset -1px 0 3px rgba(255, 0, 128, 0.2),
+        inset 1px 0 3px rgba(0, 128, 255, 0.2);
     }
     50% { 
       box-shadow: 
-        inset -4px 0 8px rgba(255, 0, 128, 0.5),
-        inset 4px 0 8px rgba(0, 128, 255, 0.5);
+        inset -2px 0 5px rgba(255, 0, 128, 0.3),
+        inset 2px 0 5px rgba(0, 128, 255, 0.3);
     }
   }
   
-  /* Quantum Flux: Text with hue rotation */
+  /* Quantum Flux: Text with slow hue rotation */
   .theme-effect-quantum .text-\[color\:var\(--color-accent\)\] {
     text-shadow: 
       0 0 6px var(--rollable-accent),
       0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
-    animation: theme-quantum-shift 3s linear infinite;
+    animation: theme-quantum-shift 30s linear infinite;
   }
   
   .theme-effect-quantum button {
     box-shadow: 
       0 0 6px var(--rollable-accent),
       0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
-    animation: theme-quantum-shift 3s linear infinite;
+    animation: theme-quantum-shift 30s linear infinite;
   }
 
   * {
