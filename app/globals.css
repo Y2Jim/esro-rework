@@ -597,6 +597,370 @@
     animation: theme-radiant-border 4s ease-in-out infinite;
   }
 
+  /* ===== LEGENDARY: Solar Flare - Blazing corona with heat shimmer ===== */
+  .theme-effect-flare {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 55%, transparent);
+  }
+  
+  /* Solar Flare: Heat distortion border */
+  .theme-effect-flare [class*="border-"] {
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-flare-heat 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes theme-flare-heat {
+    0%, 100% { 
+      box-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    }
+    50% { 
+      box-shadow: 
+        0 0 10px color-mix(in srgb, var(--rollable-accent) 70%, transparent),
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+    }
+  }
+  
+  /* Solar Flare: Corona rays emanating from edges */
+  .theme-effect-flare .theme-effect-edge-glow {
+    display: block;
+  }
+  .theme-effect-flare .theme-effect-edge-glow::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--rollable-accent) 60%, transparent) 25%,
+      var(--rollable-accent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 60%, transparent) 75%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 15px var(--rollable-accent),
+      0 -5px 25px color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+    animation: theme-flare-corona 2s ease-in-out infinite;
+    filter: blur(1px);
+  }
+  
+  @keyframes theme-flare-corona {
+    0%, 100% { 
+      opacity: 0.7;
+      transform: scaleX(1);
+    }
+    50% { 
+      opacity: 1;
+      transform: scaleX(1.05);
+    }
+  }
+  
+  /* Solar Flare: Ember particles rising */
+  .theme-effect-flare .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 20% 95%, var(--rollable-accent), transparent),
+      radial-gradient(3px 3px at 40% 90%, color-mix(in srgb, var(--rollable-accent) 80%, #ff0000), transparent),
+      radial-gradient(2px 2px at 60% 92%, var(--rollable-accent), transparent),
+      radial-gradient(3px 3px at 80% 88%, color-mix(in srgb, var(--rollable-accent) 80%, #ff0000), transparent);
+    animation: theme-flare-embers 3s ease-out infinite;
+    opacity: 0.6;
+  }
+  
+  @keyframes theme-flare-embers {
+    0% { 
+      transform: translateY(0) scale(1);
+      opacity: 0.6;
+    }
+    100% { 
+      transform: translateY(-60px) scale(0.3);
+      opacity: 0;
+    }
+  }
+  
+  /* Solar Flare: Text glow */
+  .theme-effect-flare .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 4px var(--rollable-accent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-flare-heat 1.5s ease-in-out infinite;
+  }
+  
+  .theme-effect-flare button {
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-flare-heat 1.5s ease-in-out infinite;
+  }
+
+  /* ===== LEGENDARY: Void Rift - Dark matter tears with unstable edges ===== */
+  .theme-effect-rift {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  /* Void Rift: Unstable flickering border */
+  .theme-effect-rift [class*="border-"] {
+    box-shadow: 
+      0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+      inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    animation: theme-rift-flicker 0.15s steps(2) infinite;
+  }
+  
+  @keyframes theme-rift-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+  
+  /* Void Rift: Tear effect at edges */
+  .theme-effect-rift .theme-effect-halo {
+    display: block;
+  }
+  .theme-effect-rift .theme-effect-halo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--rollable-accent) 30%,
+      color-mix(in srgb, var(--rollable-accent) 50%, #000000) 50%,
+      var(--rollable-accent) 70%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-rift-tear 4s ease-in-out infinite;
+  }
+  .theme-effect-rift .theme-effect-halo::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--rollable-accent) 30%,
+      color-mix(in srgb, var(--rollable-accent) 50%, #000000) 50%,
+      var(--rollable-accent) 70%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-rift-tear 4s ease-in-out infinite 2s;
+  }
+  
+  @keyframes theme-rift-tear {
+    0%, 100% { 
+      opacity: 0.5;
+      height: 60%;
+      top: 20%;
+    }
+    50% { 
+      opacity: 0.9;
+      height: 80%;
+      top: 10%;
+    }
+  }
+  
+  /* Void Rift: Dark matter particles being pulled in */
+  .theme-effect-rift .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 5% 50%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 15% 30%, color-mix(in srgb, var(--rollable-accent) 70%, transparent), transparent),
+      radial-gradient(2px 2px at 10% 70%, var(--rollable-accent), transparent),
+      radial-gradient(2px 2px at 95% 50%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 85% 30%, color-mix(in srgb, var(--rollable-accent) 70%, transparent), transparent),
+      radial-gradient(2px 2px at 90% 70%, var(--rollable-accent), transparent);
+    animation: theme-rift-pull 3s linear infinite;
+    opacity: 0.5;
+  }
+  
+  @keyframes theme-rift-pull {
+    0% { 
+      transform: scaleX(1.2);
+      opacity: 0.5;
+    }
+    100% { 
+      transform: scaleX(0.8);
+      opacity: 0;
+    }
+  }
+  
+  /* Void Rift: Text with unstable glow */
+  .theme-effect-rift .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 4px var(--rollable-accent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+    animation: theme-rift-flicker 0.15s steps(2) infinite;
+  }
+  
+  .theme-effect-rift button {
+    box-shadow: 
+      0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
+    animation: theme-rift-flicker 0.15s steps(2) infinite;
+  }
+
+  /* ===== MYTHIC: Quantum Flux - Reality-bending chromatic shifts ===== */
+  .theme-effect-quantum {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+  }
+  
+  /* Quantum Flux: Rainbow-shifting border */
+  .theme-effect-quantum [class*="border-"] {
+    box-shadow: 
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-quantum-shift 3s linear infinite;
+  }
+  
+  @keyframes theme-quantum-shift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  
+  /* Quantum Flux: Prismatic edge beams */
+  .theme-effect-quantum .theme-effect-edge-glow {
+    display: block;
+  }
+  .theme-effect-quantum .theme-effect-edge-glow::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      #ff0080,
+      #ff8000,
+      #ffff00,
+      #00ff80,
+      #0080ff,
+      #8000ff,
+      #ff0080
+    );
+    box-shadow: 0 0 15px currentColor;
+    animation: theme-quantum-beam 2s linear infinite;
+    opacity: 0.8;
+  }
+  .theme-effect-quantum .theme-effect-edge-glow::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      #8000ff,
+      #0080ff,
+      #00ff80,
+      #ffff00,
+      #ff8000,
+      #ff0080,
+      #8000ff
+    );
+    box-shadow: 0 0 15px currentColor;
+    animation: theme-quantum-beam 2s linear infinite reverse;
+    opacity: 0.8;
+  }
+  
+  @keyframes theme-quantum-beam {
+    0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+    100% { background-position: 200% 50%; filter: hue-rotate(360deg); }
+  }
+  
+  /* Quantum Flux: Probability particles blinking in/out */
+  .theme-effect-quantum .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 15% 25%, #ff0080, transparent),
+      radial-gradient(2px 2px at 30% 65%, #00ff80, transparent),
+      radial-gradient(2px 2px at 50% 15%, #ffff00, transparent),
+      radial-gradient(2px 2px at 70% 75%, #0080ff, transparent),
+      radial-gradient(2px 2px at 85% 35%, #8000ff, transparent);
+    animation: theme-quantum-blink 0.5s steps(1) infinite;
+    opacity: 0.6;
+  }
+  
+  @keyframes theme-quantum-blink {
+    0%, 100% { 
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    25% { 
+      opacity: 0;
+      transform: scale(0);
+    }
+    50% { 
+      opacity: 0.8;
+      transform: scale(1.2);
+    }
+    75% { 
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+  }
+  
+  /* Quantum Flux: Chromatic aberration halo */
+  .theme-effect-quantum .theme-effect-halo {
+    display: block;
+  }
+  .theme-effect-quantum .theme-effect-halo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 
+      inset -2px 0 4px rgba(255, 0, 128, 0.3),
+      inset 2px 0 4px rgba(0, 128, 255, 0.3);
+    animation: theme-quantum-aberration 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes theme-quantum-aberration {
+    0%, 100% { 
+      box-shadow: 
+        inset -2px 0 4px rgba(255, 0, 128, 0.3),
+        inset 2px 0 4px rgba(0, 128, 255, 0.3);
+    }
+    50% { 
+      box-shadow: 
+        inset -4px 0 8px rgba(255, 0, 128, 0.5),
+        inset 4px 0 8px rgba(0, 128, 255, 0.5);
+    }
+  }
+  
+  /* Quantum Flux: Text with hue rotation */
+  .theme-effect-quantum .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-quantum-shift 3s linear infinite;
+  }
+  
+  .theme-effect-quantum button {
+    box-shadow: 
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-quantum-shift 3s linear infinite;
+  }
+
   * {
     box-sizing: border-box;
     scrollbar-width: thin;

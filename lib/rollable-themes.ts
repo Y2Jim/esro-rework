@@ -143,8 +143,40 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     effectClass: "theme-effect-shimmer",
     unlocked: false,
   },
+  {
+    id: "toxic_surge",
+    label: "Toxic Surge",
+    description: "Corrosive green waves pulsing with hazardous energy.",
+    rarity: "epic",
+    colors: {
+      accent: "#40e040",
+      accentBright: "#80ff80",
+      background: "#060c06",
+      panel: "#0a140a",
+      secondary: "#a0ffa0",
+    },
+    intensity: 1.6,
+    effectClass: "theme-effect-pulse",
+    unlocked: false,
+  },
+  {
+    id: "blood_circuit",
+    label: "Blood Circuit",
+    description: "Deep crimson pathways of overclocked systems.",
+    rarity: "epic",
+    colors: {
+      accent: "#d03040",
+      accentBright: "#ff5060",
+      background: "#0c0606",
+      panel: "#140a0a",
+      secondary: "#ff8090",
+    },
+    intensity: 1.6,
+    effectClass: "theme-effect-shimmer",
+    unlocked: false,
+  },
 
-  // ============ LEGENDARY THEME ============
+  // ============ LEGENDARY THEMES ============
   // Intense glow, border style, intensity 1.8
   {
     id: "neon_pulse",
@@ -163,8 +195,42 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     borderStyle: "glow",
     unlocked: false,
   },
+  {
+    id: "solar_flare",
+    label: "Solar Flare",
+    description: "Blazing orange-gold corona of pure stellar energy.",
+    rarity: "legendary",
+    colors: {
+      accent: "#ff8020",
+      accentBright: "#ffa040",
+      background: "#0c0804",
+      panel: "#140c06",
+      secondary: "#ffc060",
+    },
+    intensity: 1.8,
+    effectClass: "theme-effect-flare",
+    borderStyle: "glow",
+    unlocked: false,
+  },
+  {
+    id: "void_rift",
+    label: "Void Rift",
+    description: "Deep purple tears in reality leaking dark matter.",
+    rarity: "legendary",
+    colors: {
+      accent: "#9020d0",
+      accentBright: "#b040f0",
+      background: "#08040c",
+      panel: "#0c0614",
+      secondary: "#d060ff",
+    },
+    intensity: 1.8,
+    effectClass: "theme-effect-rift",
+    borderStyle: "glow",
+    unlocked: false,
+  },
 
-  // ============ MYTHIC THEME (TRANSCENDENT TIER) ============
+  // ============ MYTHIC THEMES (TRANSCENDENT TIER) ============
   // Maximum intensity, shimmer border, unique animation
   {
     id: "primordial_glow",
@@ -180,6 +246,23 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     },
     intensity: 2.0,
     effectClass: "theme-effect-radiant",
+    borderStyle: "shimmer",
+    unlocked: false,
+  },
+  {
+    id: "quantum_flux",
+    label: "Quantum Flux",
+    description: "Reality-bending chromatic shifts across all spectrums.",
+    rarity: "mythic",
+    colors: {
+      accent: "#ff40ff",
+      accentBright: "#ff80ff",
+      background: "#080808",
+      panel: "#101010",
+      secondary: "#c0ffff",
+    },
+    intensity: 2.0,
+    effectClass: "theme-effect-quantum",
     borderStyle: "shimmer",
     unlocked: false,
   },

@@ -107,11 +107,11 @@ export function ChannelTabs() {
               aria-selected={active}
               onClick={() => setChannel(c.id)}
               className={cn(
-                "relative flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-[13px] font-medium uppercase tracking-[0.08em] transition-all",
+                "relative flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium uppercase tracking-[0.08em] transition-all",
                 style.hover,
                 active
-                  ? cn(style.text, style.activeBg, style.activeBorder)
-                  : cn("text-[color:var(--color-muted)]", style.inactiveBorder),
+                  ? cn(style.text, style.activeBg, "border", style.activeBorder)
+                  : cn("text-[color:var(--color-muted)] border-transparent"),
               )}
             >
               {/* icon */}
