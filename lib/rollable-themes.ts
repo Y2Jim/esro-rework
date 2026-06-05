@@ -164,12 +164,12 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     unlocked: false,
   },
 
-  // ============ MYTHIC THEME ============
+  // ============ MYTHIC THEME (TRANSCENDENT TIER) ============
   // Maximum intensity, shimmer border, unique animation
   {
     id: "primordial_glow",
     label: "Radiant Aether",
-    description: "Ethereal white-gold luminescence from the source signal.",
+    description: "Transcendent white-gold luminescence from the source signal.",
     rarity: "mythic",
     colors: {
       accent: "#f0e0a0",
