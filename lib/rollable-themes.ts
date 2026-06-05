@@ -4,17 +4,17 @@ import type { RollableUITheme, Rarity } from "./types"
  * Rollable UI Themes - Each theme is visually distinct with no color overlap.
  * Higher rarity themes have more visual effects and intensity.
  * 
- * Color families used (no overlap):
- * - Common: Warm gray (ash), Sepia brown (parchment)
- * - Uncommon: Forest green (moss), Steel blue (iron)
- * - Rare: Deep magenta (void), Burnt orange (rust)
- * - Epic: Electric violet (storm), Rose gold (bloom)
- * - Legendary: Cyan plasma (neon)
- * - Mythic: Ethereal white-gold (radiant)
+ * In-world rarity names (used in UI):
+ * - Faded (common): Warm gray, Sepia brown
+ * - Recovered (uncommon): Forest green, Steel blue
+ * - Refined (rare): Deep magenta, Burnt orange
+ * - Legendary (epic): Electric violet, Rose gold, Toxic green, Crimson
+ * - Iridescent (legendary): Cyan plasma, Solar orange, Void purple
+ * - Transcendent (mythic): Ethereal white-gold, Quantum chromatic
  */
 
 export const ROLLABLE_THEMES: RollableUITheme[] = [
-  // ============ COMMON THEMES ============
+  // ============ FADED THEMES (common) ============
   // Simple color changes, no special effects, intensity 1.0
   {
     id: "terminal_green",
@@ -45,7 +45,7 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     unlocked: false,
   },
 
-  // ============ UNCOMMON THEMES ============
+  // ============ RECOVERED THEMES (uncommon) ============
   // Slightly more vibrant, intensity 1.2
   {
     id: "ocean_depths",
@@ -76,7 +76,7 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     unlocked: false,
   },
 
-  // ============ RARE THEMES ============
+  // ============ REFINED THEMES (rare) ============
   // More saturated colors, secondary accent, intensity 1.4
   {
     id: "void_static",
@@ -109,7 +109,7 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     unlocked: false,
   },
 
-  // ============ EPIC THEMES ============
+  // ============ LEGENDARY THEMES (epic) ============
   // Vivid colors, special effect class, intensity 1.6
   {
     id: "ember_core",
@@ -176,7 +176,7 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     unlocked: false,
   },
 
-  // ============ LEGENDARY THEMES ============
+  // ============ IRIDESCENT THEMES (legendary) ============
   // Intense glow, border style, intensity 1.8
   {
     id: "neon_pulse",
@@ -230,7 +230,7 @@ export const ROLLABLE_THEMES: RollableUITheme[] = [
     unlocked: false,
   },
 
-  // ============ MYTHIC THEMES (TRANSCENDENT TIER) ============
+  // ============ TRANSCENDENT THEMES (mythic) ============
   // Maximum intensity, shimmer border, unique animation
   {
     id: "primordial_glow",
