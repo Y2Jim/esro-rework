@@ -35,7 +35,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Apply effect class for epic+ themes
-      document.documentElement.classList.remove("theme-effect-pulse", "theme-effect-shimmer", "theme-effect-glow", "theme-effect-radiant")
+      document.documentElement.classList.remove(
+        "theme-effect-pulse", 
+        "theme-effect-shimmer", 
+        "theme-effect-glow", 
+        "theme-effect-radiant",
+        "theme-effect-flare",
+        "theme-effect-rift",
+        "theme-effect-quantum"
+      )
       if (rollableTheme.effectClass) {
         document.documentElement.classList.add(rollableTheme.effectClass)
       }
@@ -65,7 +73,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.style.removeProperty("--rollable-intensity")
       document.documentElement.style.removeProperty("--rollable-secondary")
       document.documentElement.style.removeProperty("--rollable-border-style")
-      document.documentElement.classList.remove("theme-effect-pulse", "theme-effect-shimmer", "theme-effect-glow", "theme-effect-radiant")
+      document.documentElement.classList.remove(
+        "theme-effect-pulse", 
+        "theme-effect-shimmer", 
+        "theme-effect-glow", 
+        "theme-effect-radiant",
+        "theme-effect-flare",
+        "theme-effect-rift",
+        "theme-effect-quantum"
+      )
     }
   }, [uiTheme, mounted])
 
