@@ -37,7 +37,7 @@ export function PartySlot({
             </div>
           </div>
         </div>
-        <span className="text-[11px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
+        <span className="text-[13px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
           invite
         </span>
       </button>
@@ -75,7 +75,7 @@ export function PartySlot({
               {member.handle}
             </span>
             {member.leader && (
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
+              <span className="text-[12px] uppercase tracking-[0.25em] text-[color:var(--color-green)]">
                 lead
               </span>
             )}

@@ -55,7 +55,7 @@ export function ProfileScreen() {
             <span className="text-[14px]">{t.icon}</span>
             {t.label}
             {t.id === "notifications" && unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-[color:var(--color-danger)] text-[11px] text-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-[color:var(--color-danger)] text-[13px] text-white">
                 {unreadCount}
               </span>
             )}

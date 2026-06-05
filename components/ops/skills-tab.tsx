@@ -206,7 +206,7 @@ function SkillButton({
             </span>
           )}
           {hasVariants && (
-            <span className="rounded bg-[color:var(--color-accent)]/20 px-1 py-0.5 text-[11px] uppercase tracking-wider text-[color:var(--color-accent)]">
+            <span className="rounded bg-[color:var(--color-accent)]/20 px-1 py-0.5 text-[13px] uppercase tracking-wider text-[color:var(--color-accent)]">
               variants
             </span>
           )}

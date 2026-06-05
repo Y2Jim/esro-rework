@@ -43,13 +43,13 @@ export function ItemDetail({ item }: { item: InventoryItem }) {
       <div className="mt-2 flex gap-1.5">
         <button
           type="button"
-          className="flex-1 rounded-sm border border-[color:var(--color-amber-muted)]/50 bg-[color:var(--color-amber)]/10 px-2 py-1 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-amber)] transition-colors hover:text-glow-amber hover:border-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
+          className="flex-1 rounded-sm border border-[color:var(--color-amber-muted)]/50 bg-[color:var(--color-amber)]/10 px-2 py-1 text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-amber)] transition-colors hover:text-glow-amber hover:border-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/20"
         >
           {isUnknown ? "reconstruct" : "use"}
         </button>
         <button
           type="button"
-          className="flex-1 rounded-sm border border-[color:var(--color-border-soft)] px-2 py-1 text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-border)] hover:text-[color:var(--color-lilac)]"
+          className="flex-1 rounded-sm border border-[color:var(--color-border-soft)] px-2 py-1 text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-border)] hover:text-[color:var(--color-lilac)]"
         >
           trade
         </button>

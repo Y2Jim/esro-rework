@@ -58,7 +58,7 @@ export function ChatInput() {
           type="submit"
           disabled={readOnly || !value.trim()}
           className={cn(
-            "rounded-sm border px-2 py-[3px] text-[11px] uppercase tracking-[0.25em] transition-all",
+            "rounded-sm border px-2 py-[3px] text-[13px] uppercase tracking-[0.25em] transition-all",
             "border-[color:var(--color-cyan-muted)]/50 bg-[color:var(--color-cyan)]/10 text-[color:var(--color-cyan)]",
             "hover:border-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/20 hover:text-glow-cyan",
             "disabled:opacity-30 disabled:bg-transparent disabled:hover:border-[color:var(--color-border)] disabled:hover:text-[color:var(--color-muted)]",
@@ -67,7 +67,7 @@ export function ChatInput() {
           send
         </button>
       </div>
-      <div className="mt-1 px-0.5 text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-muted-2)]">
+      <div className="mt-1 px-0.5 text-[12px] uppercase tracking-[0.25em] text-[color:var(--color-muted-2)]">
         {def?.restricted
           ? "traffic not logged to registry"
           : "enter to send · 220 char limit"}

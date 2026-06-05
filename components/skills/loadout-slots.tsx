@@ -46,7 +46,7 @@ export function LoadoutSlots({ loadout }: { loadout: string[] }) {
                 className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-[color:var(--color-violet-bright)]"
               />
             )}
-            <span className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-violet-bright)] text-glow">
+            <span className="text-[13px] uppercase tracking-[0.18em] text-[color:var(--color-violet-bright)] text-glow">
               {s.label.slice(0, 7)}
             </span>
             <span className="mt-0.5 text-[13px] text-[color:var(--color-lilac)]">

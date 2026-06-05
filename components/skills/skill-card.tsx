@@ -94,7 +94,7 @@ export function SkillCard({
             >
               {skill.label}
               {skill.variant && (
-                <span className="ml-1.5 align-middle text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]">
+                <span className="ml-1.5 align-middle text-[12px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]">
                   · {skill.variant}
                 </span>
               )}

@@ -50,7 +50,7 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
           {exp.tags.map((t) => (
             <span
               key={t}
-              className="rounded-sm border border-[color:var(--color-border-soft)] px-1.5 py-[1px] text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]"
+              className="rounded-sm border border-[color:var(--color-border-soft)] px-1.5 py-[1px] text-[12px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]"
             >
               {t}
             </span>
@@ -64,7 +64,7 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
         </button>
       </div>
 
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-[color:var(--color-muted)]">
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-[color:var(--color-muted)]">
         <span className="uppercase tracking-[0.2em]">rewards</span>
         <span className="text-[color:var(--color-green)]">
           +{exp.rewards.xp} xp

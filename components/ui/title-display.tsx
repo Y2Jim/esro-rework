@@ -82,7 +82,7 @@ export function TitleDisplay({
     >
       {title}
       {showRarityLabel && (
-        <span className="opacity-60 text-[11px] lowercase">
+        <span className="opacity-60 text-[13px] lowercase">
           ({rarityLabel[rarity]})
         </span>
       )}

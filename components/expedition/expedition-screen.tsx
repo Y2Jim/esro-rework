@@ -30,7 +30,7 @@ export function ExpeditionScreen() {
           {loadout.map((id) => (
             <span
               key={id}
-              className="rounded-sm border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/60 px-2 py-[2px] text-[11px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]"
+              className="rounded-sm border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/60 px-2 py-[2px] text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-lilac)]"
             >
               {id}
             </span>

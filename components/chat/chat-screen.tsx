@@ -19,7 +19,7 @@ export function ChatScreen() {
 
       {/* channel header strip */}
       <div className="relative z-10 flex items-center justify-between gap-2 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/70 px-3 py-1.5">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em]">
+        <div className="flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">
           <span
             className={
               restricted

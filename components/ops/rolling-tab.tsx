@@ -369,7 +369,7 @@ export function RollingTab() {
                   <div className="flex items-center gap-2">
                     {/* Type badge */}
                     <span className={cn(
-                      "rounded border px-1.5 py-0.5 text-[11px] font-mono uppercase tracking-wider",
+                      "rounded border px-1.5 py-0.5 text-[13px] font-mono uppercase tracking-wider",
                       typeLabels[item.type]?.bg || "bg-[color:var(--color-panel-2)] border-[color:var(--color-border)]",
                       typeLabels[item.type]?.color || "text-[color:var(--color-muted)]"
                     )}>

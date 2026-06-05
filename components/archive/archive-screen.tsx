@@ -137,7 +137,7 @@ function ShardTile({
   return (
     <div className={cn("rounded-md border bg-[color:var(--color-panel)]/50 px-2 py-1.5 text-center", borderClass)}>
       <div className={cn("text-[17px] tabular-nums", toneClass)}>{value}</div>
-      <div className="text-[10px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
+      <div className="text-[12px] uppercase tracking-[0.25em] text-[color:var(--color-muted)]">
         {label}
       </div>
     </div>
