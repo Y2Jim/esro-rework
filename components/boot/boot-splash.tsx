@@ -43,7 +43,7 @@ export function BootSplash() {
   }, [setBooted])
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-between px-6 pb-8 pt-16">
+    <div className="relative flex h-full w-full flex-col items-center justify-between px-6 pb-8 pt-20">
       {/* top status */}
       <div className="flex w-full items-center justify-between text-[13px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
         <span>esro · v0.1</span>

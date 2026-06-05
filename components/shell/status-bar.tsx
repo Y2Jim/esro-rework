@@ -15,7 +15,7 @@ export function StatusBar() {
   }, [])
 
   return (
-    <div className="relative z-20 flex items-center justify-between px-6 pb-1 pt-5 text-[14px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]">
+    <div className="relative z-20 flex items-center justify-between px-6 pb-1 pt-8 text-[14px] font-medium uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
       <span className="font-medium">{time}</span>
       <span className="flex items-center gap-3">
         <span>relay</span>

@@ -356,8 +356,8 @@ if (briefingIndex > 0) {
         }}
       />
 
-      {/* Progress indicator */}
-      <div className="px-4 py-3 border-b border-[rgba(168,123,255,0.1)]">
+      {/* Progress indicator - extra top padding for LB-Phone native header */}
+      <div className="px-4 pb-3 pt-8 border-b border-[rgba(168,123,255,0.1)]">
         <div className="flex items-center justify-center gap-1.5">
           {["incoming", "briefing", "race", "courier", "avatar", "skills", "name", "confirm"].map((s, i) => (
             <div

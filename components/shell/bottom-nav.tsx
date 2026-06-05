@@ -54,7 +54,7 @@ export function BottomNav() {
                     </span>
                   )}
                 </span>
-                <span className="text-[12px] uppercase tracking-[0.18em]">
+                <span className="text-[11px] font-medium uppercase tracking-[0.05em]">
                   {it.label}
                 </span>
                 {active && (

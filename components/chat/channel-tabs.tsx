@@ -85,9 +85,9 @@ export function ChannelTabs() {
   const unread = useEsroStore((s) => s.unread)
 
   return (
-    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 px-2 pb-1 pt-2 backdrop-blur">
+    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 px-1.5 pb-1 pt-2 backdrop-blur">
       <div
-        className="flex gap-1.5 overflow-x-auto pb-1"
+        className="flex gap-1 overflow-x-auto pb-1"
         role="tablist"
         aria-label="channels"
         style={{
@@ -107,7 +107,7 @@ export function ChannelTabs() {
               aria-selected={active}
               onClick={() => setChannel(c.id)}
               className={cn(
-                "relative flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[14px] uppercase tracking-[0.15em] transition-all",
+                "relative flex shrink-0 items-center gap-1 rounded-md border px-2 py-1 text-[13px] font-medium uppercase tracking-[0.08em] transition-all",
                 style.hover,
                 active
                   ? cn(style.text, style.activeBg, style.activeBorder)
@@ -118,7 +118,7 @@ export function ChannelTabs() {
               <span
                 aria-hidden
                 className={cn(
-                  "text-[15px] leading-none",
+                  "text-[14px] leading-none",
                   active ? style.text : "text-[color:var(--color-muted-2)]",
                 )}
               >
