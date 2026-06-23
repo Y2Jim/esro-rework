@@ -53,7 +53,7 @@ import {
   skills as seedSkills,
 } from "@/lib/mock-data"
 
-interface EsroState {
+export interface EsroState {
   booted: boolean
   setBooted: (v: boolean) => void
 
@@ -90,6 +90,10 @@ interface EsroState {
   sendMessage: (channel: ChannelId, body: string) => void
   unread: Record<ChannelId, number>
   markRead: (c: ChannelId) => void
+  /** Message-log pagination: 0 = newest page, higher = further back */
+  pageOffset: number
+  nudgePage: (delta: number) => void
+  resetPage: () => void
 
   // Quick Actions
   quickActions: QuickAction[]
@@ -104,6 +108,8 @@ interface EsroState {
   skills: Skill[]
   loadout: string[]
   toggleLoadout: (id: string) => void
+  /** Alias of toggleLoadout used by loadout UI components */
+  toggleLoadoutSkill: (id: string) => void
   setSkillVariant: (skillId: string, variantId: string) => void
 
   // Ops - Crafting/Rolling
@@ -432,7 +438,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Terminal
   channel: "PUBLIC",
   setChannel: (c) => {
-    set({ channel: c })
+    set({ channel: c, pageOffset: 0 })
     get().markRead(c)
   },
   channels: seedChannels,
@@ -453,7 +459,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       body: trimmed.slice(0, 220),
       at: Date.now(),
     }
-    set({ messages: [...messages, next] })
+    set({ messages: [...messages, next], pageOffset: 0 })
   },
   unread: seedChannels.reduce(
     (acc, c) => {
@@ -464,6 +470,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   ),
   markRead: (c) =>
     set((s) => ({ unread: { ...s.unread, [c]: 0 } })),
+
+  // Message-log pagination
+  pageOffset: 0,
+  nudgePage: (delta) =>
+    set((s) => ({ pageOffset: Math.max(0, s.pageOffset + delta) })),
+  resetPage: () => set({ pageOffset: 0 }),
 
   // Quick Actions
   quickActions: seedQuickActions,
@@ -525,6 +537,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       if (s.loadout.length >= 4) return s
       return { loadout: [...s.loadout, id] }
     }),
+  toggleLoadoutSkill: (id) => get().toggleLoadout(id),
   setSkillVariant: (skillId, variantId) =>
     set((s) => ({
       skills: s.skills.map((skill) =>

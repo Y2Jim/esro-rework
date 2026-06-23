@@ -16,6 +16,11 @@ export type ScreenId =
   | "profile"
   | "admin"
   | "inventory"
+  | "faction"
+  | "expedition"
+  | "party"
+  | "skills"
+  | "archive"
 
 export type SocialTab = "party" | "faction" | "friends" | "trade"
 
@@ -114,6 +119,11 @@ export type RollableThemeId =
   | "crystal_lattice"
   | "neon_pulse"
   | "primordial_glow"
+  | "toxic_surge"
+  | "blood_circuit"
+  | "solar_flare"
+  | "void_rift"
+  | "quantum_flux"
 
 export interface RollableUITheme {
   id: RollableThemeId
@@ -138,7 +148,7 @@ export interface RollableUITheme {
 }
 
 // Avatar system
-export type AvatarLayerType = "base" | "skin" | "eyes" | "hair" | "accessory" | "hat" | "flair"
+export type AvatarLayerType = "base" | "skin" | "eyes" | "mouth" | "hair" | "accessory" | "hat" | "flair"
 
 export interface AvatarLayer {
   type: AvatarLayerType
@@ -183,6 +193,8 @@ export interface Skill {
   level: number
   maxLevel: number
   locked: boolean
+  /** Display label of the currently selected variant, if any */
+  variant?: string
   /** Currently active variant id */
   activeVariant?: string
   /** All available variants for this skill */
@@ -380,12 +392,21 @@ export interface TradeHistoryEntry {
 export interface RecoveryResult {
   id: string
   label: string
-  type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair"
+  type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair" | "salvage"
   rarity: Rarity
   recoveredAt: number
   vanityData?: {
     layerType: AvatarLayerType
     variant: number
+  }
+  /** Set when the rolled reward was already owned and converted to salvage */
+  isDuplicate?: boolean
+  /** Label of the original reward this salvage was converted from */
+  duplicateOf?: string
+  /** Salvage payout granted in place of a duplicate */
+  salvageReward?: {
+    label: string
+    qty: number
   }
 }
 
@@ -404,6 +425,9 @@ export interface OwnedTitle {
   equipped: boolean
   source?: string // How it was obtained (e.g., "Archive Recovery", "Waykeepers Rank 3", "Achievement")
 }
+
+/** A title a player owns; structurally identical to OwnedTitle. */
+export type ProfileTitle = OwnedTitle
 
 export interface ProfileBadge {
   id: string
@@ -444,6 +468,8 @@ export interface Profile {
   level: number
   xp: number
   xpToNext: number
+  /** Currency balance earned from expeditions and contracts */
+  tokens: number
   ownedTitles: OwnedTitle[]
   badges: ProfileBadge[]
   notifications: ProfileNotification[]
@@ -609,6 +635,7 @@ export type AdminAction =
   | "add_materials"
   | "unlock_cosmetics"
   | "unlock_titles"
+  | "edit_player"
 
 export interface AdminLog {
   id: string

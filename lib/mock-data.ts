@@ -451,6 +451,7 @@ export const expeditions: Expedition[] = [
   {
     id: "signal_trace",
     label: "Signal Trace",
+    description: "Track a drifting relay signal back to its source across calm sectors.",
     duration: 900,
     risk: "Low",
     tags: ["recon", "relay"],
@@ -461,6 +462,7 @@ export const expeditions: Expedition[] = [
   {
     id: "archive_dive",
     label: "Archive Dive",
+    description: "Descend into a stable archive sector to recover intact data fragments.",
     duration: 1200,
     risk: "Medium",
     tags: ["archive", "analysis"],
@@ -475,6 +477,7 @@ export const expeditions: Expedition[] = [
   {
     id: "courier_run",
     label: "Courier Run",
+    description: "Deliver supplies along an established route under a tight schedule.",
     duration: 780,
     risk: "Low",
     tags: ["supply", "logistics"],
@@ -1389,6 +1392,7 @@ export const profile: Profile = {
   level: 14,
   xp: 2840,
   xpToNext: 3200,
+  tokens: 320,
   vanityItems: vanityItems,
   ownedTitles: [
     {
