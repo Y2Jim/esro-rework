@@ -7,6 +7,7 @@ import { ExpeditionsTab } from "./expeditions-tab"
 import { SkillsTab } from "./skills-tab"
 import { CraftingTab } from "./crafting-tab"
 import { RollingTab } from "./rolling-tab"
+import { ActiveExpeditionView } from "@/components/expedition/active-expedition-view"
 
 const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "expeditions", label: "Expeditions", icon: "▷", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
@@ -18,6 +19,12 @@ const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: s
 export function OpsScreen() {
   const opsTab = useEsroStore((s) => s.opsTab)
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
+  const activeExpedition = useEsroStore((s) => s.activeExpedition)
+
+  // An active expedition takes over the entire Ops screen.
+  if (activeExpedition) {
+    return <ActiveExpeditionView />
+  }
 
   return (
     <div className="flex h-full flex-col">

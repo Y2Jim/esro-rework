@@ -41,7 +41,6 @@ import {
   channels as seedChannels,
   contracts as seedContracts,
   expeditions as seedExpeditions,
-  activeExpedition as seedActiveExpedition,
   factionProjects as seedFactionProjects,
   identity as seedIdentity,
   inventory as seedInventory,
@@ -471,17 +470,41 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Expeditions
   expeditions: seedExpeditions,
-  activeExpedition: seedActiveExpedition,
+  activeExpedition: null,
   startExpedition: (id) => {
     const exp = get().expeditions.find((e) => e.id === id)
     if (!exp || get().activeExpedition) return
+
+    // Assemble the deploying squad from available party members (leader first),
+    // capped at the expedition's suggested party size.
+    const { party, identity } = get()
+    const maxSquad = Math.max(1, exp.suggestedParty)
+    const available = [...party]
+      .filter((m) => m.avatar && (m.status === "ready" || m.status === "idle" || m.leader))
+      .sort((a, b) => (b.leader ? 1 : 0) - (a.leader ? 1 : 0))
+    const squadHandles = available.slice(0, maxSquad).map((m) => m.handle)
+    // Guarantee the player is on the roster.
+    if (!squadHandles.includes(identity.handle)) {
+      squadHandles.unshift(identity.handle)
+    }
+
+    const totalStages = exp.stages?.length ?? 4
+
     set({
       activeExpedition: {
         id: exp.id,
         label: exp.label,
         progress: 0,
         etaSeconds: exp.duration,
-        log: ["Expedition started..."],
+        log: [
+          "Signal lock established.",
+          `Squad of ${squadHandles.length} deployed to ${exp.label}.`,
+          "Traversing relay network...",
+        ],
+        currentStage: 1,
+        totalStages,
+        partyMembers: squadHandles,
+        startedAt: Date.now(),
       },
     })
   },
@@ -1097,6 +1120,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     
     if (!exp) return
     
+    const { party, identity } = get()
+    const squadHandles = [identity.handle, ...party.filter((m) => m.avatar && !m.leader).map((m) => m.handle)].slice(
+      0,
+      Math.max(1, exp.suggestedParty),
+    )
+
     set({
       activeExpedition: {
         id: exp.id,
@@ -1108,6 +1137,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
           "Signal lock established.",
           "Traversing relay network...",
         ],
+        currentStage: 1,
+        totalStages: exp.stages?.length ?? 4,
+        partyMembers: squadHandles,
+        startedAt: Date.now(),
       },
     })
   },
