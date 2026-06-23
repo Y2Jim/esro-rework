@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"app/page.tsx -> @/components/phone/phone-stage\":{\"id\":\"app/page.tsx -> @/components/phone/phone-stage\",\"files\":[\"static/chunks/_app-pages-browser_components_phone_phone-stage_tsx.js\"]}}"
