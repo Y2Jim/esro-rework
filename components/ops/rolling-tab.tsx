@@ -5,6 +5,7 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { motion, AnimatePresence } from "framer-motion"
 import { rarityLabel } from "@/lib/rarity"
+import type { Rarity } from "@/lib/types"
 
 const rarityColors: Record<string, string> = {
   common: "text-[color:var(--color-muted)]",
@@ -204,7 +205,7 @@ export function RollingTab() {
                           {currentItem.label}
                         </div>
         <div className="mt-1 text-[14px] text-[color:var(--color-muted)]">
-          {rarityLabel[currentItem.rarity] || currentItem.rarity}
+          {rarityLabel[currentItem.rarity as Rarity] || currentItem.rarity}
         </div>
                       </motion.div>
                     ) : showResult && finalResult ? (

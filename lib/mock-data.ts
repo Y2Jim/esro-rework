@@ -1382,6 +1382,8 @@ export const profile: Profile = {
     rarity: "common",
     equipped: true,
   },
+  race: null,
+  courier: null,
   faction: {
     id: "waykeepers",
     label: "Waykeepers",

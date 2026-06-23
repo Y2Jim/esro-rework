@@ -16,7 +16,7 @@ export function ChatInput() {
     e?.preventDefault()
     if (readOnly) return
     if (!value.trim()) return
-    send(value)
+    send(channel, value)
     setValue("")
   }
 

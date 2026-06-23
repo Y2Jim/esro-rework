@@ -84,6 +84,7 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   base: 3,        // head shapes: round, square, oval
   skin: SKIN_COLORS.length,
   eyes: 6,
+  mouth: 5,       // Neutral, Smirk, Frown, Open, Masked
   hair: 10,       // increased hair options
   accessory: 22,  // 0=none, 1-16 standard, 17-21 mythic
   hat: 24,        // 0=none, 1-18 standard, 19-23 mythic

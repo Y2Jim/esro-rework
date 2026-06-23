@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useEsroStore } from "@/store/use-esro-store"
+import { useEsroStore, type EsroState } from "@/store/use-esro-store"
 import { PartyAvatar } from "@/components/avatar/pixel-avatar"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import { rarityColor } from "@/lib/rarity"
@@ -87,9 +87,9 @@ function PartyTab({
   profile, 
   identity 
 }: { 
-  party: ReturnType<typeof useEsroStore>["party"]
-  profile: ReturnType<typeof useEsroStore>["profile"]
-  identity: ReturnType<typeof useEsroStore>["identity"]
+  party: EsroState["party"]
+  profile: EsroState["profile"]
+  identity: EsroState["identity"]
 }) {
   const maxSlots = 4
   
@@ -186,7 +186,7 @@ function PartyTab({
   )
 }
 
-function ProjectsTab({ projects }: { projects: ReturnType<typeof useEsroStore>["factionProjects"] }) {
+function ProjectsTab({ projects }: { projects: EsroState["factionProjects"] }) {
   return (
     <div className="space-y-4">
       <div className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
