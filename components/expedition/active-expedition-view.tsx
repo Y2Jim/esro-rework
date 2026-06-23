@@ -492,88 +492,101 @@ export function ActiveExpeditionView() {
 
           {/* Field view: squad vs threat (token clash) */}
           <div className="border-b border-[color:var(--color-border-soft)] px-4 py-3">
-            <div className="flex items-center justify-between gap-3">
-              {/* Squad cluster */}
-              <div className="flex flex-col items-center gap-1">
-                <div className="flex -space-x-2">
-                  {crew.slice(0, 3).map((c) => (
-                    <div
-                      key={c.handle}
-                      className="rounded-sm ring-1 ring-[color:var(--color-bg)]"
-                    >
-                      <PixelAvatar config={c.avatar} size="xs" showFlair={false} />
-                    </div>
-                  ))}
-                </div>
-                <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-cyan)]">
-                  Squad
-                </span>
+            {/* Status labels above the route */}
+            <div className="mb-3 flex items-center justify-between">
+              <motion.span
+                className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                animate={battle?.clash ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3 }}
+                style={{ color: battle?.active ? "var(--color-danger)" : "var(--color-cyan)" }}
+              >
+                {battle?.active ? "Engaging" : "Advancing"}
+              </motion.span>
+              <span
+                className="max-w-[140px] truncate text-[11px] uppercase tracking-wider"
+                style={{ color: battle?.active ? "var(--color-danger)" : "var(--color-muted)" }}
+              >
+                {battle?.active ? battle.enemy : "→ Extraction Point"}
+              </span>
+            </div>
+
+            {/* Route track: the squad token travels start → finish flag as progress advances */}
+            <div className="relative h-10">
+              {/* baseline path with traveled fill */}
+              <div className="absolute inset-x-1 top-1/2 h-1 -translate-y-1/2 rounded-full bg-[color:var(--color-panel)]">
+                <motion.div
+                  className="h-full rounded-full bg-[color:var(--color-accent)]/70"
+                  animate={{ width: `${progress * 100}%` }}
+                  transition={{ ease: "linear", duration: TICK_MS / 1000 }}
+                />
               </div>
 
-              {/* Center status */}
-              <div className="flex flex-1 flex-col items-center">
-                {battle?.active ? (
-                  <motion.div
-                    animate={battle.clash ? { scale: [1, 1.25, 1] } : { scale: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-[13px] font-semibold uppercase tracking-[0.2em] text-[color:var(--color-danger)]"
-                  >
-                    Engaging
-                  </motion.div>
-                ) : (
-                  <div className="text-[12px] uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
-                    Advancing
-                  </div>
-                )}
-                {/* connector */}
-                <div className="mt-1 flex w-full items-center gap-1 px-2">
-                  <div className="h-px flex-1 bg-[color:var(--color-border)]" />
-                  <span
-                    className="text-[12px]"
-                    style={{ color: battle?.active ? "var(--color-danger)" : "var(--color-muted)" }}
-                  >
-                    {battle?.active ? "✦" : "»"}
-                  </span>
-                  <div className="h-px flex-1 bg-[color:var(--color-border)]" />
-                </div>
+              {/* stage waypoint markers */}
+              {Array.from({ length: Math.max(0, totalStages - 1) }).map((_, i) => {
+                const pos = ((i + 1) / totalStages) * 100
+                const passed = progress * 100 >= pos
+                return (
+                  <div
+                    key={i}
+                    className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[1px] border transition-colors"
+                    style={{
+                      left: `${pos}%`,
+                      borderColor: passed ? "var(--color-accent)" : "var(--color-border)",
+                      backgroundColor: passed ? "var(--color-accent)" : "var(--color-bg)",
+                    }}
+                  />
+                )
+              })}
+
+              {/* start node */}
+              <div className="absolute left-1 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[color:var(--color-cyan)]/60 bg-[color:var(--color-cyan)]/25" />
+
+              {/* finish flag — fills in on arrival */}
+              <div
+                className="absolute right-0 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-sm border transition-colors"
+                style={{
+                  borderColor: progress >= 1 ? "var(--color-success)" : "var(--color-border)",
+                  backgroundColor: progress >= 1 ? "var(--color-success)" : "transparent",
+                  color: progress >= 1 ? "var(--color-bg)" : "var(--color-muted)",
+                }}
+              >
+                <span className="text-[12px] leading-none">⚑</span>
               </div>
 
-              {/* Threat token */}
-              <div className="flex flex-col items-center gap-1">
-                <AnimatePresence mode="wait">
-                  {battle?.active ? (
-                    <motion.div
-                      key="enemy"
-                      initial={{ opacity: 0, scale: 0.6 }}
-                      animate={
-                        battle.clash
-                          ? { opacity: 1, scale: 1, x: [-4, 0] }
-                          : { opacity: 1, scale: 1, x: 0 }
-                      }
-                      exit={{ opacity: 0, scale: 0.6 }}
-                      className="flex h-6 w-6 rotate-45 items-center justify-center rounded-sm border border-[color:var(--color-danger)]/60 bg-[color:var(--color-danger)]/15"
-                    >
-                      <span className="-rotate-45 text-[12px] text-[color:var(--color-danger)]">✶</span>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="waypoint"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.5 }}
-                      exit={{ opacity: 0 }}
-                      className="flex h-6 w-6 items-center justify-center"
-                    >
-                      <span className="text-[14px] text-[color:var(--color-muted)]">◇</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <span
-                  className="max-w-[84px] truncate text-[11px] uppercase tracking-wider"
-                  style={{ color: battle?.active ? "var(--color-danger)" : "var(--color-muted)" }}
+              {/* threat token — appears just ahead of the squad during a battle */}
+              {battle?.active && (
+                <motion.div
+                  className="absolute top-1/2 z-10 -translate-y-1/2"
+                  style={{ left: `${Math.min(progress * 100 + 9, 92)}%` }}
+                  animate={battle.clash ? { x: [-4, 0], y: "-50%" } : { x: 0, y: "-50%" }}
+                  transition={{ duration: 0.3 }}
                 >
-                  {battle?.active ? battle.enemy : "Clear"}
-                </span>
-              </div>
+                  <div className="flex h-6 w-6 -translate-x-1/2 rotate-45 items-center justify-center rounded-sm border border-[color:var(--color-danger)]/60 bg-[color:var(--color-danger)]/15">
+                    <span className="-rotate-45 text-[12px] text-[color:var(--color-danger)]">✶</span>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* traveling squad token */}
+              <motion.div
+                className="absolute top-1/2 z-20 -translate-y-1/2"
+                animate={{ left: `${progress * 100}%` }}
+                transition={{ ease: "linear", duration: TICK_MS / 1000 }}
+              >
+                <div className="-translate-x-1/2">
+                  <motion.div
+                    className="flex -space-x-2 rounded-full bg-[color:var(--color-bg)]/85 p-0.5 ring-1 ring-[color:var(--color-accent)]/40"
+                    animate={battle?.clash ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {crew.slice(0, 3).map((c) => (
+                      <div key={c.handle} className="rounded-sm ring-1 ring-[color:var(--color-bg)]">
+                        <PixelAvatar config={c.avatar} size="xs" showFlair={false} />
+                      </div>
+                    ))}
+                  </motion.div>
+                </div>
+              </motion.div>
             </div>
 
             {/* Enemy HP pips */}
