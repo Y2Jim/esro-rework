@@ -6,7 +6,20 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
-import type { AvatarConfig } from "@/lib/types"
+import { STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
+import {
+  aggregateStats,
+  checkClause,
+  deriveMemberStats,
+  EVENT_CHECK,
+  getRunModifiers,
+  planBattle,
+  resolveCheck,
+  type BattlePlan,
+  type CheckOutcome,
+  type ExpEventType,
+} from "@/lib/expedition-sim"
+import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 
 /** Sped-up run length (seconds of viewing time) and tick cadence. */
 const RUN_SECONDS = 90
@@ -25,6 +38,7 @@ interface FeedEntry {
   type: EventType
   text: string
   stage: number
+  outcome?: CheckOutcome
 }
 
 interface CrewMember {
@@ -36,6 +50,7 @@ interface CrewMember {
   hpMax: number
   hp: number
   flashUntil: number
+  stats: BaseStats
 }
 
 interface BattleState {
@@ -45,6 +60,7 @@ interface BattleState {
   active: boolean
   clash: boolean
   cooldown: number
+  plan: BattlePlan
 }
 
 const EVENT_STYLE: Record<EventType, { color: string; label: string }> = {
@@ -53,6 +69,15 @@ const EVENT_STYLE: Record<EventType, { color: string; label: string }> = {
   battle: { color: "var(--color-danger)", label: "Battle" },
   hazard: { color: "var(--color-amber)", label: "Hazard" },
   rest: { color: "var(--color-green)", label: "Regroup" },
+}
+
+/** Marker glyph + color for the resolved outcome of a stat check. */
+const OUTCOME_STYLE: Record<CheckOutcome, { glyph: string; color: string } | null> = {
+  crit: { glyph: "++", color: "var(--color-success)" },
+  success: { glyph: "+", color: "var(--color-success)" },
+  fail: { glyph: "!", color: "var(--color-amber)" },
+  badfail: { glyph: "x", color: "var(--color-danger)" },
+  neutral: null,
 }
 
 const SECTORS = [
@@ -155,6 +180,9 @@ export function ActiveExpeditionView() {
   const expeditions = useEsroStore((s) => s.expeditions)
   const party = useEsroStore((s) => s.party)
   const identity = useEsroStore((s) => s.identity)
+  const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
+  const characterRace = useEsroStore((s) => s.characterRace)
+  const characterFaction = useEsroStore((s) => s.characterFaction)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
 
@@ -173,6 +201,7 @@ export function ActiveExpeditionView() {
       : [identity.handle]
     return handles.map((handle) => {
       if (handle === identity.handle) {
+        const stats = getPlayerStats()
         return {
           handle,
           short: shortHandle(handle),
@@ -182,22 +211,35 @@ export function ActiveExpeditionView() {
           hpMax: 6,
           hp: 6,
           flashUntil: 0,
+          stats,
         }
       }
       const m = party.find((p) => p.handle === handle)
+      const role = m?.role ?? "Crew"
       return {
         handle,
         short: shortHandle(handle),
         avatar: m?.avatar ?? identity.avatar,
-        role: m?.role ?? "Crew",
+        role,
         isPlayer: false,
         hpMax: 5,
         hp: 5,
         flashUntil: 0,
+        stats: deriveMemberStats(handle, role),
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeExpedition?.id])
+
+  // Aggregate squad stats and the player's active lineage/faction passives.
+  const squadStats = useMemo<BaseStats>(
+    () => aggregateStats(initialCrew.map((c) => c.stats)),
+    [initialCrew],
+  )
+  const runMods = useMemo(
+    () => getRunModifiers(characterRace?.id as RaceId | undefined, characterFaction?.id as RaceId | undefined),
+    [characterRace?.id, characterFaction?.id],
+  )
 
   // Simulation state lives in refs; we force a render each tick for smoothness.
   const [, forceTick] = useReducer((x) => x + 1, 0)
@@ -212,6 +254,12 @@ export function ActiveExpeditionView() {
   const timelineRef = useRef<TimelineEvent[]>([])
   const feedIdRef = useRef(0)
   const battlesWonRef = useRef(0)
+  // Run outcome tallies for the completion summary.
+  const checksPassedRef = useRef(0)
+  const checksFailedRef = useRef(0)
+  const lootFoundRef = useRef(0)
+  const hiddenRoutesRef = useRef(0)
+  const woundedRef = useRef(false)
 
   // Reset all sim state when a new expedition starts.
   useEffect(() => {
@@ -222,6 +270,11 @@ export function ActiveExpeditionView() {
     firedRef.current = new Set()
     feedIdRef.current = 0
     battlesWonRef.current = 0
+    checksPassedRef.current = 0
+    checksFailedRef.current = 0
+    lootFoundRef.current = 0
+    hiddenRoutesRef.current = 0
+    woundedRef.current = false
     timelineRef.current = buildTimeline(risk, initialCrew)
     phaseRef.current = "running"
     setPhase("running")
@@ -232,33 +285,103 @@ export function ActiveExpeditionView() {
   const progress = Math.min(1, elapsedRef.current / RUN_SECONDS)
   const stageOf = (p: number) => Math.min(totalStages, Math.floor(p * totalStages) + 1)
 
-  const pushFeed = (type: EventType, text: string) => {
+  const pushFeed = (type: EventType, text: string, outcome?: CheckOutcome) => {
     feedIdRef.current += 1
     feedRef.current = [
-      { id: feedIdRef.current, type, text, stage: stageOf(elapsedRef.current / RUN_SECONDS) },
+      { id: feedIdRef.current, type, text, outcome, stage: stageOf(elapsedRef.current / RUN_SECONDS) },
       ...feedRef.current,
     ].slice(0, 24)
   }
 
-  const damageRandomCrew = () => {
+  const damageRandomCrew = (amount = 1) => {
     const candidates = crewRef.current.filter((c) => c.hp > 1)
     if (candidates.length === 0) return
     const target = randItem(candidates)
-    target.hp -= 1
+    target.hp = Math.max(1, target.hp - amount)
     target.flashUntil = Date.now() + 600
+    woundedRef.current = true
+  }
+
+  const tallyOutcome = (outcome: CheckOutcome) => {
+    if (outcome === "crit" || outcome === "success") checksPassedRef.current += 1
+    else if (outcome === "fail" || outcome === "badfail") checksFailedRef.current += 1
   }
 
   const fireEvent = (ev: TimelineEvent) => {
+    const p = elapsedRef.current / RUN_SECONDS
+    const stageIndex = stageOf(p) - 1
+    const crewSize = crewRef.current.length
+
+    // Rest events never require a check — the squad simply recovers.
+    if (ev.type === "rest") {
+      pushFeed("rest", ev.text ?? "Squad regroups.")
+      return
+    }
+
+    const result = resolveCheck({
+      type: ev.type as ExpEventType,
+      squad: squadStats,
+      crewSize,
+      risk,
+      stageIndex,
+      mods: runMods,
+    })
+    tallyOutcome(result.outcome)
+    const check = EVENT_CHECK[ev.type as ExpEventType]
+    const statLabel = check ? STAT_LABELS[check.primary] : ""
+    const clause = checkClause(result, statLabel)
+
     if (ev.type === "battle") {
       const enemy = randItem(ENEMIES)
-      const hp = 4 + Math.floor(Math.random() * 4) // 4-7 pips
-      battleRef.current = { enemy, hpMax: hp, hp, active: true, clash: false, cooldown: 400 }
-      pushFeed("battle", `Contact — ${enemy} engaging the squad.`)
-    } else if (ev.type === "hazard") {
-      if (Math.random() < 0.6) damageRandomCrew()
-      pushFeed("hazard", ev.text ?? "Hazard encountered.")
+      const plan = planBattle(result.outcome, risk, stageIndex)
+      battleRef.current = {
+        enemy,
+        hpMax: plan.enemyHp,
+        hp: plan.enemyHp,
+        active: true,
+        clash: false,
+        cooldown: 400,
+        plan,
+      }
+      const intro = plan.overwhelmed
+        ? `Ambush — ${enemy} overwhelms the approach. (${clause})`
+        : `Contact — ${enemy} engaging the squad. (${clause})`
+      pushFeed("battle", intro, result.outcome)
+      return
+    }
+
+    if (ev.type === "hazard") {
+      if (result.damage > 0) damageRandomCrew(result.damage)
+      const base = ev.text ?? "Hazard encountered."
+      const tail =
+        result.damage > 0
+          ? ` ${result.damage} wounded — ${clause}.`
+          : ` Squad holds — ${clause}.`
+      pushFeed("hazard", base + tail, result.outcome)
+      return
+    }
+
+    if (ev.type === "discovery") {
+      if (result.loot) {
+        lootFoundRef.current += 1
+        const base = ev.text ?? "Cache located."
+        const bonus = result.bonusLoot ? " Veiled instincts turn up an extra haul." : ""
+        pushFeed("discovery", `${base}${bonus} (${clause})`, result.outcome)
+      } else {
+        pushFeed("discovery", `Cache picked clean — nothing recoverable. (${clause})`, result.outcome)
+      }
+      return
+    }
+
+    // travel
+    if (result.hiddenRoute) {
+      hiddenRoutesRef.current += 1
+      pushFeed("travel", `${ev.text ?? "Crossing the route."} A hidden path opens ahead. (${clause})`, result.outcome)
+    } else if (result.damage > 0) {
+      damageRandomCrew(result.damage)
+      pushFeed("travel", `Wrong turn — the squad backtracks under fire. (${clause})`, result.outcome)
     } else {
-      pushFeed(ev.type, ev.text ?? "")
+      pushFeed("travel", `${ev.text ?? "Crossing the route."} (${clause})`, result.outcome)
     }
   }
 
@@ -272,14 +395,18 @@ export function ActiveExpeditionView() {
     }
     b.cooldown = 600
     b.clash = true
-    // Enemy takes a hit each exchange.
-    b.hp = Math.max(0, b.hp - (1 + (Math.random() < 0.4 ? 1 : 0)))
-    // Squad occasionally takes a glancing hit.
-    if (Math.random() < 0.45) damageRandomCrew()
+    // Squad lands a hit based on its combat readiness (from the pre-rolled check).
+    if (Math.random() < b.plan.squadHitChance) {
+      b.hp = Math.max(0, b.hp - 1)
+    }
+    // Squad takes a hit based on how badly outmatched it is.
+    if (Math.random() < b.plan.squadTakeChance) {
+      damageRandomCrew(b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1)
+    }
     if (b.hp <= 0) {
       b.active = false
       battlesWonRef.current += 1
-      pushFeed("battle", `${b.enemy} neutralized — squad pressing on.`)
+      pushFeed("battle", `${b.enemy} neutralized — squad pressing on.`, "success")
       if (Math.random() < 0.5) pushFeed("discovery", "Salvage stripped from the wreckage.")
       window.setTimeout(() => {
         battleRef.current = null
@@ -514,6 +641,51 @@ export function ActiveExpeditionView() {
             </div>
           </div>
 
+          {/* Squad readiness: aggregated stats + active lineage/faction passives */}
+          <div className="border-b border-[color:var(--color-border-soft)] px-4 py-3">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[12px] uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
+                Squad Readiness
+              </span>
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                {(["atk", "def", "focus", "luck"] as const).map((stat) => (
+                  <span
+                    key={stat}
+                    className="flex items-center gap-1 rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[11px] tabular-nums"
+                    title={`Squad ${STAT_LABELS[stat]}`}
+                  >
+                    <span className="uppercase tracking-wider" style={{ color: STAT_COLORS[stat] }}>
+                      {STAT_LABELS[stat]}
+                    </span>
+                    <span className="font-medium text-[color:var(--color-text)]">{squadStats[stat]}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            {runMods.passives.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {runMods.passives.map((pas) => (
+                  <span
+                    key={pas.name}
+                    className={cn(
+                      "rounded border px-1.5 py-0.5 text-[11px]",
+                      pas.source === "Lineage"
+                        ? "border-[color:var(--color-accent)]/40 text-[color:var(--color-accent)]"
+                        : "border-[color:var(--color-cyan)]/40 text-[color:var(--color-cyan)]",
+                    )}
+                    title={pas.effect}
+                  >
+                    {pas.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] text-[color:var(--color-muted)]">
+                No lineage or faction passives active — checks rely on raw squad stats.
+              </p>
+            )}
+          </div>
+
           {/* Live event feed */}
           <div className="min-h-0 flex-1 px-4 py-3">
             <div className="mb-2 text-[12px] uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
@@ -541,6 +713,15 @@ export function ActiveExpeditionView() {
                       >
                         {style.label}
                       </span>
+                      {entry.outcome && OUTCOME_STYLE[entry.outcome] && (
+                        <span
+                          className="mt-0.5 shrink-0 font-mono text-[11px] font-bold leading-none"
+                          style={{ color: OUTCOME_STYLE[entry.outcome]!.color }}
+                          aria-hidden="true"
+                        >
+                          {OUTCOME_STYLE[entry.outcome]!.glyph}
+                        </span>
+                      )}
                       <span className="text-[13px] leading-snug text-[color:var(--color-foreground)]/90">
                         {entry.text}
                       </span>
@@ -579,8 +760,34 @@ export function ActiveExpeditionView() {
               </div>
             ))}
           </div>
-          <div className="mt-2 text-[12px] text-[color:var(--color-success)]">
-            Full squad returned · {battlesWonRef.current} threats cleared
+          <div
+            className="mt-2 text-[12px]"
+            style={{ color: woundedRef.current ? "var(--color-amber)" : "var(--color-success)" }}
+          >
+            {woundedRef.current ? "Squad returned, battered" : "Full squad returned unscathed"} ·{" "}
+            {battlesWonRef.current} threats cleared
+          </div>
+
+          {/* Stat-check outcome breakdown */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[12px]">
+            <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+              <span className="text-[color:var(--color-success)]">{checksPassedRef.current}</span>
+              <span className="text-[color:var(--color-muted)]"> checks passed</span>
+            </span>
+            <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+              <span className="text-[color:var(--color-danger)]">{checksFailedRef.current}</span>
+              <span className="text-[color:var(--color-muted)]"> failed</span>
+            </span>
+            <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+              <span className="text-[color:var(--color-violet-bright)]">{lootFoundRef.current}</span>
+              <span className="text-[color:var(--color-muted)]"> caches found</span>
+            </span>
+            {hiddenRoutesRef.current > 0 && (
+              <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+                <span className="text-[color:var(--color-cyan)]">{hiddenRoutesRef.current}</span>
+                <span className="text-[color:var(--color-muted)]"> hidden routes</span>
+              </span>
+            )}
           </div>
 
           {/* Reward summary */}
