@@ -1,0 +1,161 @@
+"use client"
+
+import { channels } from "@/lib/mock-data"
+import { useEsroStore } from "@/store/use-esro-store"
+import { cn } from "@/lib/cn"
+import type { ChannelId } from "@/lib/types"
+
+const channelStyle: Record<ChannelId, { 
+  text: string
+  activeBg: string
+  activeBorder: string
+  inactiveBorder: string
+  icon: string
+  hover: string
+}> = {
+  PUBLIC: {
+    text: "text-[color:var(--color-foreground)]",
+    activeBg: "bg-[color:var(--color-foreground)]/10",
+    activeBorder: "border-[color:var(--color-foreground)]/50",
+    inactiveBorder: "border-[color:var(--color-border-soft)]",
+    icon: "◫",
+    hover: "hover-foreground",
+  },
+  TRADE: {
+    text: "text-[color:var(--color-amber)]",
+    activeBg: "bg-[color:var(--color-amber)]/10",
+    activeBorder: "border-[color:var(--color-amber)]/50",
+    inactiveBorder: "border-[color:var(--color-amber-muted)]/30",
+    icon: "⇄",
+    hover: "hover-amber",
+  },
+  PARTY: {
+    text: "text-[color:var(--color-cyan)]",
+    activeBg: "bg-[color:var(--color-cyan)]/10",
+    activeBorder: "border-[color:var(--color-cyan)]/50",
+    inactiveBorder: "border-[color:var(--color-cyan-muted)]/30",
+    icon: "⋈",
+    hover: "hover-cyan",
+  },
+  FACTION: {
+    text: "text-[color:var(--color-lilac)]",
+    activeBg: "bg-[color:var(--color-lilac)]/10",
+    activeBorder: "border-[color:var(--color-lilac)]/50",
+    inactiveBorder: "border-[color:var(--color-lilac)]/20",
+    icon: "⬡",
+    hover: "hover-lilac",
+  },
+  GAME: {
+    text: "text-[color:var(--color-green)]",
+    activeBg: "bg-[color:var(--color-green)]/10",
+    activeBorder: "border-[color:var(--color-green)]/50",
+    inactiveBorder: "border-[color:var(--color-green-muted)]/30",
+    icon: "▸",
+    hover: "hover-green",
+  },
+  HELP: {
+    text: "text-[color:var(--color-violet-bright)]",
+    activeBg: "bg-[color:var(--color-violet)]/10",
+    activeBorder: "border-[color:var(--color-violet)]/50",
+    inactiveBorder: "border-[color:var(--color-violet)]/20",
+    icon: "?",
+    hover: "hover-violet",
+  },
+  LOG: {
+    text: "text-[color:var(--color-muted)]",
+    activeBg: "bg-[color:var(--color-muted)]/10",
+    activeBorder: "border-[color:var(--color-muted)]/50",
+    inactiveBorder: "border-[color:var(--color-muted)]/20",
+    icon: "▤",
+    hover: "hover-muted",
+  },
+  UNDERCHAT: {
+    text: "text-[color:var(--color-danger)]",
+    activeBg: "bg-[color:var(--color-danger)]/10",
+    activeBorder: "border-[color:var(--color-danger)]/50",
+    inactiveBorder: "border-[color:var(--color-danger-muted)]/30",
+    icon: "◎",
+    hover: "hover-danger",
+  },
+}
+
+export function ChannelTabs() {
+  const current = useEsroStore((s) => s.channel)
+  const setChannel = useEsroStore((s) => s.setChannel)
+  const unread = useEsroStore((s) => s.unread)
+
+  return (
+    <div className="relative z-10 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 px-1.5 pb-1 pt-2 backdrop-blur">
+      <div
+        className="flex gap-1 overflow-x-auto pb-1"
+        role="tablist"
+        aria-label="channels"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--color-violet) transparent",
+        }}
+      >
+        {channels.map((c) => {
+          const active = current === c.id
+          const hidden = c.restricted
+          const u = unread[c.id] ?? 0
+          const style = channelStyle[c.id]
+          return (
+            <button
+              key={c.id}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setChannel(c.id)}
+              className={cn(
+                "relative flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium uppercase tracking-[0.08em] transition-all",
+                style.hover,
+                active
+                  ? cn(style.text, style.activeBg, "border", style.activeBorder)
+                  : cn("text-[color:var(--color-muted)] border-transparent"),
+              )}
+            >
+              {/* icon */}
+              <span
+                aria-hidden
+                className={cn(
+                  "text-[14px] leading-none",
+                  active ? style.text : "text-[color:var(--color-muted-2)]",
+                )}
+              >
+                {style.icon}
+              </span>
+              
+              {/* label */}
+              <span>{c.label}</span>
+              
+              {/* hidden indicator */}
+              {hidden && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    "inline-block h-[5px] w-[5px] rounded-full",
+                    active ? "bg-current" : "bg-[color:var(--color-muted-2)]",
+                  )}
+                />
+              )}
+              
+              {/* unread badge */}
+              {u > 0 && (
+                <span
+                  className={cn(
+                    "inline-flex min-w-[16px] items-center justify-center rounded-full px-1 text-[12px] font-medium leading-[14px]",
+                    active
+                      ? "bg-current/20 text-current"
+                      : "bg-[color:var(--color-panel-2)] text-[color:var(--color-foreground)]",
+                  )}
+                >
+                  {u}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "./schemas/onboarding.schema.json",
+  "boot": {
+    "header": "ESRO TERMINAL",
+    "body": "Linking relay...\n\nEstablishing packet route...\n\nPreparing handset shell."
+  },
+  "panels": [
+    {
+      "title": "Welcome to Enchanted Star Realms Online",
+      "body": "ESRO is a persistent world where runners navigate the frontier, build alliances, and carve out their legacy. Your handle, skills, and faction ties define who you are. You are about to register a new identity on the network."
+    },
+    {
+      "title": "The Frontier",
+      "body": "Beyond the safe zones, routes shift and danger lurks. Use OPS to run expeditions and train skills. Check CONTRACTS for faction jobs. SOCIAL keeps your party and friends in sync."
+    },
+    {
+      "title": "Your Identity",
+      "body": "You will choose a lineage that shapes your natural abilities, and a courier role that defines your specialty. Together they determine your starting stats and how you contribute to your party."
+    }
+  ]
+}

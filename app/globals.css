@@ -1,0 +1,1852 @@
+@import "tailwindcss";
+
+@theme {
+  /* ESRO Color Palette - Original Identity */
+  --color-bg: #05030a;
+  --color-bg-alt: #0d0815;
+  --color-panel: rgba(12, 8, 19, 0.94);
+  --color-panel-soft: rgba(18, 11, 28, 0.82);
+  --color-panel-gradient: linear-gradient(180deg, rgba(24, 13, 39, 0.96), rgba(12, 8, 19, 0.92));
+  
+  /* Borders - increased visibility */
+  --color-border: rgba(154, 84, 255, 0.52);
+  --color-border-soft: rgba(154, 84, 255, 0.35);
+  --color-border-strong: rgba(187, 129, 255, 0.58);
+  
+  /* Primary - Violet */
+  --color-accent: #a45dff;
+  --color-accent-strong: #bb81ff;
+  --color-accent-glow: rgba(125, 52, 234, 0.24);
+  
+  /* Text Colors - brightened significantly for in-game readability */
+  --color-text: #ffffff;
+  --color-muted: #d8c9f0;
+  --color-muted-2: #b8a5d4;
+  
+  /* Functional */
+  --color-danger: #ff4d8d;
+  --color-success: #5dff9a;
+  --color-warning: #ffb347;
+  
+  /* Special */
+  --color-prismatic: #f3d58a;
+
+  /* Rarity Colors */
+  --color-rarity-common: #c9b8e0;
+  --color-rarity-uncommon: #5dd0ff;
+  --color-rarity-rare: #bb81ff;
+  --color-rarity-epic: #ffb347;
+  --color-rarity-legendary: #f3d58a;
+  --color-rarity-mythic: #ff6b9d;
+  --color-rarity-admin: #ff3030;
+
+  --radius-panel: 14px;
+  --radius-button: 999px;
+  --radius-input: 10px;
+
+  --shadow-glow: 0 0 22px rgba(125, 52, 234, 0.24);
+  --shadow-accent: 0 0 16px rgba(125, 52, 234, 0.35);
+
+  --font-mono: "Fixedsys Excelsior 3.01", Fixedsys, "Lucida Console", ui-monospace, monospace;
+  --font-sans: "Fixedsys Excelsior 3.01", Fixedsys, "Lucida Console", ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    
+    /* Default theme variables (can be overridden by data-theme) */
+    --color-text-primary: var(--color-text);
+    --color-text-secondary: var(--color-muted);
+    --color-text-muted: var(--color-muted-2);
+    
+    /* Rarity Colors - duplicated from @theme for CSS var() access */
+    --color-rarity-common: #c9b8e0;
+    --color-rarity-uncommon: #5dd0ff;
+    --color-rarity-rare: #bb81ff;
+    --color-rarity-epic: #ffb347;
+    --color-rarity-legendary: #f3d58a;
+    --color-rarity-mythic: #ff6b9d;
+    --color-rarity-admin: #ff3030;
+  }
+  
+  /* Faction Theme: Crownborn - Golden luminous */
+  [data-theme="crownborn"] {
+    --color-bg: #0a0804;
+    --color-bg-alt: #140f08;
+    --color-panel: rgba(20, 15, 8, 0.94);
+    --color-panel-soft: rgba(28, 20, 10, 0.82);
+    --color-panel-gradient: linear-gradient(180deg, rgba(35, 25, 12, 0.96), rgba(20, 15, 8, 0.92));
+    --color-accent: #f1d38a;
+    --color-accent-strong: #ffe4a8;
+    --color-accent-glow: rgba(241, 211, 138, 0.24);
+    --color-border: rgba(241, 211, 138, 0.42);
+    --color-border-soft: rgba(241, 211, 138, 0.25);
+    --color-border-strong: rgba(255, 228, 168, 0.46);
+  }
+  
+  /* Faction Theme: Hearthkin - Warm orange */
+  [data-theme="hearthkin"] {
+    --color-bg: #0a0603;
+    --color-bg-alt: #150c05;
+    --color-panel: rgba(21, 12, 5, 0.94);
+    --color-panel-soft: rgba(30, 16, 6, 0.82);
+    --color-panel-gradient: linear-gradient(180deg, rgba(38, 22, 10, 0.96), rgba(21, 12, 5, 0.92));
+    --color-accent: #ff9b6a;
+    --color-accent-strong: #ffc299;
+    --color-accent-glow: rgba(255, 155, 106, 0.24);
+    --color-border: rgba(255, 155, 106, 0.42);
+    --color-border-soft: rgba(255, 155, 106, 0.25);
+    --color-border-strong: rgba(255, 194, 153, 0.46);
+  }
+  
+  /* Faction Theme: Gloamwhisper - Cool blue */
+  [data-theme="gloamwhisper"] {
+    --color-bg: #030508;
+    --color-bg-alt: #060a12;
+    --color-panel: rgba(6, 10, 18, 0.94);
+    --color-panel-soft: rgba(10, 16, 28, 0.82);
+    --color-panel-gradient: linear-gradient(180deg, rgba(12, 20, 36, 0.96), rgba(6, 10, 18, 0.92));
+    --color-accent: #8cb2ff;
+    --color-accent-strong: #b8d4ff;
+    --color-accent-glow: rgba(140, 178, 255, 0.24);
+    --color-border: rgba(140, 178, 255, 0.42);
+    --color-border-soft: rgba(140, 178, 255, 0.25);
+    --color-border-strong: rgba(184, 212, 255, 0.46);
+  }
+  
+  /* Faction Theme: Roadsinger - Teal green */
+  [data-theme="roadsinger"] {
+    --color-bg: #030807;
+    --color-bg-alt: #05100d;
+    --color-panel: rgba(5, 16, 13, 0.94);
+    --color-panel-soft: rgba(8, 24, 20, 0.82);
+    --color-panel-gradient: linear-gradient(180deg, rgba(12, 32, 26, 0.96), rgba(5, 16, 13, 0.92));
+    --color-accent: #68d9c0;
+    --color-accent-strong: #9aebd7;
+    --color-accent-glow: rgba(104, 217, 192, 0.24);
+    --color-border: rgba(104, 217, 192, 0.42);
+    --color-border-soft: rgba(104, 217, 192, 0.25);
+    --color-border-strong: rgba(154, 235, 215, 0.46);
+  }
+  
+  /* Rollable Themes - Dynamic via CSS custom properties */
+  /* Intensity scales glow effects: common=1.0, uncommon=1.2, rare=1.4, epic=1.6, legendary=1.8, mythic=2.0 */
+  [data-theme="rollable"] {
+    --color-bg: var(--rollable-bg, #0a0608);
+    --color-bg-alt: color-mix(in srgb, var(--rollable-bg, #0a0608), var(--rollable-accent, #bb81ff) 5%);
+    --color-panel: color-mix(in srgb, var(--rollable-panel, #120b1c) 94%, transparent);
+    --color-panel-soft: color-mix(in srgb, var(--rollable-panel, #120b1c) 82%, transparent);
+    --color-panel-gradient: linear-gradient(180deg, 
+      color-mix(in srgb, var(--rollable-panel, #120b1c) 96%, var(--rollable-accent, #bb81ff) 4%), 
+      color-mix(in srgb, var(--rollable-panel, #120b1c) 92%, transparent));
+    --color-accent: var(--rollable-accent, #bb81ff);
+    --color-accent-strong: var(--rollable-accent-bright, #dda0ff);
+    --color-accent-glow: color-mix(in srgb, var(--rollable-accent, #bb81ff) 24%, transparent);
+    --color-border: color-mix(in srgb, var(--rollable-accent, #bb81ff) 42%, transparent);
+    --color-border-soft: color-mix(in srgb, var(--rollable-accent, #bb81ff) 25%, transparent);
+    --color-border-strong: color-mix(in srgb, var(--rollable-accent-bright, #dda0ff) 46%, transparent);
+    /* Secondary color for rare+ themes */
+    --color-secondary: var(--rollable-secondary, var(--rollable-accent-bright));
+  }
+  
+  /* ============ THEME EFFECT CLASSES ============ */
+  /* Effects use dedicated layers in phone-frame.tsx to avoid pseudo-element conflicts */
+  
+  /* Hide all effect layers by default */
+  .theme-effect-corners,
+  .theme-effect-shimmer-layer,
+  .theme-effect-scanlines,
+  .theme-effect-edge-glow,
+  .theme-effect-particles,
+  .theme-effect-halo {
+    display: none;
+  }
+  
+  /* ===== EPIC: Storm Violet - Electric pulse ===== */
+  .theme-effect-pulse {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 55%, transparent);
+  }
+  
+  /* Epic: Pulsing border glow on all bordered elements */
+  .theme-effect-pulse [class*="border-"] {
+    animation: theme-border-pulse 2s ease-in-out infinite;
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+      inset 0 0 3px color-mix(in srgb, var(--rollable-accent) 8%, transparent);
+  }
+  
+  @keyframes theme-border-pulse {
+    0%, 100% { 
+      box-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+        inset 0 0 3px color-mix(in srgb, var(--rollable-accent) 8%, transparent);
+    }
+    50% { 
+      box-shadow: 
+        0 0 14px color-mix(in srgb, var(--rollable-accent) 45%, transparent),
+        inset 0 0 8px color-mix(in srgb, var(--rollable-accent) 18%, transparent);
+    }
+  }
+  
+  /* Epic: Corner brackets */
+  .theme-effect-pulse .theme-effect-corners {
+    display: block;
+  }
+  .theme-effect-pulse .theme-effect-corners::before,
+  .theme-effect-pulse .theme-effect-corners::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--rollable-accent);
+    animation: theme-corner-pulse 2s ease-in-out infinite;
+  }
+  .theme-effect-pulse .theme-effect-corners::before {
+    top: 12px;
+    left: 12px;
+    border-right: none;
+    border-bottom: none;
+  }
+  .theme-effect-pulse .theme-effect-corners::after {
+    bottom: 12px;
+    right: 12px;
+    border-left: none;
+    border-top: none;
+  }
+  @keyframes theme-corner-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; box-shadow: 0 0 10px var(--rollable-accent); }
+  }
+  
+  /* Epic: Accent text glow */
+  .theme-effect-pulse .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 0 0 10px color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+  }
+  
+  /* ===== EPIC: Rose Bloom - Warm shimmer sweep ===== */
+  .theme-effect-shimmer {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  .theme-effect-shimmer [class*="border-"] {
+    box-shadow: 0 0 10px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+  }
+  
+  /* Shimmer sweep layer - visible but not overwhelming */
+  .theme-effect-shimmer .theme-effect-shimmer-layer {
+    display: block;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%,
+      transparent 38%,
+      color-mix(in srgb, var(--rollable-accent) 12%, transparent) 45%,
+      color-mix(in srgb, var(--rollable-accent) 20%, transparent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 12%, transparent) 55%,
+      transparent 62%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: theme-shimmer-sweep 8s ease-in-out infinite;
+    opacity: 0.8;
+  }
+  
+  @keyframes theme-shimmer-sweep {
+    0%, 30% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  /* Shimmer: Button bloom (subtle) */
+  .theme-effect-shimmer button {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+  }
+  
+  /* ===== LEGENDARY: Neon Plasma - Intense cyan plasma with animated energy ===== */
+  .theme-effect-glow {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 55%, transparent);
+    --color-border-soft: color-mix(in srgb, var(--rollable-accent) 35%, transparent);
+  }
+  
+  /* Legendary: Animated border glow pulse */
+  .theme-effect-glow [class*="border-"] {
+    box-shadow: 
+      0 0 4px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    animation: theme-plasma-border 2s ease-in-out infinite;
+  }
+  
+  @keyframes theme-plasma-border {
+    0%, 100% { 
+      box-shadow: 
+        0 0 4px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+        0 0 8px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    }
+    50% { 
+      box-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 55%, transparent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
+    }
+  }
+  
+  /* Legendary: Scan lines with plasma flicker */
+  .theme-effect-glow .theme-effect-scanlines {
+    display: block;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      color-mix(in srgb, var(--rollable-accent) 6%, transparent) 2px,
+      color-mix(in srgb, var(--rollable-accent) 6%, transparent) 4px
+    );
+    animation: theme-plasma-flicker 0.1s steps(2) infinite;
+  }
+  
+  @keyframes theme-plasma-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.95; }
+  }
+  
+  /* Legendary: Plasma energy streams - animated edge effect */
+  .theme-effect-glow .theme-effect-edge-glow {
+    display: block;
+  }
+  .theme-effect-glow .theme-effect-edge-glow::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%,
+      color-mix(in srgb, var(--rollable-accent) 30%, transparent) 20%,
+      var(--rollable-accent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 30%, transparent) 80%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-plasma-stream 3s ease-in-out infinite;
+  }
+  .theme-effect-glow .theme-effect-edge-glow::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%,
+      color-mix(in srgb, var(--rollable-accent) 30%, transparent) 20%,
+      var(--rollable-accent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 30%, transparent) 80%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-plasma-stream 3s ease-in-out infinite 1.5s;
+  }
+  
+  @keyframes theme-plasma-stream {
+    0%, 100% { 
+      opacity: 0.6;
+      filter: blur(0px);
+    }
+    25% {
+      opacity: 0.9;
+      filter: blur(1px);
+    }
+    50% { 
+      opacity: 0.7;
+      filter: blur(0px);
+    }
+    75% {
+      opacity: 1;
+      filter: blur(0.5px);
+    }
+  }
+  
+  /* Legendary: Plasma orb particles floating */
+  .theme-effect-glow .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(3px 3px at 15% 20%, var(--rollable-accent), transparent),
+      radial-gradient(2px 2px at 35% 70%, color-mix(in srgb, var(--rollable-accent) 80%, transparent), transparent),
+      radial-gradient(3px 3px at 55% 30%, var(--rollable-accent), transparent),
+      radial-gradient(2px 2px at 75% 80%, color-mix(in srgb, var(--rollable-accent) 80%, transparent), transparent),
+      radial-gradient(3px 3px at 90% 45%, var(--rollable-accent), transparent);
+    animation: theme-plasma-particles 4s ease-in-out infinite;
+    opacity: 0.5;
+  }
+  
+  @keyframes theme-plasma-particles {
+    0%, 100% { 
+      transform: translateY(0) scale(1); 
+      opacity: 0.5;
+    }
+    25% { 
+      transform: translateY(-5px) scale(1.1); 
+      opacity: 0.7;
+    }
+    50% { 
+      transform: translateY(-2px) scale(0.95); 
+      opacity: 0.4;
+    }
+    75% { 
+      transform: translateY(-8px) scale(1.05); 
+      opacity: 0.6;
+    }
+  }
+  
+  /* Legendary: Glowing text with pulse */
+  .theme-effect-glow .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 4px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-plasma-text 2s ease-in-out infinite;
+  }
+  
+  @keyframes theme-plasma-text {
+    0%, 100% { 
+      text-shadow: 
+        0 0 4px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+        0 0 8px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    }
+    50% { 
+      text-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 70%, transparent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 35%, transparent);
+    }
+  }
+  
+  /* Legendary: Buttons have plasma glow */
+  .theme-effect-glow button {
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    animation: theme-plasma-border 2s ease-in-out infinite;
+  }
+  
+  /* ===== TRANSCENDENT: Radiant Aether - Divine luminescence with ethereal effects ===== */
+  .theme-effect-radiant {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+    --color-accent-glow: color-mix(in srgb, var(--rollable-accent) 45%, transparent);
+  }
+  
+  /* Transcendent: Shimmering border with divine pulse */
+  .theme-effect-radiant [class*="border-"] {
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+      inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    animation: theme-radiant-border 4s ease-in-out infinite;
+  }
+  
+  @keyframes theme-radiant-border {
+    0%, 100% { 
+      box-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent),
+        inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    }
+    50% { 
+      box-shadow: 
+        0 0 10px color-mix(in srgb, var(--rollable-accent) 65%, transparent),
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 35%, transparent),
+        inset 0 0 4px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    }
+  }
+  
+  /* Transcendent: Rising light motes - ethereal particles */
+  .theme-effect-radiant .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 8% 90%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 18% 85%, color-mix(in srgb, var(--rollable-accent) 80%, transparent), transparent),
+      radial-gradient(2px 2px at 32% 92%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 48% 88%, color-mix(in srgb, var(--rollable-accent) 80%, transparent), transparent),
+      radial-gradient(2px 2px at 62% 90%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 78% 86%, color-mix(in srgb, var(--rollable-accent) 80%, transparent), transparent),
+      radial-gradient(2px 2px at 92% 91%, var(--rollable-accent), transparent);
+    animation: theme-radiant-rise 8s linear infinite;
+    opacity: 0.7;
+  }
+  
+  @keyframes theme-radiant-rise {
+    0% { 
+      transform: translateY(0); 
+      opacity: 0.7;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% { 
+      transform: translateY(-100%); 
+      opacity: 0;
+    }
+  }
+  
+  /* Transcendent: Divine halo - pulsing edge glow */
+  .theme-effect-radiant .theme-effect-halo {
+    display: block;
+  }
+  .theme-effect-radiant .theme-effect-halo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%,
+      color-mix(in srgb, var(--rollable-accent) 40%, transparent) 15%,
+      var(--rollable-accent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 40%, transparent) 85%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 15px var(--rollable-accent),
+      0 0 30px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 45px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-radiant-divine 3s ease-in-out infinite;
+  }
+  .theme-effect-radiant .theme-effect-halo::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg, 
+      transparent 0%,
+      color-mix(in srgb, var(--rollable-accent) 40%, transparent) 15%,
+      var(--rollable-accent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 40%, transparent) 85%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 15px var(--rollable-accent),
+      0 0 30px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 45px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-radiant-divine 3s ease-in-out infinite 1.5s;
+  }
+  
+  @keyframes theme-radiant-divine {
+    0%, 100% { 
+      opacity: 0.6;
+      filter: blur(0px);
+    }
+    50% { 
+      opacity: 1;
+      filter: blur(1px);
+    }
+  }
+  
+  /* Transcendent: Ethereal vignette glow */
+  .theme-effect-radiant .theme-effect-scanlines {
+    display: block;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 40%,
+      color-mix(in srgb, var(--rollable-accent) 8%, transparent) 70%,
+      color-mix(in srgb, var(--rollable-accent) 15%, transparent) 100%
+    );
+    animation: theme-radiant-vignette 6s ease-in-out infinite;
+  }
+  
+  @keyframes theme-radiant-vignette {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+  }
+  
+  /* Transcendent: Divine text glow with shimmer */
+  .theme-effect-radiant .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    animation: theme-radiant-text 3s ease-in-out infinite;
+  }
+  
+  @keyframes theme-radiant-text {
+    0%, 100% { 
+      text-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    }
+    50% { 
+      text-shadow: 
+        0 0 10px color-mix(in srgb, var(--rollable-accent) 80%, transparent),
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 45%, transparent),
+        0 0 35px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    }
+  }
+  
+  /* Transcendent: Buttons have divine radiance */
+  .theme-effect-radiant button {
+    box-shadow: 
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 16px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-radiant-border 4s ease-in-out infinite;
+  }
+
+  /* ===== LEGENDARY: Solar Flare - Blazing corona with heat shimmer ===== */
+  .theme-effect-flare {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 55%, transparent);
+  }
+  
+  /* Solar Flare: Heat distortion border */
+  .theme-effect-flare [class*="border-"] {
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-flare-heat 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes theme-flare-heat {
+    0%, 100% { 
+      box-shadow: 
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    }
+    50% { 
+      box-shadow: 
+        0 0 10px color-mix(in srgb, var(--rollable-accent) 70%, transparent),
+        0 0 20px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+    }
+  }
+  
+  /* Solar Flare: Corona rays emanating from edges */
+  .theme-effect-flare .theme-effect-edge-glow {
+    display: block;
+  }
+  .theme-effect-flare .theme-effect-edge-glow::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--rollable-accent) 60%, transparent) 25%,
+      var(--rollable-accent) 50%,
+      color-mix(in srgb, var(--rollable-accent) 60%, transparent) 75%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 15px var(--rollable-accent),
+      0 -5px 25px color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+    animation: theme-flare-corona 2s ease-in-out infinite;
+    filter: blur(1px);
+  }
+  
+  @keyframes theme-flare-corona {
+    0%, 100% { 
+      opacity: 0.7;
+      transform: scaleX(1);
+    }
+    50% { 
+      opacity: 1;
+      transform: scaleX(1.05);
+    }
+  }
+  
+  /* Solar Flare: Ember particles rising */
+  .theme-effect-flare .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 20% 95%, var(--rollable-accent), transparent),
+      radial-gradient(3px 3px at 40% 90%, color-mix(in srgb, var(--rollable-accent) 80%, #ff0000), transparent),
+      radial-gradient(2px 2px at 60% 92%, var(--rollable-accent), transparent),
+      radial-gradient(3px 3px at 80% 88%, color-mix(in srgb, var(--rollable-accent) 80%, #ff0000), transparent);
+    animation: theme-flare-embers 3s ease-out infinite;
+    opacity: 0.6;
+  }
+  
+  @keyframes theme-flare-embers {
+    0% { 
+      transform: translateY(0) scale(1);
+      opacity: 0.6;
+    }
+    100% { 
+      transform: translateY(-60px) scale(0.3);
+      opacity: 0;
+    }
+  }
+  
+  /* Solar Flare: Text glow */
+  .theme-effect-flare .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 4px var(--rollable-accent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-flare-heat 1.5s ease-in-out infinite;
+  }
+  
+  .theme-effect-flare button {
+    box-shadow: 
+      0 0 6px color-mix(in srgb, var(--rollable-accent) 50%, transparent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    animation: theme-flare-heat 1.5s ease-in-out infinite;
+  }
+
+  /* ===== LEGENDARY: Void Rift - Dark matter tears with unstable edges ===== */
+  .theme-effect-rift {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+  }
+  
+  /* Void Rift: Slow pulsing border glow */
+  .theme-effect-rift [class*="border-"] {
+    box-shadow: 
+      0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
+      inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
+    animation: theme-rift-pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes theme-rift-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.75; }
+  }
+  
+  /* Void Rift: Tear effect at edges */
+  .theme-effect-rift .theme-effect-halo {
+    display: block;
+  }
+  .theme-effect-rift .theme-effect-halo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--rollable-accent) 30%,
+      color-mix(in srgb, var(--rollable-accent) 50%, #000000) 50%,
+      var(--rollable-accent) 70%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-rift-tear 4s ease-in-out infinite;
+  }
+  .theme-effect-rift .theme-effect-halo::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--rollable-accent) 30%,
+      color-mix(in srgb, var(--rollable-accent) 50%, #000000) 50%,
+      var(--rollable-accent) 70%,
+      transparent 100%
+    );
+    box-shadow: 
+      0 0 10px var(--rollable-accent),
+      0 0 20px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-rift-tear 4s ease-in-out infinite 2s;
+  }
+  
+  @keyframes theme-rift-tear {
+    0%, 100% { 
+      opacity: 0.5;
+      height: 60%;
+      top: 20%;
+    }
+    50% { 
+      opacity: 0.9;
+      height: 80%;
+      top: 10%;
+    }
+  }
+  
+  /* Void Rift: Dark matter particles being pulled in */
+  .theme-effect-rift .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 5% 50%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 15% 30%, color-mix(in srgb, var(--rollable-accent) 70%, transparent), transparent),
+      radial-gradient(2px 2px at 10% 70%, var(--rollable-accent), transparent),
+      radial-gradient(2px 2px at 95% 50%, var(--rollable-accent), transparent),
+      radial-gradient(1.5px 1.5px at 85% 30%, color-mix(in srgb, var(--rollable-accent) 70%, transparent), transparent),
+      radial-gradient(2px 2px at 90% 70%, var(--rollable-accent), transparent);
+    animation: theme-rift-pull 3s linear infinite;
+    opacity: 0.5;
+  }
+  
+  @keyframes theme-rift-pull {
+    0% { 
+      transform: scaleX(1.2);
+      opacity: 0.5;
+    }
+    100% { 
+      transform: scaleX(0.8);
+      opacity: 0;
+    }
+  }
+  
+  /* Void Rift: Text with slow pulsing glow */
+  .theme-effect-rift .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 4px var(--rollable-accent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
+    animation: theme-rift-pulse 3s ease-in-out infinite;
+  }
+  
+  .theme-effect-rift button {
+    box-shadow: 
+      0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
+      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
+    animation: theme-rift-pulse 3s ease-in-out infinite;
+  }
+
+  /* ===== MYTHIC: Quantum Flux - Reality-bending chromatic shifts ===== */
+  .theme-effect-quantum {
+    --color-border: color-mix(in srgb, var(--rollable-accent) 60%, transparent);
+  }
+  
+  /* Quantum Flux: Rainbow-shifting border */
+  .theme-effect-quantum [class*="border-"] {
+    box-shadow: 
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-quantum-shift 30s linear infinite;
+  }
+  
+  @keyframes theme-quantum-shift {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  
+  /* Quantum Flux: Prismatic edge beams */
+  .theme-effect-quantum .theme-effect-edge-glow {
+    display: block;
+  }
+  .theme-effect-quantum .theme-effect-edge-glow::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      #ff0080,
+      #ff8000,
+      #ffff00,
+      #00ff80,
+      #0080ff,
+      #8000ff,
+      #ff0080
+    );
+    box-shadow: 0 0 10px currentColor;
+    animation: theme-quantum-beam 25s linear infinite;
+    opacity: 0.6;
+  }
+  .theme-effect-quantum .theme-effect-edge-glow::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      #8000ff,
+      #0080ff,
+      #00ff80,
+      #ffff00,
+      #ff8000,
+      #ff0080,
+      #8000ff
+    );
+    box-shadow: 0 0 10px currentColor;
+    animation: theme-quantum-beam 25s linear infinite reverse;
+    opacity: 0.6;
+  }
+  
+  @keyframes theme-quantum-beam {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  
+  /* Quantum Flux: Gentle floating particles */
+  .theme-effect-quantum .theme-effect-particles {
+    display: block;
+    background-image: 
+      radial-gradient(2px 2px at 15% 25%, #ff0080, transparent),
+      radial-gradient(2px 2px at 30% 65%, #00ff80, transparent),
+      radial-gradient(2px 2px at 50% 15%, #ffff00, transparent),
+      radial-gradient(2px 2px at 70% 75%, #0080ff, transparent),
+      radial-gradient(2px 2px at 85% 35%, #8000ff, transparent);
+    animation: theme-quantum-float 12s ease-in-out infinite;
+    opacity: 0.4;
+  }
+  
+  @keyframes theme-quantum-float {
+    0%, 100% { 
+      opacity: 0.4;
+      transform: translateY(0);
+    }
+    50% { 
+      opacity: 0.6;
+      transform: translateY(-3px);
+    }
+  }
+  
+  /* Quantum Flux: Subtle chromatic aberration halo */
+  .theme-effect-quantum .theme-effect-halo {
+    display: block;
+  }
+  .theme-effect-quantum .theme-effect-halo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 
+      inset -1px 0 3px rgba(255, 0, 128, 0.2),
+      inset 1px 0 3px rgba(0, 128, 255, 0.2);
+    animation: theme-quantum-aberration 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes theme-quantum-aberration {
+    0%, 100% { 
+      box-shadow: 
+        inset -1px 0 3px rgba(255, 0, 128, 0.2),
+        inset 1px 0 3px rgba(0, 128, 255, 0.2);
+    }
+    50% { 
+      box-shadow: 
+        inset -2px 0 5px rgba(255, 0, 128, 0.3),
+        inset 2px 0 5px rgba(0, 128, 255, 0.3);
+    }
+  }
+  
+  /* Quantum Flux: Text with slow hue rotation */
+  .theme-effect-quantum .text-\[color\:var\(--color-accent\)\] {
+    text-shadow: 
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-quantum-shift 30s linear infinite;
+  }
+  
+  .theme-effect-quantum button {
+    box-shadow: 
+      0 0 6px var(--rollable-accent),
+      0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    animation: theme-quantum-shift 30s linear infinite;
+  }
+
+  * {
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(187, 129, 255, 0.58) rgba(18, 11, 28, 0.92);
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(18, 11, 28, 0.92);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(187, 129, 255, 0.78), rgba(111, 43, 231, 0.9));
+    border-radius: 999px;
+    border: 1px solid rgba(12, 8, 19, 0.7);
+  }
+
+  html,
+  body {
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+  }
+
+  ::selection {
+    background: rgba(164, 93, 255, 0.4);
+    color: var(--color-text);
+  }
+}
+
+/* Panel component base */
+.esro-panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+.esro-panel-soft {
+  background: var(--color-panel-soft);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-panel);
+}
+
+.esro-panel-focused {
+  border-color: var(--color-border-strong);
+  background: var(--color-panel-gradient);
+}
+
+/* Button styles */
+.esro-button {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.esro-button:hover {
+  border-color: var(--color-accent);
+  background: rgba(164, 93, 255, 0.12);
+}
+
+.esro-button-active,
+.esro-button.is-active {
+  background: linear-gradient(135deg, rgba(164, 93, 255, 0.22), rgba(111, 43, 231, 0.18));
+  border-color: var(--color-border-strong);
+}
+
+.esro-button-primary {
+  background: linear-gradient(135deg, rgba(164, 93, 255, 0.22), rgba(111, 43, 231, 0.18));
+  border-color: var(--color-border-strong);
+}
+
+.esro-button-primary:hover {
+  background: linear-gradient(135deg, rgba(164, 93, 255, 0.32), rgba(111, 43, 231, 0.28));
+}
+
+/* Chip/Tag styles */
+.esro-chip {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.esro-chip-status {
+  color: var(--color-accent-strong);
+}
+
+.esro-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 7px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  background: rgba(187, 129, 255, 0.18);
+  color: var(--color-accent-strong);
+  font-size: 12px;
+}
+
+/* Input styles */
+.esro-input {
+  appearance: none;
+  background: linear-gradient(180deg, rgba(26, 18, 38, 0.96), rgba(11, 7, 17, 0.96));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  color: var(--color-text);
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.esro-input::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+.esro-input:focus {
+  border-color: rgba(187, 129, 255, 0.86);
+  box-shadow: 0 0 0 1px rgba(187, 129, 255, 0.28);
+}
+
+/* Metric card */
+.esro-metric {
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-panel-soft);
+}
+
+/* List card */
+.esro-list-card {
+  padding: 12px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+.esro-list-card.is-focused {
+  border-color: var(--color-border-strong);
+  background: var(--color-panel-gradient);
+}
+
+/* Quick action card */
+.esro-quick-card {
+  padding: 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  flex-shrink: 0;
+}
+
+/* Message styles */
+.esro-message {
+  padding: 8px 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+}
+
+/* App background with logo watermark */
+.esro-app-bg {
+  background:
+    radial-gradient(circle at top left, rgba(187, 129, 255, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(125, 52, 234, 0.12), transparent 35%),
+    linear-gradient(180deg, rgba(13, 8, 21, 0.96), rgba(5, 3, 10, 0.98));
+}
+
+/* Glow effects */
+.text-glow {
+  text-shadow: 0 0 8px rgba(164, 93, 255, 0.5);
+}
+
+.text-glow-soft {
+  text-shadow: 0 0 6px rgba(164, 93, 255, 0.3);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 6px rgba(93, 208, 255, 0.4);
+}
+
+.text-glow-amber {
+  text-shadow: 0 0 6px rgba(255, 179, 71, 0.4);
+}
+
+.text-glow-green {
+  text-shadow: 0 0 6px rgba(93, 255, 154, 0.4);
+}
+
+/* Tab hover utilities */
+.hover-cyan:hover {
+  color: #5dd0ff !important;
+  background-color: rgba(93, 208, 255, 0.1) !important;
+}
+
+.hover-amber:hover {
+  color: #ffb347 !important;
+  background-color: rgba(255, 179, 71, 0.1) !important;
+}
+
+.hover-green:hover {
+  color: #5dff9a !important;
+  background-color: rgba(93, 255, 154, 0.1) !important;
+}
+
+.hover-violet:hover {
+  color: #bb81ff !important;
+  background-color: rgba(187, 129, 255, 0.1) !important;
+}
+
+.hover-lilac:hover {
+  color: #d4a5ff !important;
+  background-color: rgba(212, 165, 255, 0.1) !important;
+}
+
+.hover-danger:hover {
+  color: #ff4d8d !important;
+  background-color: rgba(255, 77, 141, 0.1) !important;
+}
+
+.hover-muted:hover {
+  color: #efe6ff !important;
+  background-color: rgba(167, 145, 199, 0.1) !important;
+}
+
+.hover-foreground:hover {
+  color: #efe6ff !important;
+  background-color: rgba(239, 230, 255, 0.08) !important;
+}
+
+.box-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Blinking caret */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  background: currentColor;
+  vertical-align: -0.12em;
+  animation: blink 1.05s steps(1) infinite;
+}
+
+/* Boot animations */
+@keyframes pulseLogo {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
+@keyframes scan {
+  0%, 100% { transform: translateY(0); opacity: 0.35; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+
+.pulse-logo {
+  animation: pulseLogo 2s ease-in-out infinite;
+}
+
+.scan-line {
+  animation: scan 2.1s ease-in-out infinite;
+}
+
+/* Prismatic shimmer */
+@keyframes prismatic-shift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.prismatic-text {
+  background: linear-gradient(
+    90deg,
+    var(--color-prismatic) 0%,
+    var(--color-accent-strong) 30%,
+    var(--color-text) 55%,
+    var(--color-prismatic) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: prismatic-shift 4s linear infinite;
+}
+
+/* ============ TITLE RARITY ANIMATIONS ============ */
+
+/* Legendary - Golden shimmer pulse (subtle) */
+@keyframes legendary-shimmer {
+  0%, 100% {
+    text-shadow: 0 0 2px rgba(243, 213, 138, 0.3), 0 0 4px rgba(243, 213, 138, 0.15);
+    filter: brightness(1);
+  }
+  50% {
+    text-shadow: 0 0 4px rgba(243, 213, 138, 0.4), 0 0 8px rgba(243, 213, 138, 0.2);
+    filter: brightness(1.05);
+  }
+}
+
+@keyframes legendary-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.title-legendary {
+  background: linear-gradient(
+    90deg,
+    #f3d58a 0%,
+    #ffe4a8 25%,
+    #f3d58a 50%,
+    #d4a855 75%,
+    #f3d58a 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: legendary-gradient 3s ease-in-out infinite, legendary-shimmer 2.5s ease-in-out infinite;
+}
+
+/* Mythic - Aurora borealis / cosmic effect (subtle) */
+@keyframes mythic-aurora {
+  0% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  25% {
+    filter: hue-rotate(10deg) brightness(1.02);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: hue-rotate(20deg) brightness(1.05);
+  }
+  75% {
+    filter: hue-rotate(10deg) brightness(1.02);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) brightness(1);
+  }
+}
+
+@keyframes mythic-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 2px rgba(255, 107, 157, 0.3),
+      0 0 4px rgba(187, 129, 255, 0.2);
+  }
+  33% {
+    text-shadow: 
+      0 0 3px rgba(187, 129, 255, 0.35),
+      0 0 6px rgba(93, 208, 255, 0.2);
+  }
+  66% {
+    text-shadow: 
+      0 0 3px rgba(93, 208, 255, 0.35),
+      0 0 6px rgba(255, 107, 157, 0.2);
+  }
+}
+
+.title-mythic {
+  background: linear-gradient(
+    90deg,
+    #ff6b9d 0%,
+    #bb81ff 20%,
+    #5dd0ff 40%,
+    #5dff9a 60%,
+    #ffb347 80%,
+    #ff6b9d 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mythic-aurora 4s ease-in-out infinite, mythic-glow 3s ease-in-out infinite;
+}
+
+/* Rarity badge hover enhancement */
+.title-legendary:hover,
+.title-mythic:hover {
+  animation-duration: 1.5s, 1s;
+}
+
+/* ============ ADMIN TITLE ANIMATION ============ */
+
+@keyframes admin-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px #ff3030,
+      0 0 8px #ff3030,
+      0 0 16px rgba(255, 48, 48, 0.6);
+  }
+  50% {
+    text-shadow:
+      0 0 8px #ff3030,
+      0 0 16px #ff3030,
+      0 0 32px rgba(255, 48, 48, 0.8),
+      0 0 48px rgba(255, 48, 48, 0.4);
+  }
+}
+
+@keyframes admin-flicker {
+  0%, 95%, 100% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.8;
+  }
+  97% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0.6;
+  }
+}
+
+.title-admin {
+  color: #ff3030;
+  text-shadow:
+    0 0 4px #ff3030,
+    0 0 8px #ff3030,
+    0 0 16px rgba(255, 48, 48, 0.6);
+  animation: admin-pulse 2s ease-in-out infinite, admin-flicker 4s ease-in-out infinite;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.title-admin:hover {
+  animation-duration: 1s, 2s;
+  text-shadow:
+    0 0 8px #ff3030,
+    0 0 16px #ff3030,
+    0 0 32px rgba(255, 48, 48, 0.8),
+    0 0 48px rgba(255, 48, 48, 0.5);
+}
+
+/* ============ UNIQUE TRANSCENDENT TITLE ANIMATIONS ============ */
+
+/* Myth of the Relay Sea - Ocean waves and deep currents */
+@keyframes relay-sea-waves {
+  0%, 100% {
+    background-position: 0% 50%;
+    text-shadow:
+      0 0 6px rgba(64, 180, 220, 0.7),
+      0 0 12px rgba(32, 120, 180, 0.5),
+      0 0 20px rgba(64, 180, 220, 0.3);
+  }
+  25% {
+    background-position: 50% 30%;
+    text-shadow:
+      0 0 8px rgba(32, 120, 180, 0.8),
+      0 0 16px rgba(100, 200, 255, 0.5),
+      0 0 24px rgba(32, 120, 180, 0.3);
+  }
+  50% {
+    background-position: 100% 50%;
+    text-shadow:
+      0 0 10px rgba(100, 200, 255, 0.8),
+      0 0 20px rgba(64, 180, 220, 0.6),
+      0 0 30px rgba(32, 120, 180, 0.4);
+  }
+  75% {
+    background-position: 50% 70%;
+    text-shadow:
+      0 0 8px rgba(64, 180, 220, 0.7),
+      0 0 14px rgba(32, 120, 180, 0.5),
+      0 0 22px rgba(100, 200, 255, 0.3);
+  }
+}
+
+@keyframes relay-sea-depth {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.2) saturate(1.3); }
+}
+
+.title-relay-sea {
+  background: linear-gradient(
+    100deg,
+    #2078b4 0%,
+    #40b4dc 15%,
+    #64c8ff 30%,
+    #40b4dc 50%,
+    #2088c8 65%,
+    #40e0ff 80%,
+    #2078b4 100%
+  );
+  background-size: 400% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: relay-sea-waves 5s ease-in-out infinite, relay-sea-depth 3s ease-in-out infinite;
+}
+
+/* Shardheart Ascendant - Crystal shattering and reforming */
+@keyframes shardheart-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px rgba(200, 100, 255, 0.6),
+      0 0 8px rgba(255, 150, 200, 0.4),
+      -2px 0 6px rgba(150, 200, 255, 0.3),
+      2px 0 6px rgba(255, 100, 180, 0.3);
+    transform: scale(1);
+  }
+  25% {
+    text-shadow:
+      0 0 8px rgba(255, 150, 200, 0.8),
+      0 0 16px rgba(200, 100, 255, 0.5),
+      -3px 1px 10px rgba(150, 200, 255, 0.4),
+      3px -1px 10px rgba(255, 100, 180, 0.4);
+    transform: scale(1.02);
+  }
+  50% {
+    text-shadow:
+      0 0 12px rgba(150, 200, 255, 0.9),
+      0 0 24px rgba(255, 150, 200, 0.6),
+      -4px 2px 14px rgba(200, 100, 255, 0.5),
+      4px -2px 14px rgba(255, 100, 180, 0.5);
+    transform: scale(1.03);
+  }
+  75% {
+    text-shadow:
+      0 0 8px rgba(200, 100, 255, 0.7),
+      0 0 14px rgba(150, 200, 255, 0.5),
+      -2px 1px 8px rgba(255, 150, 200, 0.4),
+      2px -1px 8px rgba(255, 100, 180, 0.4);
+    transform: scale(1.01);
+  }
+}
+
+@keyframes shardheart-fracture {
+  0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  33% { background-position: 50% 50%; filter: hue-rotate(20deg); }
+  66% { background-position: 100% 50%; filter: hue-rotate(-10deg); }
+  100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+}
+
+.title-shardheart {
+  background: linear-gradient(
+    135deg,
+    #c864ff 0%,
+    #ff96c8 20%,
+    #96c8ff 40%,
+    #ff64b4 60%,
+    #c8a0ff 80%,
+    #c864ff 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shardheart-fracture 4s ease-in-out infinite, shardheart-pulse 2.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Eternal Courier - Flowing motion trails and timeless drift */
+@keyframes courier-drift {
+  0%, 100% {
+    background-position: 0% 50%;
+    letter-spacing: 0.12em;
+    text-shadow:
+      4px 0 8px rgba(255, 200, 100, 0.4),
+      8px 0 12px rgba(255, 180, 80, 0.2),
+      -2px 0 4px rgba(255, 220, 140, 0.3);
+  }
+  50% {
+    background-position: 100% 50%;
+    letter-spacing: 0.16em;
+    text-shadow:
+      6px 0 12px rgba(255, 180, 80, 0.6),
+      12px 0 20px rgba(255, 200, 100, 0.3),
+      -3px 0 6px rgba(255, 220, 140, 0.4);
+  }
+}
+
+@keyframes courier-eternal {
+  0%, 100% { filter: brightness(1.1) contrast(1); opacity: 1; }
+  25% { filter: brightness(1.2) contrast(1.05); opacity: 0.95; }
+  50% { filter: brightness(1.3) contrast(1.1); opacity: 1; }
+  75% { filter: brightness(1.15) contrast(1.05); opacity: 0.98; }
+}
+
+.title-eternal-courier {
+  background: linear-gradient(
+    90deg,
+    #ffc864 0%,
+    #ffe0a0 20%,
+    #ffb450 40%,
+    #ffd080 60%,
+    #ff9830 80%,
+    #ffc864 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: courier-drift 6s ease-in-out infinite, courier-eternal 4s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Voidtouched Oracle - Abyssal darkness with glimpses of forbidden knowledge */
+@keyframes voidtouched-abyss {
+  0%, 100% {
+    background-position: 0% 50%;
+    text-shadow:
+      0 0 8px rgba(80, 20, 120, 0.9),
+      0 0 16px rgba(40, 0, 80, 0.6),
+      0 0 24px rgba(120, 40, 180, 0.3);
+  }
+  33% {
+    background-position: 50% 50%;
+    text-shadow:
+      0 0 12px rgba(40, 0, 80, 0.95),
+      0 0 24px rgba(80, 20, 120, 0.7),
+      0 0 36px rgba(60, 0, 100, 0.4);
+  }
+  66% {
+    background-position: 100% 50%;
+    text-shadow:
+      0 0 10px rgba(120, 40, 180, 0.85),
+      0 0 20px rgba(80, 20, 120, 0.6),
+      0 0 30px rgba(40, 0, 80, 0.35);
+  }
+}
+
+@keyframes voidtouched-flicker {
+  0%, 90%, 100% { opacity: 1; filter: brightness(1); }
+  92% { opacity: 0.3; filter: brightness(0.6); }
+  94% { opacity: 1; filter: brightness(1.4); }
+  96% { opacity: 0.5; filter: brightness(0.8); }
+  98% { opacity: 1; filter: brightness(1); }
+}
+
+.title-voidtouched {
+  background: linear-gradient(
+    120deg,
+    #280050 0%,
+    #501478 15%,
+    #200040 30%,
+    #7828b4 45%,
+    #3c0064 60%,
+    #501478 75%,
+    #280050 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: voidtouched-abyss 5s ease-in-out infinite, voidtouched-flicker 8s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Primordial Flame - Ancient fire that burns before time */
+@keyframes primordial-burn {
+  0%, 100% {
+    background-position: 0% 50%;
+    text-shadow:
+      0 -2px 6px rgba(255, 100, 0, 0.8),
+      0 -4px 12px rgba(255, 60, 0, 0.5),
+      0 2px 8px rgba(255, 180, 0, 0.4);
+  }
+  25% {
+    background-position: 30% 60%;
+    text-shadow:
+      0 -3px 10px rgba(255, 60, 0, 0.9),
+      0 -6px 18px rgba(255, 100, 0, 0.6),
+      0 3px 10px rgba(255, 200, 50, 0.5);
+  }
+  50% {
+    background-position: 70% 40%;
+    text-shadow:
+      0 -4px 14px rgba(255, 180, 0, 0.95),
+      0 -8px 24px rgba(255, 100, 0, 0.7),
+      0 4px 12px rgba(255, 60, 0, 0.6);
+  }
+  75% {
+    background-position: 100% 55%;
+    text-shadow:
+      0 -2px 8px rgba(255, 100, 0, 0.85),
+      0 -5px 16px rgba(255, 60, 0, 0.55),
+      0 2px 8px rgba(255, 180, 0, 0.45);
+  }
+}
+
+@keyframes primordial-ember {
+  0%, 100% { filter: brightness(1.1) saturate(1.2); }
+  50% { filter: brightness(1.3) saturate(1.5); }
+}
+
+.title-primordial-flame {
+  background: linear-gradient(
+    100deg,
+    #ff3c00 0%,
+    #ff6400 15%,
+    #ffb400 30%,
+    #ff5000 50%,
+    #ffc832 65%,
+    #ff3c00 80%,
+    #ff6400 100%
+  );
+  background-size: 300% 150%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: primordial-burn 4s ease-in-out infinite, primordial-ember 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Silence Between Stars - Cosmic emptiness and stellar whispers */
+@keyframes silence-drift {
+  0%, 100% {
+    background-position: 0% 50%;
+    letter-spacing: 0.14em;
+    text-shadow:
+      0 0 4px rgba(200, 220, 255, 0.5),
+      0 0 8px rgba(100, 150, 255, 0.3),
+      0 0 16px rgba(50, 80, 150, 0.2);
+  }
+  50% {
+    background-position: 100% 50%;
+    letter-spacing: 0.18em;
+    text-shadow:
+      0 0 8px rgba(100, 150, 255, 0.7),
+      0 0 16px rgba(200, 220, 255, 0.5),
+      0 0 32px rgba(50, 80, 150, 0.3);
+  }
+}
+
+@keyframes silence-twinkle {
+  0%, 100% { opacity: 1; }
+  25% { opacity: 0.92; }
+  50% { opacity: 1; }
+  75% { opacity: 0.95; }
+}
+
+.title-silence-stars {
+  background: linear-gradient(
+    90deg,
+    #1a2a50 0%,
+    #6496ff 15%,
+    #c8dcff 30%,
+    #3264c8 45%,
+    #ffffff 55%,
+    #6496ff 70%,
+    #1a2a50 85%,
+    #c8dcff 100%
+  );
+  background-size: 400% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: silence-drift 8s ease-in-out infinite, silence-twinkle 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Dreamer Unchained - Reality-bending nightmare/dream energy */
+@keyframes dreamer-warp {
+  0%, 100% {
+    background-position: 0% 50%;
+    transform: skewX(0deg);
+    text-shadow:
+      2px 2px 6px rgba(180, 100, 255, 0.6),
+      -2px -2px 6px rgba(100, 255, 200, 0.4);
+  }
+  25% {
+    background-position: 33% 50%;
+    transform: skewX(1deg);
+    text-shadow:
+      3px 1px 8px rgba(100, 255, 200, 0.7),
+      -3px -1px 8px rgba(255, 100, 180, 0.5);
+  }
+  50% {
+    background-position: 66% 50%;
+    transform: skewX(-1deg);
+    text-shadow:
+      -2px 3px 10px rgba(255, 100, 180, 0.8),
+      2px -3px 10px rgba(180, 100, 255, 0.6);
+  }
+  75% {
+    background-position: 100% 50%;
+    transform: skewX(0.5deg);
+    text-shadow:
+      1px -2px 7px rgba(180, 100, 255, 0.65),
+      -1px 2px 7px rgba(100, 255, 200, 0.45);
+  }
+}
+
+@keyframes dreamer-phase {
+  0%, 85%, 100% { filter: blur(0px) brightness(1); }
+  90% { filter: blur(0.5px) brightness(1.1); }
+  95% { filter: blur(0px) brightness(0.95); }
+}
+
+.title-dreamer-unchained {
+  background: linear-gradient(
+    110deg,
+    #b464ff 0%,
+    #64ffc8 18%,
+    #ff64b4 36%,
+    #b464ff 54%,
+    #64ffc8 72%,
+    #ff64b4 90%,
+    #b464ff 100%
+  );
+  background-size: 400% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: dreamer-warp 6s ease-in-out infinite, dreamer-phase 5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Ashen Sovereign - Ruler over destruction and rebirth */
+@keyframes ashen-smolder {
+  0%, 100% {
+    background-position: 0% 50%;
+    text-shadow:
+      0 0 6px rgba(120, 100, 90, 0.7),
+      0 0 12px rgba(80, 60, 50, 0.5),
+      0 2px 4px rgba(40, 30, 25, 0.8);
+  }
+  33% {
+    background-position: 50% 50%;
+    text-shadow:
+      0 0 8px rgba(180, 80, 40, 0.8),
+      0 0 16px rgba(120, 100, 90, 0.6),
+      0 2px 6px rgba(60, 40, 30, 0.7);
+  }
+  66% {
+    background-position: 100% 50%;
+    text-shadow:
+      0 0 10px rgba(255, 120, 60, 0.75),
+      0 0 20px rgba(180, 80, 40, 0.55),
+      0 3px 8px rgba(80, 60, 50, 0.65);
+  }
+}
+
+@keyframes ashen-crumble {
+  0%, 100% { filter: contrast(1) brightness(1); }
+  50% { filter: contrast(1.1) brightness(1.15); }
+}
+
+.title-ashen-sovereign {
+  background: linear-gradient(
+    95deg,
+    #3c2820 0%,
+    #786450 15%,
+    #b47828 30%,
+    #503c30 45%,
+    #ff7830 55%,
+    #786450 70%,
+    #3c2820 85%,
+    #b47828 100%
+  );
+  background-size: 350% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: ashen-smolder 5s ease-in-out infinite, ashen-crumble 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Empty state */
+.esro-empty {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 88px;
+  padding: 10px;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  color: var(--color-muted);
+}

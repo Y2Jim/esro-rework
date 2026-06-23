@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ESRO Races Configuration",
+  "description": "Configuration for playable races/lineages in ESRO",
+  "type": "object",
+  "required": ["races"],
+  "properties": {
+    "races": {
+      "type": "array",
+      "description": "Array of race definitions",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "summary", "affinity", "role", "icon", "color", "glow", "lore", "stats"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the race (lowercase, no spaces)",
+            "pattern": "^[a-z]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the race"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short description shown during character creation"
+          },
+          "affinity": {
+            "type": "string",
+            "description": "Gameplay affinity description"
+          },
+          "role": {
+            "type": "string",
+            "description": "The role/group this race belongs to"
+          },
+          "icon": {
+            "type": "string",
+            "description": "3-letter icon code for the race",
+            "maxLength": 3
+          },
+          "color": {
+            "type": "string",
+            "description": "Primary hex color for the race",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "glow": {
+            "type": "string",
+            "description": "RGBA glow color for effects"
+          },
+          "lore": {
+            "type": "string",
+            "description": "Extended lore/background text"
+          },
+          "stats": {
+            "type": "object",
+            "description": "Stat modifiers for this race",
+            "required": ["hp", "atk", "def", "focus", "luck"],
+            "properties": {
+              "hp": { "type": "integer", "description": "HP modifier" },
+              "atk": { "type": "integer", "description": "Attack modifier" },
+              "def": { "type": "integer", "description": "Defense modifier" },
+              "focus": { "type": "integer", "description": "Focus modifier" },
+              "luck": { "type": "integer", "description": "Luck modifier" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

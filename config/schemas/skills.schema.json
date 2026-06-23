@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ESRO Skills Configuration",
+  "description": "Configuration for skills and their sub-stats in ESRO",
+  "type": "object",
+  "required": ["starterSkillCount", "skills"],
+  "properties": {
+    "starterSkillCount": {
+      "type": "integer",
+      "description": "Number of starter skills a player can choose",
+      "minimum": 1
+    },
+    "skills": {
+      "type": "array",
+      "description": "Array of skill definitions",
+      "items": {
+        "type": "object",
+        "required": ["name", "linkedStat", "summary", "stats"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the skill"
+          },
+          "linkedStat": {
+            "type": "string",
+            "enum": ["hp", "atk", "def", "focus", "luck"],
+            "description": "The base stat this skill is linked to"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short description of what the skill covers"
+          },
+          "stats": {
+            "type": "array",
+            "description": "Sub-stats within this skill",
+            "items": {
+              "type": "object",
+              "required": ["id", "name"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the sub-stat",
+                  "pattern": "^[a-z]+$"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Display name of the sub-stat"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

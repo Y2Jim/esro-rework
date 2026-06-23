@@ -1,0 +1,36 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["config/races.json"],
+      "url": "./config/schemas/races.schema.json"
+    },
+    {
+      "fileMatch": ["config/couriers.json"],
+      "url": "./config/schemas/couriers.schema.json"
+    },
+    {
+      "fileMatch": ["config/factions.json"],
+      "url": "./config/schemas/factions.schema.json"
+    },
+    {
+      "fileMatch": ["config/skills.json"],
+      "url": "./config/schemas/skills.schema.json"
+    },
+    {
+      "fileMatch": ["config/onboarding.json"],
+      "url": "./config/schemas/onboarding.schema.json"
+    },
+    {
+      "fileMatch": ["config/game-settings.json"],
+      "url": "./config/schemas/game-settings.schema.json"
+    }
+  ],
+  "files.associations": {
+    "config/*.json": "json"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  }
+}

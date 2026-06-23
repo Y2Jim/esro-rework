@@ -1,0 +1,156 @@
+{
+  "$schema": "./schemas/skills.schema.json",
+  "starterSkillCount": 3,
+  "skills": [
+    {
+      "name": "Conditioning",
+      "linkedStat": "hp",
+      "summary": "+3% expedition duration. Reduces fatigue buildup.",
+      "stats": [
+        { "id": "marching", "name": "Marching" },
+        { "id": "recovery", "name": "Recovery" },
+        { "id": "loadbearing", "name": "Loadbearing" }
+      ]
+    },
+    {
+      "name": "Field Medicine",
+      "linkedStat": "hp",
+      "summary": "+3% safe return chance. Improves party recovery.",
+      "stats": [
+        { "id": "triage", "name": "Triage" },
+        { "id": "stabilization", "name": "Stabilization" },
+        { "id": "remedies", "name": "Remedies" }
+      ]
+    },
+    {
+      "name": "Beast Tending",
+      "linkedStat": "hp",
+      "summary": "+3% carry capacity. Reduces mount fatigue.",
+      "stats": [
+        { "id": "handling", "name": "Handling" },
+        { "id": "soothing", "name": "Soothing" },
+        { "id": "harnessing", "name": "Harnessing" }
+      ]
+    },
+    {
+      "name": "Bladecraft",
+      "linkedStat": "atk",
+      "summary": "+3% combat damage. Improves finishing strikes.",
+      "stats": [
+        { "id": "edgework", "name": "Edgework" },
+        { "id": "riposte", "name": "Riposte" },
+        { "id": "finishing", "name": "Finishing" }
+      ]
+    },
+    {
+      "name": "Marksmanship",
+      "linkedStat": "atk",
+      "summary": "+3% ranged damage. Increases critical chance.",
+      "stats": [
+        { "id": "sighting", "name": "Sighting" },
+        { "id": "draw", "name": "Draw" },
+        { "id": "precision", "name": "Precision" }
+      ]
+    },
+    {
+      "name": "Brawling",
+      "linkedStat": "atk",
+      "summary": "+3% unarmed damage. Improves hostile mitigation.",
+      "stats": [
+        { "id": "clinch", "name": "Clinch" },
+        { "id": "breaks", "name": "Breaks" },
+        { "id": "impact", "name": "Impact" }
+      ]
+    },
+    {
+      "name": "Bulwark",
+      "linkedStat": "def",
+      "summary": "+3% damage reduction. Improves convoy defense.",
+      "stats": [
+        { "id": "shielding", "name": "Shielding" },
+        { "id": "bracing", "name": "Bracing" },
+        { "id": "interception", "name": "Interception" }
+      ]
+    },
+    {
+      "name": "Guardwork",
+      "linkedStat": "def",
+      "summary": "+3% hostile risk reduction. Improves escort safety.",
+      "stats": [
+        { "id": "formation", "name": "Formation" },
+        { "id": "watchkeeping", "name": "Watchkeeping" },
+        { "id": "escorting", "name": "Escorting" }
+      ]
+    },
+    {
+      "name": "Warding",
+      "linkedStat": "def",
+      "summary": "+3% resistance. Reduces anomaly exposure.",
+      "stats": [
+        { "id": "barriers", "name": "Barriers" },
+        { "id": "anchors", "name": "Anchors" },
+        { "id": "resistance", "name": "Resistance" }
+      ]
+    },
+    {
+      "name": "Gathering",
+      "linkedStat": "luck",
+      "summary": "+3% material yield. Improves harvest quality.",
+      "stats": [
+        { "id": "foraging", "name": "Foraging" },
+        { "id": "harvesting", "name": "Harvesting" },
+        { "id": "appraisal", "name": "Appraisal" }
+      ]
+    },
+    {
+      "name": "Fishing",
+      "linkedStat": "luck",
+      "summary": "+3% catch rate. Improves wreck salvage yield.",
+      "stats": [
+        { "id": "casting", "name": "Casting" },
+        { "id": "tension", "name": "Tension" },
+        { "id": "salvage", "name": "Salvage" }
+      ]
+    },
+    {
+      "name": "Scavenging",
+      "linkedStat": "luck",
+      "summary": "+3% discovery quality. Improves rare find chance.",
+      "stats": [
+        { "id": "spotting", "name": "Spotting" },
+        { "id": "extraction", "name": "Extraction" },
+        { "id": "haggling", "name": "Haggling" }
+      ]
+    },
+    {
+      "name": "Pathfinding",
+      "linkedStat": "focus",
+      "summary": "+3% recon success. Improves zone pressure.",
+      "stats": [
+        { "id": "surveying", "name": "Surveying" },
+        { "id": "routing", "name": "Routing" },
+        { "id": "survival", "name": "Survival" }
+      ]
+    },
+    {
+      "name": "Ritualism",
+      "linkedStat": "focus",
+      "summary": "+2% contract rewards. Improves faction standing.",
+      "stats": [
+        { "id": "channeling", "name": "Channeling" },
+        { "id": "sigils", "name": "Sigils" },
+        { "id": "invocation", "name": "Invocation" }
+      ]
+    },
+    {
+      "name": "Lorekeeping",
+      "linkedStat": "focus",
+      "summary": "+3% archive quality. Improves fragment analysis.",
+      "stats": [
+        { "id": "recall", "name": "Recall" },
+        { "id": "translation", "name": "Translation" },
+        { "id": "analysis", "name": "Analysis" }
+      ]
+    }
+  ]
+}

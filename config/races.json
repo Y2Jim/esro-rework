@@ -1,0 +1,53 @@
+{
+  "$schema": "./schemas/races.schema.json",
+  "races": [
+    {
+      "id": "crownborn",
+      "name": "Crownborn",
+      "summary": "Poised and luminous, Crownborn carry high presence and a steadier hand for refined or arcane play.",
+      "affinity": "Best for composed pressure, ritual focus, and command presence.",
+      "role": "Luminous Houses",
+      "icon": "CRN",
+      "color": "#f1d38a",
+      "glow": "rgba(241, 211, 138, 0.30)",
+      "lore": "Crownborn lineages were raised around old courts and radiant halls where posture mattered as much as steel. They still move like every decision is being witnessed.",
+      "stats": { "hp": 0, "atk": 0, "def": 1, "focus": 2, "luck": 1 }
+    },
+    {
+      "id": "hearthkin",
+      "name": "Hearthkin",
+      "summary": "Sturdy and reliable, Hearthkin are built to endure pressure and keep the rest of the line standing.",
+      "affinity": "Best for shielding allies, long marches, and defensive support.",
+      "role": "Hearth Wardens",
+      "icon": "HRT",
+      "color": "#ff9b6a",
+      "glow": "rgba(255, 155, 106, 0.28)",
+      "lore": "Hearthkin settlements survived by making every outpost feel like a defended home. Their operators learned to absorb hardship first so others could keep moving.",
+      "stats": { "hp": 2, "atk": 0, "def": 2, "focus": 0, "luck": 0 }
+    },
+    {
+      "id": "gloamwhisper",
+      "name": "Gloamwhisper",
+      "summary": "Balanced and subtle, Gloamwhispers excel at adaptable play, quiet reads, and sharp turns in uncertain terrain.",
+      "affinity": "Best for shadowed routes, flexible skirmishing, and subtle reads.",
+      "role": "Veil Circles",
+      "icon": "GLM",
+      "color": "#8cb2ff",
+      "glow": "rgba(140, 178, 255, 0.30)",
+      "lore": "Gloamwhisper circles train by listening before acting. Their operators read tension in the dark, then shift shape around whatever the frontier tries next.",
+      "stats": { "hp": 0, "atk": 1, "def": 0, "focus": 2, "luck": 1 }
+    },
+    {
+      "id": "roadsinger",
+      "name": "Roadsinger",
+      "summary": "Mobile and fortunate, Roadsingers thrive on discovery, motion, and sudden opportunity.",
+      "affinity": "Best for scouting, route discovery, and opportunistic momentum.",
+      "role": "Wayfinding Choirs",
+      "icon": "RDS",
+      "color": "#68d9c0",
+      "glow": "rgba(104, 217, 192, 0.28)",
+      "lore": "Roadsingers cross borders like they were written into the path itself. Their lineages trust chance, motion, and the promise that every road still has one more door to open.",
+      "stats": { "hp": 0, "atk": 1, "def": 0, "focus": 1, "luck": 2 }
+    }
+  ]
+}
