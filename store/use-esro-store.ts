@@ -53,7 +53,7 @@ import {
   skills as seedSkills,
 } from "@/lib/mock-data"
 
-interface EsroState {
+export interface EsroState {
   booted: boolean
   setBooted: (v: boolean) => void
 
@@ -90,6 +90,10 @@ interface EsroState {
   sendMessage: (channel: ChannelId, body: string) => void
   unread: Record<ChannelId, number>
   markRead: (c: ChannelId) => void
+  /** Message-log pagination: 0 = newest page, higher = further back */
+  pageOffset: number
+  nudgePage: (delta: number) => void
+  resetPage: () => void
 
   // Quick Actions
   quickActions: QuickAction[]
@@ -104,6 +108,8 @@ interface EsroState {
   skills: Skill[]
   loadout: string[]
   toggleLoadout: (id: string) => void
+  /** Alias of toggleLoadout used by loadout UI components */
+  toggleLoadoutSkill: (id: string) => void
   setSkillVariant: (skillId: string, variantId: string) => void
 
   // Ops - Crafting/Rolling
@@ -310,6 +316,15 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Prismatic Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 11 } },
     { label: "Celestial Flame", type: "cosmetic", vanityData: { layerType: "flair", variant: 12 } },
   ],
+  mythic: [
+    { label: "Origin Cipher", type: "title" },
+    { label: "Worldcurrent Antlers", type: "cosmetic", vanityData: { layerType: "hat", variant: 19 } },
+    { label: "Genesis Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 13 } },
+  ],
+  admin: [
+    { label: "Architect's Seal", type: "title" },
+    { label: "Root Access Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 20 } },
+  ],
 }
 
 export const useEsroStore = create<EsroState>((set, get) => ({
@@ -432,7 +447,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Terminal
   channel: "PUBLIC",
   setChannel: (c) => {
-    set({ channel: c })
+    set({ channel: c, pageOffset: 0 })
     get().markRead(c)
   },
   channels: seedChannels,
@@ -453,7 +468,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       body: trimmed.slice(0, 220),
       at: Date.now(),
     }
-    set({ messages: [...messages, next] })
+    set({ messages: [...messages, next], pageOffset: 0 })
   },
   unread: seedChannels.reduce(
     (acc, c) => {
@@ -464,6 +479,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   ),
   markRead: (c) =>
     set((s) => ({ unread: { ...s.unread, [c]: 0 } })),
+
+  // Message-log pagination
+  pageOffset: 0,
+  nudgePage: (delta) =>
+    set((s) => ({ pageOffset: Math.max(0, s.pageOffset + delta) })),
+  resetPage: () => set({ pageOffset: 0 }),
 
   // Quick Actions
   quickActions: seedQuickActions,
@@ -525,6 +546,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       if (s.loadout.length >= 4) return s
       return { loadout: [...s.loadout, id] }
     }),
+  toggleLoadoutSkill: (id) => get().toggleLoadout(id),
   setSkillVariant: (skillId, variantId) =>
     set((s) => ({
       skills: s.skills.map((skill) =>
@@ -566,7 +588,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       isDuplicate = !!existingVanity
     } else if (pick.type === "title") {
       // Check if title already owned
-      const existingTitle = profile.titles.find(t => t.label === pick.label)
+      const existingTitle = profile.ownedTitles.find((t) => t.label === pick.label)
       isDuplicate = !!existingTitle
     } else if (pick.type === "badge") {
       // Check previous recoveries for same badge
@@ -1164,11 +1186,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       else if (rarityRoll > 0.65) rarity = "rare"
       else if (rarityRoll > 0.40) rarity = "uncommon"
       
+      const lootLabel = lootTypes[Math.floor(Math.random() * lootTypes.length)]
       newItems.push({
         id: `loot-${Date.now()}-${i}`,
-        label: lootTypes[Math.floor(Math.random() * lootTypes.length)],
+        label: lootLabel,
+        aspect: "material",
         rarity,
         qty: 1 + Math.floor(Math.random() * 3),
+        identified: true,
+        description: `Salvaged ${lootLabel.toLowerCase()} recovered during the expedition.`,
         type: "material",
       })
     }

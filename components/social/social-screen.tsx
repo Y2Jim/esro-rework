@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useEsroStore } from "@/store/use-esro-store"
+import { useEsroStore, type EsroState } from "@/store/use-esro-store"
 import { PartyAvatar, PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { TitleDisplay } from "@/components/ui/title-display"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
@@ -66,7 +66,7 @@ export function SocialScreen() {
 }
 
 // ============ PARTY TAB ============
-function PartyTab({ party }: { party: ReturnType<typeof useEsroStore>["party"] }) {
+function PartyTab({ party }: { party: EsroState["party"] }) {
   const maxSlots = 4
 
   return (
@@ -151,8 +151,8 @@ function FactionTab({
   faction, 
   projects 
 }: { 
-  faction: ReturnType<typeof useEsroStore>["profile"]["faction"]
-  projects: ReturnType<typeof useEsroStore>["factionProjects"] 
+  faction: EsroState["profile"]["faction"]
+  projects: EsroState["factionProjects"] 
 }) {
   const [subTab, setSubTab] = useState<"overview" | "projects" | "ranks">("overview")
   const [showFactionSelection, setShowFactionSelection] = useState(false)
@@ -347,8 +347,8 @@ function FactionOverviewNew({
   factionData, 
   faction 
 }: { 
-  factionData: NonNullable<ReturnType<typeof useEsroStore>["characterFaction"]>
-  faction: ReturnType<typeof useEsroStore>["profile"]["faction"]
+  factionData: NonNullable<EsroState["characterFaction"]>
+  faction: EsroState["profile"]["faction"]
 }) {
   return (
     <div className="space-y-3">
@@ -429,7 +429,7 @@ function FactionOverviewNew({
   )
 }
 
-function FactionOverview({ faction }: { faction: NonNullable<ReturnType<typeof useEsroStore>["profile"]["faction"]> }) {
+function FactionOverview({ faction }: { faction: NonNullable<EsroState["profile"]["faction"]> }) {
   return (
     <div className="space-y-3">
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
@@ -465,7 +465,7 @@ function FactionOverview({ faction }: { faction: NonNullable<ReturnType<typeof u
   )
 }
 
-function FactionProjects({ projects }: { projects: ReturnType<typeof useEsroStore>["factionProjects"] }) {
+function FactionProjects({ projects }: { projects: EsroState["factionProjects"] }) {
   if (projects.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
@@ -610,7 +610,7 @@ function getRankTitle(rank: number): string {
 }
 
 // ============ FRIENDS TAB ============
-function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["friends"] }) {
+function FriendsTab({ friends }: { friends: EsroState["friends"] }) {
   const online = friends.filter(f => f.status === "online")
   const away = friends.filter(f => f.status === "away")
   const offline = friends.filter(f => f.status === "offline")
@@ -666,7 +666,7 @@ function FriendsTab({ friends }: { friends: ReturnType<typeof useEsroStore>["fri
   )
 }
 
-function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friends"][0] }) {
+function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
   const [showUnfriendConfirm, setShowUnfriendConfirm] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const removeFriend = useEsroStore((s) => s.removeFriend)
@@ -830,7 +830,7 @@ function FriendRow({ friend }: { friend: ReturnType<typeof useEsroStore>["friend
 }
 
 // ============ TRADE TAB ============
-function TradeTab({ offers }: { offers: ReturnType<typeof useEsroStore>["tradeOffers"] }) {
+function TradeTab({ offers }: { offers: EsroState["tradeOffers"] }) {
   const [subTab, setSubTab] = useState<"offers" | "history">("offers")
   const incoming = offers.filter(o => o.status === "pending" && o.toHandle === "@you")
   const outgoing = offers.filter(o => o.status === "pending" && o.fromHandle === "@you")
@@ -955,7 +955,7 @@ function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty
   )
 }
 
-function TradeOfferRow({ offer, type }: { offer: ReturnType<typeof useEsroStore>["tradeOffers"][0]; type: "incoming" | "outgoing" }) {
+function TradeOfferRow({ offer, type }: { offer: EsroState["tradeOffers"][0]; type: "incoming" | "outgoing" }) {
   const inventory = useEsroStore((s) => s.inventory)
   const [showCounterOffer, setShowCounterOffer] = useState(false)
   const [counterTokensOffered, setCounterTokensOffered] = useState(offer.toTokens)

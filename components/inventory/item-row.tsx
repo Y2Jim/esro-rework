@@ -11,6 +11,13 @@ const aspectLabel: Record<InventoryItem["aspect"], string> = {
   salvage: "salvage",
   cosmetic: "cosmetic",
   unknown: "unstable",
+  food: "food",
+  potion: "potion",
+  material: "material",
+  herb: "herb",
+  mineral: "mineral",
+  essence: "essence",
+  consumable: "consumable",
 }
 
 export function ItemRow({
