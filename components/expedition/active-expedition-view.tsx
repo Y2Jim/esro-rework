@@ -25,6 +25,16 @@ import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 const RUN_SECONDS = 90
 const TICK_MS = 200
 
+/**
+ * When a check fails the squad is set back: the token slides backward on the
+ * tracker (`back` seconds of progress lost) and the mission runs longer
+ * (`extend` seconds added to the total run). Severity scales with the failure.
+ */
+const SETBACK_SECONDS: Partial<Record<CheckOutcome, { back: number; extend: number }>> = {
+  fail: { back: 3, extend: 5 },
+  badfail: { back: 7, extend: 10 },
+}
+
 type EventType = "travel" | "discovery" | "battle" | "hazard" | "rest"
 
 interface TimelineEvent {
@@ -247,6 +257,10 @@ export function ActiveExpeditionView() {
   const phaseRef = useRef<"running" | "complete">("running")
 
   const elapsedRef = useRef(0)
+  // Total run length grows as failures extend the mission.
+  const runSecondsRef = useRef(RUN_SECONDS)
+  // Cumulative extra seconds added by setbacks, for the header/summary.
+  const setbackTotalRef = useRef(0)
   const crewRef = useRef<CrewMember[]>(initialCrew)
   const feedRef = useRef<FeedEntry[]>([])
   const battleRef = useRef<BattleState | null>(null)
@@ -264,6 +278,8 @@ export function ActiveExpeditionView() {
   // Reset all sim state when a new expedition starts.
   useEffect(() => {
     elapsedRef.current = 0
+    runSecondsRef.current = RUN_SECONDS
+    setbackTotalRef.current = 0
     crewRef.current = initialCrew
     feedRef.current = []
     battleRef.current = null
@@ -282,15 +298,28 @@ export function ActiveExpeditionView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeExpedition?.id])
 
-  const progress = Math.min(1, elapsedRef.current / RUN_SECONDS)
+  const progress = Math.min(1, elapsedRef.current / runSecondsRef.current)
   const stageOf = (p: number) => Math.min(totalStages, Math.floor(p * totalStages) + 1)
 
   const pushFeed = (type: EventType, text: string, outcome?: CheckOutcome) => {
     feedIdRef.current += 1
     feedRef.current = [
-      { id: feedIdRef.current, type, text, outcome, stage: stageOf(elapsedRef.current / RUN_SECONDS) },
+      { id: feedIdRef.current, type, text, outcome, stage: stageOf(elapsedRef.current / runSecondsRef.current) },
       ...feedRef.current,
     ].slice(0, 24)
+  }
+
+  /**
+   * Apply a setback for a failed check: slide the squad backward on the tracker
+   * and extend the total mission time. Returns the seconds added (0 if none).
+   */
+  const applySetback = (outcome: CheckOutcome): number => {
+    const s = SETBACK_SECONDS[outcome]
+    if (!s) return 0
+    elapsedRef.current = Math.max(0, elapsedRef.current - s.back)
+    runSecondsRef.current += s.extend
+    setbackTotalRef.current += s.extend
+    return s.extend
   }
 
   const damageRandomCrew = (amount = 1) => {
@@ -308,7 +337,7 @@ export function ActiveExpeditionView() {
   }
 
   const fireEvent = (ev: TimelineEvent) => {
-    const p = elapsedRef.current / RUN_SECONDS
+    const p = elapsedRef.current / runSecondsRef.current
     const stageIndex = stageOf(p) - 1
     const crewSize = crewRef.current.length
 
@@ -330,6 +359,9 @@ export function ActiveExpeditionView() {
     const check = EVENT_CHECK[ev.type as ExpEventType]
     const statLabel = check ? STAT_LABELS[check.primary] : ""
     const clause = checkClause(result, statLabel)
+    // Failed checks push the squad back and lengthen the mission.
+    const delay = applySetback(result.outcome)
+    const delayNote = delay > 0 ? ` Route +${delay}s.` : ""
 
     if (ev.type === "battle") {
       const enemy = randItem(ENEMIES)
@@ -344,8 +376,8 @@ export function ActiveExpeditionView() {
         plan,
       }
       const intro = plan.overwhelmed
-        ? `Ambush — ${enemy} overwhelms the approach. (${clause})`
-        : `Contact — ${enemy} engaging the squad. (${clause})`
+        ? `Ambush — ${enemy} overwhelms the approach. (${clause})${delayNote}`
+        : `Contact — ${enemy} engaging the squad. (${clause})${delayNote}`
       pushFeed("battle", intro, result.outcome)
       return
     }
@@ -357,7 +389,7 @@ export function ActiveExpeditionView() {
         result.damage > 0
           ? ` ${result.damage} wounded — ${clause}.`
           : ` Squad holds — ${clause}.`
-      pushFeed("hazard", base + tail, result.outcome)
+      pushFeed("hazard", base + tail + delayNote, result.outcome)
       return
     }
 
@@ -368,7 +400,7 @@ export function ActiveExpeditionView() {
         const bonus = result.bonusLoot ? " Veiled instincts turn up an extra haul." : ""
         pushFeed("discovery", `${base}${bonus} (${clause})`, result.outcome)
       } else {
-        pushFeed("discovery", `Cache picked clean — nothing recoverable. (${clause})`, result.outcome)
+        pushFeed("discovery", `Cache picked clean — nothing recoverable. (${clause})${delayNote}`, result.outcome)
       }
       return
     }
@@ -379,7 +411,10 @@ export function ActiveExpeditionView() {
       pushFeed("travel", `${ev.text ?? "Crossing the route."} A hidden path opens ahead. (${clause})`, result.outcome)
     } else if (result.damage > 0) {
       damageRandomCrew(result.damage)
-      pushFeed("travel", `Wrong turn — the squad backtracks under fire. (${clause})`, result.outcome)
+      pushFeed("travel", `Wrong turn — the squad backtracks under fire. (${clause})${delayNote}`, result.outcome)
+    } else if (delay > 0) {
+      // Failed navigation with no damage: forced detour onto a longer route.
+      pushFeed("travel", `Detour — the route doubles back through ${randItem(SECTORS)}. (${clause})${delayNote}`, result.outcome)
     } else {
       pushFeed("travel", `${ev.text ?? "Crossing the route."} (${clause})`, result.outcome)
     }
@@ -419,8 +454,8 @@ export function ActiveExpeditionView() {
   useEffect(() => {
     const iv = window.setInterval(() => {
       if (phaseRef.current !== "running") return
-      elapsedRef.current = Math.min(elapsedRef.current + TICK_MS / 1000, RUN_SECONDS)
-      const p = elapsedRef.current / RUN_SECONDS
+      elapsedRef.current = Math.min(elapsedRef.current + TICK_MS / 1000, runSecondsRef.current)
+      const p = elapsedRef.current / runSecondsRef.current
       timelineRef.current.forEach((ev, idx) => {
         if (!firedRef.current.has(idx) && p >= ev.at) {
           firedRef.current.add(idx)
@@ -428,7 +463,7 @@ export function ActiveExpeditionView() {
         }
       })
       advanceBattle()
-      if (elapsedRef.current >= RUN_SECONDS && !battleRef.current?.active) {
+      if (elapsedRef.current >= runSecondsRef.current && !battleRef.current?.active) {
         phaseRef.current = "complete"
         setPhase("complete")
       }
@@ -446,6 +481,10 @@ export function ActiveExpeditionView() {
   const etaLabel =
     etaSeconds >= 60 ? `${Math.floor(etaSeconds / 60)}m ${etaSeconds % 60}s` : `${etaSeconds}s`
   const currentStage = stageOf(progress)
+  // Express accrued setback time in the expedition's own (lore) duration scale.
+  const delayLoreSeconds = Math.round(setbackTotalRef.current * ((exp?.duration ?? 600) / RUN_SECONDS))
+  const delayLabel =
+    delayLoreSeconds >= 60 ? `+${Math.floor(delayLoreSeconds / 60)}m ${delayLoreSeconds % 60}s` : `+${delayLoreSeconds}s`
 
   return (
     <div className="flex h-full flex-col bg-[color:var(--color-bg)]">
@@ -485,7 +524,14 @@ export function ActiveExpeditionView() {
                   Stage {currentStage}/{totalStages}
                 </span>
                 <span>{Math.round(progress * 100)}%</span>
-                <span>ETA {etaLabel}</span>
+                <span className="flex items-center gap-1.5">
+                  {delayLoreSeconds > 0 && (
+                    <span className="text-[color:var(--color-amber)]" title="Time added by setbacks">
+                      {delayLabel}
+                    </span>
+                  )}
+                  <span>ETA {etaLabel}</span>
+                </span>
               </div>
             </div>
           </div>
@@ -799,6 +845,12 @@ export function ActiveExpeditionView() {
               <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
                 <span className="text-[color:var(--color-cyan)]">{hiddenRoutesRef.current}</span>
                 <span className="text-[color:var(--color-muted)]"> hidden routes</span>
+              </span>
+            )}
+            {delayLoreSeconds > 0 && (
+              <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+                <span className="text-[color:var(--color-amber)]">{delayLabel}</span>
+                <span className="text-[color:var(--color-muted)]"> lost to setbacks</span>
               </span>
             )}
           </div>
