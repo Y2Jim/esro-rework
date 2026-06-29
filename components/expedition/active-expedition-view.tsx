@@ -61,6 +61,8 @@ interface CrewMember {
   hp: number
   flashUntil: number
   stats: BaseStats
+  /** Loot units this member had secured at the moment they were defeated (hp 0). */
+  downedAtLoot?: number
 }
 
 interface BattleState {
@@ -272,8 +274,13 @@ export function ActiveExpeditionView() {
   const checksPassedRef = useRef(0)
   const checksFailedRef = useRef(0)
   const lootFoundRef = useRef(0)
+  // Total loot units secured over the run (caches + battle salvage). Used to
+  // decide what is delivered: survivors carry the full haul, a total wipe loses it.
+  const lootUnitsRef = useRef(0)
   const hiddenRoutesRef = useRef(0)
   const woundedRef = useRef(false)
+  // Whether the entire squad was defeated (all hp 0) before reaching the end.
+  const wipedRef = useRef(false)
 
   // Reset all sim state when a new expedition starts.
   useEffect(() => {
@@ -289,8 +296,10 @@ export function ActiveExpeditionView() {
     checksPassedRef.current = 0
     checksFailedRef.current = 0
     lootFoundRef.current = 0
+    lootUnitsRef.current = 0
     hiddenRoutesRef.current = 0
     woundedRef.current = false
+    wipedRef.current = false
     timelineRef.current = buildTimeline(risk, initialCrew)
     phaseRef.current = "running"
     setPhase("running")
@@ -323,12 +332,23 @@ export function ActiveExpeditionView() {
   }
 
   const damageRandomCrew = (amount = 1) => {
-    const candidates = crewRef.current.filter((c) => c.hp > 1)
+    // Only members still standing can take a hit.
+    const candidates = crewRef.current.filter((c) => c.hp > 0)
     if (candidates.length === 0) return
     const target = randItem(candidates)
-    target.hp = Math.max(1, target.hp - amount)
+    const before = target.hp
+    target.hp = Math.max(0, target.hp - amount)
     target.flashUntil = Date.now() + 600
     woundedRef.current = true
+    // Member just went down: freeze the loot they had secured up to this point.
+    if (target.hp === 0 && before > 0) {
+      target.downedAtLoot = lootUnitsRef.current
+      pushFeed(
+        "battle",
+        `${target.short} goes down — their cargo is sealed at this point in the run.`,
+        "badfail",
+      )
+    }
   }
 
   const tallyOutcome = (outcome: CheckOutcome) => {
@@ -396,6 +416,7 @@ export function ActiveExpeditionView() {
     if (ev.type === "discovery") {
       if (result.loot) {
         lootFoundRef.current += 1
+        lootUnitsRef.current += result.bonusLoot ? 2 : 1
         const base = ev.text ?? "Cache located."
         const bonus = result.bonusLoot ? " Veiled instincts turn up an extra haul." : ""
         pushFeed("discovery", `${base}${bonus} (${clause})`, result.outcome)
