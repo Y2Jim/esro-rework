@@ -162,7 +162,7 @@ export interface EsroState {
   unlockAllCosmetics: () => void
   unlockAllTitles: () => void
   simulateExpedition: (expeditionId?: string) => void
-  completeActiveExpedition: () => void
+  completeActiveExpedition: (lootMultiplier?: number) => void
   injectTestChatMessages: () => void
   
   // Admin Panel
@@ -1167,15 +1167,23 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   
-  // Admin/Debug - instantly complete active expedition
-  completeActiveExpedition: () => {
+  // Complete the active expedition. `lootMultiplier` scales the haul that makes
+  // it back: 1 = survivors deliver everything, 0 = total squad wipe (no rewards).
+  completeActiveExpedition: (lootMultiplier = 1) => {
     const { activeExpedition, inventory } = get()
     if (!activeExpedition) return
-    
-    // Generate random loot rewards
+
+    const mult = Math.max(0, Math.min(1, lootMultiplier))
+
+    // Total wipe: all cargo is lost, no rewards granted.
+    if (mult <= 0) {
+      set({ activeExpedition: null })
+      return
+    }
+
+    // Generate random loot rewards, scaled by how much loot was carried back.
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
-    const rarities: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"]
-    const numRewards = 2 + Math.floor(Math.random() * 3) // 2-4 items
+    const numRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
     
     const newItems: InventoryItem[] = []
     for (let i = 0; i < numRewards; i++) {
@@ -1199,8 +1207,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       })
     }
     
-    // Add token reward
-    const tokenReward = 50 + Math.floor(Math.random() * 150)
+    // Add token reward, scaled by the loot that made it back.
+    const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult)
     
     set({
       activeExpedition: null,

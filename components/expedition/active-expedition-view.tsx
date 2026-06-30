@@ -463,7 +463,11 @@ export function ActiveExpeditionView() {
       b.active = false
       battlesWonRef.current += 1
       pushFeed("battle", `${b.enemy} neutralized — squad pressing on.`, "success")
-      if (Math.random() < 0.5) pushFeed("discovery", "Salvage stripped from the wreckage.")
+      if (Math.random() < 0.5) {
+        lootFoundRef.current += 1
+        lootUnitsRef.current += 1
+        pushFeed("discovery", "Salvage stripped from the wreckage.")
+      }
       window.setTimeout(() => {
         battleRef.current = null
         forceTick()
@@ -484,6 +488,16 @@ export function ActiveExpeditionView() {
         }
       })
       advanceBattle()
+      // Total squad wipe: everyone is down. The run ends immediately and all loot is lost.
+      if (crewRef.current.every((c) => c.hp <= 0)) {
+        wipedRef.current = true
+        if (battleRef.current) battleRef.current.active = false
+        pushFeed("battle", "Squad eliminated — transponders dark. All cargo is lost.", "badfail")
+        phaseRef.current = "complete"
+        setPhase("complete")
+        forceTick()
+        return
+      }
       if (elapsedRef.current >= runSecondsRef.current && !battleRef.current?.active) {
         phaseRef.current = "complete"
         setPhase("complete")
@@ -506,6 +520,14 @@ export function ActiveExpeditionView() {
   const delayLoreSeconds = Math.round(setbackTotalRef.current * ((exp?.duration ?? 600) / RUN_SECONDS))
   const delayLabel =
     delayLoreSeconds >= 60 ? `+${Math.floor(delayLoreSeconds / 60)}m ${delayLoreSeconds % 60}s` : `+${delayLoreSeconds}s`
+
+  // Survival outcome for the completion summary.
+  const survivors = crew.filter((c) => c.hp > 0)
+  const downed = crew.filter((c) => c.hp <= 0)
+  const wiped = wipedRef.current || survivors.length === 0
+  // Survivors carry the full haul; a total wipe loses everything.
+  const lootMultiplier = wiped ? 0 : 1
+  const totalLootUnits = lootUnitsRef.current
 
   return (
     <div className="flex h-full flex-col bg-[color:var(--color-bg)]">
@@ -821,31 +843,64 @@ export function ActiveExpeditionView() {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-[13px] uppercase tracking-[0.3em] text-[color:var(--color-success)]"
+            className="text-[13px] uppercase tracking-[0.3em]"
+            style={{ color: wiped ? "var(--color-danger)" : "var(--color-success)" }}
           >
-            Expedition Complete
+            {wiped ? "Squad Lost" : "Expedition Complete"}
           </motion.div>
           <div className="mt-1 text-[18px] font-semibold text-[color:var(--color-text)]">
             {activeExpedition.label}
           </div>
 
           {/* Returning crew */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            {crew.map((c) => (
-              <div key={c.handle} className="flex flex-col items-center gap-1">
-                <PixelAvatar config={c.avatar} size="sm" showFlair={c.isPlayer} />
-                <span className="max-w-[72px] truncate text-[11px] text-[color:var(--color-muted)]">
-                  {c.short}
-                </span>
-              </div>
-            ))}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            {crew.map((c) => {
+              const isDown = c.hp <= 0
+              return (
+                <div key={c.handle} className="flex flex-col items-center gap-1">
+                  <div className={cn("relative", isDown && "opacity-45 grayscale")}>
+                    <PixelAvatar config={c.avatar} size="sm" showFlair={c.isPlayer} />
+                    {isDown && (
+                      <span className="absolute inset-0 flex items-center justify-center text-[16px] font-bold text-[color:var(--color-danger)]">
+                        ✕
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className="max-w-[72px] truncate text-[11px]"
+                    style={{ color: isDown ? "var(--color-danger)" : "var(--color-muted)" }}
+                  >
+                    {c.short}
+                  </span>
+                  {isDown && (
+                    <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-danger)]/80">
+                      Down
+                    </span>
+                  )}
+                </div>
+              )
+            })}
           </div>
           <div
             className="mt-2 text-[12px]"
-            style={{ color: woundedRef.current ? "var(--color-amber)" : "var(--color-success)" }}
+            style={{
+              color: wiped
+                ? "var(--color-danger)"
+                : downed.length > 0
+                  ? "var(--color-amber)"
+                  : woundedRef.current
+                    ? "var(--color-amber)"
+                    : "var(--color-success)",
+            }}
           >
-            {woundedRef.current ? "Squad returned, battered" : "Full squad returned unscathed"} ·{" "}
-            {battlesWonRef.current} threats cleared
+            {wiped
+              ? "Entire squad eliminated — no one returned"
+              : downed.length > 0
+                ? `${survivors.length} returned · ${downed.length} lost in the field`
+                : woundedRef.current
+                  ? "Squad returned, battered"
+                  : "Full squad returned unscathed"}{" "}
+            · {battlesWonRef.current} threats cleared
           </div>
 
           {/* Stat-check outcome breakdown */}
@@ -876,39 +931,70 @@ export function ActiveExpeditionView() {
             )}
           </div>
 
+          {/* Lost-member salvage breakdown */}
+          {downed.length > 0 && !wiped && (
+            <div className="mt-4 w-full max-w-[300px] text-[12px] text-[color:var(--color-muted)]">
+              {downed.map((c) => (
+                <div key={c.handle} className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="truncate text-[color:var(--color-danger)]/90">{c.short} fell</span>
+                  <span>
+                    secured {c.downedAtLoot ?? 0}/{totalLootUnits} before going down
+                  </span>
+                </div>
+              ))}
+              <div className="mt-1 text-[11px] text-[color:var(--color-muted)]/80">
+                Survivors recovered the remaining cargo and carried the full haul home.
+              </div>
+            </div>
+          )}
+
           {/* Reward summary */}
           <div className="mt-5 w-full max-w-[300px] rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-4">
             <div className="mb-2 text-[12px] uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
-              Rewards
+              {wiped ? "Rewards Lost" : "Rewards"}
             </div>
-            <div className="flex items-center justify-center gap-4 text-[14px]">
-              {exp?.rewards.xp ? (
-                <span className="text-[color:var(--color-cyan)]">+{exp.rewards.xp} XP</span>
-              ) : null}
-              {exp?.rewards.tokens ? (
-                <span className="text-[color:var(--color-amber)]">+{exp.rewards.tokens} tokens</span>
-              ) : null}
-            </div>
-            {exp?.rewards.possibleDrops && exp.rewards.possibleDrops.length > 0 && (
-              <div className="mt-3 flex flex-wrap justify-center gap-1">
-                {exp.rewards.possibleDrops.slice(0, 4).map((drop, i) => (
-                  <span
-                    key={i}
-                    className={cn("rounded px-1.5 py-0.5 text-[12px]", rarityColor[drop.rarity])}
-                  >
-                    {drop.label}
-                  </span>
-                ))}
+            {wiped ? (
+              <div className="text-[13px] text-[color:var(--color-danger)]">
+                The entire squad was defeated. All loot was abandoned in the field — no rewards
+                recovered.
               </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-center gap-4 text-[14px]">
+                  {exp?.rewards.xp ? (
+                    <span className="text-[color:var(--color-cyan)]">+{exp.rewards.xp} XP</span>
+                  ) : null}
+                  {exp?.rewards.tokens ? (
+                    <span className="text-[color:var(--color-amber)]">+{exp.rewards.tokens} tokens</span>
+                  ) : null}
+                </div>
+                {exp?.rewards.possibleDrops && exp.rewards.possibleDrops.length > 0 && (
+                  <div className="mt-3 flex flex-wrap justify-center gap-1">
+                    {exp.rewards.possibleDrops.slice(0, 4).map((drop, i) => (
+                      <span
+                        key={i}
+                        className={cn("rounded px-1.5 py-0.5 text-[12px]", rarityColor[drop.rarity])}
+                      >
+                        {drop.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
           <button
             type="button"
-            onClick={completeActiveExpedition}
-            className="mt-6 rounded-lg border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/15 px-6 py-2.5 text-[14px] font-medium uppercase tracking-wider text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/25"
+            onClick={() => completeActiveExpedition(lootMultiplier)}
+            className={cn(
+              "mt-6 rounded-lg border px-6 py-2.5 text-[14px] font-medium uppercase tracking-wider transition-colors",
+              wiped
+                ? "border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/15 text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/25"
+                : "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/25",
+            )}
           >
-            Collect &amp; Return
+            {wiped ? "Return Empty-Handed" : "Collect & Return"}
           </button>
         </div>
       )}
