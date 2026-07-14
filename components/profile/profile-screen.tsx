@@ -1078,7 +1078,7 @@ function AdminUnlockButton() {
             </div>
             <button
               type="button"
-              onClick={completeActiveExpedition}
+              onClick={() => completeActiveExpedition(1)}
               className="w-full rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-2 text-[14px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
             >
               Complete Expedition (Get Loot)

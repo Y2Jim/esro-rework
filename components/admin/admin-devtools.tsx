@@ -239,7 +239,7 @@ export function AdminDevTools() {
         {activeExpedition && (
           <button
             type="button"
-            onClick={completeActiveExpedition}
+            onClick={() => completeActiveExpedition(1)}
             className="w-full rounded border border-[#60d060]/50 bg-[#60d060]/10 px-3 py-2 text-[14px] text-[#60d060] transition-colors hover:bg-[#60d060]/20"
           >
             Complete Active Expedition
