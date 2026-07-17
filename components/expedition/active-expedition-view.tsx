@@ -584,7 +584,7 @@ export function ActiveExpeditionView() {
             {/* Status labels above the route */}
             <div className="mb-3 flex items-center justify-between">
               <motion.span
-                className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                className="text-[13px] font-semibold uppercase tracking-[0.18em]"
                 animate={battle?.clash ? { scale: [1, 1.18, 1] } : { scale: 1 }}
                 transition={{ duration: 0.3 }}
                 style={{ color: battle?.active ? "var(--color-danger)" : "var(--color-cyan)" }}
@@ -592,7 +592,7 @@ export function ActiveExpeditionView() {
                 {battle?.active ? "Engaging" : "Advancing"}
               </motion.span>
               <span
-                className="max-w-[140px] truncate text-[11px] uppercase tracking-wider"
+                className="max-w-[140px] truncate text-[13px] uppercase tracking-wider"
                 style={{ color: battle?.active ? "var(--color-danger)" : "var(--color-muted)" }}
               >
                 {battle?.active ? battle.enemy : "→ Extraction Point"}
@@ -721,7 +721,7 @@ export function ActiveExpeditionView() {
                     <span className="max-w-[80px] truncate text-[12px] font-medium text-[color:var(--color-text)]">
                       {c.short}
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                    <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
                       {c.role}
                     </span>
                     <div className="flex gap-0.5">
@@ -753,7 +753,7 @@ export function ActiveExpeditionView() {
                 {(["atk", "def", "focus", "luck"] as const).map((stat) => (
                   <span
                     key={stat}
-                    className="flex items-center gap-1 rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[11px] tabular-nums"
+                    className="flex items-center gap-1 rounded bg-[color:var(--color-panel)]/50 px-1.5 py-0.5 text-[13px] tabular-nums"
                     title={`Squad ${STAT_LABELS[stat]}`}
                   >
                     <span className="uppercase tracking-wider" style={{ color: STAT_COLORS[stat] }}>
@@ -770,7 +770,7 @@ export function ActiveExpeditionView() {
                   <span
                     key={pas.name}
                     className={cn(
-                      "rounded border px-1.5 py-0.5 text-[11px]",
+                      "rounded border px-1.5 py-0.5 text-[13px]",
                       pas.source === "Lineage"
                         ? "border-[color:var(--color-accent)]/40 text-[color:var(--color-accent)]"
                         : "border-[color:var(--color-cyan)]/40 text-[color:var(--color-cyan)]",
@@ -782,7 +782,7 @@ export function ActiveExpeditionView() {
                 ))}
               </div>
             ) : (
-              <p className="text-[11px] text-[color:var(--color-muted)]">
+              <p className="text-[13px] text-[color:var(--color-muted)]">
                 No lineage or faction passives active — checks rely on raw squad stats.
               </p>
             )}
@@ -810,14 +810,14 @@ export function ActiveExpeditionView() {
                       style={{ borderLeftColor: style.color }}
                     >
                       <span
-                        className="mt-0.5 shrink-0 text-[10px] uppercase tracking-wider"
+                        className="mt-0.5 shrink-0 text-[12px] uppercase tracking-wider"
                         style={{ color: style.color }}
                       >
                         {style.label}
                       </span>
                       {entry.outcome && OUTCOME_STYLE[entry.outcome] && (
                         <span
-                          className="mt-0.5 shrink-0 font-mono text-[11px] font-bold leading-none"
+                          className="mt-0.5 shrink-0 font-mono text-[13px] font-bold leading-none"
                           style={{ color: OUTCOME_STYLE[entry.outcome]!.color }}
                           aria-hidden="true"
                         >
@@ -827,7 +827,7 @@ export function ActiveExpeditionView() {
                       <span className="text-[13px] leading-snug text-[color:var(--color-foreground)]/90">
                         {entry.text}
                       </span>
-                      <span className="ml-auto shrink-0 text-[10px] text-[color:var(--color-muted)]">
+                      <span className="ml-auto shrink-0 text-[12px] text-[color:var(--color-muted)]">
                         S{entry.stage}
                       </span>
                     </motion.div>
@@ -867,13 +867,13 @@ export function ActiveExpeditionView() {
                     )}
                   </div>
                   <span
-                    className="max-w-[72px] truncate text-[11px]"
+                    className="max-w-[72px] truncate text-[13px]"
                     style={{ color: isDown ? "var(--color-danger)" : "var(--color-muted)" }}
                   >
                     {c.short}
                   </span>
                   {isDown && (
-                    <span className="text-[10px] uppercase tracking-wider text-[color:var(--color-danger)]/80">
+                    <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-danger)]/80">
                       Down
                     </span>
                   )}
@@ -942,7 +942,7 @@ export function ActiveExpeditionView() {
                   </span>
                 </div>
               ))}
-              <div className="mt-1 text-[11px] text-[color:var(--color-muted)]/80">
+              <div className="mt-1 text-[13px] text-[color:var(--color-muted)]/80">
                 Survivors recovered the remaining cargo and carried the full haul home.
               </div>
             </div>
