@@ -177,7 +177,7 @@ const onboarding: CaptureState[] = [
 
 // ============ 02 TERMINAL ============
 const CHANNELS: ChannelId[] = ["PUBLIC", "TRADE", "HELP", "LOG", "UNDERCHAT", "GAME", "FACTION", "PARTY"]
-const terminal: CaptureState[] = CHANNELS.map((ch) => ({
+const terminal: CaptureState[] = CHANNELS.map<CaptureState>((ch) => ({
   slug: `terminal-${ch.toLowerCase()}`,
   category: "terminal" as const,
   folder: "02-terminal",
@@ -203,7 +203,7 @@ const terminal: CaptureState[] = CHANNELS.map((ch) => ({
 
 // ============ 03 OPS ============
 const OPS_TABS: OpsTab[] = ["expeditions", "skills", "crafting", "rolling"]
-const ops: CaptureState[] = OPS_TABS.map((t) => ({
+const ops: CaptureState[] = OPS_TABS.map<CaptureState>((t) => ({
   slug: `ops-${t}`,
   category: "ops" as const,
   folder: "03-ops",
