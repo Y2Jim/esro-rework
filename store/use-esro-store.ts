@@ -11,6 +11,9 @@ import type {
   Expedition,
   ActiveExpedition,
   FactionProject,
+  FactionBuilding,
+  FactionRally,
+  FactionActivity,
   Friend,
   InventoryItem,
   OpsTab,
@@ -36,6 +39,15 @@ import type {
   AdminAction,
 } from "@/lib/types"
 import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById, DEFAULT_BASE_STATS, SKILL_DEFINITIONS } from "@/lib/game-data"
+import {
+  FACTION_BUILDINGS,
+  RANK_TIERS,
+  buildingUpgradeCost,
+  craftingBonusesFrom,
+  seedFactionActivity,
+  seedFactionRallies,
+} from "@/config/faction"
+import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import type { BaseStats } from "@/lib/types"
 import {
   channels as seedChannels,
@@ -131,9 +143,20 @@ export interface EsroState {
   
   // Social - Party
   party: PartyMember[]
-  
+  invitePartyMember: () => { success: boolean; message: string }
+  removePartyMember: (slot: number) => void
+  setPartyMemberRole: (slot: number, role: string) => void
+  readyUpParty: () => void
+
   // Social - Faction
   factionProjects: FactionProject[]
+  factionBuildings: FactionBuilding[]
+  factionRallies: FactionRally[]
+  factionActivity: FactionActivity[]
+  contributeToProject: (projectId: string, amount: number) => { success: boolean; message: string }
+  upgradeBuilding: (buildingId: string) => { success: boolean; message: string }
+  joinRally: (rallyId: string) => void
+  contributeToRally: (rallyId: string, amount: number) => { success: boolean; message: string }
   
   // Social - Friends
   friends: Friend[]
@@ -326,6 +349,68 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Root Access Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 20 } },
   ],
 }
+
+// ============ FACTION HELPERS ============
+
+function randItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+let factionActivitySeq = 0
+
+/** Prepend a faction activity entry, capping the log length. */
+function pushActivity(
+  list: FactionActivity[],
+  entry: Omit<FactionActivity, "id" | "at"> & { at?: number },
+): FactionActivity[] {
+  factionActivitySeq += 1
+  const full: FactionActivity = {
+    id: `fa-live-${factionActivitySeq}`,
+    at: entry.at ?? Date.now(),
+    ...entry,
+  }
+  return [full, ...list].slice(0, 40)
+}
+
+/**
+ * Apply a standing gain to the profile's faction, handling rank-ups against the
+ * cumulative RANK_TIERS thresholds. `bonus` is a fractional multiplier (0.15 = +15%).
+ */
+function applyStanding(
+  profile: Profile,
+  rawAmount: number,
+  bonus: number,
+): { profile: Profile; gained: number; rankedUp: boolean; newRank: number } {
+  if (!profile.faction) return { profile, gained: 0, rankedUp: false, newRank: 0 }
+  const gained = Math.max(0, Math.round(rawAmount * (1 + bonus)))
+  let { rank, standing, maxStanding } = profile.faction
+  standing += gained
+  let rankedUp = false
+  const maxRank = RANK_TIERS.length - 1
+  while (standing >= maxStanding && rank < maxRank) {
+    standing -= maxStanding
+    rank += 1
+    rankedUp = true
+    const nextDelta =
+      (RANK_TIERS[rank + 1]?.standing ?? RANK_TIERS[rank].standing + 1000) - RANK_TIERS[rank].standing
+    maxStanding = Math.max(100, nextDelta)
+  }
+  if (rank >= maxRank) standing = Math.min(standing, maxStanding)
+  return {
+    profile: { ...profile, faction: { ...profile.faction, rank, standing, maxStanding } },
+    gained,
+    rankedUp,
+    newRank: rank,
+  }
+}
+
+const PARTY_ROLES = ["Logistics", "Surveying", "Analysis", "Security", "Relay Tuning", "Scavenging"]
+const PARTY_TITLES: { label: string; rarity: Rarity }[] = [
+  { label: "Route Tender", rarity: "common" },
+  { label: "Signal Keeper", rarity: "uncommon" },
+  { label: "Archive Listener", rarity: "rare" },
+  { label: "Waystone Keeper", rarity: "epic" },
+]
 
 export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
@@ -707,11 +792,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const recipe = CRAFTING_RECIPES.find((r: any) => r.id === recipeId)
     if (!recipe) return { success: false, message: "Recipe not found" }
     if (!recipe.unlocked) return { success: false, message: "Recipe locked" }
-    
-    // Check ingredients
+
+    // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
+    const bonuses = craftingBonusesFrom(get().factionBuildings)
+    const effQty = (qty: number) => Math.max(1, Math.ceil(qty * (1 - bonuses.cost)))
+
+    // Check ingredients (against the reduced requirement)
     for (const ing of recipe.ingredients) {
       const owned = inventory.find(i => i.id === ing.itemId || i.label === ing.label)
-      if (!owned || owned.qty < ing.qty) {
+      if (!owned || owned.qty < effQty(ing.qty)) {
         return { success: false, message: `Missing ${ing.label}` }
       }
     }
@@ -719,12 +808,13 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     // Consume ingredients
     let updatedInventory = [...inventory]
     for (const ing of recipe.ingredients) {
+      const need = effQty(ing.qty)
       const idx = updatedInventory.findIndex(i => i.id === ing.itemId || i.label === ing.label)
       if (idx !== -1) {
-        if (updatedInventory[idx].qty <= ing.qty) {
+        if (updatedInventory[idx].qty <= need) {
           updatedInventory = updatedInventory.filter((_, i) => i !== idx)
         } else {
-          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - ing.qty }
+          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - need }
         }
       }
     }
@@ -735,7 +825,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         recipeId: recipe.id,
         label: recipe.label,
         startedAt: Date.now(),
-        duration: recipe.craftTime * 1000,
+        duration: Math.round(recipe.craftTime * 1000 * (1 - bonuses.speed)),
       },
     })
     
@@ -752,6 +842,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return
     }
     
+    // Relay Forge upgrade: chance-weighted bonus yield on each craft.
+    const yieldBonus = craftingBonusesFrom(get().factionBuildings).yield
+    const outputQty = recipe.output.qty + Math.round(recipe.output.qty * yieldBonus)
+
     // Add crafted item to inventory
     const existingItem = inventory.find(i => i.id === recipe.output.itemId)
     let updatedInventory: InventoryItem[]
@@ -759,7 +853,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     if (existingItem) {
       updatedInventory = inventory.map(i =>
         i.id === recipe.output.itemId
-          ? { ...i, qty: i.qty + recipe.output.qty }
+          ? { ...i, qty: i.qty + outputQty }
           : i
       )
     } else {
@@ -768,7 +862,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         label: recipe.output.label,
         aspect: recipe.output.aspect,
         rarity: recipe.output.rarity,
-        qty: recipe.output.qty,
+        qty: outputQty,
         identified: true,
         description: recipe.output.description,
         effects: recipe.output.effects,
@@ -828,7 +922,250 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Faction
   party: seedParty,
+  invitePartyMember: () => {
+    const { party } = get()
+    const maxSlots = 4
+    if (party.length >= maxSlots) return { success: false, message: "Party is full" }
+    const usedSlots = new Set(party.map((m) => m.slot))
+    let slot = 1
+    while (usedSlots.has(slot)) slot += 1
+    const suffix = Math.random().toString(16).slice(2, 7)
+    const handle = `@Relay${suffix}`
+    const title = randItem(PARTY_TITLES)
+    const member: PartyMember = {
+      slot,
+      handle,
+      title: title.label,
+      titleRarity: title.rarity,
+      role: randItem(PARTY_ROLES),
+      status: "idle",
+      avatar: generateAvatarFromSeed(handle),
+      joinedAt: Date.now(),
+      contribution: 0,
+      expeditionsCompleted: 0,
+    }
+    set((s) => ({
+      party: [...s.party, member].sort((a, b) => a.slot - b.slot),
+      factionActivity: pushActivity(s.factionActivity, {
+        kind: "join",
+        handle,
+        text: "joined your party",
+      }),
+    }))
+    return { success: true, message: `${handle} joined the party` }
+  },
+  removePartyMember: (slot) =>
+    set((s) => ({
+      party: s.party.filter((m) => m.slot !== slot || m.leader),
+    })),
+  setPartyMemberRole: (slot, role) =>
+    set((s) => ({
+      party: s.party.map((m) => (m.slot === slot ? { ...m, role } : m)),
+    })),
+  readyUpParty: () =>
+    set((s) => ({
+      party: s.party.map((m) => (m.status === "idle" ? { ...m, status: "ready" as const } : m)),
+    })),
+
   factionProjects: seedFactionProjects,
+  factionBuildings: FACTION_BUILDINGS,
+  factionRallies: seedFactionRallies,
+  factionActivity: seedFactionActivity,
+
+  contributeToProject: (projectId, amount) => {
+    const { factionProjects, profile } = get()
+    const project = factionProjects.find((p) => p.id === projectId)
+    if (!project) return { success: false, message: "Project not found" }
+    if (project.complete) return { success: false, message: "Project already complete" }
+    const cost = amount // tokens spent equals units contributed
+    if (profile.tokens < cost) return { success: false, message: "Not enough tokens" }
+
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing
+    const newProgress = Math.min(project.goal, project.progress + amount)
+    const willComplete = newProgress >= project.goal
+
+    // Standing reward scales with contribution; completion grants a bonus.
+    const standingReward = Math.round(amount * 0.5) + (willComplete ? 100 : 0)
+    const { profile: afterStanding, gained, rankedUp, newRank } = applyStanding(
+      { ...profile, tokens: profile.tokens - cost },
+      standingReward,
+      bonus,
+    )
+
+    set((s) => {
+      let activity = pushActivity(s.factionActivity, {
+        kind: "contribution",
+        handle: s.identity.handle,
+        text: `contributed to ${project.label}`,
+        amount,
+      })
+      if (willComplete) {
+        activity = pushActivity(activity, {
+          kind: "project_complete",
+          handle: s.profile.faction?.label ?? "Faction",
+          text: `completed ${project.label}`,
+        })
+      }
+      if (rankedUp) {
+        activity = pushActivity(activity, {
+          kind: "rank_up",
+          handle: s.identity.handle,
+          text: `reached Rank ${newRank} — ${RANK_TIERS[newRank]?.title ?? ""}`,
+        })
+      }
+      return {
+        profile: afterStanding,
+        factionProjects: s.factionProjects.map((p) =>
+          p.id === projectId
+            ? {
+                ...p,
+                progress: newProgress,
+                complete: willComplete,
+                contributors: p.contributors + (p.progress === 0 ? 1 : 0),
+              }
+            : p,
+        ),
+        factionActivity: activity,
+      }
+    })
+
+    return {
+      success: true,
+      message: willComplete
+        ? `Project complete! +${gained} standing`
+        : `Contributed ${amount} · +${gained} standing`,
+    }
+  },
+
+  upgradeBuilding: (buildingId) => {
+    const { factionBuildings, profile, inventory } = get()
+    const building = factionBuildings.find((b) => b.id === buildingId)
+    if (!building) return { success: false, message: "Building not found" }
+    if ((profile.faction?.rank ?? 0) < building.requiredRank) {
+      return { success: false, message: `Requires Rank ${building.requiredRank}` }
+    }
+    if (building.level >= building.maxLevel) return { success: false, message: "Max level reached" }
+
+    const cost = buildingUpgradeCost(building)
+    if (profile.tokens < cost.tokens) return { success: false, message: "Not enough tokens" }
+    for (const mat of cost.materials) {
+      const owned = inventory.find((i) => i.id === mat.itemId || i.label === mat.label)
+      if (!owned || owned.qty < mat.qty) return { success: false, message: `Missing ${mat.label}` }
+    }
+
+    // Consume materials
+    let updatedInventory = [...inventory]
+    for (const mat of cost.materials) {
+      const idx = updatedInventory.findIndex((i) => i.id === mat.itemId || i.label === mat.label)
+      if (idx !== -1) {
+        if (updatedInventory[idx].qty <= mat.qty) {
+          updatedInventory = updatedInventory.filter((_, i) => i !== idx)
+        } else {
+          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - mat.qty }
+        }
+      }
+    }
+
+    const newLevel = building.level + 1
+    set((s) => ({
+      inventory: updatedInventory,
+      profile: { ...s.profile, tokens: s.profile.tokens - cost.tokens },
+      factionBuildings: s.factionBuildings.map((b) =>
+        b.id === buildingId ? { ...b, level: newLevel } : b,
+      ),
+      factionActivity: pushActivity(s.factionActivity, {
+        kind: "building",
+        handle: s.identity.handle,
+        text: `upgraded the ${building.label} to Lv.${newLevel}`,
+      }),
+    }))
+    return { success: true, message: `${building.label} upgraded to Lv.${newLevel}` }
+  },
+
+  joinRally: (rallyId) =>
+    set((s) => {
+      const rally = s.factionRallies.find((r) => r.id === rallyId)
+      if (!rally || rally.joined) return {}
+      return {
+        factionRallies: s.factionRallies.map((r) => (r.id === rallyId ? { ...r, joined: true } : r)),
+        factionActivity: pushActivity(s.factionActivity, {
+          kind: "rally",
+          handle: s.identity.handle,
+          text: `joined ${rally.label}`,
+        }),
+      }
+    }),
+
+  contributeToRally: (rallyId, amount) => {
+    const { factionRallies, profile } = get()
+    const rally = factionRallies.find((r) => r.id === rallyId)
+    if (!rally) return { success: false, message: "Rally not found" }
+    if (rally.complete) return { success: false, message: "Rally already complete" }
+    if (Date.now() > rally.endsAt) return { success: false, message: "Rally has ended" }
+    if (profile.tokens < amount) return { success: false, message: "Not enough tokens" }
+
+    const newProgress = Math.min(rally.goal, rally.progress + amount)
+    const willComplete = newProgress >= rally.goal
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing
+
+    // Personal standing for helping; the full reward lands when the rally completes.
+    let standingReward = Math.round(amount * 0.4)
+    let tokenRefund = 0
+    if (willComplete) {
+      standingReward += rally.reward.standing
+      tokenRefund = rally.reward.tokens
+    }
+    const { profile: afterStanding, gained, rankedUp, newRank } = applyStanding(
+      { ...profile, tokens: profile.tokens - amount + tokenRefund },
+      standingReward,
+      bonus,
+    )
+
+    set((s) => {
+      let activity = pushActivity(s.factionActivity, {
+        kind: "rally",
+        handle: s.identity.handle,
+        text: `pushed ${rally.label} forward`,
+        amount,
+      })
+      if (willComplete) {
+        activity = pushActivity(activity, {
+          kind: "rally",
+          handle: s.profile.faction?.label ?? "Faction",
+          text: `completed ${rally.label}`,
+        })
+      }
+      if (rankedUp) {
+        activity = pushActivity(activity, {
+          kind: "rank_up",
+          handle: s.identity.handle,
+          text: `reached Rank ${newRank} — ${RANK_TIERS[newRank]?.title ?? ""}`,
+        })
+      }
+      return {
+        profile: afterStanding,
+        factionRallies: s.factionRallies.map((r) =>
+          r.id === rallyId
+            ? {
+                ...r,
+                progress: newProgress,
+                complete: willComplete,
+                joined: true,
+                contribution: r.contribution + amount,
+              }
+            : r,
+        ),
+        factionActivity: activity,
+      }
+    })
+
+    return {
+      success: true,
+      message: willComplete
+        ? `Rally complete! +${gained} standing, +${tokenRefund} tokens`
+        : `Contributed ${amount} · +${gained} standing`,
+    }
+  },
 
   // Friends
   friends: [

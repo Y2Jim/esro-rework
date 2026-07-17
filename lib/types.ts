@@ -58,6 +58,82 @@ export interface FactionProject {
   progress: number
   goal: number
   contributors: number
+  /** Whether the project has reached its goal. */
+  complete?: boolean
+}
+
+// ============ FACTION SYSTEMS ============
+
+export type FactionActivityKind =
+  | "contribution"
+  | "rank_up"
+  | "project_complete"
+  | "building"
+  | "rally"
+  | "join"
+  | "perk"
+
+export interface FactionActivity {
+  id: string
+  kind: FactionActivityKind
+  /** Actor handle. */
+  handle: string
+  text: string
+  /** unix ms */
+  at: number
+  amount?: number
+}
+
+export type FactionBuildingEffect =
+  | "craft_speed"
+  | "craft_yield"
+  | "cost_reduction"
+  | "standing_gain"
+
+export interface FactionBuilding {
+  id: string
+  label: string
+  description: string
+  icon: string
+  /** 0 = not yet built. */
+  level: number
+  maxLevel: number
+  effect: FactionBuildingEffect
+  /** Fractional bonus granted per level (e.g. 0.08 = 8%). */
+  perLevel: number
+  /** Human-readable effect summary (per level). */
+  effectLabel: string
+  requiredRank: number
+  /** Token cost for the first level; scales up per level. */
+  baseTokenCost: number
+  /** Materials consumed for the first level; scales up per level. */
+  baseMaterials: { itemId: string; label: string; qty: number }[]
+}
+
+export interface FactionPerk {
+  id: string
+  label: string
+  description: string
+  icon: string
+  requiredRank: number
+  /** Short buff summary shown on the perk card. */
+  effectLabel: string
+}
+
+export interface FactionRally {
+  id: string
+  label: string
+  description: string
+  icon: string
+  progress: number
+  goal: number
+  /** unix ms deadline. */
+  endsAt: number
+  reward: { tokens: number; standing: number; item?: string }
+  /** The player's personal contribution to this rally. */
+  contribution: number
+  joined: boolean
+  complete?: boolean
 }
 
 export type MessageKind = "player" | "system" | "whisper"
