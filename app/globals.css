@@ -1850,3 +1850,32 @@
   border-radius: var(--radius-panel);
   color: var(--color-muted);
 }
+
+/* ============================================================
+   FIGMA CAPTURE SYSTEM (development tooling only)
+   Scoped styles used exclusively by the /figma-capture routes.
+   Safe to delete alongside the rest of the capture system.
+   ============================================================ */
+.figma-capture-mode {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+.figma-capture-stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+/* Freeze animated content so screenshots are byte-stable.
+   Zero-duration animations jump to their final (settled) frame. */
+.figma-capture-mode *,
+.figma-capture-mode *::before,
+.figma-capture-mode *::after {
+  animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001s !important;
+  transition-delay: 0s !important;
+  caret-color: transparent !important;
+}
