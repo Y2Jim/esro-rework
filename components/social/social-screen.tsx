@@ -9,6 +9,13 @@ import { getTitleClass } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { FACTIONS, FACTION_UNLOCK_LEVEL } from "@/lib/game-data"
 import { FactionSelection } from "@/components/onboarding/faction-selection"
+import {
+  RANK_TIERS,
+  FACTION_PERKS,
+  buildingUpgradeCost,
+  buildingEffectDescription,
+  formatRelativeTime,
+} from "@/config/faction"
 import type { SocialTab, RaceId } from "@/lib/types"
 
 const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
@@ -66,13 +73,34 @@ export function SocialScreen() {
 }
 
 // ============ PARTY TAB ============
+const PARTY_ROLE_OPTIONS = ["Logistics", "Surveying", "Analysis", "Security", "Relay Tuning", "Scavenging"]
+
 function PartyTab({ party }: { party: EsroState["party"] }) {
   const maxSlots = 4
+  const invitePartyMember = useEsroStore((s) => s.invitePartyMember)
+  const removePartyMember = useEsroStore((s) => s.removePartyMember)
+  const setPartyMemberRole = useEsroStore((s) => s.setPartyMemberRole)
+  const readyUpParty = useEsroStore((s) => s.readyUpParty)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [flash, setFlash] = useState<string | null>(null)
+
+  const handleInvite = () => {
+    const res = invitePartyMember()
+    setFlash(res.message)
+    window.setTimeout(() => setFlash(null), 2200)
+  }
 
   return (
     <div className="space-y-4">
-      <div className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
-        Party Members ({party.length}/{maxSlots})
+      <div className="flex items-center justify-between">
+        <div className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Party Members ({party.length}/{maxSlots})
+        </div>
+        {settingsOpen && (
+          <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-accent)]">
+            Managing
+          </span>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -95,7 +123,19 @@ function PartyTab({ party }: { party: EsroState["party"] }) {
                 <div className={cn("text-[13px]", getTitleClass(m.titleRarity || "common"))}>{m.title}</div>
               )}
               <div className="flex items-center gap-3 text-[13px] text-[color:var(--color-muted)]">
-                <span>{m.role}</span>
+                {settingsOpen && !m.leader ? (
+                  <select
+                    value={m.role}
+                    onChange={(e) => setPartyMemberRole(m.slot, e.target.value)}
+                    className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-1 py-0.5 text-[12px] text-[color:var(--color-text)]"
+                  >
+                    {PARTY_ROLE_OPTIONS.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span>{m.role}</span>
+                )}
                 <span className={cn(
                   m.status === "ready" && "text-[color:var(--color-success)]",
                   m.status === "deployed" && "text-[color:var(--color-cyan)]",
@@ -104,25 +144,40 @@ function PartyTab({ party }: { party: EsroState["party"] }) {
                 )}>
                   {m.status}
                 </span>
-                {m.contribution && <span>{m.contribution} XP</span>}
+                {m.contribution ? <span>{m.contribution} XP</span> : null}
               </div>
             </div>
+            {settingsOpen && !m.leader && (
+              <button
+                type="button"
+                onClick={() => removePartyMember(m.slot)}
+                className="shrink-0 rounded border border-[color:var(--color-danger)]/50 bg-[color:var(--color-danger)]/10 px-2 py-1 text-[12px] text-[color:var(--color-danger)] transition-colors hover:bg-[color:var(--color-danger)]/20"
+              >
+                Remove
+              </button>
+            )}
           </div>
         ))}
 
         {/* Empty slots */}
         {Array.from({ length: maxSlots - party.length }).map((_, i) => (
-          <div
+          <button
             key={`empty-${i}`}
-            className="flex items-center justify-center rounded-lg border border-dashed border-[color:var(--color-border-soft)] px-3 py-4"
+            type="button"
+            onClick={handleInvite}
+            className="flex w-full items-center justify-center rounded-lg border border-dashed border-[color:var(--color-border-soft)] px-3 py-4 transition-colors hover:border-[color:var(--color-cyan)]/50 hover:bg-[color:var(--color-cyan)]/5"
           >
             <div className="text-center">
               <div className="text-[15px] text-[color:var(--color-muted)]">Empty Slot</div>
-              <div className="mt-0.5 text-[13px] text-[color:var(--color-muted-2)]">Invite a player</div>
+              <div className="mt-0.5 text-[13px] text-[color:var(--color-muted-2)]">Tap to invite a player</div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
+
+      {flash && (
+        <div className="text-[13px] text-[color:var(--color-cyan)]">{flash}</div>
+      )}
 
       {/* Party actions */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
@@ -130,17 +185,32 @@ function PartyTab({ party }: { party: EsroState["party"] }) {
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button
             type="button"
-            className="rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-1.5 text-[14px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20"
+            onClick={handleInvite}
+            disabled={party.length >= maxSlots}
+            className="rounded border border-[color:var(--color-cyan)]/50 bg-[color:var(--color-cyan)]/10 px-3 py-1.5 text-[14px] text-[color:var(--color-cyan)] transition-colors hover:bg-[color:var(--color-cyan)]/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Invite Player
           </button>
           <button
             type="button"
-            className="rounded border border-[color:var(--color-border)] px-3 py-1.5 text-[14px] text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
+            onClick={() => setSettingsOpen((v) => !v)}
+            className={cn(
+              "rounded border px-3 py-1.5 text-[14px] transition-colors",
+              settingsOpen
+                ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)]"
+                : "border-[color:var(--color-border)] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/10"
+            )}
           >
-            Party Settings
+            {settingsOpen ? "Done" : "Party Settings"}
           </button>
         </div>
+        <button
+          type="button"
+          onClick={readyUpParty}
+          className="mt-2 w-full rounded border border-[color:var(--color-success)]/50 bg-[color:var(--color-success)]/10 px-3 py-1.5 text-[14px] text-[color:var(--color-success)] transition-colors hover:bg-[color:var(--color-success)]/20"
+        >
+          Ready Up
+        </button>
       </div>
     </div>
   )
@@ -154,7 +224,9 @@ function FactionTab({
   faction: EsroState["profile"]["faction"]
   projects: EsroState["factionProjects"] 
 }) {
-  const [subTab, setSubTab] = useState<"overview" | "projects" | "ranks">("overview")
+  const [subTab, setSubTab] = useState<
+    "overview" | "projects" | "buildings" | "rallies" | "ranks" | "activity"
+  >("overview")
   const [showFactionSelection, setShowFactionSelection] = useState(false)
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const profile = useEsroStore((s) => s.profile)
@@ -314,14 +386,17 @@ function FactionTab({
       </div>
 
       {/* Sub-tabs */}
-      <div className="flex gap-1">
-        {(["overview", "projects", "ranks"] as const).map((t) => (
+      <div
+        className="flex gap-1 overflow-x-auto pb-1"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
+      >
+        {(["overview", "projects", "buildings", "rallies", "ranks", "activity"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setSubTab(t)}
             className={cn(
-              "rounded px-2 py-1 text-[13px] uppercase tracking-wider transition-colors",
+              "shrink-0 rounded px-2 py-1 text-[13px] uppercase tracking-wider transition-colors",
               subTab === t
                 ? "text-[color:var(--color-accent)]"
                 : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
@@ -337,8 +412,11 @@ function FactionTab({
       </div>
 
       {subTab === "overview" && <FactionOverviewNew factionData={characterFaction} faction={faction} />}
-      {subTab === "projects" && <FactionProjects projects={projects} />}
+      {subTab === "projects" && <FactionProjects projects={projects} accent={characterFaction.color} />}
+      {subTab === "buildings" && <FactionBuildings accent={characterFaction.color} rank={faction?.rank || 0} />}
+      {subTab === "rallies" && <FactionRallies accent={characterFaction.color} />}
       {subTab === "ranks" && <FactionRanks currentRank={faction?.rank || 0} />}
+      {subTab === "activity" && <FactionActivityFeed accent={characterFaction.color} />}
     </div>
   )
 }
@@ -465,7 +543,23 @@ function FactionOverview({ faction }: { faction: NonNullable<EsroState["profile"
   )
 }
 
-function FactionProjects({ projects }: { projects: EsroState["factionProjects"] }) {
+function FactionProjects({
+  projects,
+  accent,
+}: {
+  projects: EsroState["factionProjects"]
+  accent: string
+}) {
+  const tokens = useEsroStore((s) => s.profile.tokens)
+  const contributeToProject = useEsroStore((s) => s.contributeToProject)
+  const [flash, setFlash] = useState<{ id: string; msg: string; ok: boolean } | null>(null)
+
+  const handleContribute = (id: string, amount: number) => {
+    const res = contributeToProject(id, amount)
+    setFlash({ id, msg: res.message, ok: res.success })
+    window.setTimeout(() => setFlash((f) => (f?.id === id ? null : f)), 2200)
+  }
+
   if (projects.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
@@ -476,28 +570,59 @@ function FactionProjects({ projects }: { projects: EsroState["factionProjects"] 
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between text-[13px] text-[color:var(--color-muted)]">
+        <span>Spend tokens to advance faction projects</span>
+        <span className="text-[color:var(--color-amber)]">{tokens} tokens</span>
+      </div>
       {projects.map((p) => {
         const pct = (p.progress / p.goal) * 100
+        const done = p.complete || p.progress >= p.goal
+        const amounts = [10, 25, 50]
         return (
           <div key={p.id} className="rounded-lg border border-[color:var(--color-border)] p-3">
             <div className="flex items-start justify-between">
-              <div className="text-[14px] font-medium text-[color:var(--color-text)]">{p.label}</div>
-              <span className="text-[13px] text-[color:var(--color-violet-bright)]">{Math.floor(pct)}%</span>
+              <div className="flex items-center gap-2 text-[14px] font-medium text-[color:var(--color-text)]">
+                {p.label}
+                {done && (
+                  <span className="rounded bg-[color:var(--color-success)]/15 px-1.5 py-0.5 text-[12px] text-[color:var(--color-success)]">
+                    Complete
+                  </span>
+                )}
+              </div>
+              <span className="text-[13px]" style={{ color: accent }}>{Math.floor(pct)}%</span>
             </div>
             <div className="mt-1 text-[14px] text-[color:var(--color-muted)]">{p.description}</div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-[color:var(--color-border)]">
-              <div className="h-full bg-[color:var(--color-violet-bright)] transition-all" style={{ width: `${pct}%` }} />
+              <div className="h-full transition-all" style={{ width: `${pct}%`, backgroundColor: accent }} />
             </div>
             <div className="mt-1 flex justify-between text-[13px] text-[color:var(--color-muted)]">
               <span>{p.progress}/{p.goal} collected</span>
               <span>{p.contributors} contributors</span>
             </div>
-            <button
-              type="button"
-              className="mt-2 w-full rounded border border-[color:var(--color-violet-bright)]/50 bg-[color:var(--color-violet-bright)]/10 px-3 py-1.5 text-[14px] text-[color:var(--color-violet-bright)] transition-colors hover:bg-[color:var(--color-violet-bright)]/20"
-            >
-              Contribute
-            </button>
+            {!done && (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {amounts.map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    disabled={tokens < amt}
+                    onClick={() => handleContribute(p.id, amt)}
+                    className="rounded border px-2 py-1.5 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                    style={{ borderColor: `${accent}80`, backgroundColor: `${accent}18`, color: accent }}
+                  >
+                    +{amt}
+                  </button>
+                ))}
+              </div>
+            )}
+            {flash?.id === p.id && (
+              <div
+                className="mt-2 text-[13px]"
+                style={{ color: flash.ok ? "var(--color-success)" : "var(--color-danger)" }}
+              >
+                {flash.msg}
+              </div>
+            )}
           </div>
         )
       })}
@@ -505,21 +630,279 @@ function FactionProjects({ projects }: { projects: EsroState["factionProjects"] 
   )
 }
 
+// ============ BUILDINGS ============
+function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
+  const buildings = useEsroStore((s) => s.factionBuildings)
+  const tokens = useEsroStore((s) => s.profile.tokens)
+  const inventory = useEsroStore((s) => s.inventory)
+  const upgradeBuilding = useEsroStore((s) => s.upgradeBuilding)
+  const [flash, setFlash] = useState<{ id: string; msg: string; ok: boolean } | null>(null)
+
+  const handleUpgrade = (id: string) => {
+    const res = upgradeBuilding(id)
+    setFlash({ id, msg: res.message, ok: res.success })
+    window.setTimeout(() => setFlash((f) => (f?.id === id ? null : f)), 2400)
+  }
+
+  const ownedQty = (m: { itemId: string; label: string }) =>
+    inventory.find((i) => i.id === m.itemId || i.label === m.label)?.qty ?? 0
+
+  return (
+    <div className="space-y-3">
+      <div className="text-[13px] text-[color:var(--color-muted)]">
+        Upgrade shared structures to boost your crafting bench faction-wide.
+      </div>
+      {buildings.map((b) => {
+        const maxed = b.level >= b.maxLevel
+        const rankLocked = rank < b.requiredRank
+        const cost = buildingUpgradeCost(b)
+        const canAfford =
+          tokens >= cost.tokens && cost.materials.every((m) => ownedQty(m) >= m.qty)
+        return (
+          <div key={b.id} className="rounded-lg border border-[color:var(--color-border)] p-3">
+            <div className="flex items-start gap-3">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[18px]"
+                style={{ backgroundColor: `${accent}18`, color: accent }}
+              >
+                {b.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[14px] font-medium text-[color:var(--color-text)]">{b.label}</span>
+                  <span className="text-[13px] text-[color:var(--color-muted)]">
+                    Lv.{b.level}/{b.maxLevel}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-[13px] text-[color:var(--color-muted)]">{b.description}</div>
+                <div className="mt-1 text-[13px]" style={{ color: accent }}>
+                  {b.level > 0 ? buildingEffectDescription(b) : `Effect: ${b.effectLabel} per level`}
+                </div>
+              </div>
+            </div>
+
+            {maxed ? (
+              <div className="mt-2 rounded bg-[color:var(--color-success)]/10 px-2 py-1.5 text-center text-[13px] text-[color:var(--color-success)]">
+                Fully upgraded
+              </div>
+            ) : rankLocked ? (
+              <div className="mt-2 rounded bg-[color:var(--color-panel)]/50 px-2 py-1.5 text-center text-[13px] text-[color:var(--color-muted)]">
+                Unlocks at Rank {b.requiredRank}
+              </div>
+            ) : (
+              <>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px]">
+                  <span className={cn(tokens >= cost.tokens ? "text-[color:var(--color-amber)]" : "text-[color:var(--color-danger)]")}>
+                    {cost.tokens} tokens
+                  </span>
+                  {cost.materials.map((m) => (
+                    <span
+                      key={m.itemId}
+                      className={cn(ownedQty(m) >= m.qty ? "text-[color:var(--color-muted)]" : "text-[color:var(--color-danger)]")}
+                    >
+                      {m.label} {ownedQty(m)}/{m.qty}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  disabled={!canAfford}
+                  onClick={() => handleUpgrade(b.id)}
+                  className="mt-2 w-full rounded border px-3 py-1.5 text-[14px] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ borderColor: `${accent}80`, backgroundColor: `${accent}18`, color: accent }}
+                >
+                  {b.level === 0 ? "Build" : "Upgrade"}
+                </button>
+              </>
+            )}
+            {flash?.id === b.id && (
+              <div
+                className="mt-2 text-[13px]"
+                style={{ color: flash.ok ? "var(--color-success)" : "var(--color-danger)" }}
+              >
+                {flash.msg}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ============ RALLIES ============
+function FactionRallies({ accent }: { accent: string }) {
+  const rallies = useEsroStore((s) => s.factionRallies)
+  const tokens = useEsroStore((s) => s.profile.tokens)
+  const joinRally = useEsroStore((s) => s.joinRally)
+  const contributeToRally = useEsroStore((s) => s.contributeToRally)
+  const [flash, setFlash] = useState<{ id: string; msg: string; ok: boolean } | null>(null)
+
+  const handleContribute = (id: string, amount: number) => {
+    const res = contributeToRally(id, amount)
+    setFlash({ id, msg: res.message, ok: res.success })
+    window.setTimeout(() => setFlash((f) => (f?.id === id ? null : f)), 2400)
+  }
+
+  if (rallies.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
+        <div className="text-[15px] text-[color:var(--color-muted)]">No active rallies</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between text-[13px] text-[color:var(--color-muted)]">
+        <span>Time-limited faction events with shared rewards</span>
+        <span className="text-[color:var(--color-amber)]">{tokens} tokens</span>
+      </div>
+      {rallies.map((r) => {
+        const pct = (r.progress / r.goal) * 100
+        const done = r.complete || r.progress >= r.goal
+        const ended = Date.now() > r.endsAt
+        const hoursLeft = Math.max(0, Math.round((r.endsAt - Date.now()) / 3600000))
+        const amounts = [25, 50, 100]
+        return (
+          <div key={r.id} className="rounded-lg border border-[color:var(--color-border)] p-3">
+            <div className="flex items-start gap-3">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[18px]"
+                style={{ backgroundColor: `${accent}18`, color: accent }}
+              >
+                {r.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[14px] font-medium text-[color:var(--color-text)]">{r.label}</span>
+                  <span className="text-[13px] text-[color:var(--color-muted)]">
+                    {done ? "Complete" : ended ? "Ended" : `${hoursLeft}h left`}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-[13px] text-[color:var(--color-muted)]">{r.description}</div>
+              </div>
+            </div>
+
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+              <div className="h-full transition-all" style={{ width: `${pct}%`, backgroundColor: accent }} />
+            </div>
+            <div className="mt-1 flex justify-between text-[13px] text-[color:var(--color-muted)]">
+              <span>{r.progress}/{r.goal}</span>
+              <span>Your share: {r.contribution}</span>
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1 text-[12px]">
+              <span className="rounded bg-[color:var(--color-amber)]/15 px-1.5 py-0.5 text-[color:var(--color-amber)]">
+                +{r.reward.tokens} tokens
+              </span>
+              <span className="rounded px-1.5 py-0.5" style={{ backgroundColor: `${accent}15`, color: accent }}>
+                +{r.reward.standing} standing
+              </span>
+              {r.reward.item && (
+                <span className="rounded bg-[color:var(--color-cyan)]/15 px-1.5 py-0.5 text-[color:var(--color-cyan)]">
+                  {r.reward.item}
+                </span>
+              )}
+            </div>
+
+            {done ? (
+              <div className="mt-2 rounded bg-[color:var(--color-success)]/10 px-2 py-1.5 text-center text-[13px] text-[color:var(--color-success)]">
+                Rally complete — rewards claimed
+              </div>
+            ) : ended ? (
+              <div className="mt-2 rounded bg-[color:var(--color-panel)]/50 px-2 py-1.5 text-center text-[13px] text-[color:var(--color-muted)]">
+                This rally has ended
+              </div>
+            ) : !r.joined ? (
+              <button
+                type="button"
+                onClick={() => joinRally(r.id)}
+                className="mt-2 w-full rounded border px-3 py-1.5 text-[14px] transition-colors"
+                style={{ borderColor: `${accent}80`, backgroundColor: `${accent}18`, color: accent }}
+              >
+                Join Rally
+              </button>
+            ) : (
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {amounts.map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    disabled={tokens < amt}
+                    onClick={() => handleContribute(r.id, amt)}
+                    className="rounded border px-2 py-1.5 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                    style={{ borderColor: `${accent}80`, backgroundColor: `${accent}18`, color: accent }}
+                  >
+                    +{amt}
+                  </button>
+                ))}
+              </div>
+            )}
+            {flash?.id === r.id && (
+              <div
+                className="mt-2 text-[13px]"
+                style={{ color: flash.ok ? "var(--color-success)" : "var(--color-danger)" }}
+              >
+                {flash.msg}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ============ ACTIVITY FEED ============
+function FactionActivityFeed({ accent }: { accent: string }) {
+  const activity = useEsroStore((s) => s.factionActivity)
+
+  const kindIcon: Record<string, string> = {
+    contribution: "◈",
+    rank_up: "▲",
+    project_complete: "✔",
+    building: "⚒",
+    rally: "⚡",
+    join: "＋",
+    perk: "✦",
+  }
+
+  if (activity.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-[color:var(--color-border)] p-4 text-center">
+        <div className="text-[15px] text-[color:var(--color-muted)]">No recent activity</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="text-[13px] text-[color:var(--color-muted)]">Recent faction activity</div>
+      {activity.map((a) => (
+        <div
+          key={a.id}
+          className="flex items-start gap-2 rounded-lg border border-[color:var(--color-border)] px-3 py-2"
+        >
+          <span className="mt-0.5 text-[14px]" style={{ color: accent }}>
+            {kindIcon[a.kind] ?? "·"}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="text-[14px] text-[color:var(--color-text)]">
+              <span style={{ color: accent }}>{a.handle}</span>{" "}
+              <span className="text-[color:var(--color-muted)]">{a.text}</span>
+              {a.amount ? <span className="text-[color:var(--color-muted)]"> ({a.amount})</span> : null}
+            </div>
+            <div className="text-[12px] text-[color:var(--color-muted-2)]">{formatRelativeTime(a.at)}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function FactionRanks({ currentRank }: { currentRank: number }) {
-  const ranks = [
-    { rank: 0, title: "Initiate", standing: 0, tier: "recruit", rewards: ["Basic access", "Faction chat"] },
-    { rank: 1, title: "Member", standing: 100, tier: "recruit", rewards: ["Route Tender title", "Public projects"] },
-    { rank: 2, title: "Trusted", standing: 250, tier: "recruit", rewards: ["Signal Keeper title", "Project voting"] },
-    { rank: 3, title: "Pathfinder", standing: 500, tier: "core", rewards: ["Priority contracts", "Faction expeditions"] },
-    { rank: 4, title: "Veteran", standing: 800, tier: "core", rewards: ["Waystone Keeper title", "Faction armory access"] },
-    { rank: 5, title: "Elite", standing: 1200, tier: "core", rewards: ["Elite Waykeeper title", "Rare schematics"] },
-    { rank: 6, title: "Vanguard", standing: 1800, tier: "officer", rewards: ["Faction Wars participant", "Lead skirmishes"] },
-    { rank: 7, title: "Officer", standing: 2500, tier: "officer", rewards: ["Officer insignia", "Territory defense"] },
-    { rank: 8, title: "Captain", standing: 3500, tier: "officer", rewards: ["Captain title", "Coordinate war efforts"] },
-    { rank: 9, title: "Commander", standing: 5000, tier: "leadership", rewards: ["Legendary title", "Faction council seat"] },
-    { rank: 10, title: "Warlord", standing: 7500, tier: "leadership", rewards: ["Warlord title", "Declare faction wars"] },
-    { rank: 11, title: "Archon", standing: 10000, tier: "leadership", rewards: ["Archon title", "Shape faction destiny"] },
-  ]
+  const ranks = RANK_TIERS
 
   const tierColors: Record<string, { border: string; bg: string; text: string }> = {
     recruit: { border: "border-[color:var(--color-muted)]", bg: "bg-[color:var(--color-muted)]/10", text: "text-[color:var(--color-muted)]" },
@@ -593,6 +976,53 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
         )
       })}
 
+      {/* Rank Perks */}
+      <div className="space-y-2">
+        <div className="text-[13px] uppercase tracking-wider text-[color:var(--color-accent)]">
+          Rank Perks
+        </div>
+        {FACTION_PERKS.map((perk) => {
+          const unlocked = currentRank >= perk.requiredRank
+          return (
+            <div
+              key={perk.id}
+              className={cn(
+                "flex items-start gap-3 rounded-lg border p-3 transition-colors",
+                unlocked
+                  ? "border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/5"
+                  : "border-[color:var(--color-border-soft)] opacity-55"
+              )}
+            >
+              <span
+                className={cn(
+                  "mt-0.5 text-[16px]",
+                  unlocked ? "text-[color:var(--color-accent)]" : "text-[color:var(--color-muted)]"
+                )}
+              >
+                {perk.icon}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[14px] font-medium text-[color:var(--color-text)]">{perk.label}</span>
+                  <span
+                    className={cn(
+                      "rounded px-1.5 py-0.5 text-[12px]",
+                      unlocked
+                        ? "bg-[color:var(--color-success)]/15 text-[color:var(--color-success)]"
+                        : "bg-[color:var(--color-panel)]/50 text-[color:var(--color-muted)]"
+                    )}
+                  >
+                    {unlocked ? "Active" : `Rank ${perk.requiredRank}`}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-[13px] text-[color:var(--color-muted)]">{perk.description}</div>
+                <div className="mt-1 text-[13px] text-[color:var(--color-accent)]">{perk.effectLabel}</div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
       {/* Faction Wars info */}
       <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
         <div className="text-[14px] font-medium text-[color:var(--color-danger)]">Faction Wars</div>
@@ -605,8 +1035,7 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
 }
 
 function getRankTitle(rank: number): string {
-  const titles = ["Initiate", "Member", "Trusted", "Veteran", "Elite", "Officer", "Commander"]
-  return titles[Math.min(rank, titles.length - 1)]
+  return RANK_TIERS[Math.min(Math.max(rank, 0), RANK_TIERS.length - 1)].title
 }
 
 // ============ FRIENDS TAB ============

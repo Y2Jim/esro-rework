@@ -8,21 +8,30 @@ import type {
 
 // ============ RANK TIERS ============
 
+export type RankTierGroup = "recruit" | "core" | "officer" | "leadership"
+
 export interface RankTier {
   rank: number
   title: string
+  /** Cumulative standing required to reach this rank. */
   standing: number
+  tier: RankTierGroup
   rewards: string[]
 }
 
 export const RANK_TIERS: RankTier[] = [
-  { rank: 0, title: "Initiate", standing: 0, rewards: ["Basic access", "Chat participation"] },
-  { rank: 1, title: "Member", standing: 100, rewards: ["Route Tender title", "Faction chat"] },
-  { rank: 2, title: "Trusted", standing: 300, rewards: ["Signal Keeper title", "Project voting"] },
-  { rank: 3, title: "Veteran", standing: 600, rewards: ["Waystone Keeper title", "Priority contracts"] },
-  { rank: 4, title: "Elite", standing: 1000, rewards: ["Elite Waykeeper title", "Rare schematics"] },
-  { rank: 5, title: "Officer", standing: 1500, rewards: ["Officer insignia", "Lead expeditions"] },
-  { rank: 6, title: "Commander", standing: 2500, rewards: ["Legendary title", "Faction leadership"] },
+  { rank: 0, title: "Initiate", standing: 0, tier: "recruit", rewards: ["Basic access", "Faction chat"] },
+  { rank: 1, title: "Member", standing: 100, tier: "recruit", rewards: ["Route Tender title", "Public projects"] },
+  { rank: 2, title: "Trusted", standing: 250, tier: "recruit", rewards: ["Signal Keeper title", "Project voting"] },
+  { rank: 3, title: "Pathfinder", standing: 500, tier: "core", rewards: ["Priority contracts", "Faction expeditions"] },
+  { rank: 4, title: "Veteran", standing: 800, tier: "core", rewards: ["Waystone Keeper title", "Faction armory access"] },
+  { rank: 5, title: "Elite", standing: 1200, tier: "core", rewards: ["Elite Waykeeper title", "Rare schematics"] },
+  { rank: 6, title: "Vanguard", standing: 1800, tier: "officer", rewards: ["Faction Wars participant", "Lead skirmishes"] },
+  { rank: 7, title: "Officer", standing: 2500, tier: "officer", rewards: ["Officer insignia", "Territory defense"] },
+  { rank: 8, title: "Captain", standing: 3500, tier: "officer", rewards: ["Captain title", "Coordinate war efforts"] },
+  { rank: 9, title: "Commander", standing: 5000, tier: "leadership", rewards: ["Legendary title", "Faction council seat"] },
+  { rank: 10, title: "Warlord", standing: 7500, tier: "leadership", rewards: ["Warlord title", "Declare faction wars"] },
+  { rank: 11, title: "Archon", standing: 10000, tier: "leadership", rewards: ["Archon title", "Shape faction destiny"] },
 ]
 
 export function getRankTitle(rank: number): string {
@@ -169,9 +178,9 @@ export const FACTION_PERKS: FactionPerk[] = [
   {
     id: "vanguard",
     label: "Vanguard Rites",
-    description: "Elite standing grants your party a combat edge on deployment.",
+    description: "Vanguard standing grants your party a combat edge on deployment.",
     icon: "⚔",
-    requiredRank: 4,
+    requiredRank: 6,
     effectLabel: "+8% squad battle strength",
   },
   {
@@ -179,13 +188,43 @@ export const FACTION_PERKS: FactionPerk[] = [
     label: "War Council Seat",
     description: "Officers rally the faction faster, boosting all rally rewards.",
     icon: "△",
-    requiredRank: 5,
+    requiredRank: 7,
     effectLabel: "+25% rally rewards",
   },
 ]
 
 export function unlockedPerks(rank: number): FactionPerk[] {
   return FACTION_PERKS.filter((p) => rank >= p.requiredRank)
+}
+
+/** Current cumulative effect summary for a building at its present level. */
+export function buildingEffectDescription(b: FactionBuilding): string {
+  if (b.level === 0) return "Not yet built"
+  const pct = Math.round(b.level * b.perLevel * 100)
+  switch (b.effect) {
+    case "craft_speed":
+      return `-${pct}% craft time`
+    case "craft_yield":
+      return `+${pct}% bonus yield`
+    case "cost_reduction":
+      return `-${pct}% material cost`
+    case "standing_gain":
+      return `+${pct}% standing gain`
+    default:
+      return `Lv.${b.level}`
+  }
+}
+
+/** Compact relative time label, e.g. "6m ago", "3h ago", "2d ago". */
+export function formatRelativeTime(at: number, nowMs = Date.now()): string {
+  const diff = Math.max(0, nowMs - at)
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
 }
 
 // ============ SEED DATA ============
