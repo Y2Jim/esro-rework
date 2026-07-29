@@ -71,9 +71,9 @@ export const MAP_REGIONS: MapRegion[] = [
     x: 50,
     y: 48,
     radius: 26,
-    // Sits in the gap between Signal Spire and Perimeter Wall.
+    // Above the hub, in the gap between the two northern faction seats.
     labelX: 50,
-    labelY: 30,
+    labelY: 26,
   },
   {
     id: "gilded_terraces",
@@ -81,9 +81,13 @@ export const MAP_REGIONS: MapRegion[] = [
     factionId: "crownborn",
     blurb:
       "Tiered marble causeways lit by standing lamps. The Courts keep their archives here, and their secrets deeper still.",
+    // The four faction washes are identical in size and mirrored about the
+    // hub so no homeland reads as larger or better-served than another.
     x: 24,
     y: 17,
-    radius: 24,
+    radius: 25,
+    labelX: 24,
+    labelY: 3,
   },
   {
     id: "the_gloaming",
@@ -91,9 +95,11 @@ export const MAP_REGIONS: MapRegion[] = [
     factionId: "gloamwhisper",
     blurb:
       "A drowned basin where the light never fully lands. Signals go quiet here, which is precisely the point.",
-    x: 79,
-    y: 16,
-    radius: 24,
+    x: 76,
+    y: 17,
+    radius: 25,
+    labelX: 76,
+    labelY: 3,
   },
   {
     id: "emberhold_vale",
@@ -102,10 +108,9 @@ export const MAP_REGIONS: MapRegion[] = [
     blurb:
       "Forge-smoke and shelter walls. The Wardens hold the vale's salvage fields and never let a road go cold.",
     x: 24,
-    y: 73,
+    y: 75,
     radius: 25,
-    // Open ground at the lower-left, clear of Salvage Flats.
-    labelX: 20,
+    labelX: 24,
     labelY: 95,
   },
   {
@@ -114,47 +119,45 @@ export const MAP_REGIONS: MapRegion[] = [
     factionId: "roadsinger",
     blurb:
       "Open country stitched together by cart tracks and luck. The Chorus maps it constantly; it never stays mapped.",
-    x: 77,
-    y: 78,
-    radius: 26,
-    // Kept inboard of the right edge so the long name never clips.
-    labelX: 70,
+    x: 76,
+    y: 75,
+    radius: 25,
+    labelX: 76,
     labelY: 95,
   },
 ]
 
 // ============ NODES ============
 
+/**
+ * Every faction homeland holds exactly three sites — one seat of power plus
+ * two deployable locations — laid out in mirrored positions around the hub, so
+ * no faction has more ground or more work available than any other.
+ *
+ * Slot template, mirrored into each quadrant:
+ *   outer-crest  (32 / 68  ·  11 / 81)   a ruin or wilds
+ *   outer-flank  (16 / 84  ·  20 / 72)   a relay or settlement
+ *   inner-seat   (26 / 74  ·  30 / 62)   the faction HQ, facing the hub
+ */
 export const MAP_NODES: MapNode[] = [
-  // --- The Relay Reach (neutral hub) ---
+  // --- The Relay Reach (neutral hub, shared by all factions) ---
   {
     id: "waystation_prime",
     label: "Waystation Prime",
     regionId: "relay_reach",
     x: 50,
-    y: 47,
+    y: 46,
     kind: "waystation",
     blurb:
       "Your home station. Bunks, a bench, and a relay mast that still catches everything worth hearing.",
     expeditionIds: [],
   },
   {
-    id: "signal_spire",
-    label: "Signal Spire",
-    regionId: "relay_reach",
-    x: 34,
-    y: 38,
-    kind: "relay",
-    blurb:
-      "A leaning mast that drinks stray transmissions out of the air. Good hunting for a patient courier.",
-    expeditionIds: ["signal_trace"],
-  },
-  {
     id: "perimeter_wall",
     label: "Perimeter Wall",
     regionId: "relay_reach",
-    x: 66,
-    y: 56,
+    x: 50,
+    y: 62,
     kind: "settlement",
     blurb:
       "The Reach's outer cordon. Someone has to walk it, and something is always testing it.",
@@ -166,19 +169,30 @@ export const MAP_NODES: MapNode[] = [
     id: "the_archive",
     label: "The Archive",
     regionId: "gilded_terraces",
-    x: 30,
-    y: 16,
+    x: 32,
+    y: 11,
     kind: "ruin",
     blurb:
       "Shelf upon shelf of pre-collapse record stacks. The Courts permit visitors. They do not permit questions.",
     expeditionIds: ["archive_dive"],
   },
   {
+    id: "signal_spire",
+    label: "Signal Spire",
+    regionId: "gilded_terraces",
+    x: 16,
+    y: 20,
+    kind: "relay",
+    blurb:
+      "A leaning mast on the terrace approach, drinking stray transmissions out of the air. The Courts let it lean.",
+    expeditionIds: ["signal_trace"],
+  },
+  {
     id: "hq_crownborn",
     label: "The Lantern Court",
     regionId: "gilded_terraces",
-    x: 17,
-    y: 28,
+    x: 26,
+    y: 30,
     kind: "faction_hq",
     blurb:
       "A hall of standing lamps where the Courts hear petitions and keep the ledgers of order.",
@@ -188,11 +202,22 @@ export const MAP_NODES: MapNode[] = [
 
   // --- The Gloaming (Veiled Circle) ---
   {
+    id: "cartographers_rest",
+    label: "Cartographer's Rest",
+    regionId: "the_gloaming",
+    x: 68,
+    y: 11,
+    kind: "settlement",
+    blurb:
+      "A waypoint inn full of contradictory maps. The Circle pays well for whichever one turns out to be right.",
+    expeditionIds: ["route_mapping"],
+  },
+  {
     id: "sunken_vault",
     label: "Sunken Vault",
     regionId: "the_gloaming",
-    x: 73,
-    y: 22,
+    x: 84,
+    y: 20,
     kind: "ruin",
     blurb:
       "A record vault half-swallowed by black water. Whatever is still readable down there is worth a fortune.",
@@ -202,8 +227,8 @@ export const MAP_NODES: MapNode[] = [
     id: "hq_gloamwhisper",
     label: "The Quiet House",
     regionId: "the_gloaming",
-    x: 80,
-    y: 13,
+    x: 74,
+    y: 30,
     kind: "faction_hq",
     blurb:
       "No sign, no lamp, no listed address. The Circle finds you when it wants to be found.",
@@ -216,8 +241,8 @@ export const MAP_NODES: MapNode[] = [
     id: "salvage_flats",
     label: "Salvage Flats",
     regionId: "emberhold_vale",
-    x: 25,
-    y: 68,
+    x: 32,
+    y: 81,
     kind: "wilds",
     blurb:
       "Acres of picked-over wreckage. The good scrap is always one layer under the bad scrap.",
@@ -227,8 +252,8 @@ export const MAP_NODES: MapNode[] = [
     id: "relay_array",
     label: "Emberhold Array",
     regionId: "emberhold_vale",
-    x: 38,
-    y: 82,
+    x: 16,
+    y: 72,
     kind: "relay",
     blurb:
       "A bank of resonance masts the Wardens keep lit. Maintenance is constant, thankless, and paid well.",
@@ -238,8 +263,8 @@ export const MAP_NODES: MapNode[] = [
     id: "hq_hearthkin",
     label: "The Long Hearth",
     regionId: "emberhold_vale",
-    x: 16,
-    y: 57,
+    x: 26,
+    y: 62,
     kind: "faction_hq",
     blurb:
       "A forge-hall with the doors always open and a pot always on. The Wardens shelter anyone on the road.",
@@ -249,44 +274,33 @@ export const MAP_NODES: MapNode[] = [
 
   // --- The Wandering Flats (Open Roads Chorus) ---
   {
-    id: "courier_road",
-    label: "The Courier Road",
-    regionId: "wandering_flats",
-    x: 61,
-    y: 71,
-    kind: "settlement",
-    blurb:
-      "The busiest track in the Flats. Parcels move, gossip moves faster, and nobody asks for papers.",
-    expeditionIds: ["courier_run"],
-  },
-  {
     id: "cache_hollow",
     label: "Cache Hollow",
     regionId: "wandering_flats",
-    x: 79,
-    y: 85,
+    x: 68,
+    y: 81,
     kind: "wilds",
     blurb:
       "A dip in the flats where old supply drops were buried. Half are rotted. Half are not.",
     expeditionIds: ["supply_cache"],
   },
   {
-    id: "cartographers_rest",
-    label: "Cartographer's Rest",
+    id: "courier_road",
+    label: "The Courier Road",
     regionId: "wandering_flats",
-    x: 79,
-    y: 62,
+    x: 84,
+    y: 72,
     kind: "settlement",
     blurb:
-      "A waypoint inn full of contradictory maps. The Chorus pays for whichever one turns out to be right.",
-    expeditionIds: ["route_mapping"],
+      "The busiest track in the Flats. Parcels move, gossip moves faster, and nobody asks for papers.",
+    expeditionIds: ["courier_run"],
   },
   {
     id: "hq_roadsinger",
     label: "The Open Gate",
     regionId: "wandering_flats",
-    x: 58,
-    y: 89,
+    x: 74,
+    y: 62,
     kind: "faction_hq",
     blurb:
       "Less a building than a permanent camp at a crossroads. The Chorus insists that is the whole idea.",
@@ -297,33 +311,39 @@ export const MAP_NODES: MapNode[] = [
 
 // ============ PATHS ============
 
+/**
+ * Each faction is reachable by the same shape of journey: one spoke from the
+ * neutral hub to its outer flank, a leg on to its outer crest, then a final
+ * leg to its seat — plus one lateral link to the neighbouring homeland. Four
+ * edges per faction, so no homeland is better connected than another.
+ */
 export const MAP_PATHS: MapPath[] = [
-  // Hub spokes
-  { from: "waystation_prime", to: "signal_spire", kind: "road" },
+  // Hub spokes — one per homeland, plus the neutral cordon
   { from: "waystation_prime", to: "perimeter_wall", kind: "road" },
-  { from: "waystation_prime", to: "salvage_flats", kind: "road" },
-  { from: "waystation_prime", to: "courier_road", kind: "road" },
-  { from: "waystation_prime", to: "relay_array", kind: "relay" },
+  { from: "waystation_prime", to: "signal_spire", kind: "road" },
   { from: "waystation_prime", to: "sunken_vault", kind: "relay" },
+  { from: "waystation_prime", to: "relay_array", kind: "relay" },
+  { from: "waystation_prime", to: "courier_road", kind: "road" },
 
   // Gilded Terraces
   { from: "signal_spire", to: "the_archive", kind: "road" },
   { from: "the_archive", to: "hq_crownborn", kind: "road" },
 
-  // The Gloaming
-  { from: "sunken_vault", to: "hq_gloamwhisper", kind: "hidden" },
-  { from: "the_archive", to: "sunken_vault", kind: "hidden" },
+  // The Gloaming — the Circle keeps its own approaches off the open charts
+  { from: "sunken_vault", to: "cartographers_rest", kind: "hidden" },
+  { from: "cartographers_rest", to: "hq_gloamwhisper", kind: "hidden" },
 
   // Emberhold Vale
-  { from: "salvage_flats", to: "relay_array", kind: "road" },
+  { from: "relay_array", to: "salvage_flats", kind: "road" },
   { from: "salvage_flats", to: "hq_hearthkin", kind: "road" },
 
   // Wandering Flats
-  { from: "perimeter_wall", to: "courier_road", kind: "road" },
   { from: "courier_road", to: "cache_hollow", kind: "road" },
-  { from: "courier_road", to: "cartographers_rest", kind: "relay" },
   { from: "cache_hollow", to: "hq_roadsinger", kind: "road" },
-  { from: "cartographers_rest", to: "sunken_vault", kind: "hidden" },
+
+  // Lateral links between neighbouring homelands
+  { from: "the_archive", to: "cartographers_rest", kind: "hidden" },
+  { from: "salvage_flats", to: "cache_hollow", kind: "hidden" },
 ]
 
 // ============ PRESENTATION MAPS ============
@@ -345,9 +365,11 @@ export const PATH_KIND_META: Record<
   MapPathKind,
   { label: string; dash?: string; opacity: number }
 > = {
-  road: { label: "Road", opacity: 0.5 },
-  relay: { label: "Relay Line", dash: "3 2", opacity: 0.65 },
-  hidden: { label: "Hidden Route", dash: "1 3", opacity: 0.4 },
+  // Lifted so the route network reads over the terrain art while keeping the
+  // hierarchy: relay lines brightest, hidden routes faintest.
+  road: { label: "Road", opacity: 0.7 },
+  relay: { label: "Relay Line", dash: "3 2", opacity: 0.85 },
+  hidden: { label: "Hidden Route", dash: "1 3", opacity: 0.55 },
 }
 
 // ============ HELPERS ============
