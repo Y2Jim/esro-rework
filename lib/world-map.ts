@@ -31,6 +31,12 @@ export interface MapRegion {
   y: number
   /** Radius of the tint wash, in percent of map width. */
   radius: number
+  /**
+   * Optional explicit anchor for the region's name, in percent. Set these
+   * where the default (top of the tint wash) would collide with node markers.
+   */
+  labelX?: number
+  labelY?: number
 }
 
 export interface MapNode {
@@ -65,6 +71,9 @@ export const MAP_REGIONS: MapRegion[] = [
     x: 50,
     y: 48,
     radius: 26,
+    // Sits in the gap between Signal Spire and Perimeter Wall.
+    labelX: 50,
+    labelY: 30,
   },
   {
     id: "gilded_terraces",
@@ -95,6 +104,9 @@ export const MAP_REGIONS: MapRegion[] = [
     x: 24,
     y: 73,
     radius: 25,
+    // Open ground at the lower-left, clear of Salvage Flats.
+    labelX: 20,
+    labelY: 95,
   },
   {
     id: "wandering_flats",
@@ -105,6 +117,9 @@ export const MAP_REGIONS: MapRegion[] = [
     x: 77,
     y: 78,
     radius: 26,
+    // Kept inboard of the right edge so the long name never clips.
+    labelX: 70,
+    labelY: 95,
   },
 ]
 
@@ -187,8 +202,8 @@ export const MAP_NODES: MapNode[] = [
     id: "hq_gloamwhisper",
     label: "The Quiet House",
     regionId: "the_gloaming",
-    x: 84,
-    y: 12,
+    x: 80,
+    y: 13,
     kind: "faction_hq",
     blurb:
       "No sign, no lamp, no listed address. The Circle finds you when it wants to be found.",
@@ -259,8 +274,8 @@ export const MAP_NODES: MapNode[] = [
     id: "cartographers_rest",
     label: "Cartographer's Rest",
     regionId: "wandering_flats",
-    x: 85,
-    y: 63,
+    x: 79,
+    y: 62,
     kind: "settlement",
     blurb:
       "A waypoint inn full of contradictory maps. The Chorus pays for whichever one turns out to be right.",

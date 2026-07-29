@@ -46,10 +46,14 @@ export function MapTab() {
   const factionBuildings = useEsroStore((s) => s.factionBuildings)
   const mapFocusNodeId = useEsroStore((s) => s.mapFocusNodeId)
   const setMapFocus = useEsroStore((s) => s.setMapFocus)
+  const characterFaction = useEsroStore((s) => s.characterFaction)
 
   const playerLevel = profile?.level ?? 1
-  // profile.faction.id is a loose string; the map keys off the canonical RaceId union.
-  const myFactionId = (profile?.faction?.id ?? null) as RaceId | null
+  // `characterFaction` is the canonical selection; profile.faction.id can still
+  // hold a legacy label, so only trust it when it matches a real faction.
+  const myFactionId: RaceId | null =
+    characterFaction?.id ??
+    (getFactionById(profile?.faction?.id as RaceId | undefined)?.id ?? null)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showLegend, setShowLegend] = useState(false)
@@ -174,10 +178,11 @@ export function MapTab() {
               key={`label-${region.id}`}
               className="pointer-events-none absolute -translate-x-1/2 whitespace-nowrap text-[12px] uppercase tracking-[0.18em]"
               style={{
-                left: `${region.x}%`,
-                top: `${Math.max(2, region.y - region.radius + 2)}%`,
+                left: `${region.labelX ?? region.x}%`,
+                top: `${region.labelY ?? Math.max(2, region.y - region.radius + 2)}%`,
                 color: faction?.color ?? "var(--color-muted)",
-                opacity: 0.75,
+                textShadow: "0 0 6px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,1)",
+                opacity: 0.8,
               }}
             >
               {region.label}
@@ -266,12 +271,12 @@ export function MapTab() {
               </span>
               <span
                 className={cn(
-                  "max-w-[86px] truncate rounded px-1 text-[12px] leading-tight",
+                  "w-[74px] rounded px-1 text-center text-[12px] leading-tight text-balance",
                   isSelected
                     ? "text-[color:var(--color-text)]"
                     : "text-[color:var(--color-muted)]"
                 )}
-                style={{ backgroundColor: "rgba(10,11,15,0.7)" }}
+                style={{ backgroundColor: "rgba(10,11,15,0.82)" }}
               >
                 {node.label}
               </span>
@@ -304,7 +309,12 @@ export function MapTab() {
         )}
       </div>
 
-      {/* Your base shortcut */}
+      {/* Your base shortcut, or a nudge to pick a faction */}
+      {!myFactionId && (
+        <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-3 py-2 text-[13px] text-[color:var(--color-muted)]">
+          Join a faction to claim a base on the map.
+        </div>
+      )}
       {myFactionId && (
         <button
           type="button"

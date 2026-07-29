@@ -653,13 +653,17 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
   const tokens = useEsroStore((s) => s.profile.tokens)
   const inventory = useEsroStore((s) => s.inventory)
   const upgradeBuilding = useEsroStore((s) => s.upgradeBuilding)
-  const factionId = useEsroStore((s) => s.profile.faction?.id)
+  const characterFaction = useEsroStore((s) => s.characterFaction)
+  const profileFactionId = useEsroStore((s) => s.profile.faction?.id)
   const setScreen = useEsroStore((s) => s.setScreen)
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
   const setMapFocus = useEsroStore((s) => s.setMapFocus)
   const [flash, setFlash] = useState<{ id: string; msg: string; ok: boolean } | null>(null)
 
-  const hqNode = getFactionHqNode(factionId as RaceId | undefined)
+  // Prefer the canonical selection; profile.faction.id may hold a legacy label.
+  const hqNode =
+    getFactionHqNode(characterFaction?.id) ??
+    getFactionHqNode(profileFactionId as RaceId | undefined)
 
   const handleViewOnMap = () => {
     if (hqNode) setMapFocus(hqNode.id)
