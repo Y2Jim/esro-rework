@@ -333,9 +333,10 @@ export const NODE_KIND_META: Record<
   { icon: string; label: string }
 > = {
   waystation: { icon: "◉", label: "Waystation" },
-  faction_hq: { icon: "⬡", label: "Faction Base" },
-  ruin: { icon: "◭", label: "Ruin" },
-  wilds: { icon: "❋", label: "Wilds" },
+  // Keep to glyphs the terminal mono stack actually ships — ⬡ / ◭ / ❋ render blank.
+  faction_hq: { icon: "◆", label: "Faction Base" },
+  ruin: { icon: "▲", label: "Ruin" },
+  wilds: { icon: "◇", label: "Wilds" },
   relay: { icon: "↑", label: "Relay" },
   settlement: { icon: "⌂", label: "Settlement" },
 }
