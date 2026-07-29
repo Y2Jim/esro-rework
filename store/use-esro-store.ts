@@ -14,6 +14,7 @@ import type {
   FactionBuilding,
   FactionRally,
   FactionActivity,
+  FactionView,
   Friend,
   InventoryItem,
   OpsTab,
@@ -93,6 +94,12 @@ export interface EsroState {
   setScreen: (s: ScreenId) => void
   opsTab: OpsTab
   setOpsTab: (t: OpsTab) => void
+  /** World-map node to preselect when the Map tab mounts (deep-link target). */
+  mapFocusNodeId: string | null
+  setMapFocus: (id: string | null) => void
+  /** Faction sub-view to open when the Faction tab mounts (deep-link target). */
+  factionViewRequest: FactionView | null
+  requestFactionView: (v: FactionView | null) => void
 
   // Terminal (Chat)
   channel: ChannelId
@@ -528,6 +535,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   setScreen: (s) => set({ screen: s }),
   opsTab: "expeditions",
   setOpsTab: (t) => set({ opsTab: t }),
+  mapFocusNodeId: null,
+  setMapFocus: (id) => set({ mapFocusNodeId: id }),
+  factionViewRequest: null,
+  requestFactionView: (v) => set({ factionViewRequest: v }),
 
   // Terminal
   channel: "PUBLIC",

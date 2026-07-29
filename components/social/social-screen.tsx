@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useEsroStore, type EsroState } from "@/store/use-esro-store"
 import { PartyAvatar, PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { TitleDisplay } from "@/components/ui/title-display"
@@ -16,6 +16,7 @@ import {
   buildingEffectDescription,
   formatRelativeTime,
 } from "@/config/faction"
+import { getFactionHqNode } from "@/lib/world-map"
 import type { SocialTab, RaceId } from "@/lib/types"
 
 const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
@@ -27,6 +28,7 @@ const socialTabs: { id: SocialTab; label: string; icon: string; color: string; b
 
 export function SocialScreen() {
   const [tab, setTab] = useState<SocialTab>("party")
+  const factionViewRequest = useEsroStore((s) => s.factionViewRequest)
   const profile = useEsroStore((s) => s.profile)
   const party = useEsroStore((s) => s.party)
   const factionProjects = useEsroStore((s) => s.factionProjects)
@@ -34,6 +36,11 @@ export function SocialScreen() {
   const tradeOffers = useEsroStore((s) => s.tradeOffers)
 
   const faction = profile?.faction
+
+  // A deep link into a faction sub-view (e.g. from the world map) opens the Faction tab.
+  useEffect(() => {
+    if (factionViewRequest) setTab("faction")
+  }, [factionViewRequest])
 
   return (
     <div className="flex h-full flex-col">
@@ -231,7 +238,17 @@ function FactionTab({
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const profile = useEsroStore((s) => s.profile)
   const setFaction = useEsroStore((s) => s.setFaction)
-  
+  const factionViewRequest = useEsroStore((s) => s.factionViewRequest)
+  const requestFactionView = useEsroStore((s) => s.requestFactionView)
+
+  // Consume a deep-link request (e.g. "Manage Base" from the world map).
+  useEffect(() => {
+    if (factionViewRequest) {
+      setSubTab(factionViewRequest)
+      requestFactionView(null)
+    }
+  }, [factionViewRequest, requestFactionView])
+
   const playerLevel = profile?.level || 1
   const isLocked = playerLevel < FACTION_UNLOCK_LEVEL
 
@@ -636,7 +653,19 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
   const tokens = useEsroStore((s) => s.profile.tokens)
   const inventory = useEsroStore((s) => s.inventory)
   const upgradeBuilding = useEsroStore((s) => s.upgradeBuilding)
+  const factionId = useEsroStore((s) => s.profile.faction?.id)
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const setOpsTab = useEsroStore((s) => s.setOpsTab)
+  const setMapFocus = useEsroStore((s) => s.setMapFocus)
   const [flash, setFlash] = useState<{ id: string; msg: string; ok: boolean } | null>(null)
+
+  const hqNode = getFactionHqNode(factionId as RaceId | undefined)
+
+  const handleViewOnMap = () => {
+    if (hqNode) setMapFocus(hqNode.id)
+    setOpsTab("map")
+    setScreen("ops")
+  }
 
   const handleUpgrade = (id: string) => {
     const res = upgradeBuilding(id)
@@ -649,8 +678,24 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
 
   return (
     <div className="space-y-3">
-      <div className="text-[13px] text-[color:var(--color-muted)]">
-        Upgrade shared structures to boost your crafting bench faction-wide.
+      <div className="flex items-start justify-between gap-2">
+        <div className="text-[13px] text-[color:var(--color-muted)]">
+          Upgrade shared structures to boost your crafting bench faction-wide.
+        </div>
+        {hqNode && (
+          <button
+            type="button"
+            onClick={handleViewOnMap}
+            className="shrink-0 rounded border px-2 py-1 text-[12px] uppercase tracking-wider transition-colors"
+            style={{
+              borderColor: `${accent}66`,
+              backgroundColor: `${accent}14`,
+              color: accent,
+            }}
+          >
+            View on Map
+          </button>
+        )}
       </div>
       {buildings.map((b) => {
         const maxed = b.level >= b.maxLevel

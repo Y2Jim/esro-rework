@@ -24,7 +24,16 @@ export type ScreenId =
 
 export type SocialTab = "party" | "faction" | "friends" | "trade"
 
-export type OpsTab = "expeditions" | "skills" | "crafting" | "rolling"
+export type OpsTab = "map" | "expeditions" | "skills" | "crafting" | "rolling"
+
+/** Sub-views inside the Faction tab, used for cross-screen deep links. */
+export type FactionView =
+  | "overview"
+  | "projects"
+  | "buildings"
+  | "rallies"
+  | "ranks"
+  | "activity"
 
 export interface QuickAction {
   id: string

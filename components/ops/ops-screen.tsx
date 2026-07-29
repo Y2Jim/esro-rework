@@ -3,6 +3,7 @@
 import { useEsroStore } from "@/store/use-esro-store"
 import type { OpsTab } from "@/lib/types"
 import { cn } from "@/lib/cn"
+import { MapTab } from "./map-tab"
 import { ExpeditionsTab } from "./expeditions-tab"
 import { SkillsTab } from "./skills-tab"
 import { CraftingTab } from "./crafting-tab"
@@ -10,6 +11,7 @@ import { RollingTab } from "./rolling-tab"
 import { ActiveExpeditionView } from "@/components/expedition/active-expedition-view"
 
 const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
+  { id: "map", label: "Map", icon: "◈", color: "text-[color:var(--color-accent)]", bgColor: "bg-[color:var(--color-accent)]/15", hover: "hover-violet" },
   { id: "expeditions", label: "Expeditions", icon: "▷", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
   { id: "skills", label: "Skills", icon: "◆", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
   { id: "crafting", label: "Crafting", icon: "⬢", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
@@ -54,6 +56,7 @@ export function OpsScreen() {
 
       {/* Tab content */}
       <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+        {opsTab === "map" && <MapTab />}
         {opsTab === "expeditions" && <ExpeditionsTab />}
         {opsTab === "skills" && <SkillsTab />}
         {opsTab === "crafting" && <CraftingTab />}
