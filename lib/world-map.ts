@@ -173,8 +173,8 @@ export const MAP_NODES: MapNode[] = [
     y: 11,
     kind: "ruin",
     blurb:
-      "Shelf upon shelf of pre-collapse record stacks. The Courts permit visitors. They do not permit questions.",
-    expeditionIds: ["archive_dive"],
+      "Shelf upon shelf of pre-collapse record stacks, and stairs down to the unlit levels. The Courts permit visitors. They do not permit questions.",
+    expeditionIds: ["deep_archive"],
   },
   {
     id: "signal_spire",
@@ -220,8 +220,8 @@ export const MAP_NODES: MapNode[] = [
     y: 20,
     kind: "ruin",
     blurb:
-      "A record vault half-swallowed by black water. Whatever is still readable down there is worth a fortune.",
-    expeditionIds: ["deep_archive"],
+      "A record vault half-swallowed by black water. The upper shelves are still dry, and still readable.",
+    expeditionIds: ["archive_dive"],
   },
   {
     id: "hq_gloamwhisper",
@@ -245,8 +245,8 @@ export const MAP_NODES: MapNode[] = [
     y: 81,
     kind: "wilds",
     blurb:
-      "Acres of picked-over wreckage. The good scrap is always one layer under the bad scrap.",
-    expeditionIds: ["scavenger_sweep"],
+      "Acres of picked-over wreckage, and pre-collapse store rooms still sealed underneath it.",
+    expeditionIds: ["supply_cache"],
   },
   {
     id: "relay_array",
@@ -281,8 +281,8 @@ export const MAP_NODES: MapNode[] = [
     y: 81,
     kind: "wilds",
     blurb:
-      "A dip in the flats where old supply drops were buried. Half are rotted. Half are not.",
-    expeditionIds: ["supply_cache"],
+      "A dip in the flats where old supply drops were buried. Half are rotted, and worth stripping for parts.",
+    expeditionIds: ["scavenger_sweep"],
   },
   {
     id: "courier_road",
