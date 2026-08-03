@@ -63,8 +63,13 @@ import {
   quickActions as seedQuickActions,
   recoveryResults as seedRecovery,
   shards as seedShards,
-  skills as seedSkills,
 } from "@/lib/mock-data"
+import {
+  aggregateSkillBonuses,
+  createInitialSkills,
+  getSkillMechanic,
+  getSkillUnlocks,
+} from "@/lib/skill-effects"
 
 export interface EsroState {
   booted: boolean
@@ -510,19 +515,32 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     stats.focus += levelBonus
     stats.luck += levelBonus
     
-    // Add skill bonuses (each unlocked skill linked to a stat gives +1 to that stat)
-    skills.forEach(skill => {
-      if (!skill.locked && skill.level > 0) {
-        const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skill.label)
-        if (skillDef) {
-          const linkedStat = skillDef.linkedStat as keyof BaseStats
-          stats[linkedStat] += Math.floor(skill.level / 2) // +1 per 2 skill levels
-        }
+    // Add skill bonuses (+1 to the linked stat per 2 skill levels).
+    // Reads linkedStat off the skill itself, which is populated from
+    // config/skills.json. The old lookup matched skill.label against
+    // SKILL_DEFINITIONS and missed on all but one skill, so 8 of 9 skills
+    // contributed nothing.
+    skills.forEach((skill) => {
+      if (skill.locked || skill.level <= 0) return
+      const linkedStat = skill.linkedStat ?? getSkillMechanic(skill.label)?.linkedStat
+      if (linkedStat) {
+        stats[linkedStat] += Math.floor(skill.level / 2)
       }
     })
-    
+
+    // Conditioning and other survivability skills widen the HP pool directly.
+    stats.hp += Math.round(get().getSkillBonuses().maxHpBonus)
+
     return stats
   },
+
+  /** Aggregated sub-stat effects across every unlocked skill. */
+  getSkillBonuses: () => aggregateSkillBonuses(get().skills),
+
+  /** Content unlocked by skill tier breakpoints (levels 5 / 10 / 15). */
+  getSkillUnlocks: () => getSkillUnlocks(get().skills),
+
+  hasSkillUnlock: (id) => get().getSkillUnlocks().has(id),
   
   getStatBonus: (stat) => {
     const stats = get().getPlayerStats()
@@ -631,9 +649,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({ activeExpedition: null })
   },
 
-  // Skills
-  skills: seedSkills,
-  loadout: ["analysis", "surveying", "logistics", "scavenging"],
+  // Skills — the canonical 15 from config/skills.json, so every skill resolves
+  // to a real mechanic in lib/skill-effects.ts.
+  skills: createInitialSkills(),
+  loadout: ["scavenging", "gathering", "pathfinding", "lorekeeping"],
   toggleLoadout: (id) =>
     set((s) => {
       if (s.loadout.includes(id)) {

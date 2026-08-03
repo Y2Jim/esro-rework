@@ -1,4 +1,5 @@
-import type { BaseStats, Skill } from "./types"
+import skillsConfig from "@/config/skills.json"
+import type { BaseStats, Skill, SkillStat } from "./types"
 
 /**
  * ============================================================================
@@ -473,6 +474,90 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
 
 export function getSkillMechanic(name: string): SkillMechanic | undefined {
   return SKILL_MECHANICS.find((m) => m.name === name)
+}
+
+// ---------------------------------------------------------------------------
+// Runtime skill construction
+// ---------------------------------------------------------------------------
+
+/**
+ * Stable slug for a skill name, e.g. "Field Medicine" -> "field_medicine".
+ * Used as the runtime `Skill.id` so saves and expedition `requiredSkill`
+ * references stay readable.
+ */
+export function skillIdFromName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "_")
+}
+
+interface RawSkillDef {
+  name: string
+  linkedStat: string
+  summary: string
+  stats: { id: string; name: string }[]
+}
+
+const RAW_SKILLS = skillsConfig.skills as RawSkillDef[]
+
+/**
+ * Starting levels for the demo profile. Previously the runtime skill list was a
+ * separate, hand-written set whose names mostly did not exist in
+ * config/skills.json — so all but one skill silently contributed nothing. These
+ * levels keep the old demo's shape (a few developed skills, the rest to earn)
+ * while running on the canonical 15.
+ */
+const DEMO_SKILL_LEVELS: Record<string, number> = {
+  Scavenging: 6,
+  Gathering: 5,
+  Pathfinding: 4,
+  Lorekeeping: 3,
+  Conditioning: 2,
+  Bladecraft: 2,
+}
+
+/** Spread a skill's level across its three sub-stats, front-weighted. */
+function distribute(level: number, count: number): number[] {
+  const out = Array<number>(count).fill(0)
+  for (let i = 0; i < level; i++) out[i % count] += 1
+  return out
+}
+
+/**
+ * Build the canonical runtime skill list from config/skills.json.
+ *
+ * This is the single source of truth: the same 15 skills the character-creation
+ * screen offers are the ones the store holds, so every skill resolves to a
+ * mechanic instead of falling through.
+ */
+export function createInitialSkills(unlockedNames?: string[]): Skill[] {
+  return RAW_SKILLS.map((def) => {
+    const mech = getSkillMechanic(def.name)
+    const level = unlockedNames
+      ? unlockedNames.includes(def.name)
+        ? 1
+        : 0
+      : (DEMO_SKILL_LEVELS[def.name] ?? 0)
+    const spread = distribute(level, def.stats.length)
+
+    const stats: SkillStat[] = def.stats.map((s, i) => ({
+      id: s.id,
+      name: s.name,
+      level: spread[i],
+      progress: 0,
+    }))
+
+    return {
+      id: skillIdFromName(def.name),
+      label: def.name,
+      // Prefer the registry summary: several config summaries described systems
+      // that did not exist, and Conditioning's was inverted into a penalty.
+      summary: mech?.summary ?? def.summary,
+      level,
+      maxLevel: 20,
+      locked: level <= 0,
+      linkedStat: def.linkedStat as keyof BaseStats,
+      stats,
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------

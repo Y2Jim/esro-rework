@@ -288,6 +288,13 @@ export interface Skill {
   primaryExpeditions?: string[]
   /** Effects granted per level */
   effects?: SkillEffect[]
+  /** The BaseStat this skill feeds, from config/skills.json */
+  linkedStat?: keyof BaseStats
+  /**
+   * The three sub-stats that drive this skill's distinct mechanical hooks.
+   * Each one maps to its own effect in lib/skill-effects.ts.
+   */
+  stats?: SkillStat[]
   }
 
 export interface ExpeditionStage {
