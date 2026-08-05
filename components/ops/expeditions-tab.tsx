@@ -54,9 +54,8 @@ export function ExpeditionsTab() {
     // Check required skill's linked stat
     const skill = skills.find(s => s.id === exp.requiredSkill)
     if (skill && !skill.locked) {
-      const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skill.label)
-      if (skillDef) {
-        const linkedStat = skillDef.linkedStat as keyof BaseStats
+      const linkedStat = skill.linkedStat
+      if (linkedStat) {
         const bonus = getStatBonus(linkedStat)
         if (bonus > 0 && !relevantStats.find(r => r.stat === linkedStat)) {
           relevantStats.push({ stat: linkedStat, bonus })

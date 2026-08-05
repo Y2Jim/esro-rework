@@ -69,6 +69,7 @@ import {
   createInitialSkills,
   getSkillMechanic,
   getSkillUnlocks,
+  type SkillBonuses,
 } from "@/lib/skill-effects"
 
 export interface EsroState {
@@ -135,6 +136,11 @@ export interface EsroState {
   /** Alias of toggleLoadout used by loadout UI components */
   toggleLoadoutSkill: (id: string) => void
   setSkillVariant: (skillId: string, variantId: string) => void
+  /** Aggregated mechanical effects of every unlocked skill sub-stat. */
+  getSkillBonuses: () => SkillBonuses
+  /** Content unlocked by skill tier breakpoints (levels 5 / 10 / 15). */
+  getSkillUnlocks: () => Set<string>
+  hasSkillUnlock: (id: string) => boolean
 
   // Ops - Crafting/Rolling
   inventory: InventoryItem[]
