@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn"
 import { STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import {
   aggregateStats,
+  applySkillBonuses,
   checkClause,
   deriveMemberStats,
   EVENT_CHECK,
@@ -19,6 +20,7 @@ import {
   type CheckOutcome,
   type ExpEventType,
 } from "@/lib/expedition-sim"
+import { skillPassiveList } from "@/lib/skill-effects"
 import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 
 /** Sped-up run length (seconds of viewing time) and tick cadence. */
@@ -195,6 +197,8 @@ export function ActiveExpeditionView() {
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const characterRace = useEsroStore((s) => s.characterRace)
   const characterFaction = useEsroStore((s) => s.characterFaction)
+  const skills = useEsroStore((s) => s.skills)
+  const skillBonuses = useEsroStore((s) => s.getSkillBonuses())
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
 
@@ -248,9 +252,16 @@ export function ActiveExpeditionView() {
     () => aggregateStats(initialCrew.map((c) => c.stats)),
     [initialCrew],
   )
+  // Lineage + faction passives, then every unlocked skill's sub-stat effects
+  // folded in on top. Skills stack additively with lineage/faction traits.
   const runMods = useMemo(
-    () => getRunModifiers(characterRace?.id as RaceId | undefined, characterFaction?.id as RaceId | undefined),
-    [characterRace?.id, characterFaction?.id],
+    () =>
+      applySkillBonuses(
+        getRunModifiers(characterRace?.id as RaceId | undefined, characterFaction?.id as RaceId | undefined),
+        skillBonuses,
+        skillPassiveList(skills),
+      ),
+    [characterRace?.id, characterFaction?.id, skillBonuses, skills],
   )
 
   // Simulation state lives in refs; we force a render each tick for smoothness.
@@ -385,7 +396,11 @@ export function ActiveExpeditionView() {
 
     if (ev.type === "battle") {
       const enemy = randItem(ENEMIES)
-      const plan = planBattle(result.outcome, risk, stageIndex)
+      const plan = planBattle(result.outcome, risk, stageIndex, runMods)
+      // Marksmanship: open the engagement with a free hit.
+      const openingHp = plan.firstStrike
+        ? Math.max(0, plan.enemyHp - (1 + plan.bonusDamage))
+        : plan.enemyHp
       battleRef.current = {
         enemy,
         hpMax: plan.enemyHp,

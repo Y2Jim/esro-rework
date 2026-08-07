@@ -593,6 +593,44 @@ export function aggregateSkillBonuses(skills: Skill[]): SkillBonuses {
   return out
 }
 
+/**
+ * The strongest effect from each unlocked skill, formatted for the expedition
+ * readiness panel so skills read as first-class passives next to lineage and
+ * faction traits.
+ */
+export function skillPassiveList(
+  skills: Skill[],
+): { source: "Skill"; name: string; effect: string }[] {
+  const out: { source: "Skill"; name: string; effect: string }[] = []
+
+  for (const skill of skills) {
+    if (skill.locked || skill.level <= 0) continue
+    const mech = getSkillMechanic(skill.label)
+    if (!mech) continue
+
+    // Rank this skill's hooks by contribution and surface the top one.
+    let best: { effect: SkillBonusKey; value: number } | null = null
+    for (const hook of mech.hooks) {
+      const sub = skill.stats?.find((s) => s.id === hook.id)
+      const lvl = sub ? sub.level : skill.level
+      if (lvl <= 0) continue
+      const value = hook.perLevel * lvl
+      if (!best || Math.abs(value) > Math.abs(best.value)) {
+        best = { effect: hook.effect, value }
+      }
+    }
+    if (!best) continue
+
+    out.push({
+      source: "Skill",
+      name: `${skill.label} Lv.${skill.level}`,
+      effect: `${BONUS_LABEL[best.effect]} ${formatBonus(best.effect, best.value)}`,
+    })
+  }
+
+  return out
+}
+
 /** Every unlock the player's current skill levels have earned. */
 export function getSkillUnlocks(skills: Skill[]): Set<SkillUnlockId> {
   const unlocked = new Set<SkillUnlockId>()

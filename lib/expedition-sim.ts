@@ -80,7 +80,7 @@ export function aggregateStats(list: BaseStats[]): BaseStats {
 }
 
 export interface ActivePassive {
-  source: "Lineage" | "Faction"
+  source: "Lineage" | "Faction" | "Skill"
   name: string
   effect: string
 }
