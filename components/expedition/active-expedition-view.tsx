@@ -20,7 +20,7 @@ import {
   type CheckOutcome,
   type ExpEventType,
 } from "@/lib/expedition-sim"
-import { skillPassiveList } from "@/lib/skill-effects"
+import { aggregateSkillBonuses, skillPassiveList } from "@/lib/skill-effects"
 import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 
 /** Sped-up run length (seconds of viewing time) and tick cadence. */
@@ -198,7 +198,6 @@ export function ActiveExpeditionView() {
   const characterRace = useEsroStore((s) => s.characterRace)
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const skills = useEsroStore((s) => s.skills)
-  const skillBonuses = useEsroStore((s) => s.getSkillBonuses())
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
 
@@ -254,14 +253,18 @@ export function ActiveExpeditionView() {
   )
   // Lineage + faction passives, then every unlocked skill's sub-stat effects
   // folded in on top. Skills stack additively with lineage/faction traits.
+  //
+  // Derived here rather than via a store selector: aggregateSkillBonuses builds
+  // a fresh object each call, so selecting it directly gave zustand a new
+  // snapshot every render and looped forever.
   const runMods = useMemo(
     () =>
       applySkillBonuses(
         getRunModifiers(characterRace?.id as RaceId | undefined, characterFaction?.id as RaceId | undefined),
-        skillBonuses,
+        aggregateSkillBonuses(skills),
         skillPassiveList(skills),
       ),
-    [characterRace?.id, characterFaction?.id, skillBonuses, skills],
+    [characterRace?.id, characterFaction?.id, skills],
   )
 
   // Simulation state lives in refs; we force a render each tick for smoothness.
