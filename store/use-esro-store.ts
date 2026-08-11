@@ -69,6 +69,7 @@ import {
   createInitialSkills,
   getSkillMechanic,
   getSkillUnlocks,
+  skillIdFromName,
   type SkillBonuses,
 } from "@/lib/skill-effects"
 
@@ -450,6 +451,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       characterRace: race,
       characterCourier: courier,
       isNewUser: false,
+      // The player's chosen starter skills start unlocked at level 1; the rest
+      // stay locked to be earned. Previously starterSkills was accepted and
+      // then discarded, so character creation had no mechanical effect.
+      skills: createInitialSkills(starterSkills),
+      loadout: starterSkills.slice(0, 4).map(skillIdFromName),
       identity: {
         ...identity,
         handle: `@${handle}`,
@@ -830,7 +836,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     if (!recipe.unlocked) return { success: false, message: "Recipe locked" }
 
     // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
-    const bonuses = craftingBonusesFrom(get().factionBuildings)
+    const buildingBonuses = craftingBonusesFrom(get().factionBuildings)
+    // Skills stack on top: Ritualism (Inscription) trims cost, Bladecraft
+    // (Maintenance) and Gathering (Harvesting) speed the work up.
+    const skillFx = get().getSkillBonuses()
+    const bonuses = {
+      cost: buildingBonuses.cost + skillFx.craftCost,
+      speed: buildingBonuses.speed + skillFx.craftSpeed,
+      yield: buildingBonuses.yield + skillFx.craftYield,
+    }
     const effQty = (qty: number) => Math.max(1, Math.ceil(qty * (1 - bonuses.cost)))
 
     // Check ingredients (against the reduced requirement)
@@ -878,8 +892,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return
     }
     
-    // Relay Forge upgrade: chance-weighted bonus yield on each craft.
-    const yieldBonus = craftingBonusesFrom(get().factionBuildings).yield
+    // Relay Forge upgrade plus skill yield bonuses on each craft.
+    const yieldBonus =
+      craftingBonusesFrom(get().factionBuildings).yield + get().getSkillBonuses().craftYield
     const outputQty = recipe.output.qty + Math.round(recipe.output.qty * yieldBonus)
 
     // Add crafted item to inventory
@@ -1016,8 +1031,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const cost = amount // tokens spent equals units contributed
     if (profile.tokens < cost) return { success: false, message: "Not enough tokens" }
 
-    const bonus = craftingBonusesFrom(get().factionBuildings).standing
-    const newProgress = Math.min(project.goal, project.progress + amount)
+    // Ritualism (Consecration) makes each token contributed count for more.
+    const skillFx = get().getSkillBonuses()
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing + skillFx.factionStanding
+    const effAmount = Math.round(amount * (1 + skillFx.contribution))
+    const newProgress = Math.min(project.goal, project.progress + effAmount)
     const willComplete = newProgress >= project.goal
 
     // Standing reward scales with contribution; completion grants a bonus.
@@ -1140,9 +1158,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     if (Date.now() > rally.endsAt) return { success: false, message: "Rally has ended" }
     if (profile.tokens < amount) return { success: false, message: "Not enough tokens" }
 
-    const newProgress = Math.min(rally.goal, rally.progress + amount)
+    // Ritualism (Consecration) amplifies rally contributions the same way.
+    const skillFx = get().getSkillBonuses()
+    const effAmount = Math.round(amount * (1 + skillFx.contribution))
+    const newProgress = Math.min(rally.goal, rally.progress + effAmount)
     const willComplete = newProgress >= rally.goal
-    const bonus = craftingBonusesFrom(get().factionBuildings).standing
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing + skillFx.factionStanding
 
     // Personal standing for helping; the full reward lands when the rally completes.
     let standingReward = Math.round(amount * 0.4)
