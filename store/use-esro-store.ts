@@ -232,8 +232,13 @@ export interface EsroState {
   deleteExpedition: (id: string) => void
 }
 
-function rollRarity(focused: boolean): Rarity {
-  const r = Math.random()
+/**
+ * @param luck Rollcraft / Lorekeeping bonus. Shrinks the random draw so it
+ *   lands in the rarer bands more often — luck of 0.2 makes a roll behave as
+ *   if it came in 20% lower.
+ */
+function rollRarity(focused: boolean, luck = 0): Rarity {
+  const r = Math.random() * (1 - Math.min(0.6, Math.max(0, luck)))
   if (focused) {
     if (r < 0.02) return "legendary"
     if (r < 0.1) return "epic"
@@ -691,7 +696,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const currencyKey = mode === "focused" ? "resonance" : "relay_tokens"
     const { shards, recovery, profile, inventory } = get()
     if ((shards as any)[currencyKey] < cost) return
-    const rarity = rollRarity(mode === "focused")
+    const rarity = rollRarity(mode === "focused", get().getSkillBonuses().rollLuck)
     const pool = POOL[rarity]
     const pick = pool[Math.floor(Math.random() * pool.length)]
     
@@ -843,7 +848,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const bonuses = {
       cost: buildingBonuses.cost + skillFx.craftCost,
       speed: buildingBonuses.speed + skillFx.craftSpeed,
-      yield: buildingBonuses.yield + skillFx.craftYield,
+      yield: buildingBonuses.yield + skillFx.craftQuality,
     }
     const effQty = (qty: number) => Math.max(1, Math.ceil(qty * (1 - bonuses.cost)))
 
@@ -894,7 +899,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     
     // Relay Forge upgrade plus skill yield bonuses on each craft.
     const yieldBonus =
-      craftingBonusesFrom(get().factionBuildings).yield + get().getSkillBonuses().craftYield
+      craftingBonusesFrom(get().factionBuildings).yield + get().getSkillBonuses().craftQuality
     const outputQty = recipe.output.qty + Math.round(recipe.output.qty * yieldBonus)
 
     // Add crafted item to inventory
@@ -954,14 +959,29 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Contracts
   contracts: seedContracts,
-  acceptContract: (id) =>
+  acceptContract: (id) => {
+    // Negotiation (Lorekeeping) and Appraisal raise the agreed payout at the
+    // moment the contract is signed, so the bonus is locked into the terms.
+    const rewardBonus = get().getSkillBonuses().contractReward
     set((s) => ({
       contracts: s.contracts.map((c) =>
         c.id === id && c.status === "available"
-          ? { ...c, status: "active" as const }
-          : c
+          ? {
+              ...c,
+              status: "active" as const,
+              // reward is a display string ("120 relay tokens"); scale the
+              // numbers inside it and leave the wording intact.
+              reward:
+                rewardBonus > 0
+                  ? c.reward.replace(/\d+/g, (n) =>
+                      String(Math.round(Number(n) * (1 + rewardBonus))),
+                    )
+                  : c.reward,
+            }
+          : c,
       ),
-    })),
+    }))
+  },
   cancelContract: (id) =>
     set((s) => ({
       contracts: s.contracts.map((c) =>
@@ -1033,8 +1053,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     // Ritualism (Consecration) makes each token contributed count for more.
     const skillFx = get().getSkillBonuses()
-    const bonus = craftingBonusesFrom(get().factionBuildings).standing + skillFx.factionStanding
-    const effAmount = Math.round(amount * (1 + skillFx.contribution))
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing
+    const effAmount = Math.round(amount * (1 + skillFx.factionContribution))
     const newProgress = Math.min(project.goal, project.progress + effAmount)
     const willComplete = newProgress >= project.goal
 
@@ -1160,10 +1180,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     // Ritualism (Consecration) amplifies rally contributions the same way.
     const skillFx = get().getSkillBonuses()
-    const effAmount = Math.round(amount * (1 + skillFx.contribution))
+    const effAmount = Math.round(amount * (1 + skillFx.factionContribution))
     const newProgress = Math.min(rally.goal, rally.progress + effAmount)
     const willComplete = newProgress >= rally.goal
-    const bonus = craftingBonusesFrom(get().factionBuildings).standing + skillFx.factionStanding
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing
 
     // Personal standing for helping; the full reward lands when the rally completes.
     let standingReward = Math.round(amount * 0.4)
