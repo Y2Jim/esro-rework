@@ -371,6 +371,32 @@ export interface InventoryItem {
   duration?: number // in seconds for buffs
 }
 
+/** Where the line currently is in the cast -> bite -> hook loop. */
+export type FishingPhase = "idle" | "casting" | "bite" | "landed" | "escaped"
+
+export interface FishingState {
+  phase: FishingPhase
+  spotId: string | null
+  /** Fish currently on the hook (during "bite") or just resolved. */
+  fishId: string | null
+  /** Timestamp the bite window opened, for the reaction bar. */
+  biteAt: number | null
+  /** How long the player has to strike, in ms. */
+  windowMs: number
+  /** Quantity landed on the last successful catch. */
+  lastQty: number
+  /** Consecutive successful catches — drives the streak readout. */
+  streak: number
+}
+
+export interface FishingCatch {
+  fishId: string
+  label: string
+  rarity: Rarity
+  qty: number
+  at: number
+}
+
 export type CraftingCategory = "food" | "potion" | "gear" | "component" | "special"
 
 export interface CraftingIngredient {

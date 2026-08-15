@@ -17,6 +17,8 @@ import type {
   FactionView,
   Friend,
   InventoryItem,
+  FishingCatch,
+  FishingState,
   OpsTab,
   PartyMember,
   Profile,
@@ -72,6 +74,7 @@ import {
   skillIdFromName,
   type SkillBonuses,
 } from "@/lib/skill-effects"
+import { FISHING_SPOTS, JUNK, fishToItem, getFish } from "@/config/fishing"
 
 export interface EsroState {
   booted: boolean
@@ -154,6 +157,18 @@ export interface EsroState {
   craftItem: (recipeId: string) => { success: boolean; message: string }
   completeCraft: () => void
   addMaterials: () => void // Admin function to add crafting materials
+
+  // Ops - Fishing (gated behind the Fishing skill's tier unlocks)
+  fishing: FishingState
+  /** Drop the line at a spot. Returns false if the spot is still locked. */
+  castLine: (spotId: string) => boolean
+  /** Internal: a fish has taken the bait and the hook window is open. */
+  triggerBite: (fishId: string) => void
+  /** Player struck. Lands the catch if the window is still open. */
+  setHook: () => void
+  /** Window closed without a strike, or the player reeled in early. */
+  reelIn: () => void
+  fishingLog: FishingCatch[]
 
   // Contracts
   contracts: Contract[]
@@ -956,6 +971,94 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     
     set({ inventory: updatedInventory })
   },
+
+  // Ops - Fishing
+  fishing: {
+    phase: "idle",
+    spotId: null,
+    fishId: null,
+    biteAt: null,
+    windowMs: 0,
+    lastQty: 0,
+    streak: 0,
+  },
+  fishingLog: [],
+
+  castLine: (spotId) => {
+    const spot = FISHING_SPOTS.find((s) => s.id === spotId)
+    if (!spot) return false
+    if (spot.requires && !get().hasSkillUnlock(spot.requires)) return false
+    if (get().fishing.phase === "casting" || get().fishing.phase === "bite") return false
+
+    set((s) => ({
+      fishing: { ...s.fishing, phase: "casting", spotId, fishId: null, biteAt: null },
+    }))
+    return true
+  },
+
+  triggerBite: (fishId) => {
+    const fish = getFish(fishId)
+    if (!fish) return
+
+    // Casting (Tension) widens the strike window, so a trained angler gets a
+    // more forgiving reaction test on the same fish.
+    const success = get().getSkillBonuses().fishingSuccess
+    const windowMs = Math.round(fish.biteWindow * 1000 * (1 + success))
+
+    set((s) => ({
+      fishing: { ...s.fishing, phase: "bite", fishId, biteAt: Date.now(), windowMs },
+    }))
+  },
+
+  setHook: () => {
+    const { fishing } = get()
+    if (fishing.phase !== "bite" || !fishing.fishId || fishing.biteAt === null) return
+
+    // Struck too late — the window already closed.
+    if (Date.now() - fishing.biteAt > fishing.windowMs) {
+      get().reelIn()
+      return
+    }
+
+    const fish = getFish(fishing.fishId)
+    if (!fish) return
+
+    // Casting (Casting) raises how many land per successful catch.
+    const yieldBonus = get().getSkillBonuses().fishingYield
+    const qty = Math.max(1, Math.round((1 + yieldBonus) * (1 + Math.random() * 0.5)))
+    const item = fishToItem(fish, qty)
+    const isJunk = fish.id === JUNK.id
+
+    set((s) => {
+      const existing = s.inventory.find((i) => i.id === item.id)
+      return {
+        inventory: existing
+          ? s.inventory.map((i) => (i.id === item.id ? { ...i, qty: i.qty + qty } : i))
+          : [...s.inventory, item],
+        fishing: {
+          ...s.fishing,
+          phase: "landed",
+          lastQty: qty,
+          // Junk breaks the streak; a real fish extends it.
+          streak: isJunk ? 0 : s.fishing.streak + 1,
+        },
+        fishingLog: [
+          { fishId: fish.id, label: fish.label, rarity: fish.rarity, qty, at: Date.now() },
+          ...s.fishingLog,
+        ].slice(0, 12),
+      }
+    })
+
+  },
+
+  reelIn: () =>
+    set((s) => ({
+      fishing: {
+        ...s.fishing,
+        phase: s.fishing.phase === "bite" ? "escaped" : "idle",
+        streak: s.fishing.phase === "bite" ? 0 : s.fishing.streak,
+      },
+    })),
 
   // Contracts
   contracts: seedContracts,
