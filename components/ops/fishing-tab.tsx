@@ -121,7 +121,9 @@ export function FishingTab() {
       {/* The water: sprite stage */}
       <div
         className={cn(
-          "relative flex h-44 flex-col items-center justify-center overflow-hidden rounded border bg-[color:var(--color-surface)]",
+          // min-h keeps every phase the same size as before, but lets the
+          // landed phase grow instead of clipping long names/descriptions.
+          "relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded border bg-[color:var(--color-surface)] px-4 py-4",
           hooked && fishing.phase === "landed"
             ? rarityBorder[hooked.rarity]
             : "border-[color:var(--color-border)]",
@@ -163,22 +165,30 @@ export function FishingTab() {
 
         {/* Landed: reveal the sprite */}
         {fishing.phase === "landed" && hooked && (
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="flex w-full max-w-sm flex-col items-center gap-1.5">
             <Image
               src={hooked.sprite}
               alt={hooked.label}
               width={92}
               height={92}
-              className={cn("h-23 w-23 [image-rendering:pixelated]", rarityGlow[hooked.rarity])}
+              className={cn(
+                "h-23 w-23 shrink-0 [image-rendering:pixelated]",
+                rarityGlow[hooked.rarity],
+              )}
             />
-            <p className={cn("text-[17px] uppercase tracking-wider", rarityColor[hooked.rarity])}>
+            <p
+              className={cn(
+                "text-center text-[17px] uppercase tracking-wider text-balance",
+                rarityColor[hooked.rarity],
+              )}
+            >
               {hooked.label}
               {fishing.lastQty > 1 && ` ×${fishing.lastQty}`}
             </p>
             <p className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
               {rarityLabel[hooked.rarity]}
             </p>
-            <p className="max-w-xs text-center text-[13px] leading-relaxed text-[color:var(--color-muted)]">
+            <p className="text-center text-[13px] leading-relaxed text-[color:var(--color-muted)] text-pretty">
               {hooked.description}
             </p>
           </div>
