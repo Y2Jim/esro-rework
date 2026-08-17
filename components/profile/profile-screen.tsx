@@ -6,6 +6,8 @@ import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor, rarityAnimation, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
+import { StatAllocation } from "@/components/profile/stat-allocation"
+import { KnownRituals } from "@/components/profile/known-rituals"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { Shield } from "lucide-react"
@@ -191,7 +193,7 @@ function SummaryTab() {
         </div>
       )}
 
-      {/* Character Stats */}
+      {/* Character Stats — HP shown here since it cannot be spent into. */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
         <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Character Stats
@@ -218,6 +220,12 @@ function SummaryTab() {
           ))}
         </div>
       </div>
+
+      {/* Level-up point spending + the sub-stats those points feed. */}
+      <StatAllocation />
+
+      {/* Known rituals (Focus) */}
+      <KnownRituals />
 
       {/* Collection summary */}
       <div className="grid grid-cols-3 gap-2 rounded-lg border border-[color:var(--color-border)] p-3">

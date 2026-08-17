@@ -1992,8 +1992,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
     const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
+    // Beast Tending's pack tiers. These replace the old mount_basic/mount_pack
+    // unlocks, which gated a mount system that never existed and so did nothing.
+    const packSlots =
+      (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
     // Extra loot slots are whole items, so they scale with what made it back.
-    const numRewards = baseRewards + Math.round(fx.carryCapacity * mult)
+    const numRewards = baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)
 
     const newItems: InventoryItem[] = []
     for (let i = 0; i < numRewards; i++) {

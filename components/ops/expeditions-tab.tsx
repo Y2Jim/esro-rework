@@ -1,10 +1,12 @@
 "use client"
 
+import { useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { rarityColor } from "@/lib/rarity"
 import { STAT_COLORS, SKILL_DEFINITIONS } from "@/lib/game-data"
 import type { BaseStats } from "@/lib/types"
+import { RitualPrep } from "@/components/ops/ritual-prep"
 
 /** Map expedition tags to relevant stats for bonus calculation */
 const TAG_STAT_MAP: Record<string, keyof BaseStats> = {
@@ -32,7 +34,12 @@ export function ExpeditionsTab() {
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const getStatBonus = useEsroStore((s) => s.getStatBonus)
-  
+
+  // Site chosen but not yet launched: the ritual prep step sits in between.
+  const [pendingExpedition, setPendingExpedition] = useState<{ id: string; name: string } | null>(
+    null,
+  )
+
   const playerStats = getPlayerStats()
   
   /** Calculate bonus percentage for an expedition based on relevant stats */
@@ -180,7 +187,7 @@ export function ExpeditionsTab() {
               <button
                 key={exp.id}
                 type="button"
-                onClick={() => startExpedition(exp.id)}
+                onClick={() => setPendingExpedition({ id: exp.id, name: exp.label })}
                 disabled={!!activeExpedition || !meetsRequirement}
                 className={cn(
                   "w-full rounded-lg border bg-[color:var(--color-panel)] p-3 text-left transition-colors",
@@ -309,6 +316,17 @@ export function ExpeditionsTab() {
           })}
         </div>
       </div>
+
+      {pendingExpedition && (
+        <RitualPrep
+          expeditionName={pendingExpedition.name}
+          onClose={() => setPendingExpedition(null)}
+          onLaunch={(ritualIds) => {
+            startExpedition(pendingExpedition.id, ritualIds)
+            setPendingExpedition(null)
+          }}
+        />
+      )}
     </div>
   )
 }

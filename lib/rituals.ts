@@ -96,7 +96,9 @@ export const RITUALS: Ritual[] = [
     label: "Ash Communion",
     description: "Speaking to the ash turns disasters into mere setbacks.",
     attunement: 3,
-    effects: { badfailDowngrade: 1, damageReduction: 0.05 },
+    // badfailDowngrade and bonusLoot are raw probabilities in the sim, so these
+    // stay fractional — a value of 1 would make the effect unconditional.
+    effects: { badfailDowngrade: 0.25, damageReduction: 0.05 },
     source: "Major codex — hidden routes",
   },
   {
@@ -104,7 +106,7 @@ export const RITUALS: Ritual[] = [
     label: "Echo Vigil",
     description: "Standing watch over echoes reveals caches left behind.",
     attunement: 3,
-    effects: { bonusLoot: 1, discoveryScore: 0.12 },
+    effects: { bonusLoot: 0.3, discoveryScore: 0.12 },
     source: "Major codex — hidden routes",
   },
   {

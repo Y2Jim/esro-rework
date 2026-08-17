@@ -415,14 +415,15 @@ export function ActiveExpeditionView() {
     if (ev.type === "battle") {
       const enemy = randItem(ENEMIES)
       const plan = planBattle(result.outcome, risk, stageIndex, runMods)
-      // Marksmanship: open the engagement with a free hit.
+      // Marksmanship: open the engagement with a free hit. This opening was
+      // previously computed but never applied, so first strike did nothing.
       const openingHp = plan.firstStrike
         ? Math.max(0, plan.enemyHp - (1 + plan.bonusDamage))
         : plan.enemyHp
       battleRef.current = {
         enemy,
         hpMax: plan.enemyHp,
-        hp: plan.enemyHp,
+        hp: openingHp,
         active: true,
         clash: false,
         cooldown: 400,
@@ -432,6 +433,14 @@ export function ActiveExpeditionView() {
         ? `Ambush — ${enemy} overwhelms the approach. (${clause})${delayNote}`
         : `Contact — ${enemy} engaging the squad. (${clause})${delayNote}`
       pushFeed("battle", intro, result.outcome)
+      // Narrate the opening so the passive is visible in the feed.
+      if (plan.firstStrike) {
+        pushFeed(
+          "battle",
+          `Opening shot lands before ${enemy} can close — ${1 + plan.bonusDamage} damage.`,
+          "crit",
+        )
+      }
       return
     }
 
@@ -485,12 +494,19 @@ export function ActiveExpeditionView() {
     b.cooldown = 600
     b.clash = true
     // Squad lands a hit based on its combat readiness (from the pre-rolled check).
+    // Brawling/Marksmanship bonusDamage is added here; previously every hit
+    // dealt exactly 1, so those passives had no effect on battle length.
     if (Math.random() < b.plan.squadHitChance) {
-      b.hp = Math.max(0, b.hp - 1)
+      b.hp = Math.max(0, b.hp - (1 + b.plan.bonusDamage))
     }
-    // Squad takes a hit based on how badly outmatched it is.
+    // Squad takes a hit based on how badly outmatched it is, unless Guardwork
+    // negates the blow outright. counterChance was previously never read.
     if (Math.random() < b.plan.squadTakeChance) {
-      damageRandomCrew(b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1)
+      if (Math.random() < b.plan.counterChance) {
+        pushFeed("battle", `Guard turns the blow — ${b.enemy} left open.`, "success")
+      } else {
+        damageRandomCrew(b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1)
+      }
     }
     if (b.hp <= 0) {
       b.active = false

@@ -21,7 +21,6 @@ const LOWER_IS_BETTER = new Set<SkillBonusKey>([
   "runDuration",
   "battleFrequency",
   "hazardFrequency",
-  "mountFatigue",
   "craftCost",
 ])
 

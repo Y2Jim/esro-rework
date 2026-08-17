@@ -73,7 +73,6 @@ export type SkillBonusKey =
   | "rollLuck" // rarity weighting in the rolling pool
   | "hiddenRoute"
   | "runDuration" // negative = faster expeditions
-  | "mountFatigue" // negative = mounts tire slower
 
 export type SkillBonuses = Record<SkillBonusKey, number>
 
@@ -114,7 +113,6 @@ export function emptySkillBonuses(): SkillBonuses {
     rollLuck: 0,
     hiddenRoute: 0,
     runDuration: 0,
-    mountFatigue: 0,
   }
 }
 
@@ -155,7 +153,6 @@ export const BONUS_SYSTEM: Record<SkillBonusKey, string> = {
   rollLuck: "Rolling",
   hiddenRoute: "Expedition",
   runDuration: "Expedition",
-  mountFatigue: "Mounts",
 }
 
 /** How a lever is rendered: a percentage, a flat number, or a slot count. */
@@ -195,7 +192,6 @@ export const BONUS_FORMAT: Record<SkillBonusKey, "pct" | "flat"> = {
   rollLuck: "pct",
   hiddenRoute: "pct",
   runDuration: "pct",
-  mountFatigue: "pct",
 }
 
 // ---------------------------------------------------------------------------
@@ -213,8 +209,8 @@ export type SkillUnlockId =
   | "quality_harvest"
   | "fishing_basic"
   | "fishing_wrecks"
-  | "mount_basic"
-  | "mount_pack"
+  | "pack_beasts"
+  | "pack_train"
   | "field_surgery"
   | "advanced_recipes"
   | "master_recipes"
@@ -302,7 +298,7 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     ],
     breakpoints: [
       { level: 5, unlock: "deep_ruins", label: "Long March", detail: "Endure the deep ruin routes" },
-      { level: 10, unlock: "mount_pack", label: "Pack Discipline", detail: "Handle a loaded pack mount" },
+      { level: 10, unlock: "pack_train", label: "Pack Discipline", detail: "Handle a second loaded pack animal" },
     ],
   },
   {
@@ -322,15 +318,17 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Beast Tending",
     linkedStat: "hp",
-    summary: "Mounts carry more and tire slower, raising what a run can bring home.",
+    summary: "Pack animals haul more and keep a steadier pace, raising what a run brings home.",
     hooks: [
       { id: "handling", effect: "carryCapacity", perLevel: 0.25, detail: "Extra loot slots per run" },
-      { id: "soothing", effect: "mountFatigue", perLevel: -0.025, detail: "Mounts tire more slowly" },
+      // Was `mountFatigue`, a lever no system ever read. Repointed to
+      // runDuration so well-tended animals genuinely shorten the route.
+      { id: "soothing", effect: "runDuration", perLevel: -0.004, detail: "Steadier pace shortens the route" },
       { id: "harnessing", effect: "materialYield", perLevel: 0.015, detail: "More hauled back per haul" },
     ],
     breakpoints: [
-      { level: 5, unlock: "mount_basic", label: "First Saddle", detail: "Bring a mount on expeditions" },
-      { level: 10, unlock: "mount_pack", label: "Pack Train", detail: "Run a second pack animal" },
+      { level: 5, unlock: "pack_beasts", label: "First Saddle", detail: "Pack animal adds a loot slot per run" },
+      { level: 10, unlock: "pack_train", label: "Pack Train", detail: "A second animal adds two more slots" },
     ],
   },
 
@@ -749,5 +747,4 @@ export const BONUS_LABEL: Record<SkillBonusKey, string> = {
   rollLuck: "Roll Rarity Odds",
   hiddenRoute: "Hidden Route Chance",
   runDuration: "Expedition Duration",
-  mountFatigue: "Mount Fatigue",
 }
