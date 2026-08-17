@@ -1,4 +1,5 @@
 import type { BaseStats, RaceId } from "./types"
+import { getRituals } from "./rituals"
 
 /**
  * Pure simulation helpers for the active expedition view.
@@ -80,7 +81,7 @@ export function aggregateStats(list: BaseStats[]): BaseStats {
 }
 
 export interface ActivePassive {
-  source: "Lineage" | "Faction" | "Skill"
+  source: "Lineage" | "Faction" | "Skill" | "Ritual"
   name: string
   effect: string
 }
@@ -159,8 +160,16 @@ function addBonus(mods: RunModifiers, type: ExpEventType, amt: number) {
   mods.scoreBonus[type] = (mods.scoreBonus[type] ?? 0) + amt
 }
 
-/** Combine the player's lineage + faction into a single set of squad modifiers. */
-export function getRunModifiers(raceId: RaceId | undefined, factionId: RaceId | undefined): RunModifiers {
+/**
+ * Combine the player's lineage + faction + prepped rituals into one set of
+ * squad modifiers. `ritualIds` is optional so callers that predate the ritual
+ * system keep working unchanged.
+ */
+export function getRunModifiers(
+  raceId: RaceId | undefined,
+  factionId: RaceId | undefined,
+  ritualIds?: string[]
+): RunModifiers {
   const mods = emptyMods()
 
   // ---- Lineage (race) passives ----
@@ -244,6 +253,19 @@ export function getRunModifiers(raceId: RaceId | undefined, factionId: RaceId | 
       break
     default:
       break
+  }
+
+  // ---- Rituals (Focus) ----
+  // Ritual effect keys deliberately mirror the skill-bonus keys, so the same
+  // additive merge handles both and rituals stack with lineage/faction/skills.
+  const rituals = getRituals(ritualIds)
+  for (const ritual of rituals) {
+    applySkillBonuses(mods, ritual.effects as Record<string, number>)
+    mods.passives.push({
+      source: "Ritual",
+      name: ritual.label,
+      effect: ritual.description,
+    })
   }
 
   return mods

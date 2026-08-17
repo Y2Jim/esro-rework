@@ -347,6 +347,8 @@ export interface ActiveExpedition {
   partyMembers?: string[] // handles
   startedAt: number
   skillGains?: { skill: string; xp: number }[]
+  /** Rituals prepped at launch; their effects apply for the whole run. */
+  rituals?: string[]
 }
 
 export type ItemAspect =
@@ -592,6 +594,12 @@ export interface Profile {
   level: number
   xp: number
   xpToNext: number
+  /** Unspent stat points earned from level-ups. */
+  statPoints: number
+  /** Points spent per core stat; folded into getPlayerStats(). */
+  allocated: BaseStats
+  /** Ritual ids the player knows, from starters and looted books. */
+  knownRituals: string[]
   /** Currency balance earned from expeditions and contracts */
   tokens: number
   ownedTitles: OwnedTitle[]

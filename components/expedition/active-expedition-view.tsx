@@ -257,14 +257,21 @@ export function ActiveExpeditionView() {
   // Derived here rather than via a store selector: aggregateSkillBonuses builds
   // a fresh object each call, so selecting it directly gave zustand a new
   // snapshot every render and looped forever.
+  // Rituals prepped at launch are stored on the run itself, so they stay fixed
+  // for its duration even if the player's Focus or known list changes mid-run.
+  const runRituals = activeExpedition?.rituals
   const runMods = useMemo(
     () =>
       applySkillBonuses(
-        getRunModifiers(characterRace?.id as RaceId | undefined, characterFaction?.id as RaceId | undefined),
+        getRunModifiers(
+          characterRace?.id as RaceId | undefined,
+          characterFaction?.id as RaceId | undefined,
+          runRituals,
+        ),
         aggregateSkillBonuses(skills),
         skillPassiveList(skills),
       ),
-    [characterRace?.id, characterFaction?.id, skills],
+    [characterRace?.id, characterFaction?.id, skills, runRituals],
   )
 
   // Pathfinding (Marching), Conditioning (Survival) and Gathering (Harvesting)

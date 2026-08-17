@@ -15,6 +15,8 @@ import type {
   Skill,
   VanityItem,
 } from "./types"
+import { emptyAllocation, POINTS_PER_LEVEL } from "./leveling"
+import { STARTER_RITUALS } from "./rituals"
 
 export const channels: Channel[] = [
   {
@@ -1396,6 +1398,11 @@ export const profile: Profile = {
   level: 14,
   xp: 2840,
   xpToNext: 3200,
+  // This demo profile starts mid-game, so it carries the points those 14 levels
+  // would have granted, all unspent.
+  statPoints: 14 * POINTS_PER_LEVEL,
+  allocated: emptyAllocation(),
+  knownRituals: [...STARTER_RITUALS],
   tokens: 320,
   vanityItems: vanityItems,
   ownedTitles: [

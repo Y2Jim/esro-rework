@@ -53,6 +53,21 @@ import {
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import type { BaseStats } from "@/lib/types"
 import {
+  applyXp,
+  emptyAllocation,
+  POINTS_PER_LEVEL,
+  spentPoints,
+  type AllocatableStat,
+} from "@/lib/leveling"
+import {
+  attunementCapacity,
+  attunementUsed,
+  getRitual,
+  getRituals,
+  MAJOR_RITUAL_BOOKS,
+  MINOR_RITUAL_BOOKS,
+} from "@/lib/rituals"
+import {
   channels as seedChannels,
   contracts as seedContracts,
   expeditions as seedExpeditions,
@@ -101,6 +116,24 @@ export interface EsroState {
   // Player Stats
   getPlayerStats: () => BaseStats
   getStatBonus: (stat: keyof BaseStats) => number
+
+  // Leveling & stat allocation
+  /** Award XP and resolve any level-ups it triggers. */
+  awardXp: (amount: number) => void
+  /** Spend one unspent point on a core stat. */
+  allocateStat: (stat: AllocatableStat, amount?: number) => void
+  /** Refund every spent point back into the pool. */
+  respecStats: () => void
+  /** Sub-stats derived from the core stats, as used by expedition checks. */
+  getDerivedStats: () => { label: string; value: number; from: string }[]
+
+  // Rituals (Focus)
+  /** Attunement capacity from Focus, and how much the given set consumes. */
+  getAttunement: () => { capacity: number; used: number }
+  /** Rituals prepped for the next launch. */
+  preparedRituals: string[]
+  toggleRitual: (id: string) => void
+  learnRitual: (id: string) => void
   
   // Navigation
   screen: ScreenId
@@ -133,7 +166,11 @@ export interface EsroState {
   // Ops - Expeditions
   expeditions: Expedition[]
   activeExpedition: ActiveExpedition | null
-  startExpedition: (id: string) => void
+  /**
+   * Launch a run. `ritualIds` is optional so existing call sites that launch
+   * without a prep step keep working; omitted means "use preparedRituals".
+   */
+  startExpedition: (id: string, ritualIds?: string[]) => void
   cancelExpedition: () => void
 
   // Ops - Skills
@@ -217,6 +254,10 @@ export interface EsroState {
   profileTab: "summary" | "notifications"
   setProfileTab: (tab: "summary" | "notifications") => void
   setActiveTitle: (titleId: string) => void
+  /** Push a new unread notification; id and timestamp are assigned here. */
+  addNotification: (
+    n: Omit<ProfileNotification, "id" | "state" | "createdAt">
+  ) => void
   markNotificationRead: (id: number) => void
   openNotification: (notification: ProfileNotification) => void
   clearNotification: (id: number) => void
@@ -572,10 +613,140 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
+    // Points the player spent from level-ups. Added here so every consumer —
+    // expedition checks, the Luck 15 fishing gate, the readiness panel — picks
+    // them up without any further wiring.
+    const allocated = profile.allocated
+    if (allocated) {
+      stats.atk += allocated.atk || 0
+      stats.def += allocated.def || 0
+      stats.focus += allocated.focus || 0
+      stats.luck += allocated.luck || 0
+      // Each point of DEF also thickens the HP pool, so tanky builds feel it.
+      stats.hp += (allocated.def || 0) * 2
+    }
+
     // Conditioning and other survivability skills widen the HP pool directly.
     stats.hp += Math.round(get().getSkillBonuses().maxHpBonus)
 
     return stats
+  },
+
+  /**
+   * Award XP and resolve level-ups. This is the only place XP enters the
+   * profile; before it existed, `rewards.xp` was dead data and levels never
+   * moved, so stat points were unreachable.
+   */
+  awardXp: (amount) => {
+    if (amount <= 0) return
+    const { profile } = get()
+    const result = applyXp(profile, amount)
+
+    set({
+      profile: {
+        ...profile,
+        level: result.level,
+        xp: result.xp,
+        xpToNext: result.xpToNext,
+        statPoints: result.statPoints,
+      },
+    })
+
+    // One notification per level crossed, so a multi-level award is legible.
+    for (const lvl of result.levelsGained) {
+      get().addNotification({
+        title: `Level ${lvl}`,
+        body: `You reached level ${lvl}. ${POINTS_PER_LEVEL} stat points available.`,
+        priority: "high",
+        deeplink: { screen: "profile" },
+      })
+    }
+
+    // Reaching a level can satisfy the faction gate.
+    if (result.levelsGained.length) get().checkFactionUnlock()
+  },
+
+  allocateStat: (stat, amount = 1) => {
+    const { profile } = get()
+    const points = profile.statPoints ?? 0
+    // Never spend more than the pool holds, so the UI cannot overdraw.
+    const spend = Math.max(0, Math.min(amount, points))
+    if (spend === 0) return
+
+    const allocated = { ...(profile.allocated ?? emptyAllocation()) }
+    allocated[stat] = (allocated[stat] || 0) + spend
+
+    set({
+      profile: { ...profile, allocated, statPoints: points - spend },
+    })
+  },
+
+  respecStats: () => {
+    const { profile } = get()
+    // Refund exactly what was spent rather than recomputing from level, so a
+    // partially spent pool is never inflated or truncated.
+    const refund = spentPoints(profile.allocated)
+    if (refund === 0) return
+    set({
+      profile: {
+        ...profile,
+        allocated: emptyAllocation(),
+        statPoints: (profile.statPoints ?? 0) + refund,
+      },
+    })
+  },
+
+  /**
+   * The sub-stats expedition checks actually roll against. These already
+   * existed inside the sim's EVENT_CHECK table but were never surfaced, which
+   * is why spending points felt disconnected from outcomes.
+   */
+  getDerivedStats: () => {
+    const s = get().getPlayerStats()
+    return [
+      { label: "Combat", value: s.atk + s.def, from: "ATK + DEF" },
+      { label: "Endurance", value: s.def + s.focus, from: "DEF + FOC" },
+      { label: "Insight", value: s.focus + s.luck, from: "FOC + LUK" },
+      { label: "Navigation", value: s.luck + s.focus, from: "LUK + FOC" },
+    ]
+  },
+
+  // ---- Rituals ----
+  preparedRituals: [],
+
+  getAttunement: () => ({
+    capacity: attunementCapacity(get().getPlayerStats().focus),
+    used: attunementUsed(get().preparedRituals),
+  }),
+
+  toggleRitual: (id) => {
+    const { preparedRituals, profile } = get()
+    if (preparedRituals.includes(id)) {
+      set({ preparedRituals: preparedRituals.filter((r) => r !== id) })
+      return
+    }
+    // Can only prep what is known, and only within Focus capacity.
+    if (!profile.knownRituals?.includes(id)) return
+    const ritual = getRitual(id)
+    if (!ritual) return
+    const { capacity, used } = get().getAttunement()
+    if (used + ritual.attunement > capacity) return
+    set({ preparedRituals: [...preparedRituals, id] })
+  },
+
+  learnRitual: (id) => {
+    const { profile } = get()
+    const known = profile.knownRituals ?? []
+    if (known.includes(id)) return
+    const ritual = getRitual(id)
+    if (!ritual) return
+    set({ profile: { ...profile, knownRituals: [...known, id] } })
+    get().addNotification({
+      title: "Ritual learned",
+      body: `${ritual.label} — ${ritual.description}`,
+      priority: "normal",
+      deeplink: { screen: "profile" },
+    })
   },
 
   /** Aggregated sub-stat effects across every unlocked skill. */
@@ -679,11 +850,27 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Expeditions
   expeditions: seedExpeditions,
   activeExpedition: null,
-  startExpedition: (id) => {
+  startExpedition: (id, ritualIds) => {
     const exp = get().expeditions.find((e) => e.id === id)
     if (!exp || get().activeExpedition) return
     // Tier gate: some sites only open once the matching skill breakpoint is hit.
     if (exp.requiresUnlock && !get().hasSkillUnlock(exp.requiresUnlock)) return
+
+    // Callers may pass an explicit ritual set; otherwise use whatever the prep
+    // dialog left staged. Filter to known rituals and re-check capacity so a
+    // stale selection can never exceed current Focus.
+    const known = get().profile.knownRituals ?? []
+    const capacity = attunementCapacity(get().getPlayerStats().focus)
+    const requested = (ritualIds ?? get().preparedRituals).filter((r) =>
+      known.includes(r)
+    )
+    const rituals: string[] = []
+    for (const rid of requested) {
+      const ritual = getRitual(rid)
+      if (!ritual) continue
+      if (attunementUsed(rituals) + ritual.attunement > capacity) continue
+      rituals.push(rid)
+    }
 
     // Assemble the deploying squad from available party members (leader first),
     // capped at the expedition's suggested party size.
@@ -715,6 +902,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         totalStages,
         partyMembers: squadHandles,
         startedAt: Date.now(),
+        rituals,
       },
     })
   },
@@ -1520,6 +1708,23 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         title: s.profile.ownedTitles.find((t) => t.id === titleId) || s.profile.title,
       },
     })),
+  addNotification: (notification) =>
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        notifications: [
+          {
+            ...notification,
+            // Monotonic id derived from the current max, so rapid successive
+            // pushes (e.g. a multi-level XP award) cannot collide.
+            id: s.profile.notifications.reduce((max, n) => Math.max(max, n.id), 0) + 1,
+            state: "unread" as const,
+            createdAt: Date.now(),
+          },
+          ...s.profile.notifications,
+        ],
+      },
+    })),
   markNotificationRead: (id) =>
     set((s) => ({
       profile: {
@@ -1816,7 +2021,25 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     
     // Add token reward, scaled by the loot that made it back.
     const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult)
-    
+
+    // Ritual book drops. Hidden/deep routes are the main source; ordinary
+    // routes have a small chance at the minor books only.
+    const expDef = get().expeditions.find((e) => e.id === activeExpedition.id)
+    const isHiddenRoute = Boolean(expDef?.requiresUnlock)
+    const bookPool = isHiddenRoute
+      ? [...MAJOR_RITUAL_BOOKS, ...MINOR_RITUAL_BOOKS]
+      : MINOR_RITUAL_BOOKS
+    const bookChance = (isHiddenRoute ? 0.35 : 0.06) * mult
+    // Only roll against books the player does not already know, so a drop is
+    // never wasted on a duplicate.
+    const unknownBooks = bookPool.filter(
+      (id) => !(get().profile.knownRituals ?? []).includes(id)
+    )
+    const learnedBook =
+      unknownBooks.length > 0 && Math.random() < bookChance
+        ? unknownBooks[Math.floor(Math.random() * unknownBooks.length)]
+        : null
+
     set({
       activeExpedition: null,
       inventory: [...inventory, ...newItems],
@@ -1825,6 +2048,18 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         tokens: get().profile.tokens + tokenReward,
       },
     })
+
+    // XP is awarded after the loot commit so a level-up notification lands last.
+    // This also revives Lorekeeping's xpBonus hook, which had nothing to scale.
+    const baseXp = expDef?.rewards.xp ?? 0
+    if (baseXp > 0) {
+      get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult))
+    }
+
+    if (learnedBook) get().learnRitual(learnedBook)
+
+    // Prepped rituals are consumed by the run.
+    set({ preparedRituals: [] })
   },
   
   // Admin/Debug - inject test chat messages with all title rarities to PUBLIC channel
