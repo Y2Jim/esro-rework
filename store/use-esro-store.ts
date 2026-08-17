@@ -75,6 +75,7 @@ import {
   type SkillBonuses,
 } from "@/lib/skill-effects"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
+import { recipeUnlockFor } from "@/config/crafting-recipes"
 
 export interface EsroState {
   booted: boolean
@@ -854,6 +855,19 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const recipe = CRAFTING_RECIPES.find((r: any) => r.id === recipeId)
     if (!recipe) return { success: false, message: "Recipe not found" }
     if (!recipe.unlocked) return { success: false, message: "Recipe locked" }
+
+    // Tier gate: epic/legendary work needs the matching Bladecraft or Ritualism
+    // breakpoint. Enforced here so the rule holds no matter which UI calls in.
+    const needed = recipeUnlockFor(recipe.output.rarity)
+    if (needed && !get().hasSkillUnlock(needed)) {
+      return {
+        success: false,
+        message:
+          needed === "master_recipes"
+            ? "Requires Ritualism 10 (Marked Work) or Lorekeeping 10 (Lost Techniques)"
+            : "Requires Bladecraft 10 (Blade Smithing) or Marksmanship 10 (Munitions)",
+      }
+    }
 
     // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
     const buildingBonuses = craftingBonusesFrom(get().factionBuildings)
@@ -1709,26 +1723,33 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return
     }
 
-    // Generate random loot rewards, scaled by how much loot was carried back.
+    // Gathering skill shapes the haul: carryCapacity adds slots, rareChance
+    // biases the rarity roll, materialYield/salvageYield grow the stack sizes.
+    const fx = get().getSkillBonuses()
+
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
-    const numRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
-    
+    const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
+    // Extra loot slots are whole items, so they scale with what made it back.
+    const numRewards = baseRewards + Math.round(fx.carryCapacity * mult)
+
     const newItems: InventoryItem[] = []
     for (let i = 0; i < numRewards; i++) {
-      const rarityRoll = Math.random()
+      // Shrinking the roll pushes it up through the rarity bands.
+      const rarityRoll = Math.random() * (1 - Math.min(0.6, Math.max(0, fx.rareChance)))
       let rarity: Rarity = "common"
       if (rarityRoll > 0.95) rarity = "legendary"
       else if (rarityRoll > 0.85) rarity = "epic"
       else if (rarityRoll > 0.65) rarity = "rare"
       else if (rarityRoll > 0.40) rarity = "uncommon"
-      
+
       const lootLabel = lootTypes[Math.floor(Math.random() * lootTypes.length)]
+      const baseQty = 1 + Math.floor(Math.random() * 3)
       newItems.push({
         id: `loot-${Date.now()}-${i}`,
         label: lootLabel,
         aspect: "material",
         rarity,
-        qty: 1 + Math.floor(Math.random() * 3),
+        qty: Math.max(1, Math.round(baseQty * (1 + fx.materialYield + fx.salvageYield))),
         identified: true,
         description: `Salvaged ${lootLabel.toLowerCase()} recovered during the expedition.`,
         type: "material",

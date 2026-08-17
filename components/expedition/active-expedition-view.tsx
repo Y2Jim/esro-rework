@@ -267,6 +267,14 @@ export function ActiveExpeditionView() {
     [characterRace?.id, characterFaction?.id, skills],
   )
 
+  // Pathfinding (Marching), Conditioning (Survival) and Gathering (Harvesting)
+  // shorten the run. runDuration is negative for faster, so it is added. Floored
+  // at 40% of the base so stacked bonuses can never trivialize an expedition.
+  const runLength = useMemo(
+    () => Math.max(RUN_SECONDS * 0.4, RUN_SECONDS * (1 + runMods.runDuration)),
+    [runMods.runDuration],
+  )
+
   // Simulation state lives in refs; we force a render each tick for smoothness.
   const [, forceTick] = useReducer((x) => x + 1, 0)
   const [phase, setPhase] = useState<"running" | "complete">("running")
@@ -274,7 +282,7 @@ export function ActiveExpeditionView() {
 
   const elapsedRef = useRef(0)
   // Total run length grows as failures extend the mission.
-  const runSecondsRef = useRef(RUN_SECONDS)
+  const runSecondsRef = useRef(runLength)
   // Cumulative extra seconds added by setbacks, for the header/summary.
   const setbackTotalRef = useRef(0)
   const crewRef = useRef<CrewMember[]>(initialCrew)
@@ -299,7 +307,7 @@ export function ActiveExpeditionView() {
   // Reset all sim state when a new expedition starts.
   useEffect(() => {
     elapsedRef.current = 0
-    runSecondsRef.current = RUN_SECONDS
+    runSecondsRef.current = runLength
     setbackTotalRef.current = 0
     crewRef.current = initialCrew
     feedRef.current = []
@@ -535,7 +543,7 @@ export function ActiveExpeditionView() {
     etaSeconds >= 60 ? `${Math.floor(etaSeconds / 60)}m ${etaSeconds % 60}s` : `${etaSeconds}s`
   const currentStage = stageOf(progress)
   // Express accrued setback time in the expedition's own (lore) duration scale.
-  const delayLoreSeconds = Math.round(setbackTotalRef.current * ((exp?.duration ?? 600) / RUN_SECONDS))
+  const delayLoreSeconds = Math.round(setbackTotalRef.current * ((exp?.duration ?? 600) / runLength))
   const delayLabel =
     delayLoreSeconds >= 60 ? `+${Math.floor(delayLoreSeconds / 60)}m ${delayLoreSeconds % 60}s` : `+${delayLoreSeconds}s`
 

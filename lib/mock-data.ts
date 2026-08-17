@@ -575,6 +575,7 @@ export const expeditions: Expedition[] = [
     requiredSkill: "cartography",
     suggestedParty: 2,
     minLevel: 6,
+    requiresUnlock: "hidden_routes",
     rewards: {
       xp: 50,
       tokens: 2,
@@ -595,6 +596,7 @@ export const expeditions: Expedition[] = [
     requiredSkill: "analysis",
     suggestedParty: 4,
     minLevel: 12,
+    requiresUnlock: "deep_ruins",
     stages: [
       { id: "s1", label: "Descent", description: "Navigate the outer layers", duration: 600, risk: "Low" },
       { id: "s2", label: "Search", description: "Locate archive signatures", duration: 900, skillCheck: "analysis", risk: "Medium" },

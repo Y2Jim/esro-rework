@@ -1,3 +1,7 @@
+// Type-only import: erased at build time, so this does not create a runtime
+// cycle with skill-effects.ts (which imports types from here).
+import type { SkillUnlockId } from "./skill-effects"
+
 export type ChannelId =
   | "PUBLIC"
   | "TRADE"
@@ -317,6 +321,8 @@ export interface Expedition {
   requiredSkill: string
   suggestedParty: number
   minLevel?: number
+  /** Skill tier breakpoint required to launch this run at all. */
+  requiresUnlock?: SkillUnlockId
   stages?: ExpeditionStage[]
   factionAttunement?: string // faction id for bonus standing
   rewards: {

@@ -1,4 +1,16 @@
-import type { CraftingRecipe, InventoryItem } from "@/lib/types"
+import type { SkillUnlockId } from "@/lib/skill-effects"
+import type { CraftingRecipe, InventoryItem, Rarity } from "@/lib/types"
+
+/**
+ * Tier gate for a recipe, derived from what it produces rather than tagged on
+ * each recipe: epic output needs Marked Work, legendary needs Lost Techniques.
+ * Returns null for recipes anyone can attempt.
+ */
+export function recipeUnlockFor(rarity: Rarity): SkillUnlockId | null {
+  if (rarity === "legendary" || rarity === "mythic") return "master_recipes"
+  if (rarity === "epic") return "advanced_recipes"
+  return null
+}
 
 // Base crafting materials that can be found or gathered
 export const CRAFTING_MATERIALS: InventoryItem[] = [

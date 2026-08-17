@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
-import { CRAFTING_RECIPES, CATEGORY_CONFIG } from "@/config/crafting-recipes"
+import { CRAFTING_RECIPES, CATEGORY_CONFIG, recipeUnlockFor } from "@/config/crafting-recipes"
 import { craftingBonusesFrom } from "@/config/faction"
 import type { CraftingCategory, CraftingRecipe } from "@/lib/types"
 import { rarityColor } from "@/lib/rarity"
@@ -17,12 +17,27 @@ export function CraftingTab() {
   const craftItem = useEsroStore((s) => s.craftItem)
   const completeCraft = useEsroStore((s) => s.completeCraft)
   const factionBuildings = useEsroStore((s) => s.factionBuildings)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+  const getSkillBonuses = useEsroStore((s) => s.getSkillBonuses)
 
-  // Active faction building buffs applied to the crafting bench.
-  const bonuses = craftingBonusesFrom(factionBuildings)
+  // Faction building buffs plus skill bonuses, matching how the store computes
+  // the craft so displayed costs and times never drift from what is consumed.
+  const buildingBonuses = craftingBonusesFrom(factionBuildings)
+  const skillFx = getSkillBonuses()
+  const bonuses = {
+    cost: buildingBonuses.cost + skillFx.craftCost,
+    speed: buildingBonuses.speed + skillFx.craftSpeed,
+    yield: buildingBonuses.yield + skillFx.craftQuality,
+  }
   const hasBuffs = bonuses.speed > 0 || bonuses.yield > 0 || bonuses.cost > 0
   // Mirror the store's material-cost reduction so the UI matches what is actually consumed.
   const effQty = (qty: number) => Math.max(1, Math.ceil(qty * (1 - bonuses.cost)))
+
+  /** Tier breakpoint a recipe needs but the player has not earned yet. */
+  const missingUnlock = (recipe: CraftingRecipe) => {
+    const needed = recipeUnlockFor(recipe.output.rarity)
+    return needed && !hasSkillUnlock(needed) ? needed : null
+  }
 
   const [selectedCategory, setSelectedCategory] = useState<CraftingCategory>("food")
   const [selectedRecipe, setSelectedRecipe] = useState<CraftingRecipe | null>(null)
@@ -37,6 +52,7 @@ export function CraftingTab() {
   // Check if player has ingredients for a recipe (against the buffed requirement)
   const canCraft = (recipe: CraftingRecipe) => {
     if (!recipe.unlocked) return false
+    if (missingUnlock(recipe)) return false
     for (const ing of recipe.ingredients) {
       const owned = inventory.find(i => i.id === ing.itemId || i.label === ing.label)
       if (!owned || owned.qty < effQty(ing.qty)) return false
@@ -184,6 +200,7 @@ export function CraftingTab() {
           {filteredRecipes.map((recipe) => {
             const craftable = canCraft(recipe)
             const isSelected = selectedRecipe?.id === recipe.id
+            const tierLock = missingUnlock(recipe)
             return (
               <button
                 key={recipe.id}
@@ -203,14 +220,28 @@ export function CraftingTab() {
                   <span className={cn("text-[14px] font-medium", rarityColor[recipe.output.rarity])}>
                     {recipe.label}
                   </span>
-                  {craftable && !activeCraft && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-green)]" />
+                  {tierLock ? (
+                    <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                      Locked
+                    </span>
+                  ) : (
+                    craftable &&
+                    !activeCraft && <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-green)]" />
                   )}
                 </div>
-                {!recipe.unlocked && recipe.requiredSkill && (
+                {tierLock ? (
                   <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
-                    Requires {recipe.requiredSkill} Lv.{recipe.requiredSkillLevel}
+                    {tierLock === "master_recipes"
+                      ? "Needs Ritualism 10 or Lorekeeping 10"
+                      : "Needs Bladecraft 10 or Marksmanship 10"}
                   </div>
+                ) : (
+                  !recipe.unlocked &&
+                  recipe.requiredSkill && (
+                    <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
+                      Requires {recipe.requiredSkill} Lv.{recipe.requiredSkillLevel}
+                    </div>
+                  )
                 )}
               </button>
             )

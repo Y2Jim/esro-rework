@@ -283,7 +283,9 @@ export function applySkillBonuses(
   mods.rareChance += b("rareChance")
   mods.materialYield += b("materialYield")
   mods.salvageYield += b("salvageYield")
-  mods.runDuration += b("runDuration")
+  // Gathering (Harvesting) speeds up node work, which shortens the run the same
+  // way runDuration does — hence the sign flip on a positive-is-faster stat.
+  mods.runDuration += b("runDuration") - b("gatherSpeed")
   mods.xpBonus += b("xpBonus")
 
   mods.passives.push(...skillPassives)
