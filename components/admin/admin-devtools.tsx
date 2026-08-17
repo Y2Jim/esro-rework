@@ -4,28 +4,54 @@ import { useState, useMemo } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
-import { SKILL_MECHANICS } from "@/lib/skill-effects"
+import { SKILL_MECHANICS, type SkillUnlockId } from "@/lib/skill-effects"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { Wrench } from "lucide-react"
 
 /**
- * Every tier breakpoint in the registry, flattened into a togglable list.
+ * Every tier breakpoint in the registry as a togglable list, keyed by unlock id.
+ * Several unlocks are granted by more than one skill (either route opens the
+ * content), so those are merged into one row listing each path.
  * Fishing is surfaced first since it is the most common thing to test.
  */
-const UNLOCK_OVERRIDES = SKILL_MECHANICS.flatMap((mech) =>
-  mech.breakpoints.map((bp) => ({
-    unlock: bp.unlock,
-    label: bp.label,
-    detail: bp.detail,
-    skill: mech.name,
-    level: bp.level,
-  }))
-).sort((a, b) => {
-  const aFish = a.unlock.startsWith("fishing")
-  const bFish = b.unlock.startsWith("fishing")
-  if (aFish !== bFish) return aFish ? -1 : 1
-  return a.skill.localeCompare(b.skill) || a.level - b.level
-})
+const UNLOCK_OVERRIDES = (() => {
+  const byUnlock = new Map<
+    SkillUnlockId,
+    {
+      unlock: SkillUnlockId
+      label: string
+      detail: string
+      skills: string[]
+      skillName: string
+      level: number
+    }
+  >()
+  for (const mech of SKILL_MECHANICS) {
+    for (const bp of mech.breakpoints) {
+      const existing = byUnlock.get(bp.unlock)
+      if (existing) {
+        existing.skills.push(`${mech.name} Lv.${bp.level}`)
+        continue
+      }
+      byUnlock.set(bp.unlock, {
+        unlock: bp.unlock,
+        label: bp.label,
+        detail: bp.detail,
+        skills: [`${mech.name} Lv.${bp.level}`],
+        // Kept separate from the display strings so sorting compares the skill
+        // name and the numeric level rather than "Lv.10" vs "Lv.5" as text.
+        skillName: mech.name,
+        level: bp.level,
+      })
+    }
+  }
+  return [...byUnlock.values()].sort((a, b) => {
+    const aFish = a.unlock.startsWith("fishing")
+    const bFish = b.unlock.startsWith("fishing")
+    if (aFish !== bFish) return aFish ? -1 : 1
+    return a.skillName.localeCompare(b.skillName) || a.level - b.level
+  })
+})()
 
 export function AdminDevTools() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
@@ -311,7 +337,7 @@ export function AdminDevTools() {
                     {entry.label}
                   </span>
                   <span className="block truncate text-[12px] text-[color:var(--color-muted)]">
-                    {entry.skill} Lv.{entry.level} — {entry.detail}
+                    {entry.skills.join(" or ")} — {entry.detail}
                   </span>
                 </span>
                 <span
