@@ -130,6 +130,12 @@ export function RitualPrep({
                     <div className="text-[13px] leading-relaxed text-[color:var(--color-muted)]">
                       {r.description}
                     </div>
+                    {locked && r.requiresUnlock && (
+                      <div className="mt-1 flex items-center gap-1 text-[12px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                        <Lock className="h-3 w-3 shrink-0" />
+                        {unlockRequirementLabel(r.requiresUnlock)}
+                      </div>
+                    )}
                   </button>
                 )
               })}

@@ -95,6 +95,9 @@ import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fis
 import { recipeUnlockFor } from "@/config/crafting-recipes"
 import { dayKey, rotateContracts } from "@/lib/contract-rotation"
 
+/** Archive reconstruction passes, cheapest first. */
+export type RecoveryMode = "standard" | "focused" | "translation"
+
 export interface EsroState {
   booted: boolean
   setBooted: (v: boolean) => void
@@ -196,7 +199,11 @@ export interface EsroState {
   shards: typeof seedShards
   recovery: RecoveryResult[]
   lastRecovered: RecoveryResult | null
-  runRecovery: (mode: "standard" | "focused") => void
+  /**
+   * "translation" is the Lorekeeping payoff: it reads the sealed packets the
+   * other two passes cannot, and is gated on the `archive_translation` unlock.
+   */
+  runRecovery: (mode: RecoveryMode) => void
   clearLastRecovered: () => void
   activeCraft: { recipeId: string; label: string; startedAt: number; duration: number } | null
   craftItem: (recipeId: string) => { success: boolean; message: string }
@@ -982,11 +989,22 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   recovery: seedRecovery,
   lastRecovered: null,
   runRecovery: (mode) => {
-    const cost = mode === "focused" ? 2 : 1
-    const currencyKey = mode === "focused" ? "resonance" : "relay_tokens"
+    // Translation reads sealed packets, so it needs the Lorekeeping unlock and
+    // spends salvage rather than relay or resonance.
+    if (mode === "translation" && !get().hasSkillUnlock("archive_translation")) return
+    const COSTS = {
+      standard: { cost: 1, currencyKey: "relay_tokens" },
+      focused: { cost: 2, currencyKey: "resonance" },
+      translation: { cost: 3, currencyKey: "signal_salvage" },
+    } as const
+    const { cost, currencyKey } = COSTS[mode]
     const { shards, recovery, profile, inventory } = get()
     if ((shards as any)[currencyKey] < cost) return
-    const rarity = rollRarity(mode === "focused", get().getSkillBonuses().rollLuck)
+    // Translation inherits the focused odds table and adds its own luck on top.
+    const rarity = rollRarity(
+      mode !== "standard",
+      get().getSkillBonuses().rollLuck + (mode === "translation" ? 0.15 : 0),
+    )
     const pool = POOL[rarity]
     const pick = pool[Math.floor(Math.random() * pool.length)]
     

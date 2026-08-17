@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { useEsroStore } from "@/store/use-esro-store"
+import { useEsroStore, type RecoveryMode } from "@/store/use-esro-store"
+import { unlockRequirementLabel } from "@/lib/skill-effects"
 import { cn } from "@/lib/cn"
 import { motion, AnimatePresence } from "framer-motion"
 import { rarityLabel } from "@/lib/rarity"
@@ -65,9 +66,10 @@ export function RollingTab() {
   const runRecovery = useEsroStore((s) => s.runRecovery)
   const lastRecovered = useEsroStore((s) => s.lastRecovered)
   const clearLastRecovered = useEsroStore((s) => s.clearLastRecovered)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
 
   const [isRolling, setIsRolling] = useState(false)
-  const [rollMode, setRollMode] = useState<"standard" | "focused" | null>(null)
+  const [rollMode, setRollMode] = useState<RecoveryMode | null>(null)
   const [displayItems, setDisplayItems] = useState<typeof ROLL_POOL>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showResult, setShowResult] = useState(false)
@@ -76,8 +78,12 @@ export function RollingTab() {
 
   const canStandard = shards.relay_tokens >= 1 && !isRolling
   const canFocused = shards.resonance >= 2 && !isRolling
+  // Split the tier gate from affordability so the button can explain which one
+  // is blocking it rather than just greying out.
+  const canTranslateTier = hasSkillUnlock("archive_translation")
+  const canTranslate = canTranslateTier && shards.signal_salvage >= 3 && !isRolling
 
-  const startRoll = useCallback((mode: "standard" | "focused") => {
+  const startRoll = useCallback((mode: RecoveryMode) => {
     setIsRolling(true)
     setRollMode(mode)
     setShowResult(false)
@@ -147,6 +153,9 @@ export function RollingTab() {
         </span>
         <span className="text-[color:var(--color-muted)]">
           Resonance <span className="text-[color:var(--color-text)]">{shards.resonance}</span>
+        </span>
+        <span className="text-[color:var(--color-muted)]">
+          Salvage <span className="text-[color:var(--color-text)]">{shards.signal_salvage}</span>
         </span>
       </div>
 
@@ -344,6 +353,23 @@ export function RollingTab() {
         >
           <div className="text-[15px] font-medium text-[color:var(--color-text)]">Focused</div>
           <div className="text-[13px] text-[color:var(--color-muted)]">2 Resonance</div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => startRoll("translation")}
+          disabled={!canTranslate}
+          className={cn(
+            "flex-1 rounded-lg border px-3 py-3 text-center transition-colors",
+            canTranslate
+              ? "border-[color:var(--color-violet)]/50 bg-[color:var(--color-violet)]/10 hover:bg-[color:var(--color-violet)]/20"
+              : "border-[color:var(--color-border)] opacity-50"
+          )}
+        >
+          <div className="text-[15px] font-medium text-[color:var(--color-text)]">Translation</div>
+          <div className="text-[13px] text-[color:var(--color-muted)]">
+            {canTranslateTier ? "3 Salvage" : unlockRequirementLabel("archive_translation")}
+          </div>
         </button>
       </div>
 
