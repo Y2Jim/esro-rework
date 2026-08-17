@@ -46,7 +46,16 @@ export interface BaitDef {
   attractMult: number
   /** Multiplier on the spot's junkChance. Below 1 means less junk. */
   junkMult: number
-  /** Short effect line shown under the bait name in the fishing UI. */
+  /**
+   * Short effect line shown under the bait name in the fishing UI.
+   *
+   * MUST NOT name individual fish species. This string is the only player-facing
+   * surface that could reveal a fish before it has been caught (the fishing log
+   * only lists species already landed), so naming one here spoils the discovery.
+   * Describe the *habitat* the bait works in instead — "shallow, sunlit water",
+   * "the deep channel" — which still differentiates the tiers without leaking
+   * the fish table. Use `attracts` for the actual targeting.
+   */
   effect: string
   description: string
 }
