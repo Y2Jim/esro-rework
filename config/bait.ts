@@ -13,8 +13,21 @@ import type { Rarity } from "@/lib/types"
  *   `attracts`    biases *which* species bites, without touching rarity
  *
  * Keeping those separate is what stops the highest tier from being the automatic
- * answer: Volt Chum is the rarity play, but if you specifically want Glass Carp,
+ * answer: Void Chum is the rarity play, but if you specifically want Glass Carp,
  * Glowcap Lure still beats it.
+ *
+ * LADDER INVARIANT: `attracts` must climb the fish table alongside `tier`.
+ * The fish ladder is silverfin -> glasscarp -> voltray -> echo_eel -> goldrelay
+ * -> prism_leviathan. A high tier that targets a fish low on that ladder fights
+ * its own `pull` and can end up worse for rare catches than no bait at all,
+ * because `attractMult` would be inflating a common fish.
+ *
+ * Both mid tiers originally tripped this: tier 3 and tier 4 each targeted Volt
+ * Ray, which is the *most common* member of the deep pool, so their advertised
+ * rarity pull was measurably false at the Sunken Wreck (tier 3 came in at 13.5%
+ * rare-end versus 16.1% for a bare hook). Retargeting them one rung up the
+ * ladder fixed it. scripts/verify-bait.mjs asserts this and reads this table
+ * directly, so a future retune cannot silently reintroduce the inversion.
  */
 
 export interface BaitDef {
@@ -72,10 +85,10 @@ export const BAIT: BaitDef[] = [
     rarity: "uncommon",
     sprite: "/fishing/bait-glowlure.png",
     pull: 0.12,
-    attracts: ["fish_glasscarp", "fish_voltray"],
+    attracts: ["fish_glasscarp", "fish_echo_eel"],
     attractMult: 1.7,
     junkMult: 0.6,
-    effect: "Draws Glass Carp and Volt Ray. Pulls rarer fish.",
+    effect: "Draws Glass Carp and Echo Eel. Pulls rarer fish.",
     description: "A pinch of glowcap bound to a hook. Visible six feet down.",
   },
   {
@@ -85,10 +98,10 @@ export const BAIT: BaitDef[] = [
     rarity: "rare",
     sprite: "/fishing/bait-voltchum.png",
     pull: 0.2,
-    attracts: ["fish_voltray", "fish_echo_eel"],
+    attracts: ["fish_echo_eel", "fish_goldrelay"],
     attractMult: 1.8,
     junkMult: 0.45,
-    effect: "Draws Volt Ray and Echo Eel. Strong rarity pull.",
+    effect: "Draws Echo Eel and Gold Relay. Strong rarity pull.",
     description: "Ground carp cut with crystal dust. It hums against the tin.",
   },
   {

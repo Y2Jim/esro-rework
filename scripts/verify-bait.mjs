@@ -1,5 +1,7 @@
-// Throwaway verification of the bait maths. Mirrors pickFish + the Focus
-// window so we can assert distributions without booting the app.
+// Verification of the bait maths. Mirrors pickFish + the Focus window so we can
+// assert distributions without booting the app, but reads the bait table itself
+// out of config/bait.ts so the two cannot drift apart.
+import { readFileSync } from "node:fs"
 const FISH = {
   fish_silverfin: { rarity: "common", weight: 40, biteWindow: 1.6 },
   fish_glasscarp: { rarity: "uncommon", weight: 24, biteWindow: 1.3 },
@@ -13,13 +15,26 @@ const SPOTS = {
   drift_channel: { pool: ["fish_glasscarp", "fish_voltray", "fish_echo_eel", "fish_goldrelay"], junkChance: 0.12 },
   sunken_wreck: { pool: ["fish_voltray", "fish_echo_eel", "fish_goldrelay", "fish_prism_leviathan"], junkChance: 0.08 },
 }
-const BAIT = {
-  bait_grubs: { tier: 1, pull: 0, attracts: ["fish_silverfin"], attractMult: 1.4, junkMult: 1 },
-  bait_dough: { tier: 2, pull: 0.05, attracts: ["fish_silverfin", "fish_glasscarp"], attractMult: 1.5, junkMult: 0.8 },
-  bait_glowlure: { tier: 3, pull: 0.12, attracts: ["fish_glasscarp", "fish_voltray"], attractMult: 1.7, junkMult: 0.6 },
-  bait_voltchum: { tier: 4, pull: 0.2, attracts: ["fish_voltray", "fish_echo_eel"], attractMult: 1.8, junkMult: 0.45 },
-  bait_voidchum: { tier: 5, pull: 0.3, attracts: ["fish_goldrelay", "fish_prism_leviathan"], attractMult: 2, junkMult: 0.3 },
-}
+// Parsed out of the real config rather than mirrored here. A hardcoded copy
+// silently goes stale the moment the table is retuned, which is exactly how a
+// test starts asserting the old design instead of the current one.
+const baitSrc = readFileSync(new URL("../config/bait.ts", import.meta.url), "utf8")
+const BAIT = Object.fromEntries(
+  [...baitSrc.matchAll(/\{\s*id: "(bait_[a-z]+)",[\s\S]*?junkMult: ([\d.]+),/g)].map((m) => {
+    const block = m[0]
+    const num = (k) => Number(block.match(new RegExp(`${k}: ([\\d.]+)`))[1])
+    return [
+      m[1],
+      {
+        tier: num("tier"),
+        pull: num("pull"),
+        attracts: [...block.matchAll(/"(fish_[a-z_]+)"/g)].map((f) => f[1]),
+        attractMult: num("attractMult"),
+        junkMult: Number(m[2]),
+      },
+    ]
+  }),
+)
 const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
 
 function pickFish(spot, luck, rng, bait) {
@@ -82,13 +97,45 @@ for (const [spotName, spot] of Object.entries(SPOTS)) {
     check(row[rarest] < row[commonest], `${spotName}/${bn}: rarest (${rarest}) must stay below commonest (${commonest})`)
   }
 
-  // Invariant 2: a bait must actually deliver on what it advertises — every
-  // fish it lists in `attracts` and that exists here gets a bigger share.
+  // Invariant 2: a bait must deliver on what it advertises, measured as the
+  // combined share of the fish it targets. Asserting each target individually
+  // would be wrong: `pull` deliberately drains share from the commonest fish in
+  // the pool, so a bait that targets both a common and a rare fish can lift the
+  // pair while still (correctly) lowering the common one.
   for (const [bn, b] of Object.entries(BAIT)) {
-    for (const target of b.attracts) {
-      if (!spot.pool.includes(target)) continue
-      check(rows[bn][target] > none[target], `${spotName}/${bn}: should raise its target ${target}`)
-    }
+    const present = b.attracts.filter((t) => spot.pool.includes(t))
+    if (present.length === 0) continue
+    const sum = (row) => present.reduce((a, t) => a + row[t], 0)
+    check(
+      sum(rows[bn]) > sum(none),
+      `${spotName}/${bn}: must raise combined share of its targets (${present.join("+")})`,
+    )
+  }
+
+
+}
+
+// Invariant 2b: the ladder invariant documented in config/bait.ts. A tier 3+
+// bait must beat a bare hook at moving catches OFF the commonest fish in the
+// deep pool. That is the real failure mode: attractMult inflating a common fish
+// and fighting the bait's own `pull`.
+//
+// Deliberately measured as "everything above the commonest fish" rather than
+// just the top two tiers. A narrower metric reports a false failure for bait
+// that targets the epic tier — lifting Echo Eel necessarily dilutes the
+// legendary/mythic slice while still being a clear upgrade over no bait.
+{
+  const deep = SPOTS.sunken_wreck
+  const commonestDeep = "fish_voltray"
+  const aboveCommon = (row) =>
+    deep.pool.filter((id) => id !== commonestDeep).reduce((a, id) => a + row[id], 0)
+  const bare = aboveCommon(dist(deep, undefined))
+  console.log("\n[v0] wreck: share better than %s — bare hook %s%%", commonestDeep, bare.toFixed(2))
+  for (const [bn, b] of Object.entries(BAIT)) {
+    if (b.tier < 3) continue
+    const got = aboveCommon(dist(deep, b))
+    console.log(`  ${bn.padEnd(16)} ${got.toFixed(2)}%`)
+    check(got > bare, `${bn} (tier ${b.tier}) must beat bare hook at avoiding ${commonestDeep}`)
   }
 }
 
