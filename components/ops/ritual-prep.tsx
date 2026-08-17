@@ -62,7 +62,9 @@ export function RitualPrep({
               {used}/{capacity}
             </span>
           </div>
-          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-border)]">
+          {/* Track uses the darker panel tone like the other Ops meters: this one
+              starts at zero, and the lighter border tone reads as already full. */}
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[color:var(--color-panel)]">
             <div
               className="h-full bg-[color:var(--color-accent)] transition-all"
               style={{ width: `${capacity > 0 ? (used / capacity) * 100 : 0}%` }}

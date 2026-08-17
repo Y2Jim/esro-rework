@@ -23,6 +23,15 @@ export function KnownRituals() {
 
   const known = getRituals(profile.knownRituals)
   const locked = RITUALS.filter((r) => !(profile.knownRituals ?? []).includes(r.id))
+  // Locked rituals are identified only by where they come from, and several
+  // share a source. Listing each one repeats the same line, so group by source
+  // and show a count instead — same information, without looking like a bug.
+  const lockedBySource = [...new Set(locked.map((r) => r.source ?? "Unknown origin"))].map(
+    (source) => ({
+      source,
+      count: locked.filter((r) => (r.source ?? "Unknown origin") === source).length,
+    }),
+  )
 
   return (
     <div className="rounded-lg border border-[color:var(--color-border)] p-3">
@@ -60,13 +69,14 @@ export function KnownRituals() {
             Undiscovered ({locked.length})
           </div>
           <div className="mt-1.5 flex flex-col gap-1">
-            {locked.map((r) => (
+            {lockedBySource.map(({ source, count }) => (
               <div
-                key={r.id}
+                key={source}
                 className="flex items-center gap-1.5 text-[13px] text-[color:var(--color-muted-2)]"
               >
                 <Lock className="h-3 w-3 shrink-0" />
-                <span className="truncate">{r.source ?? "Unknown origin"}</span>
+                <span className="truncate">{source}</span>
+                {count > 1 && <span className="shrink-0">×{count}</span>}
               </div>
             ))}
           </div>
