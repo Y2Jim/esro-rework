@@ -581,9 +581,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   /** Aggregated sub-stat effects across every unlocked skill. */
   getSkillBonuses: () => aggregateSkillBonuses(get().skills),
 
-  /** Content unlocked by skill tier breakpoints (levels 5 / 10 / 15). */
+  /**
+   * Content unlocked by skill tier breakpoints (levels 5 / 10 / 15), plus the
+   * stat-threshold gates in STAT_UNLOCKS (e.g. fishing needs Luck 15).
+   */
   getSkillUnlocks: () => {
-    const earned = getSkillUnlocks(get().skills)
+    const earned = getSkillUnlocks(get().skills, get().getPlayerStats())
     // Admin/debug forces are merged in here rather than at each call site, so a
     // single toggle covers every gate that reads hasSkillUnlock.
     for (const id of get().debugUnlocks) earned.add(id)

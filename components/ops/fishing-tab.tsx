@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { FISHING_SPOTS, getFish } from "@/config/fishing"
 import { rarityBorder, rarityColor, rarityGlow, rarityLabel } from "@/lib/rarity"
+import { STAT_UNLOCKS } from "@/lib/skill-effects"
 import { cn } from "@/lib/cn"
 
 export function FishingTab() {
@@ -15,8 +16,11 @@ export function FishingTab() {
   const setHook = useEsroStore((s) => s.setHook)
   const reelIn = useEsroStore((s) => s.reelIn)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+  const luck = useEsroStore((s) => s.getPlayerStats().luck)
 
   const canFish = hasSkillUnlock("fishing_basic")
+  // Sourced from the gate table so the copy can never drift from the real check.
+  const luckRequired = STAT_UNLOCKS.find((g) => g.unlock === "fishing_basic")?.value ?? 15
   const [spotId, setSpotId] = useState(FISHING_SPOTS[0].id)
   // Drives the shrinking reaction bar during the bite window.
   const [remaining, setRemaining] = useState(1)
@@ -67,9 +71,13 @@ export function FishingTab() {
         <p className="text-[15px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Fishing locked
         </p>
-        <p className="max-w-xs text-[14px] leading-relaxed text-[color:var(--color-muted)]">
-          Reach <span className="text-[color:var(--color-cyan)]">Fishing level 5</span> to earn a rod
-          and start working the relay waters.
+        <p className="max-w-xs text-[14px] leading-relaxed text-[color:var(--color-muted)] text-pretty">
+          Reach <span className="text-[color:var(--color-cyan)]">Luck {luckRequired}</span> to earn a
+          rod and start working the relay waters. Luck comes from your race, courier, character level
+          and skills like Gathering and Scavenging.
+        </p>
+        <p className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Luck {luck} / {luckRequired}
         </p>
       </div>
     )

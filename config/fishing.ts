@@ -3,9 +3,12 @@ import type { InventoryItem, Rarity } from "@/lib/types"
 /**
  * Fishing catch table.
  *
- * Gated behind the Fishing skill's tier unlocks (see lib/skill-effects.ts):
- *   level 5  -> "fishing_basic"  : the Cast Line action itself
- *   level 10 -> "fishing_wrecks" : the submerged wreck spot
+ * Gating (see lib/skill-effects.ts):
+ *   Luck 15          -> "fishing_basic"  : the Cast Line action itself
+ *   Fishing level 10 -> "fishing_wrecks" : the submerged wreck spot
+ *
+ * Entry is a Luck stat gate rather than a Fishing level gate because Fishing XP
+ * can only be earned by fishing — a skill cannot gate its own entry point.
  */
 
 export interface FishDef {

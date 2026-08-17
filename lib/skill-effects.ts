@@ -230,6 +230,39 @@ export interface SkillBreakpoint {
   detail: string
 }
 
+/**
+ * Content gated behind a raw stat threshold instead of a skill level.
+ *
+ * This exists because a skill cannot gate its own entry point: fishing was
+ * locked behind Fishing Lv.5, but Fishing XP is only earned by fishing, so the
+ * requirement could never be met. Stat gates break that loop because stats come
+ * from race, courier, character level and *other* skills.
+ */
+export interface StatUnlock {
+  unlock: SkillUnlockId
+  stat: keyof BaseStats
+  /** Minimum total stat value required. */
+  value: number
+  label: string
+  detail: string
+  /**
+   * Skill whose detail panel should display this gate. Several skills share a
+   * linked stat, so this is explicit rather than inferred from `stat`.
+   */
+  skill: string
+}
+
+export const STAT_UNLOCKS: StatUnlock[] = [
+  {
+    unlock: "fishing_basic",
+    stat: "luck",
+    value: 15,
+    label: "Cast Line",
+    detail: "Fish at water nodes",
+    skill: "Fishing",
+  },
+]
+
 export interface SubStatHook {
   /** Sub-stat id, matching config/skills.json. */
   id: string
@@ -407,8 +440,11 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
       { id: "tension", effect: "fishingSuccess", perLevel: 0.02, detail: "Chance to land a catch" },
       { id: "salvage", effect: "salvageYield", perLevel: 0.025, detail: "Yield from wreck sites" },
     ],
+    // "fishing_basic" deliberately lives in STAT_UNLOCKS (Luck 15) rather than
+    // here — gating the rod behind Fishing Lv.5 was unreachable, since Fishing
+    // XP only comes from fishing. Wreck diving stays a skill gate because by
+    // then the player can actually earn Fishing levels.
     breakpoints: [
-      { level: 5, unlock: "fishing_basic", label: "Cast Line", detail: "Fish at water nodes" },
       { level: 10, unlock: "fishing_wrecks", label: "Wreck Diving", detail: "Salvage submerged wrecks" },
     ],
   },
@@ -632,7 +668,7 @@ export function skillPassiveList(
 }
 
 /** Every unlock the player's current skill levels have earned. */
-export function getSkillUnlocks(skills: Skill[]): Set<SkillUnlockId> {
+export function getSkillUnlocks(skills: Skill[], stats?: BaseStats): Set<SkillUnlockId> {
   const unlocked = new Set<SkillUnlockId>()
   for (const skill of skills) {
     if (skill.locked || skill.level <= 0) continue
@@ -640,6 +676,13 @@ export function getSkillUnlocks(skills: Skill[]): Set<SkillUnlockId> {
     if (!mech) continue
     for (const bp of mech.breakpoints) {
       if (skill.level >= bp.level) unlocked.add(bp.unlock)
+    }
+  }
+  // Stat-threshold gates. Stats are optional so callers that only care about
+  // skill tiers keep working; those simply see no stat unlocks.
+  if (stats) {
+    for (const gate of STAT_UNLOCKS) {
+      if (stats[gate.stat] >= gate.value) unlocked.add(gate.unlock)
     }
   }
   return unlocked

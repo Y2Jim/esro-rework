@@ -6,8 +6,10 @@ import {
   BONUS_SYSTEM,
   formatBonus,
   getSkillMechanic,
+  STAT_UNLOCKS,
   type SkillBonusKey,
 } from "@/lib/skill-effects"
+import { useEsroStore } from "@/store/use-esro-store"
 import { STAT_COLORS, STAT_LABELS } from "@/lib/game-data"
 import type { Skill } from "@/lib/types"
 import { X, Lock, Check } from "lucide-react"
@@ -29,10 +31,16 @@ const LOWER_IS_BETTER = new Set<SkillBonusKey>([
  * that run — no restating of static flavour text.
  */
 export function SkillDetail({ skill, onClose }: { skill: Skill; onClose: () => void }) {
+  // Live totals, needed to show progress toward any stat-threshold unlock.
+  const stats = useEsroStore((s) => s.getPlayerStats())
   const mech = getSkillMechanic(skill.label)
   if (!mech) return null
 
   const statColor = STAT_COLORS[mech.linkedStat]
+
+  // Stat gates belonging to this skill, e.g. Fishing shows its Luck 15 entry
+  // gate alongside its level breakpoints.
+  const statGates = STAT_UNLOCKS.filter((gate) => gate.skill === mech.name)
 
   // Each sub-stat's live contribution. Sub-stats fall back to the parent level
   // so a skill still reads correctly before its sub-stats are broken out.
@@ -144,12 +152,45 @@ export function SkillDetail({ skill, onClose }: { skill: Skill; onClose: () => v
           </div>
 
           {/* Breakpoints */}
-          {mech.breakpoints.length > 0 && (
+          {(mech.breakpoints.length > 0 || statGates.length > 0) && (
             <>
               <div className="mb-1.5 mt-3 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
                 Unlocks
               </div>
               <div className="space-y-1.5">
+                {/* Stat-threshold gates tied to this skill's linked stat, e.g.
+                    fishing entry needs Luck 15 rather than a Fishing level. */}
+                {statGates.map((gate) => {
+                  const earned = stats[gate.stat] >= gate.value
+                  return (
+                    <div
+                      key={gate.unlock}
+                      className={cn(
+                        "flex items-start gap-2 rounded-md border px-2 py-1.5",
+                        earned
+                          ? "border-[color:var(--color-cyan)]/40 bg-[color:var(--color-cyan)]/10"
+                          : "border-[color:var(--color-border)] opacity-70"
+                      )}
+                    >
+                      {earned ? (
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[color:var(--color-cyan)]" />
+                      ) : (
+                        <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[color:var(--color-muted)]" />
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[14px] text-[color:var(--color-text)]">
+                            {gate.label}
+                          </span>
+                          <span className="text-[12px] text-[color:var(--color-muted)]">
+                            {gate.stat.toUpperCase()} {stats[gate.stat]}/{gate.value}
+                          </span>
+                        </div>
+                        <p className="text-[12px] text-[color:var(--color-muted)]">{gate.detail}</p>
+                      </div>
+                    </div>
+                  )
+                })}
                 {mech.breakpoints.map((bp) => {
                   const earned = skill.level >= bp.level
                   return (

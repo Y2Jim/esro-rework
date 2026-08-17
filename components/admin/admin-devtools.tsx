@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
-import { SKILL_MECHANICS, type SkillUnlockId } from "@/lib/skill-effects"
+import { SKILL_MECHANICS, STAT_UNLOCKS, type SkillUnlockId } from "@/lib/skill-effects"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { Wrench } from "lucide-react"
 
@@ -44,6 +44,24 @@ const UNLOCK_OVERRIDES = (() => {
         level: bp.level,
       })
     }
+  }
+  // Stat-threshold gates (e.g. fishing entry needs Luck 15) live outside the
+  // skill registry, so merge them in or they would drop off this list entirely.
+  for (const gate of STAT_UNLOCKS) {
+    const requirement = `${gate.stat.toUpperCase()} ${gate.value}`
+    const existing = byUnlock.get(gate.unlock)
+    if (existing) {
+      existing.skills.push(requirement)
+      continue
+    }
+    byUnlock.set(gate.unlock, {
+      unlock: gate.unlock,
+      label: gate.label,
+      detail: gate.detail,
+      skills: [requirement],
+      skillName: requirement,
+      level: gate.value,
+    })
   }
   return [...byUnlock.values()].sort((a, b) => {
     const aFish = a.unlock.startsWith("fishing")
