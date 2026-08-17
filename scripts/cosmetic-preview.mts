@@ -331,14 +331,19 @@ const CANDIDATES: Candidate[] = [
     rarity: "common",
     anchor: "rest",
     draw: (g) => {
-      const reed = "#b8975a"
+      // Row 0 needs real mass: at 2px this read as a hair fringe in the live app.
+      const reed = "#c9a86a"
+      const reedMid = "#b8975a"
       const reedDark = "#8a6f3f"
-      px(g, 6, 0, reedDark)
-      px(g, 7, 0, reedDark)
-      hline(g, 5, 8, 1, reed)
-      hline(g, 3, 10, 2, reed)
-      px(g, 3, 2, reedDark)
-      px(g, 10, 2, reedDark)
+      hline(g, 5, 8, 0, reedMid)
+      px(g, 6, 0, reed)
+      px(g, 7, 0, reed)
+      hline(g, 4, 9, 1, reedMid)
+      px(g, 5, 1, reed)
+      px(g, 8, 1, reed)
+      // Wide brim - the cue that makes this read as a hat.
+      hline(g, 2, 11, 2, reedDark)
+      hline(g, 4, 9, 2, reedMid)
     },
   },
   {
@@ -353,22 +358,21 @@ const CANDIDATES: Candidate[] = [
       const metalHi = "#aab2c0"
       const bulb = "#ffc861"
       const glow = "#fff4d0"
-      // Headband.
-      hline(g, 4, 9, 1, strap)
-      hline(g, 4, 9, 2, strap)
-      px(g, 4, 2, metal)
-      px(g, 9, 2, metal)
-      // Lantern housing, offset to one side so it reads as a mounted lamp rather
-      // than a symmetrical band. The bulb is 2x2 with a highlight: the first pass
-      // used single pixels and the lantern — the whole concept — vanished at 28px.
+      // Strap spans the full head width so the rig reads as worn hardware.
+      hline(g, 3, 10, 1, strap)
+      hline(g, 3, 10, 2, strap)
+      px(g, 3, 2, metal)
+      px(g, 10, 2, metal)
+      // Lamp sits ABOVE the strap, offset to one side. Overlapping the warm lamp
+      // pixels with the dark strap averaged out to a grey blob at small sizes.
       px(g, 5, 0, metal)
       px(g, 6, 0, metalHi)
+      px(g, 7, 0, metal)
       px(g, 5, 1, metalHi)
-      px(g, 6, 1, glow)
-      px(g, 5, 2, bulb)
+      px(g, 6, 1, bulb)
+      px(g, 7, 1, glow)
       px(g, 6, 2, glow)
-      px(g, 5, 3, bulb)
-      px(g, 6, 3, bulb)
+      px(g, 7, 2, bulb)
     },
   },
   {
@@ -382,16 +386,19 @@ const CANDIDATES: Candidate[] = [
       const copperHi = "#e0a566"
       const line = "#cfc6b0"
       const hook = "#9aa5b0"
+      // Spool crown widened on row 0 so the shape reads as a hat, not hair.
+      hline(g, 5, 8, 0, copper)
       px(g, 6, 0, copperHi)
       px(g, 7, 0, copperHi)
-      hline(g, 4, 9, 1, copper)
+      hline(g, 3, 10, 1, copper)
       px(g, 5, 1, copperHi)
       px(g, 8, 1, copperHi)
-      hline(g, 4, 9, 2, copper)
-      px(g, 6, 2, line)
-      px(g, 7, 2, line)
-      px(g, 3, 3, hook)
-      px(g, 10, 3, hook)
+      // Wound line moved to row 1, keeping row 2 clear so the forehead shows.
+      px(g, 6, 1, line)
+      px(g, 7, 1, line)
+      hline(g, 3, 10, 2, copper)
+      px(g, 2, 2, hook)
+      px(g, 11, 2, hook)
     },
   },
   {
