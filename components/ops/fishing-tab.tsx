@@ -16,7 +16,7 @@ export function FishingTab() {
   const reelIn = useEsroStore((s) => s.reelIn)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
 
-  const canFish = true || hasSkillUnlock("fishing_basic")
+  const canFish = hasSkillUnlock("fishing_basic")
   const [spotId, setSpotId] = useState(FISHING_SPOTS[0].id)
   // Drives the shrinking reaction bar during the bite window.
   const [remaining, setRemaining] = useState(1)
@@ -62,7 +62,7 @@ export function FishingTab() {
           alt=""
           width={48}
           height={48}
-          className="opacity-30 [image-rendering:pixelated]"
+          className="h-12 w-12 opacity-30 [image-rendering:pixelated]"
         />
         <p className="text-[15px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Fishing locked
@@ -136,7 +136,7 @@ export function FishingTab() {
               width={40}
               height={40}
               className={cn(
-                "[image-rendering:pixelated]",
+                "h-10 w-10 [image-rendering:pixelated]",
                 fishing.phase === "casting" && "animate-bounce",
               )}
             />
@@ -169,7 +169,7 @@ export function FishingTab() {
               alt={hooked.label}
               width={92}
               height={92}
-              className={cn("[image-rendering:pixelated]", rarityGlow[hooked.rarity])}
+              className={cn("h-23 w-23 [image-rendering:pixelated]", rarityGlow[hooked.rarity])}
             />
             <p className={cn("text-[17px] uppercase tracking-wider", rarityColor[hooked.rarity])}>
               {hooked.label}
@@ -247,7 +247,7 @@ export function FishingTab() {
                       alt=""
                       width={24}
                       height={24}
-                      className="[image-rendering:pixelated]"
+                      className="h-6 w-6 [image-rendering:pixelated]"
                     />
                   )}
                   <span className={cn("flex-1 text-[14px]", rarityColor[c.rarity])}>{c.label}</span>
