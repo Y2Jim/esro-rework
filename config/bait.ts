@@ -71,7 +71,7 @@ export const BAIT: BaitDef[] = [
     attracts: ["fish_silverfin"],
     attractMult: 1.4,
     junkMult: 1,
-    effect: "Draws Silverfin. Snags plenty of junk.",
+    effect: "Works surface water. Snags plenty of junk.",
     description: "Turned out of wet gravel by hand. Free, and worth exactly that.",
   },
   {
@@ -84,7 +84,7 @@ export const BAIT: BaitDef[] = [
     attracts: ["fish_silverfin", "fish_glasscarp"],
     attractMult: 1.5,
     junkMult: 0.8,
-    effect: "Draws Silverfin and Glass Carp. Less junk.",
+    effect: "Works shallow, sunlit water. Less junk.",
     description: "Flour and river water, kneaded until it stops arguing.",
   },
   {
@@ -97,7 +97,7 @@ export const BAIT: BaitDef[] = [
     attracts: ["fish_glasscarp", "fish_echo_eel"],
     attractMult: 1.7,
     junkMult: 0.6,
-    effect: "Draws Glass Carp and Echo Eel. Pulls rarer fish.",
+    effect: "Light carries into mid-depth. Pulls rarer fish.",
     description: "A pinch of glowcap bound to a hook. Visible six feet down.",
   },
   {
@@ -110,7 +110,7 @@ export const BAIT: BaitDef[] = [
     attracts: ["fish_echo_eel", "fish_goldrelay"],
     attractMult: 1.8,
     junkMult: 0.45,
-    effect: "Draws Echo Eel and Gold Relay. Strong rarity pull.",
+    effect: "Reaches the deep channel. Strong rarity pull.",
     description: "Ground carp cut with crystal dust. It hums against the tin.",
   },
   {
@@ -123,7 +123,7 @@ export const BAIT: BaitDef[] = [
     attracts: ["fish_goldrelay", "fish_prism_leviathan"],
     attractMult: 2,
     junkMult: 0.3,
-    effect: "Draws Gold Relay and Prism Leviathan. Severe rarity pull.",
+    effect: "Carries to wreck depths. Severe rarity pull.",
     description: "Something in the water recognises this and comes up to look.",
   },
 ]
