@@ -197,15 +197,13 @@ export function ContractsScreen() {
                       <span className="capitalize">{c.type}</span>
                     </div>
                     <div className="mt-2 text-[15px] text-[color:var(--color-text)]/70">{c.description}</div>
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <div className="text-[14px] text-[color:var(--color-accent)]">{c.reward}</div>
-                      {tierLocked && c.requiresUnlock && (
-                        <span className="flex shrink-0 items-center gap-1 text-[13px] uppercase tracking-wider text-[color:var(--color-amber)]">
-                          <Lock className="h-3 w-3" />
-                          {unlockRequirementLabel(c.requiresUnlock)}
-                        </span>
-                      )}
-                    </div>
+                    <div className="mt-2 text-[14px] text-[color:var(--color-accent)]">{c.reward}</div>
+                    {tierLocked && c.requiresUnlock && (
+                      <div className="mt-2 flex items-center gap-1 text-[13px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                        <Lock className="h-3 w-3 shrink-0" />
+                        {unlockRequirementLabel(c.requiresUnlock)}
+                      </div>
+                    )}
                   </button>
                   )
                 })}

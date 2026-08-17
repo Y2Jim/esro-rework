@@ -10,6 +10,8 @@
  * ones are taught by books found on expeditions — mostly on hidden routes.
  */
 
+import type { SkillUnlockId } from "@/lib/skill-effects"
+
 export type RitualEffectKey =
   | "damageReduction"
   | "battleScore"
@@ -34,6 +36,13 @@ export interface Ritual {
   starter?: boolean
   /** Where the teaching book is found, for codex copy. */
   source?: string
+  /**
+   * Skill unlock required to lead this rite.
+   *
+   * Rites carry no book: the unlock itself is what teaches them, so they are
+   * offered alongside known rituals and locked until the skill line earns it.
+   */
+  requiresUnlock?: SkillUnlockId
 }
 
 /**
@@ -125,7 +134,27 @@ export const RITUALS: Ritual[] = [
     effects: { xpBonus: 0.2 },
     source: "Major codex — deep ruins",
   },
+
+  // ---- Faction rites: taught by standing, not by books ----
+  {
+    id: "sealed_circle",
+    label: "Sealed Circle",
+    description:
+      "A ward drawn around the whole company before it steps off. Only a rite keeper may close the circle.",
+    attunement: 4,
+    effects: { damageReduction: 0.15, hazardScore: 0.12 },
+    requiresUnlock: "faction_rites",
+    source: "Faction rite — Warding or Ritualism",
+  },
 ]
+
+/**
+ * Rites offered without a book, gated on a skill unlock instead.
+ *
+ * Ritual prep lists these next to known rituals so the lock is visible before
+ * the skill line reaches it, rather than the rite simply not existing.
+ */
+export const UNLOCK_RITUALS: Ritual[] = RITUALS.filter((r) => r.requiresUnlock)
 
 export const STARTER_RITUALS = RITUALS.filter((r) => r.starter).map((r) => r.id)
 

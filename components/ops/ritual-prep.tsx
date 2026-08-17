@@ -1,9 +1,10 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
-import { getRituals } from "@/lib/rituals"
+import { getRituals, UNLOCK_RITUALS } from "@/lib/rituals"
+import { unlockRequirementLabel } from "@/lib/skill-effects"
 import { cn } from "@/lib/cn"
-import { X, BookOpen } from "lucide-react"
+import { X, BookOpen, Lock } from "lucide-react"
 
 /**
  * Pre-launch ritual prep — the Focus payoff, gated by attunement capacity.
@@ -28,7 +29,11 @@ export function RitualPrep({
   const getAttunement = useEsroStore((s) => s.getAttunement)
   const { capacity, used } = getAttunement()
 
-  const known = getRituals(profile?.knownRituals)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+
+  // Rites carry no book, so they are appended to the known list and locked in
+  // place — otherwise the reward for the skill line would be invisible until earned.
+  const known = [...getRituals(profile?.knownRituals), ...UNLOCK_RITUALS]
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -88,6 +93,7 @@ export function RitualPrep({
             <div className="flex flex-col gap-1.5">
               {known.map((r) => {
                 const on = prepared.includes(r.id)
+                const locked = Boolean(r.requiresUnlock && !hasSkillUnlock(r.requiresUnlock))
                 // Grey out what will not fit, so the limit is legible before clicking.
                 const wontFit = !on && used + r.attunement > capacity
                 return (
@@ -95,13 +101,13 @@ export function RitualPrep({
                     key={r.id}
                     type="button"
                     onClick={() => toggleRitual(r.id)}
-                    disabled={wontFit}
+                    disabled={locked || wontFit}
                     aria-pressed={on}
                     className={cn(
                       "rounded border px-2 py-1.5 text-left transition-colors",
                       on
                         ? "border-[color:var(--color-accent)]/60 bg-[color:var(--color-accent)]/10"
-                        : wontFit
+                        : locked || wontFit
                           ? "cursor-not-allowed border-[color:var(--color-border-soft)] opacity-50"
                           : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/40",
                     )}

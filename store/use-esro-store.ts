@@ -759,10 +759,16 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       set({ preparedRituals: preparedRituals.filter((r) => r !== id) })
       return
     }
-    // Can only prep what is known, and only within Focus capacity.
-    if (!profile.knownRituals?.includes(id)) return
     const ritual = getRitual(id)
     if (!ritual) return
+    // Rites are taught by a skill unlock rather than a book, so they bypass the
+    // known-ritual check and are gated on the unlock instead.
+    if (ritual.requiresUnlock) {
+      if (!get().hasSkillUnlock(ritual.requiresUnlock)) return
+    } else if (!profile.knownRituals?.includes(id)) {
+      // Can only prep what is known, and only within Focus capacity.
+      return
+    }
     const { capacity, used } = get().getAttunement()
     if (used + ritual.attunement > capacity) return
     set({ preparedRituals: [...preparedRituals, id] })
