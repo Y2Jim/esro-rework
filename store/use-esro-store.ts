@@ -642,6 +642,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   startExpedition: (id) => {
     const exp = get().expeditions.find((e) => e.id === id)
     if (!exp || get().activeExpedition) return
+    // Tier gate: some sites only open once the matching skill breakpoint is hit.
+    if (exp.requiresUnlock && !get().hasSkillUnlock(exp.requiresUnlock)) return
 
     // Assemble the deploying squad from available party members (leader first),
     // capped at the expedition's suggested party size.

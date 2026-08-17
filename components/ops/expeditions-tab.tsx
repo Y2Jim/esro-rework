@@ -29,6 +29,7 @@ export function ExpeditionsTab() {
   const startExpedition = useEsroStore((s) => s.startExpedition)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const skills = useEsroStore((s) => s.skills)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const getStatBonus = useEsroStore((s) => s.getStatBonus)
   
@@ -170,7 +171,9 @@ export function ExpeditionsTab() {
         <div className="space-y-2">
           {expeditions.map((exp) => {
             const requiredSkill = skills.find(s => s.id === exp.requiredSkill)
-            const meetsRequirement = requiredSkill && !requiredSkill.locked
+            // Locked either by the run's base skill or by an unearned tier breakpoint.
+            const tierLocked = !!exp.requiresUnlock && !hasSkillUnlock(exp.requiresUnlock)
+            const meetsRequirement = requiredSkill && !requiredSkill.locked && !tierLocked
             const { totalBonus, relevantStats } = getExpeditionBonus(exp)
 
             return (
@@ -195,6 +198,11 @@ export function ExpeditionsTab() {
                       {exp.minLevel && (
                         <span className="text-[13px] text-[color:var(--color-muted)]">
                           Lv.{exp.minLevel}+
+                        </span>
+                      )}
+                      {tierLocked && (
+                        <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                          {exp.requiresUnlock === "deep_ruins" ? "Needs Deep Ruins" : "Needs Hidden Routes"}
                         </span>
                       )}
                     </div>

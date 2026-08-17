@@ -361,6 +361,7 @@ function NodeDetail({
   onDeploy: (expeditionId: string) => void
   onManageBase: () => void
 }) {
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const region = getRegionById(node.regionId)
   const owner = getFactionById(region?.factionId)
   const nodeFaction = getFactionById(node.factionId)
@@ -486,7 +487,10 @@ function NodeDetail({
           <div className="mt-1.5 flex flex-col gap-2">
             {missions.map((exp) => {
               const req = exp.minLevel ?? 1
-              const locked = playerLevel < req
+              // Level gate plus the run's skill tier breakpoint, so the button
+              // never offers a deploy the store will refuse.
+              const tierLocked = !!exp.requiresUnlock && !hasSkillUnlock(exp.requiresUnlock)
+              const locked = playerLevel < req || tierLocked
               return (
                 <div
                   key={exp.id}
@@ -527,7 +531,13 @@ function NodeDetail({
                         : "border border-[color:var(--color-cyan)]/60 bg-[color:var(--color-cyan)]/15 text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/25"
                     )}
                   >
-                    {locked ? `Requires Lv.${req}` : "Deploy"}
+                    {tierLocked
+                      ? exp.requiresUnlock === "deep_ruins"
+                        ? "Requires Deep Ruins"
+                        : "Requires Hidden Routes"
+                      : locked
+                        ? `Requires Lv.${req}`
+                        : "Deploy"}
                   </button>
                 </div>
               )
