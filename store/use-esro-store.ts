@@ -90,6 +90,7 @@ import {
   type SkillBonuses,
   type SkillUnlockId,
 } from "@/lib/skill-effects"
+import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
 import { dayKey, rotateContracts } from "@/lib/contract-rotation"
@@ -204,8 +205,23 @@ export interface EsroState {
 
   // Ops - Fishing (gated behind the Fishing skill's tier unlocks)
   fishing: FishingState
-  /** Drop the line at a spot. Returns false if the spot is still locked. */
-  castLine: (spotId: string) => boolean
+  /** Bait the player has chosen to fish with. Required to cast. */
+  selectedBaitId: string | null
+  setBait: (baitId: string) => void
+  /** How much of a given bait is in the inventory. */
+  getBaitCount: (baitId: string) => number
+  /** Timestamp of the last free grub dig, for the cooldown. */
+  lastDigAt: number | null
+  /**
+   * Free fallback bait so "bait required" can never hard-lock a courier who
+   * has no materials. Returns false while still on cooldown.
+   */
+  digForGrubs: () => boolean
+  /**
+   * Drop the line at a spot with a bait. Consumes one bait.
+   * Returns false if the spot is locked or the bait is not in the inventory.
+   */
+  castLine: (spotId: string, baitId: string) => boolean
   /** A fish has taken the bait; the store picks which one and opens the window. */
   triggerBite: () => void
   /** Player struck. Lands the catch if the window is still open. */
@@ -708,6 +724,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { label: "Endurance", value: s.def + s.focus, from: "DEF + FOC" },
       { label: "Insight", value: s.focus + s.luck, from: "FOC + LUK" },
       { label: "Navigation", value: s.luck + s.focus, from: "LUK + FOC" },
+      // The only place the hidden fishing bite-window bonus is surfaced. Left
+      // deliberately vague so an attentive player can connect it themselves.
+      { label: "Reflex", value: s.focus, from: "FOC" },
     ]
   },
 
@@ -1224,6 +1243,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   fishing: {
     phase: "idle",
     spotId: null,
+    baitId: null,
     fishId: null,
     biteAt: null,
     windowMs: 0,
@@ -1232,14 +1252,72 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   },
   fishingLog: [],
 
-  castLine: (spotId) => {
+  selectedBaitId: null,
+  lastDigAt: null,
+
+  setBait: (baitId) => set({ selectedBaitId: baitId }),
+
+  getBaitCount: (baitId) => get().inventory.find((i) => i.id === baitId)?.qty ?? 0,
+
+  digForGrubs: () => {
+    const { lastDigAt } = get()
+    const now = Date.now()
+    if (lastDigAt !== null && now - lastDigAt < DIG_COOLDOWN_MS) return false
+
+    const qty = DIG_MIN + Math.floor(Math.random() * (DIG_MAX - DIG_MIN + 1))
+    const def = getBait(DIG_BAIT_ID)
+    if (!def) return false
+
+    set((s) => {
+      const existing = s.inventory.find((i) => i.id === DIG_BAIT_ID)
+      return {
+        lastDigAt: now,
+        selectedBaitId: s.selectedBaitId ?? DIG_BAIT_ID,
+        inventory: existing
+          ? s.inventory.map((i) => (i.id === DIG_BAIT_ID ? { ...i, qty: i.qty + qty } : i))
+          : [
+              ...s.inventory,
+              {
+                id: def.id,
+                label: def.label,
+                aspect: "consumable" as const,
+                rarity: def.rarity,
+                qty,
+                identified: true,
+                description: def.description,
+                type: "consumable" as const,
+              },
+            ],
+      }
+    })
+    return true
+  },
+
+  castLine: (spotId, baitId) => {
     const spot = FISHING_SPOTS.find((s) => s.id === spotId)
     if (!spot) return false
     if (spot.requires && !get().hasSkillUnlock(spot.requires)) return false
     if (get().fishing.phase === "casting" || get().fishing.phase === "bite") return false
 
+    // Bait is required, and one is spent per cast whether or not anything bites.
+    // Enforced here rather than in the view so the component cannot cast for
+    // free, matching how triggerBite refuses to let the view pick its own fish.
+    if (!getBait(baitId)) return false
+    if (get().getBaitCount(baitId) < 1) return false
+
     set((s) => ({
-      fishing: { ...s.fishing, phase: "casting", spotId, fishId: null, biteAt: null },
+      selectedBaitId: baitId,
+      inventory: s.inventory
+        .map((i) => (i.id === baitId ? { ...i, qty: i.qty - 1 } : i))
+        .filter((i) => i.qty > 0),
+      fishing: {
+        ...s.fishing,
+        phase: "casting",
+        spotId,
+        baitId,
+        fishId: null,
+        biteAt: null,
+      },
     }))
     return true
   },
@@ -1255,14 +1333,26 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     // reports "a bite happened", so it can never nominate its own rare fish.
     // Rollcraft/Lorekeeping luck also biases the fishing table toward rarity.
     const luck = get().getSkillBonuses().rollLuck
+    const bait = fishing.baitId ? getBait(fishing.baitId) : undefined
+
+    // Better bait keeps more of the debris off the hook.
+    const junkChance = spot.junkChance * (bait?.junkMult ?? 1)
     const fish =
-      Math.random() < spot.junkChance ? JUNK : pickFish(spot, luck, Math.random)
+      Math.random() < junkChance ? JUNK : pickFish(spot, luck, Math.random, bait)
     const fishId = fish.id
 
     // Casting (Tension) widens the strike window, so a trained angler gets a
     // more forgiving reaction test on the same fish.
     const success = get().getSkillBonuses().fishingSuccess
-    const windowMs = Math.round(fish.biteWindow * 1000 * (1 + success))
+
+    // Focus quietly buys reaction time: a high-FOC courier gets a longer beat
+    // between the bite and the fish spitting the hook. Deliberately unadvertised
+    // in the fishing UI — the only tell is the "Reflex" derived stat on Profile.
+    // Capped at +50% so stacking Focus can never make the strike test trivial.
+    const focus = get().getPlayerStats().focus
+    const focusGrace = 1 + Math.min(0.5, focus * 0.02)
+
+    const windowMs = Math.round(fish.biteWindow * 1000 * (1 + success) * focusGrace)
 
     set((s) => ({
       fishing: { ...s.fishing, phase: "bite", fishId, biteAt: Date.now(), windowMs },

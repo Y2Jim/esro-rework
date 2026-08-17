@@ -1,3 +1,4 @@
+import type { BaitDef } from "@/config/bait"
 import type { InventoryItem, Rarity } from "@/lib/types"
 
 /**
@@ -133,14 +134,31 @@ export function getFish(id: string): FishDef | undefined {
   return id === JUNK.id ? JUNK : FISH.find((f) => f.id === id)
 }
 
-/** Weighted pick from a spot's pool, biased toward rarity by `luck`. */
-export function pickFish(spot: FishingSpot, luck: number, rng: () => number): FishDef {
+/**
+ * Weighted pick from a spot's pool, biased toward rarity by `luck` and `bait`.
+ *
+ * `bait` is optional so existing callers and tests keep working unchanged.
+ */
+export function pickFish(
+  spot: FishingSpot,
+  luck: number,
+  rng: () => number,
+  bait?: BaitDef,
+): FishDef {
   const pool = spot.pool.map((id) => getFish(id)).filter((f): f is FishDef => !!f)
   if (pool.length === 0) return JUNK
 
   // Luck flattens the weight curve so rare entries get proportionally closer
-  // to common ones, rather than just adding a flat bonus to the roll.
-  const weights = pool.map((f) => f.weight ** Math.max(0.2, 1 - luck))
+  // to common ones, rather than just adding a flat bonus to the roll. Bait's
+  // `pull` stacks into the same exponent so the two compose instead of being
+  // two unrelated systems fighting over the same roll.
+  const flatten = Math.max(0.2, 1 - luck - (bait?.pull ?? 0))
+  const weights = pool.map((f) => {
+    const w = f.weight ** flatten
+    // Applied AFTER the exponent so targeting shifts which fish of a given tier
+    // bites without collapsing the rarity ladder the exponent just built.
+    return bait?.attracts.includes(f.id) ? w * bait.attractMult : w
+  })
   const total = weights.reduce((a, b) => a + b, 0)
 
   let r = rng() * total

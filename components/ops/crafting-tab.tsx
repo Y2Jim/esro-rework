@@ -8,7 +8,7 @@ import type { CraftingCategory, CraftingRecipe } from "@/lib/types"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
-const categories: CraftingCategory[] = ["food", "potion", "component", "gear", "special"]
+const categories: CraftingCategory[] = ["food", "potion", "component", "gear", "special", "bait"]
 
 export function CraftingTab() {
   const inventory = useEsroStore((s) => s.inventory)

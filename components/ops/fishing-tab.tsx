@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
+import { BAIT, DIG_COOLDOWN_MS } from "@/config/bait"
 import { FISHING_SPOTS, getFish } from "@/config/fishing"
 import { rarityBorder, rarityColor, rarityGlow, rarityLabel } from "@/lib/rarity"
 import { STAT_UNLOCKS } from "@/lib/skill-effects"
@@ -11,10 +12,15 @@ import { cn } from "@/lib/cn"
 export function FishingTab() {
   const fishing = useEsroStore((s) => s.fishing)
   const fishingLog = useEsroStore((s) => s.fishingLog)
+  const inventory = useEsroStore((s) => s.inventory)
   const castLine = useEsroStore((s) => s.castLine)
   const triggerBite = useEsroStore((s) => s.triggerBite)
   const setHook = useEsroStore((s) => s.setHook)
   const reelIn = useEsroStore((s) => s.reelIn)
+  const selectedBaitId = useEsroStore((s) => s.selectedBaitId)
+  const setBait = useEsroStore((s) => s.setBait)
+  const digForGrubs = useEsroStore((s) => s.digForGrubs)
+  const lastDigAt = useEsroStore((s) => s.lastDigAt)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const luck = useEsroStore((s) => s.getPlayerStats().luck)
 
@@ -24,6 +30,29 @@ export function FishingTab() {
   const [spotId, setSpotId] = useState(FISHING_SPOTS[0].id)
   // Drives the shrinking reaction bar during the bite window.
   const [remaining, setRemaining] = useState(1)
+
+  // How much of each bait the courier holds, keyed by bait id.
+  const baitCounts = new Map(BAIT.map((b) => [b.id, inventory.find((i) => i.id === b.id)?.qty ?? 0]))
+  const totalBait = BAIT.reduce((sum, b) => sum + (baitCounts.get(b.id) ?? 0), 0)
+  const selectedCount = selectedBaitId ? (baitCounts.get(selectedBaitId) ?? 0) : 0
+
+  // Keep a sensible bait selected without the player clicking: prefer the best
+  // tier they own, and fall back off an empty stack automatically.
+  useEffect(() => {
+    if (selectedBaitId && (baitCounts.get(selectedBaitId) ?? 0) > 0) return
+    const best = [...BAIT].reverse().find((b) => (baitCounts.get(b.id) ?? 0) > 0)
+    if (best && best.id !== selectedBaitId) setBait(best.id)
+  }, [selectedBaitId, totalBait, setBait]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Live countdown on the free dig, so the button can show when it's ready.
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (lastDigAt === null) return
+    const id = setInterval(() => setNow(Date.now()), 500)
+    return () => clearInterval(id)
+  }, [lastDigAt])
+  const digCooldownLeft =
+    lastDigAt === null ? 0 : Math.max(0, Math.ceil((DIG_COOLDOWN_MS - (now - lastDigAt)) / 1000))
 
   const hooked = fishing.fishId ? getFish(fishing.fishId) : undefined
 
@@ -85,6 +114,88 @@ export function FishingTab() {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Bait selection — one is spent per cast, so this gates the rod. */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between">
+          <p className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Bait
+          </p>
+          <p className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            {totalBait} held
+          </p>
+        </div>
+
+        {totalBait === 0 ? (
+          <div className="flex flex-col items-start gap-2 rounded border border-[color:var(--color-amber)]/40 bg-[color:var(--color-amber)]/10 px-3 py-2.5">
+            <p className="text-[14px] leading-relaxed text-[color:var(--color-amber)] text-pretty">
+              No bait. Craft some at the bench, or turn over the gravel for grubs.
+            </p>
+            <button
+              type="button"
+              disabled={digCooldownLeft > 0}
+              onClick={() => digForGrubs()}
+              className={cn(
+                "rounded border px-3 py-1.5 text-[14px] uppercase tracking-wider transition-colors",
+                digCooldownLeft > 0
+                  ? "border-[color:var(--color-border)] text-[color:var(--color-muted)] opacity-50"
+                  : "border-[color:var(--color-amber)]/60 bg-[color:var(--color-amber)]/15 text-[color:var(--color-amber)] hover:bg-[color:var(--color-amber)]/25",
+              )}
+            >
+              {digCooldownLeft > 0 ? `Dig again in ${digCooldownLeft}s` : "Dig for grubs"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {BAIT.map((bait) => {
+              const owned = baitCounts.get(bait.id) ?? 0
+              const active = bait.id === selectedBaitId
+              const unavailable = owned === 0
+              return (
+                <button
+                  key={bait.id}
+                  type="button"
+                  disabled={unavailable || isBusy}
+                  onClick={() => setBait(bait.id)}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded border px-3 py-2 text-left transition-colors hover-cyan",
+                    active
+                      ? "border-[color:var(--color-cyan)]/60 bg-[color:var(--color-cyan)]/10"
+                      : "border-[color:var(--color-border)] bg-[color:var(--color-surface)]",
+                    (unavailable || isBusy) && "opacity-40",
+                  )}
+                >
+                  <Image
+                    src={bait.sprite}
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="h-7 w-7 shrink-0 [image-rendering:pixelated]"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="flex items-baseline justify-between gap-2">
+                      <span
+                        className={cn(
+                          "text-[15px] uppercase tracking-wider",
+                          active ? "text-[color:var(--color-cyan)]" : rarityColor[bait.rarity],
+                        )}
+                      >
+                        {bait.label}
+                      </span>
+                      <span className="shrink-0 text-[13px] text-[color:var(--color-muted)]">
+                        ×{owned}
+                      </span>
+                    </span>
+                    <span className="text-[13px] leading-relaxed text-[color:var(--color-muted)]">
+                      {bait.effect}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Spot selection */}
       <div className="flex flex-col gap-2">
         <p className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
@@ -232,16 +343,20 @@ export function FishingTab() {
       ) : (
         <button
           type="button"
-          disabled={fishing.phase === "casting"}
-          onClick={() => castLine(spotId)}
+          disabled={fishing.phase === "casting" || !selectedBaitId || selectedCount < 1}
+          onClick={() => selectedBaitId && castLine(spotId, selectedBaitId)}
           className={cn(
             "rounded px-4 py-3 text-[17px] uppercase tracking-widest transition-colors",
-            fishing.phase === "casting"
+            fishing.phase === "casting" || !selectedBaitId || selectedCount < 1
               ? "bg-[color:var(--color-surface)] text-[color:var(--color-muted)]"
               : "bg-[color:var(--color-accent)]/20 text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/30",
           )}
         >
-          {fishing.phase === "casting" ? "Line out…" : "Cast line"}
+          {fishing.phase === "casting"
+            ? "Line out…"
+            : !selectedBaitId || selectedCount < 1
+              ? "No bait"
+              : "Cast line"}
         </button>
       )}
 

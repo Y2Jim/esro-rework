@@ -385,6 +385,8 @@ export type FishingPhase = "idle" | "casting" | "bite" | "landed" | "escaped"
 export interface FishingState {
   phase: FishingPhase
   spotId: string | null
+  /** Bait spent on the current cast. Drives the rarity pull and junk rate. */
+  baitId: string | null
   /** Fish currently on the hook (during "bite") or just resolved. */
   fishId: string | null
   /** Timestamp the bite window opened, for the reaction bar. */
@@ -405,7 +407,7 @@ export interface FishingCatch {
   at: number
 }
 
-export type CraftingCategory = "food" | "potion" | "gear" | "component" | "special"
+export type CraftingCategory = "food" | "potion" | "gear" | "component" | "special" | "bait"
 
 export interface CraftingIngredient {
   itemId: string
