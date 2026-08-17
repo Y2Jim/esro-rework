@@ -23,7 +23,10 @@ export function RitualPrep({
   const profile = useEsroStore((s) => s.profile)
   const prepared = useEsroStore((s) => s.preparedRituals)
   const toggleRitual = useEsroStore((s) => s.toggleRitual)
-  const { capacity, used } = useEsroStore((s) => s.getAttunement())
+  // getAttunement() builds a new object per call, so select the getter and
+  // invoke it during render rather than selecting its result.
+  const getAttunement = useEsroStore((s) => s.getAttunement)
+  const { capacity, used } = getAttunement()
 
   const known = getRituals(profile?.knownRituals)
 

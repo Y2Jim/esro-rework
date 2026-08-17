@@ -13,8 +13,11 @@ import { BookOpen, Lock } from "lucide-react"
  */
 export function KnownRituals() {
   const profile = useEsroStore((s) => s.profile)
+  // Focus is a primitive so selecting it directly is safe, but getAttunement()
+  // returns a new object each call and must be invoked during render instead.
   const focus = useEsroStore((s) => s.getPlayerStats().focus)
-  const attunement = useEsroStore((s) => s.getAttunement())
+  const getAttunement = useEsroStore((s) => s.getAttunement)
+  const attunement = getAttunement()
 
   if (!profile) return null
 

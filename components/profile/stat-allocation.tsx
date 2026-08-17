@@ -15,10 +15,15 @@ import { RotateCcw } from "lucide-react"
  */
 export function StatAllocation() {
   const profile = useEsroStore((s) => s.profile)
-  const playerStats = useEsroStore((s) => s.getPlayerStats())
-  const derived = useEsroStore((s) => s.getDerivedStats())
+  // Select the getters, then call them during render. Selecting their *result*
+  // returns a fresh object each render and trips zustand's snapshot check.
+  const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
+  const getDerivedStats = useEsroStore((s) => s.getDerivedStats)
   const allocateStat = useEsroStore((s) => s.allocateStat)
   const respecStats = useEsroStore((s) => s.respecStats)
+
+  const playerStats = getPlayerStats()
+  const derived = getDerivedStats()
 
   if (!profile) return null
 
