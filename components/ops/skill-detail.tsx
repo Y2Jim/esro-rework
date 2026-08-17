@@ -31,7 +31,12 @@ const LOWER_IS_BETTER = new Set<SkillBonusKey>([
  */
 export function SkillDetail({ skill, onClose }: { skill: Skill; onClose: () => void }) {
   // Live totals, needed to show progress toward any stat-threshold unlock.
-  const stats = useEsroStore((s) => s.getPlayerStats())
+  // getPlayerStats() spreads a new object per call, so selecting its *result*
+  // hands useSyncExternalStore a fresh reference on every equality check and
+  // spins into "Maximum update depth exceeded". Select the getter (a stable
+  // reference) and invoke it during render, as the other call sites do.
+  const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
+  const stats = getPlayerStats()
   const mech = getSkillMechanic(skill.label)
   if (!mech) return null
 
