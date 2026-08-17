@@ -2013,7 +2013,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "voidtouched_oracle", label: "Voidtouched Oracle", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "primordial_flame", label: "Primordial Flame", rarity: "mythic", equipped: false, source: "Admin unlock" },
-      { id: "silence_between_stars", label: "Silence Between Stars", rarity: "mythic", equipped: false, source: "Admin unlock" },
+      { id: "silence_between_stars", label: "Astral Wayfarer", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "dreamer_unchained", label: "Dreamer Unchained", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "ashen_sovereign", label: "Ashen Sovereign", rarity: "mythic", equipped: false, source: "Admin unlock" },
       // Admin exclusive

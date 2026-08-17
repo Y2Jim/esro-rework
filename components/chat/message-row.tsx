@@ -9,7 +9,7 @@ const TRANSCENDENT_TITLE_ANIMATIONS: Record<string, string> = {
   "Eternal Courier": "title-eternal-courier",
   "Voidtouched Oracle": "title-voidtouched",
   "Primordial Flame": "title-primordial-flame",
-  "Silence Between Stars": "title-silence-stars",
+  "Astral Wayfarer": "title-silence-stars",
   "Dreamer Unchained": "title-dreamer-unchained",
   "Ashen Sovereign": "title-ashen-sovereign",
 }

@@ -782,7 +782,7 @@ const ALL_TITLES: { id: string; label: string; rarity: Rarity }[] = [
   { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic" },
   { id: "voidtouched_oracle", label: "Voidtouched Oracle", rarity: "mythic" },
   { id: "primordial_flame", label: "Primordial Flame", rarity: "mythic" },
-  { id: "silence_between_stars", label: "Silence Between Stars", rarity: "mythic" },
+  { id: "silence_between_stars", label: "Astral Wayfarer", rarity: "mythic" },
   { id: "dreamer_unchained", label: "Dreamer Unchained", rarity: "mythic" },
   { id: "ashen_sovereign", label: "Ashen Sovereign", rarity: "mythic" },
   // Admin - exclusive red title

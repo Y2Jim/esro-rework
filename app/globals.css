@@ -1684,7 +1684,10 @@
   display: inline-block;
 }
 
-/* Silence Between Stars - Cosmic emptiness and stellar whispers */
+/* Astral Wayfarer (.title-silence-stars) - Cosmic emptiness and stellar whispers.
+   Class and keyframe names keep the original "silence" slug: they are internal
+   identifiers referenced by the TRANSCENDENT_TITLE_ANIMATIONS maps, so renaming
+   them would be churn with no user-visible effect. */
 @keyframes silence-drift {
   0%, 100% {
     background-position: 0% 50%;
