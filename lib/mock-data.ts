@@ -1403,6 +1403,12 @@ export const profile: Profile = {
   statPoints: 14 * POINTS_PER_LEVEL,
   allocated: emptyAllocation(),
   knownRituals: [...STARTER_RITUALS],
+  // A fixed literal rather than a relative Date.now() offset: this seed is
+  // spread into the Figma capture fixtures, and a moving date would make those
+  // snapshots differ on every run. Pinned to midday UTC rather than midnight so
+  // that rendering it in local time still reads as the 9th either side of the
+  // date line, instead of slipping a day for anyone west or far east of UTC.
+  createdAt: Date.UTC(2026, 2, 9, 12),
   tokens: 320,
   vanityItems: vanityItems,
   ownedTitles: [

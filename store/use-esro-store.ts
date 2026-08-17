@@ -556,6 +556,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         handle: `@${handle}`,
         race: race,
         courier: courier,
+        // Stamped once, here, so it records when the courier was actually made
+        // rather than when the profile was last touched.
+        createdAt: Date.now(),
       },
     })
   },

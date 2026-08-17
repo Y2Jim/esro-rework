@@ -602,6 +602,13 @@ export interface Profile {
   allocated: BaseStats
   /** Ritual ids the player knows, from starters and looted books. */
   knownRituals: string[]
+  /**
+   * When the character was created, as an epoch ms timestamp. Stamped by
+   * setCharacterData. Nullable so the profile can omit the line entirely rather
+   * than invent a date for a courier that was never created; the mid-game demo
+   * seed carries a fixed backdated value.
+   */
+  createdAt: number | null
   /** Currency balance earned from expeditions and contracts */
   tokens: number
   ownedTitles: OwnedTitle[]

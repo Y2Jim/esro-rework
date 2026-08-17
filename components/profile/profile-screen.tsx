@@ -15,6 +15,23 @@ import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
 import type { RaceId, Rarity, VanityItem } from "@/lib/types"
 
+const MONTH_LABELS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+]
+
+/**
+ * Formats a creation timestamp as e.g. "9 Mar 2026".
+ *
+ * Deliberately hand-rolled instead of using toLocaleDateString: the locale
+ * formatter resolves differently on the server than in the browser, which turns
+ * this into a hydration mismatch on first paint.
+ */
+function formatCreatedAt(ts: number): string {
+  const d = new Date(ts)
+  return `${d.getDate()} ${MONTH_LABELS[d.getMonth()]} ${d.getFullYear()}`
+}
+
 type ProfileTab = "summary" | "titles" | "cosmetics" | "settings" | "notifications"
 
 const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
@@ -129,6 +146,17 @@ function SummaryTab() {
           <div className="mt-1 text-[13px] text-[color:var(--color-muted)]">
             {identity.established ? "Established identity" : "New arrival"}
           </div>
+          {/* Own line rather than an inline separator: the profile renders in a
+              narrow phone frame, where a "·" delimiter wraps and strands the dot
+              at the end of the previous line. */}
+          {profile.createdAt !== null && (
+            <div className="text-[13px] text-[color:var(--color-muted)]">
+              Courier since{" "}
+              <time dateTime={new Date(profile.createdAt).toISOString()}>
+                {formatCreatedAt(profile.createdAt)}
+              </time>
+            </div>
+          )}
         </div>
       </div>
 
