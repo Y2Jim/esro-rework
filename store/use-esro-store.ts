@@ -76,6 +76,7 @@ import {
 } from "@/lib/skill-effects"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
+import { dayKey, rotateContracts } from "@/lib/contract-rotation"
 
 export interface EsroState {
   booted: boolean
@@ -173,6 +174,11 @@ export interface EsroState {
 
   // Contracts
   contracts: Contract[]
+  /** Every contract that can be drawn; `contracts` is today's subset. */
+  contractPool: Contract[]
+  /** Local day key the current board was generated for. */
+  contractDay: string
+  rotateContractsIfStale: () => void
   acceptContract: (id: string) => void
   cancelContract: (id: string) => void
   
@@ -1087,8 +1093,24 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       },
     })),
 
-  // Contracts
-  contracts: seedContracts,
+  // Contracts — the board is the day's rotated subset of the full pool, not the
+  // whole pool. contractPool keeps every contract available to draw from.
+  contractPool: seedContracts,
+  contracts: rotateContracts(seedContracts),
+  contractDay: dayKey(),
+  /**
+   * Rolls the board to the current day if it has changed. Active and completed
+   * contracts carry over so a reset never cancels work in progress.
+   */
+  rotateContractsIfStale: () => {
+    const today = dayKey()
+    if (get().contractDay === today) return
+    const keep = get().contracts.filter((c) => c.status !== "available")
+    set({
+      contractDay: today,
+      contracts: rotateContracts(get().contractPool, new Date(), keep),
+    })
+  },
   acceptContract: (id) => {
     // Negotiation (Lorekeeping) and Appraisal raise the agreed payout at the
     // moment the contract is signed, so the bonus is locked into the terms.
@@ -1993,18 +2015,26 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Admin Contract Management
   createContract: (contract) => {
-    const { contracts } = get()
+    const { contracts, contractPool } = get()
     const newContract: Contract = {
       ...contract,
       id: `contract-${Date.now()}`,
     }
-    set({ contracts: [...contracts, newContract] })
+    // Added to both the pool (so it can be drawn on later days) and today's
+    // board (so it shows up immediately).
+    set({
+      contractPool: [...contractPool, newContract],
+      contracts: [...contracts, newContract],
+    })
     get().logAdminAction("create_contract", newContract.label, `Created ${contract.type} contract`)
   },
   deleteContract: (id) => {
-    const { contracts } = get()
-    const contract = contracts.find((c) => c.id === id)
-    set({ contracts: contracts.filter((c) => c.id !== id) })
+    const { contracts, contractPool } = get()
+    const contract = contracts.find((c) => c.id === id) ?? contractPool.find((c) => c.id === id)
+    set({
+      contractPool: contractPool.filter((c) => c.id !== id),
+      contracts: contracts.filter((c) => c.id !== id),
+    })
     if (contract) {
       get().logAdminAction("delete_contract", contract.label, "Deleted contract")
     }

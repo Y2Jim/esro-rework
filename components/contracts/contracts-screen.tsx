@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
+import { formatResetIn, msUntilNextDay } from "@/lib/contract-rotation"
 import type { ContractType } from "@/lib/types"
-import { Zap, Users, Calendar } from "lucide-react"
+import { Zap, Users, Calendar, RotateCcw } from "lucide-react"
 
 type ContractFilter = "all" | ContractType
 
@@ -32,6 +33,22 @@ export function ContractsScreen() {
   const contracts = useEsroStore((s) => s.contracts)
   const acceptContract = useEsroStore((s) => s.acceptContract)
   const cancelContract = useEsroStore((s) => s.cancelContract)
+  const rotateContractsIfStale = useEsroStore((s) => s.rotateContractsIfStale)
+
+  const [resetIn, setResetIn] = useState(() => msUntilNextDay())
+
+  // Ticks the countdown and rolls the board over when it reaches midnight while
+  // the screen is open. Also catches a stale board on mount, e.g. after the tab
+  // has been left open past midnight.
+  useEffect(() => {
+    rotateContractsIfStale()
+    const timer = setInterval(() => {
+      const remaining = msUntilNextDay()
+      setResetIn(remaining)
+      if (remaining <= 1000) rotateContractsIfStale()
+    }, 30_000)
+    return () => clearInterval(timer)
+  }, [rotateContractsIfStale])
 
   const filteredContracts = contracts.filter((c) => {
     if (filter === "all") return true
@@ -45,6 +62,10 @@ export function ContractsScreen() {
     <div className="flex h-full flex-col">
       {/* Filter tabs */}
       <div className="shrink-0 border-b border-[color:var(--color-border)] px-3 py-2">
+        <div className="mb-2 flex items-center gap-1.5 text-[13px] text-[color:var(--color-muted)]">
+          <RotateCcw className="h-3 w-3" />
+          <span>New contracts in {formatResetIn(resetIn)}</span>
+        </div>
         <div className="flex gap-1">
           {FILTER_TABS.map((tab) => (
             <button
