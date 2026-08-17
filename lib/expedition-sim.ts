@@ -111,6 +111,10 @@ export interface RunModifiers {
   firstStrike: number
   /** Bonus damage dealt per battle exchange. */
   battleDamage: number
+  /** Extra damage multiplier against an enemy that is nearly down. */
+  finishBonus: number
+  /** Chance a crew member who would be downed is spared instead. */
+  partyProtection: number
   /** Multiplier on hostile encounter frequency (negative = fewer). */
   battleFrequency: number
   /** Multiplier on hazard frequency (negative = fewer). */
@@ -144,6 +148,8 @@ function emptyMods(): RunModifiers {
     counterChance: 0,
     firstStrike: 0,
     battleDamage: 0,
+    finishBonus: 0,
+    partyProtection: 0,
     battleFrequency: 0,
     hazardFrequency: 0,
     anomalyResist: 0,
@@ -298,6 +304,10 @@ export function applySkillBonuses(
   mods.counterChance += b("counterChance")
   mods.firstStrike += b("firstStrike")
   mods.battleDamage += b("battleDamage")
+  mods.finishBonus += b("finishBonus")
+  // Several survival skills feed this, so cap it — at 100% no crew could ever be
+  // lost, which would remove all risk from a run.
+  mods.partyProtection = Math.min(0.75, mods.partyProtection + b("partyProtection"))
   mods.battleFrequency += b("battleFrequency")
   mods.hazardFrequency += b("hazardFrequency")
   mods.anomalyResist += b("anomalyResist")
@@ -446,6 +456,10 @@ export interface BattlePlan {
   counterChance: number
   /** Squad lands a free opening hit before the enemy can act (Marksmanship). */
   firstStrike: boolean
+  /** Extra damage once the enemy is nearly down (Bladecraft's Finishing Blow). */
+  finishBonus: number
+  /** Chance a crew member who would be downed is spared (Bulwark / Guardwork). */
+  partyProtection: number
 }
 
 export function planBattle(
@@ -464,7 +478,10 @@ export function planBattle(
   const counterChance = mods?.counterChance ?? 0
   const firstStrike = rng() < (mods?.firstStrike ?? 0)
 
-  const base = { bonusDamage, counterChance, firstStrike }
+  const finishBonus = mods?.finishBonus ?? 0
+  const partyProtection = mods?.partyProtection ?? 0
+
+  const base = { bonusDamage, counterChance, firstStrike, finishBonus, partyProtection }
 
   switch (outcome) {
     case "crit":

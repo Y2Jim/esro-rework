@@ -366,7 +366,16 @@ export function ActiveExpeditionView() {
     if (candidates.length === 0) return
     const target = randItem(candidates)
     const before = target.hp
-    target.hp = Math.max(0, target.hp - amount)
+    let next = Math.max(0, target.hp - amount)
+    // Bulwark/Guardwork/Field Medicine can pull someone back from a downing and
+    // leave them on their last point instead. partyProtection was advertised on
+    // those skills but never read, so it did nothing. Applied here rather than in
+    // the battle loop so hazard damage is covered too.
+    if (next === 0 && before > 0 && Math.random() < runMods.partyProtection) {
+      next = 1
+      pushFeed("battle", `${target.short} is dragged clear — still standing.`, "success")
+    }
+    target.hp = next
     target.flashUntil = Date.now() + 600
     woundedRef.current = true
     // Member just went down: freeze the loot they had secured up to this point.
@@ -497,7 +506,15 @@ export function ActiveExpeditionView() {
     // Brawling/Marksmanship bonusDamage is added here; previously every hit
     // dealt exactly 1, so those passives had no effect on battle length.
     if (Math.random() < b.plan.squadHitChance) {
-      b.hp = Math.max(0, b.hp - (1 + b.plan.bonusDamage))
+      // Finishing Blow: once the enemy is into its last third, hits land harder.
+      // finishBonus was previously computed but never read by the loop.
+      const nearlyDown = b.hp <= Math.max(1, Math.ceil(b.plan.enemyHp / 3))
+      const finisher = nearlyDown ? b.plan.finishBonus : 0
+      const dealt = 1 + b.plan.bonusDamage + finisher
+      b.hp = Math.max(0, b.hp - dealt)
+      if (nearlyDown && finisher > 0) {
+        pushFeed("battle", `Opening found — ${b.enemy} staggered.`, "success")
+      }
     }
     // Squad takes a hit based on how badly outmatched it is, unless Guardwork
     // negates the blow outright. counterChance was previously never read.

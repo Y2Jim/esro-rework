@@ -904,6 +904,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         startedAt: Date.now(),
         rituals,
       },
+      // The staged set has been copied onto the run, so release it now. Clearing
+      // only on completion let a cancelled run leak its selection into the next
+      // launch that relies on the preparedRituals fallback.
+      preparedRituals: [],
     })
   },
   cancelExpedition: () => {
@@ -2061,9 +2065,6 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
 
     if (learnedBook) get().learnRitual(learnedBook)
-
-    // Prepped rituals are consumed by the run.
-    set({ preparedRituals: [] })
   },
   
   // Admin/Debug - inject test chat messages with all title rarities to PUBLIC channel

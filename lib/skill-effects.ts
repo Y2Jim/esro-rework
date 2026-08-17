@@ -41,7 +41,6 @@ export type SkillBonusKey =
   | "maxHpBonus" // extra crew HP pool
   | "badfailDowngrade" // chance a catastrophic failure becomes an ordinary one
   | "partyProtection" // chance a downed party member is spared
-  | "recoveryRate" // post-run crew healing speed
   // --- Combat resolution ---
   | "critChance"
   | "counterChance" // negate an incoming exchange
@@ -69,7 +68,6 @@ export type SkillBonusKey =
   | "xpBonus"
   | "contractReward"
   | "factionContribution"
-  | "sellValue"
   | "rollLuck" // rarity weighting in the rolling pool
   | "hiddenRoute"
   | "runDuration" // negative = faster expeditions
@@ -293,7 +291,9 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     summary: "Shortens expeditions and blunts fatigue. Heavier packs, longer marches.",
     hooks: [
       { id: "marching", effect: "runDuration", perLevel: -0.006, detail: "Faster expedition legs" },
-      { id: "recovery", effect: "recoveryRate", perLevel: 0.02, detail: "Quicker crew recovery after a run" },
+      // Was `recoveryRate`. There is no post-run healing timer to speed up, so it
+      // never did anything; a tougher crew is the same promise the system can keep.
+      { id: "recovery", effect: "maxHpBonus", perLevel: 0.5, detail: "Hardier crew, more HP" },
       { id: "loadbearing", effect: "carryCapacity", perLevel: 0.2, detail: "Extra loot slots per run" },
     ],
     breakpoints: [
@@ -308,7 +308,9 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     hooks: [
       { id: "triage", effect: "badfailDowngrade", perLevel: 0.03, detail: "Chance a critical failure is downgraded" },
       { id: "stabilization", effect: "damageReduction", perLevel: 0.1, detail: "Wounds shaved off failed checks" },
-      { id: "remedies", effect: "recoveryRate", perLevel: 0.025, detail: "Faster post-run healing" },
+      // Was `recoveryRate`, which nothing read. Repointed to partyProtection so
+      // "gets the crew back on their feet" happens where it matters — mid-run.
+      { id: "remedies", effect: "partyProtection", perLevel: 0.02, detail: "Chance to keep a falling ally up" },
     ],
     breakpoints: [
       { level: 5, unlock: "field_surgery", label: "Field Surgery", detail: "Revive a downed crew member mid-run" },
@@ -327,7 +329,8 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
       { id: "harnessing", effect: "materialYield", perLevel: 0.015, detail: "More hauled back per haul" },
     ],
     breakpoints: [
-      { level: 5, unlock: "pack_beasts", label: "First Saddle", detail: "Pack animal adds a loot slot per run" },
+      // Label kept in pack-animal terms: there is no mount system to ride.
+      { level: 5, unlock: "pack_beasts", label: "First Beast", detail: "Pack animal adds a loot slot per run" },
       { level: 10, unlock: "pack_train", label: "Pack Train", detail: "A second animal adds two more slots" },
     ],
   },
@@ -449,11 +452,13 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Scavenging",
     linkedStat: "luck",
-    summary: "Spots what others walked past, and gets a better price for it.",
+    summary: "Spots what others walked past, and strips more out of every find.",
     hooks: [
       { id: "spotting", effect: "discoveryScore", perLevel: 0.02, detail: "Higher discovery check scores" },
       { id: "extraction", effect: "bonusLoot", perLevel: 0.02, detail: "Chance of bonus loot" },
-      { id: "haggling", effect: "sellValue", perLevel: 0.02, detail: "Better prices when selling" },
+      // Was `sellValue`, but there is no market or selling system to price into.
+      // Repointed to salvageYield, which keeps the "worth more per find" idea.
+      { id: "haggling", effect: "salvageYield", perLevel: 0.02, detail: "More stripped from each find" },
     ],
     breakpoints: [
       { level: 5, unlock: "deep_ruins", label: "Ruin Crawler", detail: "Search the deep ruin levels" },
