@@ -74,7 +74,7 @@ import {
   skillIdFromName,
   type SkillBonuses,
 } from "@/lib/skill-effects"
-import { FISHING_SPOTS, JUNK, fishToItem, getFish } from "@/config/fishing"
+import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
 
 export interface EsroState {
   booted: boolean
@@ -162,8 +162,8 @@ export interface EsroState {
   fishing: FishingState
   /** Drop the line at a spot. Returns false if the spot is still locked. */
   castLine: (spotId: string) => boolean
-  /** Internal: a fish has taken the bait and the hook window is open. */
-  triggerBite: (fishId: string) => void
+  /** A fish has taken the bait; the store picks which one and opens the window. */
+  triggerBite: () => void
   /** Player struck. Lands the catch if the window is still open. */
   setHook: () => void
   /** Window closed without a strike, or the player reeled in early. */
@@ -996,9 +996,20 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     return true
   },
 
-  triggerBite: (fishId) => {
-    const fish = getFish(fishId)
-    if (!fish) return
+  triggerBite: () => {
+    const { fishing } = get()
+    if (fishing.phase !== "casting" || !fishing.spotId) return
+
+    const spot = FISHING_SPOTS.find((s) => s.id === fishing.spotId)
+    if (!spot) return
+
+    // Pick what bit here in the store, not in the view: the component only
+    // reports "a bite happened", so it can never nominate its own rare fish.
+    // Rollcraft/Lorekeeping luck also biases the fishing table toward rarity.
+    const luck = get().getSkillBonuses().rollLuck
+    const fish =
+      Math.random() < spot.junkChance ? JUNK : pickFish(spot, luck, Math.random)
+    const fishId = fish.id
 
     // Casting (Tension) widens the strike window, so a trained angler gets a
     // more forgiving reaction test on the same fish.

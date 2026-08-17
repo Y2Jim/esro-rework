@@ -7,6 +7,7 @@ import { MapTab } from "./map-tab"
 import { ExpeditionsTab } from "./expeditions-tab"
 import { SkillsTab } from "./skills-tab"
 import { CraftingTab } from "./crafting-tab"
+import { FishingTab } from "./fishing-tab"
 import { RollingTab } from "./rolling-tab"
 import { ActiveExpeditionView } from "@/components/expedition/active-expedition-view"
 
@@ -15,6 +16,7 @@ const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: s
   { id: "expeditions", label: "Expeditions", icon: "▷", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
   { id: "skills", label: "Skills", icon: "◆", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
   { id: "crafting", label: "Crafting", icon: "⬢", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+  { id: "fishing", label: "Fishing", icon: "≈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
   { id: "rolling", label: "Rolling", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
 ]
 
@@ -60,6 +62,7 @@ export function OpsScreen() {
         {opsTab === "expeditions" && <ExpeditionsTab />}
         {opsTab === "skills" && <SkillsTab />}
         {opsTab === "crafting" && <CraftingTab />}
+        {opsTab === "fishing" && <FishingTab />}
         {opsTab === "rolling" && <RollingTab />}
       </div>
     </div>
