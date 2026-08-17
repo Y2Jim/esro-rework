@@ -20,7 +20,7 @@ import {
   type CheckOutcome,
   type ExpEventType,
 } from "@/lib/expedition-sim"
-import { aggregateSkillBonuses, skillPassiveList } from "@/lib/skill-effects"
+import { aggregateSkillBonuses, getSkillUnlocks, skillPassiveList } from "@/lib/skill-effects"
 import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 
 /** Sped-up run length (seconds of viewing time) and tick cadence. */
@@ -198,6 +198,9 @@ export function ActiveExpeditionView() {
   const characterRace = useEsroStore((s) => s.characterRace)
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const skills = useEsroStore((s) => s.skills)
+  // Selected as raw state (not via getSkillUnlocks(), which builds a new Set on
+  // every call and would hand zustand a fresh snapshot each render).
+  const debugUnlocks = useEsroStore((s) => s.debugUnlocks)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
 
@@ -260,19 +263,22 @@ export function ActiveExpeditionView() {
   // Rituals prepped at launch are stored on the run itself, so they stay fixed
   // for its duration even if the player's Focus or known list changes mid-run.
   const runRituals = activeExpedition?.rituals
-  const runMods = useMemo(
-    () =>
-      applySkillBonuses(
-        getRunModifiers(
-          characterRace?.id as RaceId | undefined,
-          characterFaction?.id as RaceId | undefined,
-          runRituals,
-        ),
-        aggregateSkillBonuses(skills),
-        skillPassiveList(skills),
+  const runMods = useMemo(() => {
+    // Earned breakpoint unlocks plus any forced via admin dev tools, mirroring
+    // the store's getSkillUnlocks() so a devtools toggle affects a live run.
+    const unlocks = getSkillUnlocks(skills, getPlayerStats())
+    for (const id of debugUnlocks) unlocks.add(id)
+    return applySkillBonuses(
+      getRunModifiers(
+        characterRace?.id as RaceId | undefined,
+        characterFaction?.id as RaceId | undefined,
+        runRituals,
       ),
-    [characterRace?.id, characterFaction?.id, skills, runRituals],
-  )
+      aggregateSkillBonuses(skills),
+      skillPassiveList(skills),
+      unlocks,
+    )
+  }, [characterRace?.id, characterFaction?.id, skills, runRituals, debugUnlocks, getPlayerStats])
 
   // Pathfinding (Marching), Conditioning (Survival) and Gathering (Harvesting)
   // shorten the run. runDuration is negative for faster, so it is added. Floored
@@ -310,6 +316,12 @@ export function ActiveExpeditionView() {
   const woundedRef = useRef(false)
   // Whether the entire squad was defeated (all hp 0) before reaching the end.
   const wipedRef = useRef(false)
+  // `field_surgery` is a once-per-run save, so it needs run-scoped state.
+  const fieldSurgeryUsedRef = useRef(false)
+  // Rare/rich finds and clean-harvest extras, surfaced in the run summary.
+  const rareFindsRef = useRef(0)
+  const richFindsRef = useRef(0)
+  const cleanHarvestsRef = useRef(0)
 
   // Reset all sim state when a new expedition starts.
   useEffect(() => {
@@ -329,6 +341,10 @@ export function ActiveExpeditionView() {
     hiddenRoutesRef.current = 0
     woundedRef.current = false
     wipedRef.current = false
+    fieldSurgeryUsedRef.current = false
+    rareFindsRef.current = 0
+    richFindsRef.current = 0
+    cleanHarvestsRef.current = 0
     timelineRef.current = buildTimeline(risk, initialCrew)
     phaseRef.current = "running"
     setPhase("running")
@@ -374,6 +390,17 @@ export function ActiveExpeditionView() {
     if (next === 0 && before > 0 && Math.random() < runMods.partyProtection) {
       next = 1
       pushFeed("battle", `${target.short} is dragged clear — still standing.`, "success")
+    }
+    // Field Medicine's `field_surgery` breakpoint: one guaranteed save per run,
+    // checked only after partyProtection has already failed its roll.
+    if (next === 0 && before > 0 && runMods.unlocks.has("field_surgery") && !fieldSurgeryUsedRef.current) {
+      fieldSurgeryUsedRef.current = true
+      next = 2
+      pushFeed(
+        "battle",
+        `${target.short} is stabilized on the spot — field surgery holds them together.`,
+        "success",
+      )
     }
     target.hp = next
     target.flashUntil = Date.now() + 600
@@ -470,7 +497,26 @@ export function ActiveExpeditionView() {
         lootUnitsRef.current += result.bonusLoot ? 2 : 1
         const base = ev.text ?? "Cache located."
         const bonus = result.bonusLoot ? " Veiled instincts turn up an extra haul." : ""
-        pushFeed("discovery", `${base}${bonus} (${clause})`, result.outcome)
+        // rareFind was computed by the sim but never read, so Appraisal and
+        // Prospecting had no visible payoff. `rare_nodes` promotes it further.
+        let tier = ""
+        if (result.richFind) {
+          richFindsRef.current += 1
+          lootUnitsRef.current += 2
+          tier = " The seam runs deep — a rare-node yield, richer than anything on the manifest."
+        } else if (result.rareFind) {
+          rareFindsRef.current += 1
+          lootUnitsRef.current += 1
+          tier = " The find appraises a tier above expectation."
+        }
+        // quality_harvest: node worked clean, so it gives up one more unit.
+        let clean = ""
+        if (result.extraYield) {
+          cleanHarvestsRef.current += 1
+          lootUnitsRef.current += 1
+          clean = " Worked clean — the node gives up an extra unit."
+        }
+        pushFeed("discovery", `${base}${bonus}${tier}${clean} (${clause})`, result.outcome)
       } else {
         pushFeed("discovery", `Cache picked clean — nothing recoverable. (${clause})${delayNote}`, result.outcome)
       }

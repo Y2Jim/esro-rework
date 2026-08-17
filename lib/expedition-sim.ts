@@ -1,5 +1,6 @@
 import type { BaseStats, RaceId } from "./types"
 import { getRituals } from "./rituals"
+import type { SkillUnlockId } from "./skill-effects"
 
 /**
  * Pure simulation helpers for the active expedition view.
@@ -133,6 +134,17 @@ export interface RunModifiers {
   runDuration: number
   /** Multiplier on XP earned. */
   xpBonus: number
+
+  /**
+   * Skill-tree content unlocks active for this run.
+   *
+   * Every behavior keyed off this set is strictly *additive*: when an id is
+   * absent the sim must run exactly as it did before the unlock existed. In
+   * particular, any new `rng()` draw has to live **inside** the unlock guard —
+   * an unconditional draw would shift the random stream and silently change
+   * every downstream outcome even with the unlock off.
+   */
+  unlocks: ReadonlySet<SkillUnlockId>
 }
 
 function emptyMods(): RunModifiers {
@@ -159,6 +171,7 @@ function emptyMods(): RunModifiers {
     salvageYield: 0,
     runDuration: 0,
     xpBonus: 0,
+    unlocks: new Set(),
   }
 }
 
@@ -287,8 +300,12 @@ export function applySkillBonuses(
   mods: RunModifiers,
   bonuses: Partial<Record<string, number>>,
   skillPassives: ActivePassive[] = [],
+  /** Content unlocks earned from skill breakpoints. Optional so existing
+   *  callers (and the no-unlock baseline) keep their exact behavior. */
+  unlocks: Iterable<SkillUnlockId> = [],
 ): RunModifiers {
   const b = (k: string) => bonuses[k] ?? 0
+  mods.unlocks = new Set(unlocks)
 
   addBonus(mods, "battle", b("battleScore"))
   addBonus(mods, "hazard", b("hazardScore"))
@@ -356,7 +373,16 @@ export interface ResolveResult {
   hiddenRoute: boolean
   /** Appraisal/Prospecting upgraded the find to a rarer tier. */
   rareFind: boolean
+  /** `rare_nodes`: the node held a tier above an ordinary rare find. */
+  richFind: boolean
+  /** `quality_harvest`: the node was worked clean and gave an extra unit. */
+  extraYield: boolean
 }
+
+/** Chance `rare_nodes` promotes an already-rare find to the richest tier. */
+const RARE_NODE_UPGRADE = 0.35
+/** Chance `quality_harvest` yields one additional unit from a clean node. */
+const CLEAN_HARVEST_CHANCE = 0.4
 
 /**
  * Resolve a single event as a stat check. Returns the outcome plus any
@@ -377,6 +403,8 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
     bonusLoot: false,
     hiddenRoute: false,
     rareFind: false,
+    richFind: false,
+    extraYield: false,
   }
 
   if (!check) return base // rest: no check, always fine
@@ -418,6 +446,14 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
       result.bonusLoot = outcome === "crit" || rng() < mods.bonusLootChance
       // Gathering (Appraisal) / Scavenging (Prospecting) upgrade the tier.
       result.rareFind = rng() < mods.rareChance
+      // Both draws below are deliberately inside their unlock guard: an
+      // unconditional rng() here would shift the stream for every locked run.
+      if (result.rareFind && mods.unlocks.has("rare_nodes")) {
+        result.richFind = rng() < RARE_NODE_UPGRADE
+      }
+      if (mods.unlocks.has("quality_harvest")) {
+        result.extraYield = rng() < CLEAN_HARVEST_CHANCE
+      }
     }
   } else if (type === "travel") {
     if (passed) {
