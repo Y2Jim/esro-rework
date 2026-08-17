@@ -760,6 +760,7 @@ export type AdminAction =
   | "unlock_cosmetics"
   | "unlock_titles"
   | "edit_player"
+  | "debug_unlock"
 
 export interface AdminLog {
   id: string

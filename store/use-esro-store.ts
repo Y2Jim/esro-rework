@@ -73,6 +73,7 @@ import {
   getSkillUnlocks,
   skillIdFromName,
   type SkillBonuses,
+  type SkillUnlockId,
 } from "@/lib/skill-effects"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
@@ -147,6 +148,10 @@ export interface EsroState {
   /** Content unlocked by skill tier breakpoints (levels 5 / 10 / 15). */
   getSkillUnlocks: () => Set<string>
   hasSkillUnlock: (id: string) => boolean
+  /** Unlock ids forced on via admin dev tools, bypassing the skill requirement. */
+  debugUnlocks: SkillUnlockId[]
+  toggleDebugUnlock: (id: SkillUnlockId) => void
+  clearDebugUnlocks: () => void
 
   // Ops - Crafting/Rolling
   inventory: InventoryItem[]
@@ -577,9 +582,35 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   getSkillBonuses: () => aggregateSkillBonuses(get().skills),
 
   /** Content unlocked by skill tier breakpoints (levels 5 / 10 / 15). */
-  getSkillUnlocks: () => getSkillUnlocks(get().skills),
+  getSkillUnlocks: () => {
+    const earned = getSkillUnlocks(get().skills)
+    // Admin/debug forces are merged in here rather than at each call site, so a
+    // single toggle covers every gate that reads hasSkillUnlock.
+    for (const id of get().debugUnlocks) earned.add(id)
+    return earned
+  },
 
   hasSkillUnlock: (id) => get().getSkillUnlocks().has(id),
+
+  debugUnlocks: [],
+  toggleDebugUnlock: (id) => {
+    const active = get().debugUnlocks.includes(id)
+    set({
+      debugUnlocks: active
+        ? get().debugUnlocks.filter((u) => u !== id)
+        : [...get().debugUnlocks, id],
+    })
+    get().logAdminAction(
+      "debug_unlock",
+      id,
+      active ? `Cleared forced unlock ${id}` : `Forced unlock ${id}`
+    )
+  },
+  clearDebugUnlocks: () => {
+    if (get().debugUnlocks.length === 0) return
+    set({ debugUnlocks: [] })
+    get().logAdminAction("debug_unlock", undefined, "Cleared all forced unlocks")
+  },
   
   getStatBonus: (stat) => {
     const stats = get().getPlayerStats()
