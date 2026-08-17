@@ -194,29 +194,43 @@ const CANDIDATES: Candidate[] = [
     layer: "accessory",
     rarity: "epic",
     anchor: "rest",
-    sealRows: [4],
+    // Rows 4-6 fully sealed: an epic must out-read the rare below it, and the
+    // first pass failed that — a thin brow band looked like a headband next to
+    // Currentweave's full lower-face weave. This is a wraparound visor instead.
+    sealRows: [4, 5, 6],
     draw: (g) => {
-      const frame = "#1a1d2b"
-      const glass = "#2b4a7a"
-      const arc = "#a8dcff"
+      const frame = "#141826"
+      const glassDeep = "#1d3557"
+      const glass = "#2f6ba8"
+      const arc = "#8fd4ff"
       const hot = "#ffffff"
-      // Brow emitter fits row 3's narrowest extent (round = 4-9).
+      // Brow ridge, narrow enough for round's row-3 extent (4-9).
       hline(g, 4, 9, 3, frame)
       px(g, 6, 3, arc)
       px(g, 7, 3, arc)
+      // Visor body spans the union on 5-6 so the wider oval cannot peek through.
       hline(g, 3, 10, 4, frame)
-      px(g, 6, 4, hot)
-      px(g, 7, 4, hot)
-      px(g, 3, 5, frame)
-      px(g, 4, 5, glass)
-      px(g, 5, 5, glass)
+      px(g, 4, 4, glassDeep)
+      px(g, 9, 4, glassDeep)
+      hline(g, 2, 11, 5, glassDeep)
+      px(g, 2, 5, frame)
+      px(g, 11, 5, frame)
+      px(g, 4, 5, arc)
+      px(g, 5, 5, hot)
       px(g, 6, 5, arc)
       px(g, 7, 5, arc)
-      px(g, 8, 5, glass)
-      px(g, 9, 5, glass)
-      px(g, 10, 5, frame)
-      px(g, 3, 6, arc)
-      px(g, 10, 6, arc)
+      px(g, 8, 5, hot)
+      px(g, 9, 5, arc)
+      hline(g, 2, 11, 6, glass)
+      px(g, 2, 6, frame)
+      px(g, 11, 6, frame)
+      px(g, 5, 6, glassDeep)
+      px(g, 6, 6, arc)
+      px(g, 7, 6, arc)
+      px(g, 8, 6, glassDeep)
+      // Chin vents hint at a sealed rig without covering the mouth.
+      px(g, 3, 7, frame)
+      px(g, 10, 7, frame)
     },
   },
   {
@@ -336,16 +350,25 @@ const CANDIDATES: Candidate[] = [
     draw: (g) => {
       const strap = "#3a3f4a"
       const metal = "#7b8290"
-      const bulb = "#ffd98a"
+      const metalHi = "#aab2c0"
+      const bulb = "#ffc861"
       const glow = "#fff4d0"
+      // Headband.
       hline(g, 4, 9, 1, strap)
       hline(g, 4, 9, 2, strap)
-      px(g, 5, 2, metal)
-      px(g, 8, 2, metal)
-      px(g, 5, 3, metal)
+      px(g, 4, 2, metal)
+      px(g, 9, 2, metal)
+      // Lantern housing, offset to one side so it reads as a mounted lamp rather
+      // than a symmetrical band. The bulb is 2x2 with a highlight: the first pass
+      // used single pixels and the lantern — the whole concept — vanished at 28px.
+      px(g, 5, 0, metal)
+      px(g, 6, 0, metalHi)
+      px(g, 5, 1, metalHi)
+      px(g, 6, 1, glow)
+      px(g, 5, 2, bulb)
+      px(g, 6, 2, glow)
+      px(g, 5, 3, bulb)
       px(g, 6, 3, bulb)
-      px(g, 7, 3, glow)
-      px(g, 8, 3, metal)
     },
   },
   {
@@ -852,12 +875,104 @@ function cmdExisting(layer: AvatarLayerType, list: string) {
   console.log("row order: " + variants.join(", "))
 }
 
+/**
+ * Hats draw AFTER accessories (layer order in renderAvatarPixels), so a hat
+ * silently overwrites accessory pixels in the rows they share. This measures how
+ * much of each accessory's art survives under each hat, and flags the case that
+ * actually matters: a signature feature being erased so the accessory reads as
+ * broken rather than layered.
+ */
+function cmdStack() {
+  const accessories = CANDIDATES.filter((c) => c.layer === "accessory")
+  const hats = CANDIDATES.filter((c) => c.layer === "hat")
+  const base = render(0, 0, "accessory", 0)
+
+  console.log("Accessory pixel survival under each candidate hat (round head, bald):\n")
+  const header = ["accessory".padEnd(22), ...hats.map((h) => h.label.slice(0, 13).padEnd(14))].join("")
+  console.log(header)
+  console.log("-".repeat(header.length))
+
+  const worst: string[] = []
+  for (const acc of accessories) {
+    const accGrid = cloneGrid(base)
+    acc.draw(accGrid)
+    const accPx = diffPixels(base, accGrid)
+    const cells: string[] = []
+    for (const hat of hats) {
+      const both = cloneGrid(base)
+      acc.draw(both)
+      hat.draw(both)
+      // Accessory pixels still showing the accessory's colour after the hat drew.
+      const survived = accPx.filter(([x, y]) => both[y][x] === accGrid[y][x]).length
+      const pct = Math.round((survived / accPx.length) * 100)
+      cells.push(`${pct}%`.padEnd(14))
+      if (pct < 70) worst.push(`${acc.label} under ${hat.label}: only ${pct}% survives`)
+    }
+    console.log(acc.label.slice(0, 21).padEnd(22) + cells.join(""))
+  }
+
+  console.log("\nCombos losing >30% of the accessory:")
+  if (worst.length === 0) console.log("  none — every accessory stays legible under every hat")
+  else for (const w of worst) console.log("  " + w)
+
+  // Visual sheet of the riskiest combos: tall accessories under tall hats.
+  const sheetRows: Grid[][] = []
+  const labels: string[] = []
+  for (const acc of accessories) {
+    for (const hat of hats) {
+      const cells: Grid[] = []
+      for (const head of HEADS) {
+        const g = render(head.variant, 0, "accessory", 0)
+        acc.draw(g)
+        hat.draw(g)
+        cells.push(g)
+      }
+      sheetRows.push(cells)
+      labels.push(`${acc.label} + ${hat.label}`)
+    }
+  }
+  const out = "/tmp/agent-browser/cosmetics-stacked.png"
+  fs.mkdirSync(path.dirname(out), { recursive: true })
+  fs.writeFileSync(out, contactSheet(sheetRows, 6))
+  console.log(`\ncontact sheet: ${out}`)
+  console.log(`${labels.length} combos, row order (round/square/oval each):`)
+  labels.forEach((l, i) => console.log(`  ${i + 1}. ${l}`))
+}
+
+/**
+ * Renders at the scales the UI actually uses, to confirm the art still reads
+ * when it is not blown up 10x. Anything that turns to mush here is too fussy
+ * regardless of how good the large version looks.
+ */
+function cmdSmall() {
+  const sheetRows: Grid[][] = []
+  for (const c of CANDIDATES) {
+    const cells: Grid[] = []
+    for (const head of HEADS) {
+      const g = render(head.variant, 0, c.layer, 0)
+      c.draw(g)
+      cells.push(g)
+    }
+    sheetRows.push(cells)
+  }
+  for (const scale of [2, 3, 5]) {
+    const out = `/tmp/agent-browser/cosmetics-small-${scale}x.png`
+    fs.mkdirSync(path.dirname(out), { recursive: true })
+    fs.writeFileSync(out, contactSheet(sheetRows, scale, 1))
+    console.log(`${GRID * scale}px sheet: ${out}`)
+  }
+  console.log("\nrow order:")
+  CANDIDATES.forEach((c, i) => console.log(`  ${i + 1}. ${c.label} [${c.rarity}] ${c.layer}`))
+}
+
 const [cmd, a, b] = process.argv.slice(2)
 if (cmd === "masks") cmdMasks()
 else if (cmd === "candidates") cmdCandidates()
+else if (cmd === "stack") cmdStack()
+else if (cmd === "small") cmdSmall()
 else if (cmd === "existing") cmdExisting((a as AvatarLayerType) ?? "accessory", b ?? "1")
 else {
-  console.log("commands: masks | candidates | existing <layer> <variants>")
+  console.log("commands: masks | candidates | stack | small | existing <layer> <variants>")
 }
 
 export { CANDIDATES }

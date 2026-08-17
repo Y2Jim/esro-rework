@@ -1376,6 +1376,22 @@ export const vanityItems: VanityItem[] = [
   { id: "v62", label: "Eternal Courier's Light", layerType: "flair", variant: 15, rarity: "mythic", unlocked: false, equipped: false },
   { id: "v63", label: "Voidtouched Presence", layerType: "flair", variant: 16, rarity: "mythic", unlocked: false, equipped: false },
   { id: "v64", label: "Primordial Resonance", layerType: "flair", variant: 17, rarity: "mythic", unlocked: false, equipped: false },
+
+  // Tidal Set - accessories, one per rarity tier
+  { id: "v65", label: "Tide Goggles", layerType: "accessory", variant: 22, rarity: "common", unlocked: false, equipped: false },
+  { id: "v66", label: "Ashfall Veil", layerType: "accessory", variant: 23, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v67", label: "Currentweave Mask", layerType: "accessory", variant: 24, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v68", label: "Stormglass Lens", layerType: "accessory", variant: 25, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v69", label: "Leviathan's Regard", layerType: "accessory", variant: 26, rarity: "legendary", unlocked: false, equipped: false },
+  { id: "v70", label: "Tidecaller's Visage", layerType: "accessory", variant: 27, rarity: "mythic", unlocked: false, equipped: false },
+
+  // Tidal Set - hats, one per rarity tier
+  { id: "v71", label: "Reed Hat", layerType: "hat", variant: 24, rarity: "common", unlocked: false, equipped: false },
+  { id: "v72", label: "Lantern Rig", layerType: "hat", variant: 25, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v73", label: "Deepline Coil", layerType: "hat", variant: 26, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v74", label: "Stormglass Crown", layerType: "hat", variant: 27, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v75", label: "Kelpwarden Wreath", layerType: "hat", variant: 28, rarity: "legendary", unlocked: false, equipped: false },
+  { id: "v76", label: "Abyssal Diadem", layerType: "hat", variant: 29, rarity: "mythic", unlocked: false, equipped: false },
 ]
 
 export const profile: Profile = {

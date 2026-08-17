@@ -86,8 +86,8 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   eyes: 6,
   mouth: 5,       // Neutral, Smirk, Frown, Open, Masked
   hair: 10,       // increased hair options
-  accessory: 22,  // 0=none, 1-16 standard, 17-21 mythic
-  hat: 24,        // 0=none, 1-18 standard, 19-23 mythic
+  accessory: 28,  // 0=none, 1-16 standard, 17-21 mythic, 22-27 tidal set
+  hat: 30,        // 0=none, 1-18 standard, 19-23 mythic, 24-29 tidal set
   flair: 18,      // 0=none, 1-12 standard, 13-17 mythic
 }
 
@@ -691,6 +691,170 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 7, 4, voidBlack)
     setPixel(grid, 6, 5, runeAncient)
     setPixel(grid, 7, 5, runeAncient)
+  } else if (accVariant === 22) {
+    // Tide Goggles (common) - strap sits on row 4, the one row all three head
+    // shapes span identically (x 3-10), so it seats cleanly on every silhouette
+    const frame = "#22262e"
+    const glass = "#4fb3a0"
+    const shine = "#9fe8d8"
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 4, frame)
+    setPixel(grid, 3, 5, frame)
+    setPixel(grid, 4, 5, shine)
+    setPixel(grid, 5, 5, glass)
+    setPixel(grid, 6, 5, frame)
+    setPixel(grid, 7, 5, frame)
+    setPixel(grid, 8, 5, shine)
+    setPixel(grid, 9, 5, glass)
+    setPixel(grid, 10, 5, frame)
+  } else if (accVariant === 23) {
+    // Ashfall Veil (uncommon) - cloth tied at the temples, draping to a point
+    const cloth = "#6f6558"
+    const fold = "#52483d"
+    const dust = "#8d8375"
+    setPixel(grid, 3, 6, fold)
+    setPixel(grid, 10, 6, fold)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 7, cloth)
+    setPixel(grid, 5, 7, fold)
+    setPixel(grid, 8, 7, fold)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 8, cloth)
+    setPixel(grid, 4, 8, fold)
+    setPixel(grid, 9, 8, fold)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 9, cloth)
+    setPixel(grid, 6, 9, dust)
+    setPixel(grid, 7, 9, dust)
+    setPixel(grid, 6, 10, fold)
+    setPixel(grid, 7, 10, fold)
+  } else if (accVariant === 24) {
+    // RARE: Currentweave Mask - woven lower-face mask with threaded highlights
+    const deep = "#1f3a44"
+    const weave = "#2f6b6f"
+    const thread = "#55a89a"
+    const crest = "#a8e6d4"
+    setPixel(grid, 3, 5, deep)
+    setPixel(grid, 10, 5, deep)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 6, deep)
+    setPixel(grid, 5, 6, crest)
+    setPixel(grid, 8, 6, crest)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 7, weave)
+    setPixel(grid, 4, 7, thread)
+    setPixel(grid, 6, 7, thread)
+    setPixel(grid, 8, 7, thread)
+    setPixel(grid, 10, 7, thread)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 8, deep)
+    setPixel(grid, 5, 8, thread)
+    setPixel(grid, 7, 8, thread)
+    setPixel(grid, 9, 8, thread)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 9, weave)
+    setPixel(grid, 5, 9, crest)
+    setPixel(grid, 8, 9, crest)
+    setPixel(grid, 6, 10, deep)
+    setPixel(grid, 7, 10, deep)
+  } else if (accVariant === 25) {
+    // EPIC: Stormglass Lens - wraparound visor. Rows 5-6 span the union extent
+    // (x 2-11) so the wider oval head cannot peek through at the temples
+    const frame = "#141826"
+    const glassDeep = "#1d3557"
+    const glass = "#2f6ba8"
+    const arc = "#8fd4ff"
+    const hot = "#ffffff"
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 3, frame)
+    setPixel(grid, 6, 3, arc)
+    setPixel(grid, 7, 3, arc)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 4, frame)
+    setPixel(grid, 4, 4, glassDeep)
+    setPixel(grid, 9, 4, glassDeep)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 5, glassDeep)
+    setPixel(grid, 2, 5, frame)
+    setPixel(grid, 11, 5, frame)
+    setPixel(grid, 4, 5, arc)
+    setPixel(grid, 5, 5, hot)
+    setPixel(grid, 6, 5, arc)
+    setPixel(grid, 7, 5, arc)
+    setPixel(grid, 8, 5, hot)
+    setPixel(grid, 9, 5, arc)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 6, glass)
+    setPixel(grid, 2, 6, frame)
+    setPixel(grid, 11, 6, frame)
+    setPixel(grid, 5, 6, glassDeep)
+    setPixel(grid, 6, 6, arc)
+    setPixel(grid, 7, 6, arc)
+    setPixel(grid, 8, 6, glassDeep)
+    setPixel(grid, 3, 7, frame)
+    setPixel(grid, 10, 7, frame)
+  } else if (accVariant === 26) {
+    // LEGENDARY: Leviathan's Regard - scaled plate with gill slits and gold crest.
+    // Crest tip lands on x 6-7 at row 2, the only span the narrow round head
+    // occupies there, so it stays anchored on all three shapes
+    const scaleDark = "#11313a"
+    const plate = "#1d5a63"
+    const edge = "#37a08e"
+    const glow = "#9ffff0"
+    const gold = "#d8b45a"
+    setPixel(grid, 6, 2, gold)
+    setPixel(grid, 7, 2, gold)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 3, plate)
+    setPixel(grid, 6, 3, gold)
+    setPixel(grid, 7, 3, gold)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 4, scaleDark)
+    setPixel(grid, 4, 4, edge)
+    setPixel(grid, 9, 4, edge)
+    setPixel(grid, 3, 5, scaleDark)
+    setPixel(grid, 4, 5, glow)
+    setPixel(grid, 5, 5, glow)
+    setPixel(grid, 6, 5, scaleDark)
+    setPixel(grid, 7, 5, scaleDark)
+    setPixel(grid, 8, 5, glow)
+    setPixel(grid, 9, 5, glow)
+    setPixel(grid, 10, 5, scaleDark)
+    setPixel(grid, 3, 6, edge)
+    setPixel(grid, 4, 6, plate)
+    setPixel(grid, 9, 6, plate)
+    setPixel(grid, 10, 6, edge)
+    setPixel(grid, 3, 7, edge)
+    setPixel(grid, 10, 7, edge)
+    setPixel(grid, 3, 8, scaleDark)
+    setPixel(grid, 10, 8, scaleDark)
+  } else if (accVariant === 27) {
+    // MYTHIC: Tidecaller's Visage - full-face mask. Rows 5-8 span the union
+    // extent so no head shape leaks skin through the covering
+    const abyss = "#0b2030"
+    const deep = "#14415e"
+    const tide = "#2b7fa8"
+    const foam = "#7fd0e8"
+    const crest = "#d8f6ff"
+    for (let x = 5; x <= 8; x++) setPixel(grid, x, 2, crest)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 3, deep)
+    setPixel(grid, 6, 3, crest)
+    setPixel(grid, 7, 3, crest)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 4, abyss)
+    setPixel(grid, 4, 4, tide)
+    setPixel(grid, 9, 4, tide)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 5, deep)
+    setPixel(grid, 2, 5, tide)
+    setPixel(grid, 11, 5, tide)
+    setPixel(grid, 4, 5, foam)
+    setPixel(grid, 5, 5, foam)
+    setPixel(grid, 6, 5, abyss)
+    setPixel(grid, 7, 5, abyss)
+    setPixel(grid, 8, 5, foam)
+    setPixel(grid, 9, 5, foam)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 6, tide)
+    setPixel(grid, 5, 6, crest)
+    setPixel(grid, 8, 6, crest)
+    setPixel(grid, 6, 6, deep)
+    setPixel(grid, 7, 6, deep)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 7, deep)
+    setPixel(grid, 4, 7, foam)
+    setPixel(grid, 9, 7, foam)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 8, tide)
+    setPixel(grid, 2, 8, deep)
+    setPixel(grid, 11, 8, deep)
+    for (let x = 5; x <= 8; x++) setPixel(grid, x, 8, abyss)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 9, deep)
+    setPixel(grid, 6, 9, foam)
+    setPixel(grid, 7, 9, foam)
+    setPixel(grid, 6, 10, tide)
+    setPixel(grid, 7, 10, tide)
   }
   
   // Draw hat
@@ -1070,6 +1234,126 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     // Floating runes
     setPixel(grid, 2, 0, runeAncient)
     setPixel(grid, 11, 0, runeAncient)
+  } else if (hatVariant === 24) {
+    // Reed Hat (common) - woven cap, deliberately humble
+    const reed = "#b8975a"
+    const reedDark = "#8a6f3f"
+    setPixel(grid, 6, 0, reedDark)
+    setPixel(grid, 7, 0, reedDark)
+    for (let x = 5; x <= 8; x++) setPixel(grid, x, 1, reed)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 2, reed)
+    setPixel(grid, 3, 2, reedDark)
+    setPixel(grid, 10, 2, reedDark)
+  } else if (hatVariant === 25) {
+    // Lantern Rig (uncommon) - headband with a side-mounted lamp
+    const strap = "#3a3f4a"
+    const metal = "#7b8290"
+    const metalHi = "#aab2c0"
+    const bulb = "#ffc861"
+    const glow = "#fff4d0"
+    for (let x = 4; x <= 9; x++) {
+      setPixel(grid, x, 1, strap)
+      setPixel(grid, x, 2, strap)
+    }
+    setPixel(grid, 4, 2, metal)
+    setPixel(grid, 9, 2, metal)
+    // Lamp offset to one side so it reads as mounted hardware, not a symmetric band
+    setPixel(grid, 5, 0, metal)
+    setPixel(grid, 6, 0, metalHi)
+    setPixel(grid, 5, 1, metalHi)
+    setPixel(grid, 6, 1, glow)
+    setPixel(grid, 5, 2, bulb)
+    setPixel(grid, 6, 2, glow)
+    setPixel(grid, 5, 3, bulb)
+    setPixel(grid, 6, 3, bulb)
+  } else if (hatVariant === 26) {
+    // Deepline Coil (rare) - copper line spool with hooks at the temples
+    const copper = "#b0713a"
+    const copperHi = "#e0a566"
+    const line = "#cfc6b0"
+    const hook = "#9aa5b0"
+    setPixel(grid, 6, 0, copperHi)
+    setPixel(grid, 7, 0, copperHi)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 1, copper)
+    setPixel(grid, 5, 1, copperHi)
+    setPixel(grid, 8, 1, copperHi)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 2, copper)
+    setPixel(grid, 6, 2, line)
+    setPixel(grid, 7, 2, line)
+    setPixel(grid, 3, 3, hook)
+    setPixel(grid, 10, 3, hook)
+  } else if (hatVariant === 27) {
+    // EPIC: Stormglass Crown - gapped spires for a jagged silhouette
+    const glassDark = "#23324f"
+    const glass = "#3f6ea8"
+    const arc = "#a8dcff"
+    const hot = "#ffffff"
+    setPixel(grid, 3, 0, glass)
+    setPixel(grid, 5, 0, arc)
+    setPixel(grid, 7, 0, hot)
+    setPixel(grid, 9, 0, arc)
+    setPixel(grid, 10, 0, glass)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 1, glassDark)
+    setPixel(grid, 5, 1, glass)
+    setPixel(grid, 8, 1, glass)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 2, glass)
+    setPixel(grid, 6, 2, hot)
+    setPixel(grid, 7, 2, hot)
+  } else if (hatVariant === 28) {
+    // LEGENDARY: Kelpwarden Wreath - living kelp with amber floats
+    const kelpDark = "#1f4a33"
+    const kelp = "#327a4f"
+    const kelpLight = "#5fb87a"
+    const amber = "#e8a13c"
+    const amberHi = "#ffd98a"
+    setPixel(grid, 4, 0, kelp)
+    setPixel(grid, 5, 0, kelpLight)
+    setPixel(grid, 6, 0, kelpDark)
+    setPixel(grid, 7, 0, kelpDark)
+    setPixel(grid, 8, 0, kelpLight)
+    setPixel(grid, 9, 0, kelp)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 1, kelp)
+    setPixel(grid, 4, 1, kelpDark)
+    setPixel(grid, 9, 1, kelpDark)
+    setPixel(grid, 6, 1, kelpLight)
+    setPixel(grid, 7, 1, kelpLight)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 2, kelpDark)
+    setPixel(grid, 5, 2, kelp)
+    setPixel(grid, 8, 2, kelp)
+    setPixel(grid, 3, 2, amber)
+    setPixel(grid, 10, 2, amber)
+    setPixel(grid, 3, 3, amberHi)
+    setPixel(grid, 10, 3, amberHi)
+  } else if (hatVariant === 29) {
+    // MYTHIC: Abyssal Diadem - widest silhouette, lumen points and gold inlay
+    const abyss = "#0a1622"
+    const voidBlue = "#16304a"
+    const tide = "#2a6f96"
+    const lumen = "#6fe0f0"
+    const pearl = "#eafdff"
+    const gold = "#d9c07a"
+    setPixel(grid, 2, 0, lumen)
+    setPixel(grid, 3, 0, tide)
+    setPixel(grid, 5, 0, pearl)
+    setPixel(grid, 6, 0, lumen)
+    setPixel(grid, 7, 0, lumen)
+    setPixel(grid, 8, 0, pearl)
+    setPixel(grid, 10, 0, tide)
+    setPixel(grid, 11, 0, lumen)
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 1, voidBlue)
+    setPixel(grid, 4, 1, tide)
+    setPixel(grid, 9, 1, tide)
+    setPixel(grid, 6, 1, gold)
+    setPixel(grid, 7, 1, gold)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 2, abyss)
+    setPixel(grid, 5, 2, lumen)
+    setPixel(grid, 8, 2, lumen)
+    setPixel(grid, 6, 2, gold)
+    setPixel(grid, 7, 2, gold)
+    setPixel(grid, 4, 3, tide)
+    setPixel(grid, 9, 3, tide)
+    setPixel(grid, 6, 3, gold)
+    setPixel(grid, 7, 3, gold)
   }
   
   return grid

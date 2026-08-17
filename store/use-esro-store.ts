@@ -357,11 +357,13 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Basic Shades", type: "cosmetic", vanityData: { layerType: "accessory", variant: 5 } },
     { label: "Dust Goggles", type: "cosmetic", vanityData: { layerType: "accessory", variant: 6 } },
     { label: "Worn Bandana", type: "cosmetic", vanityData: { layerType: "accessory", variant: 7 } },
+    { label: "Tide Goggles", type: "cosmetic", vanityData: { layerType: "accessory", variant: 22 } },
     // Hats
     { label: "Route Cap", type: "cosmetic", vanityData: { layerType: "hat", variant: 1 } },
     { label: "Dust Hood", type: "cosmetic", vanityData: { layerType: "hat", variant: 7 } },
     { label: "Signal Beanie", type: "cosmetic", vanityData: { layerType: "hat", variant: 8 } },
     { label: "Worn Helmet", type: "cosmetic", vanityData: { layerType: "hat", variant: 9 } },
+    { label: "Reed Hat", type: "cosmetic", vanityData: { layerType: "hat", variant: 24 } },
     // Flair
     { label: "Soft Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 4 } },
     { label: "Dust Motes", type: "cosmetic", vanityData: { layerType: "flair", variant: 5 } },
@@ -381,11 +383,13 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Relay Earpiece", type: "cosmetic", vanityData: { layerType: "accessory", variant: 8 } },
     { label: "Signal Monocle", type: "cosmetic", vanityData: { layerType: "accessory", variant: 9 } },
     { label: "Route Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 10 } },
+    { label: "Ashfall Veil", type: "cosmetic", vanityData: { layerType: "accessory", variant: 23 } },
     // Hats
     { label: "Signal Antenna", type: "cosmetic", vanityData: { layerType: "hat", variant: 3 } },
     { label: "Relay Headset", type: "cosmetic", vanityData: { layerType: "hat", variant: 10 } },
     { label: "Archive Hood", type: "cosmetic", vanityData: { layerType: "hat", variant: 11 } },
     { label: "Scout Helm", type: "cosmetic", vanityData: { layerType: "hat", variant: 12 } },
+    { label: "Lantern Rig", type: "cosmetic", vanityData: { layerType: "hat", variant: 25 } },
     // Flair
     { label: "Signal Flicker", type: "cosmetic", vanityData: { layerType: "flair", variant: 6 } },
     { label: "Route Trails", type: "cosmetic", vanityData: { layerType: "flair", variant: 7 } },
@@ -403,11 +407,13 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Deep Scanner", type: "cosmetic", vanityData: { layerType: "accessory", variant: 11 } },
     { label: "Rift Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 12 } },
     { label: "Echo Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 13 } },
+    { label: "Currentweave Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 24 } },
     // Hats
     { label: "Relay Horns", type: "cosmetic", vanityData: { layerType: "hat", variant: 4 } },
     { label: "Drift Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 13 } },
     { label: "Echo Circlet", type: "cosmetic", vanityData: { layerType: "hat", variant: 14 } },
     { label: "Signal Crest", type: "cosmetic", vanityData: { layerType: "hat", variant: 15 } },
+    { label: "Deepline Coil", type: "cosmetic", vanityData: { layerType: "hat", variant: 26 } },
     // Flair
     { label: "Sparkle Effect", type: "cosmetic", vanityData: { layerType: "flair", variant: 3 } },
     { label: "Echo Ripples", type: "cosmetic", vanityData: { layerType: "flair", variant: 8 } },
@@ -423,10 +429,12 @@ const POOL: Record<Rarity, PoolItem[]> = {
     // Accessories
     { label: "Void Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 14 } },
     { label: "Prismatic Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 15 } },
+    { label: "Stormglass Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 25 } },
     // Hats
     { label: "Archive Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 5 } },
     { label: "Void Helm", type: "cosmetic", vanityData: { layerType: "hat", variant: 16 } },
     { label: "Rift Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 17 } },
+    { label: "Stormglass Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 27 } },
     // Flair
     { label: "Static Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 2 } },
     { label: "Pulse Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 1 } },
@@ -1945,12 +1953,21 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const rarities: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
     
     // Generate all possible cosmetic variants for each layer type (including mythic transcendent tier)
-    const layers: { type: AvatarLayerType; maxVariants: number; labels: string[]; mythicStart?: number }[] = [
+    // The Tidal Set (accessory 22-27, hat 24-29) deliberately spans every rarity
+    // tier, so it cannot use the `mythicStart` rule that assumes all high
+    // variants are mythic. rarityByVariant pins each one explicitly.
+    const TIDAL_ACCESSORY_RARITY: Record<number, Rarity> = {
+      22: "common", 23: "uncommon", 24: "rare", 25: "epic", 26: "legendary", 27: "mythic",
+    }
+    const TIDAL_HAT_RARITY: Record<number, Rarity> = {
+      24: "common", 25: "uncommon", 26: "rare", 27: "epic", 28: "legendary", 29: "mythic",
+    }
+    const layers: { type: AvatarLayerType; maxVariants: number; labels: string[]; mythicStart?: number; rarityByVariant?: Record<number, Rarity> }[] = [
       { type: "hair", maxVariants: 8, labels: ["Short Cut", "Long Flow", "Spiky", "Slicked", "Braided", "Mohawk", "Curly", "Bald Fade"] },
       { type: "eyes", maxVariants: 6, labels: ["Standard", "Narrow", "Wide", "Glowing", "Cyber", "Ancient"] },
       { type: "mouth", maxVariants: 5, labels: ["Neutral", "Smirk", "Frown", "Open", "Masked"] },
-      { type: "accessory", maxVariants: 22, mythicStart: 17, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask", "Worn Bandana", "Relay Earpiece", "Signal Monocle", "Route Mask", "Deep Scanner", "Rift Lens", "Echo Mask", "Void Visor", "Prismatic Lens", "All-Seeing Eye", "Voidtouched Gaze", "Relay Sea Mask", "Shardheart Visor", "Eternal Courier's Mark", "Primordial Echo"] },
-      { type: "hat", maxVariants: 24, mythicStart: 19, labels: ["None", "Cap", "Hood", "Antenna", "Horns", "Halo", "Crown", "Dust Hood", "Signal Beanie", "Worn Helmet", "Relay Headset", "Archive Hood", "Scout Helm", "Drift Crown", "Echo Circlet", "Signal Crest", "Void Helm", "Rift Diadem", "Primordial Antlers", "Crown of the Relay Sea", "Shardheart Coronet", "Eternal Courier's Crest", "Voidtouched Halo", "Primordial Echo Crown"] },
+      { type: "accessory", maxVariants: 28, mythicStart: 17, rarityByVariant: TIDAL_ACCESSORY_RARITY, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask", "Worn Bandana", "Relay Earpiece", "Signal Monocle", "Route Mask", "Deep Scanner", "Rift Lens", "Echo Mask", "Void Visor", "Prismatic Lens", "All-Seeing Eye", "Voidtouched Gaze", "Relay Sea Mask", "Shardheart Visor", "Eternal Courier's Mark", "Primordial Echo", "Tide Goggles", "Ashfall Veil", "Currentweave Mask", "Stormglass Lens", "Leviathan's Regard", "Tidecaller's Visage"] },
+      { type: "hat", maxVariants: 30, mythicStart: 19, rarityByVariant: TIDAL_HAT_RARITY, labels: ["None", "Cap", "Hood", "Antenna", "Horns", "Halo", "Crown", "Dust Hood", "Signal Beanie", "Worn Helmet", "Relay Headset", "Archive Hood", "Scout Helm", "Drift Crown", "Echo Circlet", "Signal Crest", "Void Helm", "Rift Diadem", "Primordial Antlers", "Crown of the Relay Sea", "Shardheart Coronet", "Eternal Courier's Crest", "Voidtouched Halo", "Primordial Echo Crown", "Reed Hat", "Lantern Rig", "Deepline Coil", "Stormglass Crown", "Kelpwarden Wreath", "Abyssal Diadem"] },
       { type: "flair", maxVariants: 18, mythicStart: 13, labels: ["None", "Pulse Glow", "Static Aura", "Sparkle", "Soft Glow", "Dust Motes", "Signal Flicker", "Route Trails", "Echo Ripples", "Data Stream", "Void Shimmer", "Prismatic Aura", "Celestial Flame", "Relay Sea Aura", "Shardheart Radiance", "Eternal Courier's Light", "Voidtouched Presence", "Primordial Resonance"] },
     ]
     
@@ -1958,7 +1975,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       for (let v = 1; v < layer.maxVariants; v++) {
         // Determine rarity - mythic for transcendent tier items
         let rarity: Rarity
-        if (layer.mythicStart && v >= layer.mythicStart) {
+        if (layer.rarityByVariant?.[v]) {
+          rarity = layer.rarityByVariant[v]
+        } else if (layer.mythicStart && v >= layer.mythicStart) {
           rarity = "mythic"
         } else {
           rarity = rarities[Math.min(Math.floor(v / 2), rarities.length - 2)] // Cap at legendary for non-mythic
