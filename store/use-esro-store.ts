@@ -448,9 +448,11 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Signal Sovereign", type: "title" },
     // Accessories
     { label: "All-Seeing Eye", type: "cosmetic", vanityData: { layerType: "accessory", variant: 16 } },
+    { label: "Leviathan's Regard", type: "cosmetic", vanityData: { layerType: "accessory", variant: 26 } },
     // Hats
     { label: "Crown of Routes", type: "cosmetic", vanityData: { layerType: "hat", variant: 6 } },
     { label: "Primordial Antlers", type: "cosmetic", vanityData: { layerType: "hat", variant: 18 } },
+    { label: "Kelpwarden Wreath", type: "cosmetic", vanityData: { layerType: "hat", variant: 28 } },
     // Flair
     { label: "Prismatic Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 11 } },
     { label: "Celestial Flame", type: "cosmetic", vanityData: { layerType: "flair", variant: 12 } },
@@ -459,6 +461,8 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Origin Cipher", type: "title" },
     { label: "Worldcurrent Antlers", type: "cosmetic", vanityData: { layerType: "hat", variant: 19 } },
     { label: "Genesis Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 13 } },
+    { label: "Tidecaller's Visage", type: "cosmetic", vanityData: { layerType: "accessory", variant: 27 } },
+    { label: "Abyssal Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 29 } },
   ],
   admin: [
     { label: "Architect's Seal", type: "title" },

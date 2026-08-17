@@ -1235,15 +1235,21 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, 2, 0, runeAncient)
     setPixel(grid, 11, 0, runeAncient)
   } else if (hatVariant === 24) {
-    // Reed Hat (common) - woven cap, deliberately humble
-    const reed = "#b8975a"
+    // Reed Hat (common) - woven conical hat with a wide brim.
+    // Row 0 must carry real mass: at 2px the shape read as a hair fringe rather
+    // than headwear in the live app (the existing Route Cap uses 10px on row 0).
+    const reed = "#c9a86a"
+    const reedMid = "#b8975a"
     const reedDark = "#8a6f3f"
-    setPixel(grid, 6, 0, reedDark)
-    setPixel(grid, 7, 0, reedDark)
-    for (let x = 5; x <= 8; x++) setPixel(grid, x, 1, reed)
-    for (let x = 3; x <= 10; x++) setPixel(grid, x, 2, reed)
-    setPixel(grid, 3, 2, reedDark)
-    setPixel(grid, 10, 2, reedDark)
+    for (let x = 5; x <= 8; x++) setPixel(grid, x, 0, reedMid)
+    setPixel(grid, 6, 0, reed)
+    setPixel(grid, 7, 0, reed)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 1, reedMid)
+    setPixel(grid, 5, 1, reed)
+    setPixel(grid, 8, 1, reed)
+    // Wide brim - the silhouette cue that makes this read as a hat
+    for (let x = 2; x <= 11; x++) setPixel(grid, x, 2, reedDark)
+    for (let x = 4; x <= 9; x++) setPixel(grid, x, 2, reedMid)
   } else if (hatVariant === 25) {
     // Lantern Rig (uncommon) - headband with a side-mounted lamp
     const strap = "#3a3f4a"
@@ -1251,37 +1257,43 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     const metalHi = "#aab2c0"
     const bulb = "#ffc861"
     const glow = "#fff4d0"
-    for (let x = 4; x <= 9; x++) {
+    // Strap spans the full head width so the rig reads as worn hardware
+    for (let x = 3; x <= 10; x++) {
       setPixel(grid, x, 1, strap)
       setPixel(grid, x, 2, strap)
     }
-    setPixel(grid, 4, 2, metal)
-    setPixel(grid, 9, 2, metal)
-    // Lamp offset to one side so it reads as mounted hardware, not a symmetric band
+    setPixel(grid, 3, 2, metal)
+    setPixel(grid, 10, 2, metal)
+    // Lamp housing sits ABOVE the strap and offset to one side. Previously the
+    // warm lamp pixels overlapped the dark strap and averaged out to a grey
+    // blob at small sizes; keeping the bulb clear of the strap preserves it.
     setPixel(grid, 5, 0, metal)
     setPixel(grid, 6, 0, metalHi)
+    setPixel(grid, 7, 0, metal)
     setPixel(grid, 5, 1, metalHi)
-    setPixel(grid, 6, 1, glow)
-    setPixel(grid, 5, 2, bulb)
+    setPixel(grid, 6, 1, bulb)
+    setPixel(grid, 7, 1, glow)
     setPixel(grid, 6, 2, glow)
-    setPixel(grid, 5, 3, bulb)
-    setPixel(grid, 6, 3, bulb)
+    setPixel(grid, 7, 2, bulb)
   } else if (hatVariant === 26) {
     // Deepline Coil (rare) - copper line spool with hooks at the temples
     const copper = "#b0713a"
     const copperHi = "#e0a566"
     const line = "#cfc6b0"
     const hook = "#9aa5b0"
+    // Spool crown widened on row 0 so the shape reads as a hat rather than hair
+    for (let x = 5; x <= 8; x++) setPixel(grid, x, 0, copper)
     setPixel(grid, 6, 0, copperHi)
     setPixel(grid, 7, 0, copperHi)
-    for (let x = 4; x <= 9; x++) setPixel(grid, x, 1, copper)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 1, copper)
     setPixel(grid, 5, 1, copperHi)
     setPixel(grid, 8, 1, copperHi)
-    for (let x = 4; x <= 9; x++) setPixel(grid, x, 2, copper)
-    setPixel(grid, 6, 2, line)
-    setPixel(grid, 7, 2, line)
-    setPixel(grid, 3, 3, hook)
-    setPixel(grid, 10, 3, hook)
+    // Wound line sits on row 1, keeping row 2 free so the forehead stays visible
+    setPixel(grid, 6, 1, line)
+    setPixel(grid, 7, 1, line)
+    for (let x = 3; x <= 10; x++) setPixel(grid, x, 2, copper)
+    setPixel(grid, 2, 2, hook)
+    setPixel(grid, 11, 2, hook)
   } else if (hatVariant === 27) {
     // EPIC: Stormglass Crown - gapped spires for a jagged silhouette
     const glassDark = "#23324f"
