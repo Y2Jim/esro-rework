@@ -4,8 +4,9 @@ import { useEffect, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { formatResetIn, msUntilNextDay } from "@/lib/contract-rotation"
+import { unlockRequirementLabel } from "@/lib/skill-effects"
 import type { ContractType } from "@/lib/types"
-import { Zap, Users, Calendar, RotateCcw } from "lucide-react"
+import { Zap, Users, Calendar, RotateCcw, Shield, Lock } from "lucide-react"
 
 type ContractFilter = "all" | ContractType
 
@@ -14,6 +15,7 @@ const FILTER_TABS: { id: ContractFilter; label: string; icon?: React.ReactNode }
   { id: "neutral", label: "Open", icon: <Zap className="h-3 w-3" /> },
   { id: "faction", label: "Faction", icon: <Users className="h-3 w-3" /> },
   { id: "event", label: "Event", icon: <Calendar className="h-3 w-3" /> },
+  { id: "escort", label: "Escort", icon: <Shield className="h-3 w-3" /> },
 ]
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -26,6 +28,7 @@ const TYPE_COLORS: Record<ContractType, string> = {
   neutral: "border-l-cyan-400",
   faction: "border-l-[color:var(--color-accent)]",
   event: "border-l-amber-400",
+  escort: "border-l-emerald-400",
 }
 
 export function ContractsScreen() {
@@ -34,6 +37,7 @@ export function ContractsScreen() {
   const acceptContract = useEsroStore((s) => s.acceptContract)
   const cancelContract = useEsroStore((s) => s.cancelContract)
   const rotateContractsIfStale = useEsroStore((s) => s.rotateContractsIfStale)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
 
   const [resetIn, setResetIn] = useState(() => msUntilNextDay())
 
@@ -154,13 +158,21 @@ export function ContractsScreen() {
               </div>
             ) : (
               <div className="space-y-2">
-                {available.map((c) => (
+                {available.map((c) => {
+                  // Tier gate: mirrors the store, so the card never offers a
+                  // signature acceptContract would silently refuse.
+                  const tierLocked = !!c.requiresUnlock && !hasSkillUnlock(c.requiresUnlock)
+                  return (
                   <button
                     key={c.id}
                     type="button"
+                    disabled={tierLocked}
                     onClick={() => acceptContract(c.id)}
                     className={cn(
-                      "w-full rounded-lg border border-[color:var(--color-border)] border-l-2 p-3 text-left transition-colors hover:border-[color:var(--color-accent)]/50 hover:bg-[color:var(--color-accent)]/5",
+                      "w-full rounded-lg border border-[color:var(--color-border)] border-l-2 p-3 text-left transition-colors",
+                      tierLocked
+                        ? "cursor-not-allowed opacity-60"
+                        : "hover:border-[color:var(--color-accent)]/50 hover:bg-[color:var(--color-accent)]/5",
                       TYPE_COLORS[c.type]
                     )}
                   >
@@ -185,9 +197,18 @@ export function ContractsScreen() {
                       <span className="capitalize">{c.type}</span>
                     </div>
                     <div className="mt-2 text-[15px] text-[color:var(--color-text)]/70">{c.description}</div>
-                    <div className="mt-2 text-[14px] text-[color:var(--color-accent)]">{c.reward}</div>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <div className="text-[14px] text-[color:var(--color-accent)]">{c.reward}</div>
+                      {tierLocked && c.requiresUnlock && (
+                        <span className="flex shrink-0 items-center gap-1 text-[13px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                          <Lock className="h-3 w-3" />
+                          {unlockRequirementLabel(c.requiresUnlock)}
+                        </span>
+                      )}
+                    </div>
                   </button>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

@@ -5,6 +5,10 @@ const DAILY_SLOTS: Record<ContractType, number> = {
   faction: 3,
   neutral: 2,
   event: 1,
+  // Escort work is gated behind the `escort_contracts` breakpoint. The slot is
+  // always filled so the board shows the job as locked rather than hiding it,
+  // matching how locked expeditions stay visible on the map.
+  escort: 1,
 }
 
 /** Local-day key, e.g. "2026-08-17". Rolls over at the player's midnight. */

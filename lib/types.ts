@@ -50,7 +50,7 @@ export interface QuickAction {
   }
 }
 
-export type ContractType = "faction" | "neutral" | "event"
+export type ContractType = "faction" | "neutral" | "event" | "escort"
 
 export interface Contract {
   id: string
@@ -62,6 +62,11 @@ export interface Contract {
   status: "available" | "active" | "completed"
   type: ContractType
   difficulty?: "easy" | "medium" | "hard"
+  /**
+   * Skill-tree content unlock required to sign this contract. Mirrors
+   * `Expedition.requiresUnlock`; enforced by acceptContract in the store.
+   */
+  requiresUnlock?: SkillUnlockId
   }
 
 export interface FactionProject {

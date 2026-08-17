@@ -211,6 +211,36 @@ export type SkillUnlockId =
   | "faction_rites"
   | "archive_translation"
 
+/**
+ * Player-facing name for each unlock, for lock labels on buttons and cards.
+ *
+ * Exhaustive by type: adding a SkillUnlockId without a label here is a compile
+ * error. Previously each surface hand-rolled its own if/else chain, which
+ * silently mislabelled every gate it did not explicitly name.
+ */
+export const UNLOCK_LABELS: Record<SkillUnlockId, string> = {
+  hidden_routes: "Hidden Routes",
+  deep_ruins: "Deep Ruins",
+  rare_nodes: "Rare Nodes",
+  quality_harvest: "Quality Harvest",
+  fishing_basic: "Fishing",
+  fishing_wrecks: "Wreck Fishing",
+  pack_beasts: "Pack Beasts",
+  pack_train: "Pack Train",
+  field_surgery: "Field Surgery",
+  advanced_recipes: "Advanced Recipes",
+  master_recipes: "Master Recipes",
+  anomaly_zones: "Anomaly Zones",
+  escort_contracts: "Escort Contracts",
+  faction_rites: "Faction Rites",
+  archive_translation: "Archive Translation",
+}
+
+/** "Requires Deep Ruins" — the standard lock caption for a gated action. */
+export function unlockRequirementLabel(id: SkillUnlockId): string {
+  return `Requires ${UNLOCK_LABELS[id]}`
+}
+
 export interface SkillBreakpoint {
   level: number
   unlock: SkillUnlockId

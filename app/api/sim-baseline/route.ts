@@ -7,15 +7,20 @@ import {
   type ExpEventType,
   type RunModifiers,
 } from "@/lib/expedition-sim"
+import * as orig from "@/lib/sim-original-tmp"
 import type { BaseStats, RaceId } from "@/lib/types"
+import type { SkillUnlockId } from "@/lib/skill-effects"
 
 /**
  * TEMPORARY verification route (deleted before hand-off).
  *
- * Produces a deterministic fingerprint of the expedition simulation so the
- * "additive only" guarantee can be proven: with every skill unlock OFF, the
- * output of this route must be byte-identical before and after the unlock work.
- * Uses a seeded PRNG so there is no Math.random noise.
+ * Proves the "additive only" guarantee by running the CURRENT sim and the
+ * PRISTINE pre-change sim (commit dc68ab6, vendored as sim-original-tmp) over
+ * the same seeded cases. With every unlock OFF the two must agree exactly.
+ *
+ * The squad profiles and crew sizes are chosen so checks actually SUCCEED —
+ * an all-failing sweep never reaches the discovery/loot branch and would make
+ * the comparison vacuous.
  */
 
 /** mulberry32 — small deterministic PRNG. */
@@ -31,9 +36,19 @@ function seeded(seed: number) {
 
 const EVENTS: ExpEventType[] = ["travel", "discovery", "battle", "hazard", "rest"]
 const RISKS: Array<"Low" | "Medium" | "High"> = ["Low", "Medium", "High"]
-const RACES: Array<RaceId | undefined> = [undefined, "crownborn", "hearthkin", "gloamwhisper", "roadsinger"]
+const RACES: Array<RaceId | undefined> = [undefined, "crownborn", "gloamwhisper"]
 
-const SQUAD: BaseStats = { hp: 30, atk: 7, def: 6, focus: 6, luck: 4 }
+/**
+ * Weak -> overwhelming. threshold = (RISK_BASE + stage*1.4) * crewSize, so with
+ * crewSize 1-3 these span badfail through crit and exercise every branch.
+ */
+const SQUADS: BaseStats[] = [
+  { hp: 30, atk: 7, def: 6, focus: 6, luck: 4 },
+  { hp: 40, atk: 14, def: 13, focus: 14, luck: 10 },
+  { hp: 60, atk: 26, def: 24, focus: 26, luck: 18 },
+  { hp: 90, atk: 40, def: 38, focus: 42, luck: 30 },
+]
+const CREW_SIZES = [1, 2, 3]
 
 /** Skill bonus payload covering every modifier the unlock work touches. */
 const BONUSES: Record<string, number> = {
@@ -48,55 +63,105 @@ const BONUSES: Record<string, number> = {
   carryCapacity: 2,
 }
 
+/** Fields present in BOTH implementations — the additive comparison surface. */
+function shared(r: {
+  outcome: string
+  score: number
+  threshold: number
+  damage: number
+  loot: boolean
+  bonusLoot: boolean
+  hiddenRoute: boolean
+  rareFind: boolean
+}) {
+  return [
+    r.outcome,
+    r.score.toFixed(6),
+    r.threshold.toFixed(6),
+    r.damage,
+    r.loot,
+    r.bonusLoot,
+    r.hiddenRoute,
+    r.rareFind,
+  ].join("|")
+}
+
 export async function GET(req: Request) {
-  const lines: string[] = []
   // ?unlocks=rare_nodes,quality_harvest — proves the ON case has an effect.
   const raw = new URL(req.url).searchParams.get("unlocks")
   const unlocks = (raw ? raw.split(",").filter(Boolean) : []) as SkillUnlockId[]
 
+  const curLines: string[] = []
+  const origLines: string[] = []
+  const tally = { rows: 0, loot: 0, rareFind: 0, richFind: 0, extraYield: 0, outcomes: {} as Record<string, number> }
+
   for (const race of RACES) {
     for (const faction of RACES) {
-      const base = getRunModifiers(race, faction)
-      const mods: RunModifiers = applySkillBonuses(base, BONUSES, [], unlocks)
-      // Record the modifier block itself: any retune would change this.
-      lines.push(
-        `MODS ${race ?? "-"}/${faction ?? "-"} ` +
-          JSON.stringify({ ...mods, passives: mods.passives.map((p) => p.name) }),
-      )
+      const mods: RunModifiers = applySkillBonuses(getRunModifiers(race, faction), BONUSES, [], unlocks)
+      const oMods = orig.applySkillBonuses(orig.getRunModifiers(race, faction), BONUSES)
 
       for (const type of EVENTS) {
         for (const risk of RISKS) {
-          for (let stage = 0; stage < 4; stage++) {
-            // Fresh seed per case so one extra rng() draw cannot be masked.
-            const rng = seeded(stage * 7919 + risk.length * 104729 + type.length * 15485863)
-            const r = resolveCheck({ type, squad: SQUAD, crewSize: 3, risk, stageIndex: stage, mods, rng })
-            lines.push(
-              `CHK ${type}/${risk}/${stage} ` +
-                [
-                  r.outcome,
-                  r.score.toFixed(6),
-                  r.threshold.toFixed(6),
-                  r.damage,
-                  r.loot,
-                  r.bonusLoot,
-                  r.hiddenRoute,
-                  r.rareFind,
-                  r.richFind,
-                  r.extraYield,
-                ].join("|"),
-            )
-            // planBattle consumes the rng too, so fingerprint it as well.
-            const plan = planBattle(r.outcome, risk, stage, mods, seeded(stage + 1337))
-            lines.push(`PLAN ${type}/${risk}/${stage} ` + JSON.stringify(plan))
+          for (const crewSize of CREW_SIZES) {
+            for (let si = 0; si < 4; si++) {
+              for (let sq = 0; sq < SQUADS.length; sq++) {
+                const squad = SQUADS[sq]
+                const key = `${type}/${risk}/c${crewSize}/s${si}/q${sq}`
+                // Identical seed for both impls so any divergence is real.
+                const seed = si * 7919 + risk.length * 104729 + type.length * 15485863 + crewSize * 31 + sq * 613
+
+                const r = resolveCheck({ type, squad, crewSize, risk, stageIndex: si, mods, rng: seeded(seed) })
+                const o = orig.resolveCheck({
+                  type,
+                  squad,
+                  crewSize,
+                  risk,
+                  stageIndex: si,
+                  mods: oMods,
+                  rng: seeded(seed),
+                })
+
+                curLines.push(`CHK ${key} ${shared(r)}`)
+                origLines.push(`CHK ${key} ${shared(o)}`)
+
+                tally.rows++
+                if (r.loot) tally.loot++
+                if (r.rareFind) tally.rareFind++
+                if (r.richFind) tally.richFind++
+                if (r.extraYield) tally.extraYield++
+                tally.outcomes[r.outcome] = (tally.outcomes[r.outcome] ?? 0) + 1
+
+                const p = planBattle(r.outcome, risk, si, mods, seeded(seed + 1337))
+                const op = orig.planBattle(o.outcome, risk, si, oMods, seeded(seed + 1337))
+                curLines.push(`PLAN ${key} ${JSON.stringify(p)}`)
+                origLines.push(`PLAN ${key} ${JSON.stringify(op)}`)
+              }
+            }
           }
         }
       }
     }
   }
 
-  const body = lines.join("\n")
-  const hash = createHash("sha256").update(body).digest("hex")
-  return new Response(`${hash}\ncases=${lines.length}\n${body}\n`, {
-    headers: { "content-type": "text/plain; charset=utf-8" },
-  })
+  // Compare current vs pristine, reporting the first few real divergences.
+  const mismatches: string[] = []
+  for (let i = 0; i < curLines.length; i++) {
+    if (curLines[i] !== origLines[i]) {
+      if (mismatches.length < 6) mismatches.push(`  cur:  ${curLines[i]}\n  orig: ${origLines[i]}`)
+    }
+  }
+  const total = mismatches.length === 0 ? 0 : curLines.reduce((n, l, i) => n + (l !== origLines[i] ? 1 : 0), 0)
+
+  const h = (l: string[]) => createHash("sha256").update(l.join("\n")).digest("hex").slice(0, 16)
+  const body = [
+    `unlocks=${unlocks.length ? unlocks.join(",") : "(none)"}`,
+    `rows=${tally.rows}  comparedLines=${curLines.length}`,
+    `outcomes=${JSON.stringify(tally.outcomes)}`,
+    `loot=${tally.loot}  rareFind=${tally.rareFind}  richFind=${tally.richFind}  extraYield=${tally.extraYield}`,
+    `curHash=${h(curLines)}  origHash=${h(origLines)}`,
+    `divergentLines=${total}`,
+    total === 0 ? "MATCH: current sim identical to pristine sim" : "DIVERGED:\n" + mismatches.join("\n"),
+  ].join("\n")
+
+  return new Response(body + "\n", { headers: { "content-type": "text/plain; charset=utf-8" } })
 }

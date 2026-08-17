@@ -5,6 +5,7 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { rarityColor } from "@/lib/rarity"
 import { STAT_COLORS, SKILL_DEFINITIONS } from "@/lib/game-data"
+import { UNLOCK_LABELS } from "@/lib/skill-effects"
 import type { BaseStats } from "@/lib/types"
 import { RitualPrep } from "@/components/ops/ritual-prep"
 
@@ -207,9 +208,9 @@ export function ExpeditionsTab() {
                           Lv.{exp.minLevel}+
                         </span>
                       )}
-                      {tierLocked && (
+                      {tierLocked && exp.requiresUnlock && (
                         <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
-                          {exp.requiresUnlock === "deep_ruins" ? "Needs Deep Ruins" : "Needs Hidden Routes"}
+                          Needs {UNLOCK_LABELS[exp.requiresUnlock]}
                         </span>
                       )}
                     </div>

@@ -17,6 +17,7 @@ import {
   nodeRequiredLevel,
   type MapNode,
 } from "@/lib/world-map"
+import { unlockRequirementLabel } from "@/lib/skill-effects"
 import type { RaceId } from "@/lib/types"
 
 const riskColor = (risk: string) => {
@@ -531,10 +532,8 @@ function NodeDetail({
                         : "border border-[color:var(--color-cyan)]/60 bg-[color:var(--color-cyan)]/15 text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/25"
                     )}
                   >
-                    {tierLocked
-                      ? exp.requiresUnlock === "deep_ruins"
-                        ? "Requires Deep Ruins"
-                        : "Requires Hidden Routes"
+                    {tierLocked && exp.requiresUnlock
+                      ? unlockRequirementLabel(exp.requiresUnlock)
                       : locked
                         ? `Requires Lv.${req}`
                         : "Deploy"}

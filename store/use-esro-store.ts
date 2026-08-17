@@ -1443,6 +1443,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   acceptContract: (id) => {
+    // Tier gate: escort and anomaly work needs the matching skill breakpoint.
+    // Mirrors startExpedition so a locked job cannot be signed from any surface.
+    const target = get().contracts.find((c) => c.id === id)
+    if (target?.requiresUnlock && !get().hasSkillUnlock(target.requiresUnlock)) return
+
     // Negotiation (Lorekeeping) and Appraisal raise the agreed payout at the
     // moment the contract is signed, so the bonus is locked into the terms.
     const rewardBonus = get().getSkillBonuses().contractReward

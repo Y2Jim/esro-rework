@@ -1198,6 +1198,9 @@ export const contracts: Contract[] = [
     status: "available",
     type: "neutral",
     difficulty: "hard",
+    // Surveying's `anomaly_zones` breakpoint — safely reading an anomaly is the
+    // entire job, so the contract cannot be signed without it.
+    requiresUnlock: "anomaly_zones",
   },
   {
     id: "n6",
@@ -1231,6 +1234,50 @@ export const contracts: Contract[] = [
     status: "available",
     type: "event",
     difficulty: "hard",
+  },
+
+  // Escort contracts — the content behind the `escort_contracts` breakpoint,
+  // which Field Medicine, Marksmanship, Bulwark and Vigilance all promise.
+  // Protected-convoy work: heavier pay, but it needs a crew that can keep a
+  // client alive rather than just move cargo.
+  {
+    id: "esc1",
+    label: "Physician's Passage",
+    issuer: "Hearth Wardens",
+    description:
+      "Walk a field physician between two outposts. She stops for the wounded whether or not the route is clear — your job is to make sure that never costs her anything.",
+    reward: "95 XP, 5 Relay Tokens, Triage Kit",
+    deadline: "18h",
+    status: "available",
+    type: "escort",
+    difficulty: "medium",
+    requiresUnlock: "escort_contracts",
+  },
+  {
+    id: "esc2",
+    label: "Salt Convoy",
+    issuer: "Open Roads",
+    description:
+      "Six carts of preserved stores crossing pressured ground. Slow, loud, and impossible to hide — the pay assumes you will be seen and holds the line anyway.",
+    reward: "120 XP, 7 Relay Tokens, Convoy Seal",
+    deadline: "24h",
+    status: "available",
+    type: "escort",
+    difficulty: "hard",
+    requiresUnlock: "escort_contracts",
+  },
+  {
+    id: "esc3",
+    label: "The Quiet Client",
+    issuer: "Veiled Circle",
+    description:
+      "One passenger, no cargo manifest, no questions. They pay for a route nobody logs and a crew that forgets the face at the far end.",
+    reward: "110 XP, 9 Relay Tokens, Unmarked Token",
+    deadline: "12h",
+    status: "available",
+    type: "escort",
+    difficulty: "hard",
+    requiresUnlock: "escort_contracts",
   },
 ]
 
