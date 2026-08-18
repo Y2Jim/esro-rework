@@ -592,6 +592,18 @@ export interface Faction {
   maxStanding: number
 }
 
+/** What the player has learned about one creature, accumulated across runs. */
+export interface BestiaryRecord {
+  /** Times met in the field. A record existing at all means "discovered". */
+  encounters: number
+  /** Times put down. Field notes only; gates nothing. */
+  defeats: number
+  /** First sighting, epoch ms. */
+  firstSeen: number
+  /** Set once the beast has been brought in as a pack animal. */
+  tamed?: boolean
+}
+
 export interface Profile {
   handle: string
   title: OwnedTitle | null
@@ -607,6 +619,18 @@ export interface Profile {
   allocated: BaseStats
   /** Ritual ids the player knows, from starters and looted books. */
   knownRituals: string[]
+  /**
+   * Creature id -> what the player knows about it. Absent key means undiscovered,
+   * which is what lets the codex show silhouettes for everything not yet met.
+   *
+   * Optional so saves and seeds created before the bestiary existed stay valid;
+   * every read goes through a `?? {}` fallback.
+   */
+  bestiary?: Record<string, BestiaryRecord>
+  /** Creature ids tamed and available as pack animals. */
+  tamedBeasts?: string[]
+  /** Active pack animal, or null when travelling unmounted. */
+  activeMount?: string | null
   /**
    * When the character was created, as an epoch ms timestamp. Stamped by
    * setCharacterData. Nullable so the profile can omit the line entirely rather
