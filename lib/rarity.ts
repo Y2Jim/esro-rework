@@ -79,7 +79,55 @@ export const rarityAnimation: Record<Rarity, string> = {
   admin: "title-admin",
 }
 
-/** Combined title class - color + animation */
+/**
+ * Transcendent titles that each own a bespoke animation, keyed by label.
+ *
+ * These classes paint the text with a gradient (`background-clip: text` plus a
+ * transparent color), so a rarity color class must NOT be applied alongside them
+ * or it overrides the gradient and the animation renders as flat text.
+ */
+export const TRANSCENDENT_TITLE_ANIMATIONS: Record<string, string> = {
+  "Myth of the Relay Sea": "title-relay-sea",
+  "Shardheart Ascendant": "title-shardheart",
+  "Eternal Courier": "title-eternal-courier",
+  "Voidtouched Oracle": "title-voidtouched",
+  "Primordial Flame": "title-primordial-flame",
+  "Astral Wayfarer": "title-silence-stars",
+  "Dreamer Unchained": "title-dreamer-unchained",
+  "Ashen Sovereign": "title-ashen-sovereign",
+}
+
+/**
+ * Resolve the animation + color classes for a title.
+ *
+ * This is the single source of truth for title appearance. Every surface that
+ * renders a title (identity bar, chat, profile list, social) must use it so the
+ * same title never looks different in two places.
+ */
+export function getTitleStyle(
+  title: string | undefined,
+  rarity: Rarity | undefined,
+): { animClass: string; colorClass: string } {
+  if (!rarity) return { animClass: "", colorClass: "text-[color:var(--color-muted)]" }
+  // Admin outranks a bespoke animation.
+  if (rarity === "admin") {
+    return { animClass: rarityAnimation[rarity], colorClass: "" }
+  }
+  // A bespoke gradient supplies its own color, so send no color class with it.
+  if (rarity === "mythic" && title && TRANSCENDENT_TITLE_ANIMATIONS[title]) {
+    return { animClass: TRANSCENDENT_TITLE_ANIMATIONS[title], colorClass: "" }
+  }
+  const anim = rarityAnimation[rarity]
+  // legendary/mythic gradients also self-color; the plainer tiers need the color.
+  return { animClass: anim, colorClass: anim ? "" : rarityColor[rarity] }
+}
+
+/**
+ * Combined title class - color + animation.
+ *
+ * Rarity-only, so it cannot resolve the bespoke transcendent animations. Prefer
+ * `getTitleStyle` when the title label is available.
+ */
 export function getTitleClass(rarity: Rarity): string {
   const anim = rarityAnimation[rarity]
   // Admin, legendary, mythic use animation class which sets its own color

@@ -860,7 +860,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   sendMessage: (channel, body) => {
     const trimmed = body.trim()
     if (!trimmed) return
-    const { identity, messages, channels } = get()
+    const { identity, profile, messages, channels } = get()
     const channelDef = channels.find((ch) => ch.id === channel)
     if (channelDef?.readOnly) return
     const next: ChatMessage = {
@@ -868,8 +868,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       channel,
       kind: "player",
       handle: identity.handle,
-      title: identity.title,
-      titleRarity: identity.titleRarity,
+      // Prefer the equipped title so messages reflect what the player selected,
+      // falling back to the seed identity before anything is equipped.
+      title: profile.title?.label ?? identity.title,
+      titleRarity: profile.title?.rarity ?? identity.titleRarity,
       body: trimmed.slice(0, 220),
       at: Date.now(),
     }
