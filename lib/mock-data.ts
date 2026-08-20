@@ -457,7 +457,10 @@ export const expeditions: Expedition[] = [
     duration: 900,
     risk: "Low",
     tags: ["recon", "relay"],
-    requiredSkill: "pathfinding",
+    // Deliberately ungated. Skills can only be chosen at creation and never
+    // unlock afterwards, so gating every run on a skill let a combat-only build
+    // lock itself out of all expeditions permanently. The two Low-risk runs stay
+    // open as a guaranteed entry point.
     suggestedParty: 1,
     rewards: { xp: 35, tokens: 1, materials: ["scrap_wire x3", "relay_glass"] },
   },
@@ -483,7 +486,7 @@ export const expeditions: Expedition[] = [
     duration: 780,
     risk: "Low",
     tags: ["supply", "logistics"],
-    requiredSkill: "conditioning",
+    // Ungated alongside Signal Trace; see the note there.
     suggestedParty: 1,
     rewards: {
       xp: 30,

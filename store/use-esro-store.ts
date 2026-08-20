@@ -90,6 +90,13 @@ import {
   type SkillBonuses,
   type SkillUnlockId,
 } from "@/lib/skill-effects"
+import {
+  CLASS_LABEL,
+  TAME_MASTER_UNLOCK,
+  TAME_UNLOCK,
+  getCreature,
+  packContribution,
+} from "@/lib/bestiary"
 import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
@@ -138,7 +145,20 @@ export interface EsroState {
   preparedRituals: string[]
   toggleRitual: (id: string) => void
   learnRitual: (id: string) => void
-  
+
+  // Bestiary + mounts
+  /** Record a sighting. First sighting is what discovers the codex entry. */
+  recordEncounter: (creatureId: string) => void
+  /** Record a kill. Field notes only; taming is gated on encounters, not kills. */
+  recordDefeat: (creatureId: string) => void
+  /** Bring a beast in as a pack animal. No-op unless `canTame` allows it. */
+  tameBeast: (creatureId: string) => void
+  /** Set the active pack animal, or pass null to travel unmounted. */
+  setActiveMount: (creatureId: string | null) => void
+  /** Whether this beast can be tamed right now, plus why not when it can't. */
+  canTame: (creatureId: string) => { ok: boolean; reason?: string }
+
+
   // Navigation
   screen: ScreenId
   setScreen: (s: ScreenId) => void
@@ -794,6 +814,117 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       priority: "normal",
       deeplink: { screen: "profile" },
     })
+  },
+
+  recordEncounter: (creatureId) => {
+    const creature = getCreature(creatureId)
+    if (!creature) return
+    const { profile } = get()
+    const bestiary = profile.bestiary ?? {}
+    const prev = bestiary[creatureId]
+    set({
+      profile: {
+        ...profile,
+        bestiary: {
+          ...bestiary,
+          [creatureId]: {
+            encounters: (prev?.encounters ?? 0) + 1,
+            defeats: prev?.defeats ?? 0,
+            firstSeen: prev?.firstSeen ?? Date.now(),
+            tamed: prev?.tamed,
+          },
+        },
+      },
+    })
+    // Only announce the first sighting; repeat encounters would spam the feed.
+    if (!prev) {
+      get().addNotification({
+        title: "Bestiary updated",
+        body: `${creature.name} recorded — ${creature.habitat}.`,
+        priority: "normal",
+        deeplink: { screen: "profile" },
+      })
+    }
+  },
+
+  recordDefeat: (creatureId) => {
+    const { profile } = get()
+    const bestiary = profile.bestiary ?? {}
+    const prev = bestiary[creatureId]
+    // A defeat implies a sighting, so seed the record rather than dropping it.
+    set({
+      profile: {
+        ...profile,
+        bestiary: {
+          ...bestiary,
+          [creatureId]: {
+            encounters: prev?.encounters ?? 1,
+            defeats: (prev?.defeats ?? 0) + 1,
+            firstSeen: prev?.firstSeen ?? Date.now(),
+            tamed: prev?.tamed,
+          },
+        },
+      },
+    })
+  },
+
+  canTame: (creatureId) => {
+    const creature = getCreature(creatureId)
+    if (!creature) return { ok: false, reason: "Unknown creature" }
+    if (!creature.pack) return { ok: false, reason: `${CLASS_LABEL[creature.kind]} — cannot be tamed` }
+    const { profile } = get()
+    if ((profile.tamedBeasts ?? []).includes(creatureId)) return { ok: false, reason: "Already tamed" }
+    if (!get().hasSkillUnlock(TAME_UNLOCK)) return { ok: false, reason: "Requires Pack Beasts" }
+    // Must have met it in the field first; the codex is the prerequisite.
+    if (!(profile.bestiary ?? {})[creatureId]) return { ok: false, reason: "Not yet encountered" }
+    // The sturdiest beasts need the second Beast Tending tier.
+    const heavy = creature.rarity === "epic" || creature.rarity === "legendary"
+    if (heavy && !get().hasSkillUnlock(TAME_MASTER_UNLOCK)) {
+      return { ok: false, reason: "Requires Pack Train" }
+    }
+    return { ok: true }
+  },
+
+  tameBeast: (creatureId) => {
+    // Route through canTame so the UI and any caller share one rule set.
+    if (!get().canTame(creatureId).ok) return
+    const creature = getCreature(creatureId)
+    if (!creature) return
+    const { profile } = get()
+    const bestiary = profile.bestiary ?? {}
+    const prev = bestiary[creatureId]
+    const tamed = [...(profile.tamedBeasts ?? []), creatureId]
+    set({
+      profile: {
+        ...profile,
+        tamedBeasts: tamed,
+        bestiary: {
+          ...bestiary,
+          [creatureId]: {
+            encounters: prev?.encounters ?? 1,
+            defeats: prev?.defeats ?? 0,
+            firstSeen: prev?.firstSeen ?? Date.now(),
+            tamed: true,
+          },
+        },
+        // First beast becomes the active mount so the bonus applies immediately
+        // rather than sitting unused until the player notices the selector.
+        activeMount: profile.activeMount ?? creatureId,
+      },
+    })
+    get().addNotification({
+      title: "Beast tamed",
+      body: `${creature.name} joins your pack — +${creature.pack?.carry ?? 0} carry.`,
+      priority: "high",
+      deeplink: { screen: "profile" },
+    })
+  },
+
+  setActiveMount: (creatureId) => {
+    const { profile } = get()
+    // Guard against mounting something that was never tamed.
+    if (creatureId !== null && !(profile.tamedBeasts ?? []).includes(creatureId)) return
+    set({ profile: { ...profile, activeMount: creatureId } })
   },
 
   /** Aggregated sub-stat effects across every unlocked skill. */
@@ -2143,10 +2274,14 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
     const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
-    // Beast Tending's pack tiers. These replace the old mount_basic/mount_pack
-    // unlocks, which gated a mount system that never existed and so did nothing.
-    const packSlots =
-      (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
+    // Carry now comes from the beast actually hauling the load, so the Beast
+    // Tending unlocks gate *access* to taming while the mount supplies the
+    // number. Falls back to the old flat tiers when travelling unmounted, so an
+    // unlocked-but-untamed player is never worse off than before.
+    const mount = getCreature(get().profile.activeMount ?? "")
+    const packSlots = mount
+      ? packContribution(mount).carry
+      : (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
     // Extra loot slots are whole items, so they scale with what made it back.
     const numRewards = baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)
 
