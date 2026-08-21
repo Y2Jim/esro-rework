@@ -181,7 +181,12 @@ export function ExpeditionsTab() {
             const requiredSkill = skills.find(s => s.id === exp.requiredSkill)
             // Locked either by the run's base skill or by an unearned tier breakpoint.
             const tierLocked = !!exp.requiresUnlock && !hasSkillUnlock(exp.requiresUnlock)
-            const meetsRequirement = requiredSkill && !requiredSkill.locked && !tierLocked
+            // An expedition with no requiredSkill is intentionally open to every
+            // build, so treat a missing requirement as satisfied. Previously the
+            // truthiness check meant "no requirement" read as "unmet", which is
+            // what left ungated runs unselectable.
+            const skillSatisfied = exp.requiredSkill ? !!requiredSkill && !requiredSkill.locked : true
+            const meetsRequirement = skillSatisfied && !tierLocked
             const { totalBonus, relevantStats } = getExpeditionBonus(exp)
 
             return (

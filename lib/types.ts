@@ -323,7 +323,13 @@ export interface Expedition {
   duration: number
   risk: "Low" | "Medium" | "High"
   tags: string[]
-  requiredSkill: string
+  /**
+   * Skill id needed to launch. Optional because the Low-risk starter runs are
+   * deliberately ungated: skills can only be chosen at character creation and
+   * never unlock afterwards, so a build that took no exploration skills would
+   * otherwise have no reachable expedition at all.
+   */
+  requiredSkill?: string
   suggestedParty: number
   minLevel?: number
   /** Skill tier breakpoint required to launch this run at all. */
