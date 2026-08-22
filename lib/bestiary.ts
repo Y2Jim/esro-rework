@@ -218,6 +218,27 @@ export function creaturesForTier(tier: RiskTier): Creature[] {
   return CREATURES.filter((c) => c.tiers.includes(tier))
 }
 
+/**
+ * Creatures met as enemies: everything without a pack profile.
+ *
+ * Tameable beasts are deliberately excluded from combat. They are sighted during
+ * discovery events instead, so the player isn't required to kill the animal they
+ * are trying to bring home.
+ */
+export const HOSTILES: Creature[] = CREATURES.filter((c) => !c.pack)
+
+/** Enemies that can be rolled for a battle at this risk tier. */
+export function hostilesForTier(tier: RiskTier): Creature[] {
+  const list = HOSTILES.filter((c) => c.tiers.includes(tier))
+  // Never hand back an empty pool; callers roll from this directly.
+  return list.length ? list : HOSTILES
+}
+
+/** Tameable beasts that can be sighted at this risk tier. */
+export function tameablesForTier(tier: RiskTier): Creature[] {
+  return TAMEABLE.filter((c) => c.tiers.includes(tier))
+}
+
 /** Skill unlock that permits taming at all. */
 export const TAME_UNLOCK: SkillUnlockId = "pack_beasts"
 /** Skill unlock that improves tame odds and allows the sturdier beasts. */

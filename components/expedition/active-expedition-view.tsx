@@ -20,6 +20,7 @@ import {
   type CheckOutcome,
   type ExpEventType,
 } from "@/lib/expedition-sim"
+import { hostilesForTier, tameablesForTier, type RiskTier } from "@/lib/bestiary"
 import { aggregateSkillBonuses, getSkillUnlocks, skillPassiveList } from "@/lib/skill-effects"
 import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 
@@ -69,6 +70,8 @@ interface CrewMember {
 
 interface BattleState {
   enemy: string
+  /** Bestiary id of the enemy, so a win can be recorded as a defeat. */
+  creatureId: string
   hpMax: number
   hp: number
   active: boolean
@@ -105,14 +108,8 @@ const SECTORS = [
   "Sector Null",
 ]
 
-const ENEMIES = [
-  "a Static Wraith",
-  "a Signal Husk",
-  "Drift Scavengers",
-  "a Corrupted Relay",
-  "an Anomaly Swarm",
-  "a Hollow Sentinel",
-]
+// Enemies now come from the bestiary (lib/bestiary.ts) rather than a local
+// string list, so every fight can be recorded against a real creature id.
 
 const TEXT_POOLS: Record<Exclude<EventType, "battle">, string[]> = {
   travel: [
@@ -201,6 +198,8 @@ export function ActiveExpeditionView() {
   // Selected as raw state (not via getSkillUnlocks(), which builds a new Set on
   // every call and would hand zustand a fresh snapshot each render).
   const debugUnlocks = useEsroStore((s) => s.debugUnlocks)
+  const recordEncounter = useEsroStore((s) => s.recordEncounter)
+  const recordDefeat = useEsroStore((s) => s.recordDefeat)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
 
@@ -449,7 +448,11 @@ export function ActiveExpeditionView() {
     const delayNote = delay > 0 ? ` Route +${delay}s.` : ""
 
     if (ev.type === "battle") {
-      const enemy = randItem(ENEMIES)
+      // Roll a real creature scoped to this run's risk tier, and log the
+      // sighting so the codex fills in as the squad meets things.
+      const foe = randItem(hostilesForTier(risk as RiskTier))
+      const enemy = foe.display
+      recordEncounter(foe.id)
       const plan = planBattle(result.outcome, risk, stageIndex, runMods)
       // Marksmanship: open the engagement with a free hit. This opening was
       // previously computed but never applied, so first strike did nothing.
@@ -458,6 +461,7 @@ export function ActiveExpeditionView() {
         : plan.enemyHp
       battleRef.current = {
         enemy,
+        creatureId: foe.id,
         hpMax: plan.enemyHp,
         hp: openingHp,
         active: true,
@@ -492,6 +496,14 @@ export function ActiveExpeditionView() {
     }
 
     if (ev.type === "discovery") {
+      // Tameable beasts are sighted rather than fought, so there is a path to
+      // taming that doesn't require killing the animal first.
+      const beasts = tameablesForTier(risk as RiskTier)
+      if (beasts.length && Math.random() < 0.35) {
+        const beast = randItem(beasts)
+        recordEncounter(beast.id)
+        pushFeed("discovery", `Tracks sighted — ${beast.display} moving through ${beast.habitat.toLowerCase()}.`)
+      }
       if (result.loot) {
         lootFoundRef.current += 1
         lootUnitsRef.current += result.bonusLoot ? 2 : 1
@@ -574,6 +586,7 @@ export function ActiveExpeditionView() {
     if (b.hp <= 0) {
       b.active = false
       battlesWonRef.current += 1
+      recordDefeat(b.creatureId)
       pushFeed("battle", `${b.enemy} neutralized — squad pressing on.`, "success")
       if (Math.random() < 0.5) {
         lootFoundRef.current += 1
