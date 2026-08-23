@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 import { StatAllocation } from "@/components/profile/stat-allocation"
 import { KnownRituals } from "@/components/profile/known-rituals"
+import { BestiaryTab } from "@/components/profile/bestiary-tab"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { Shield } from "lucide-react"
@@ -32,11 +33,12 @@ function formatCreatedAt(ts: number): string {
   return `${d.getDate()} ${MONTH_LABELS[d.getMonth()]} ${d.getFullYear()}`
 }
 
-type ProfileTab = "summary" | "titles" | "cosmetics" | "settings" | "notifications"
+type ProfileTab = "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications"
 
 const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15", hover: "hover-lilac" },
   { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+  { id: "bestiary", label: "Bestiary", icon: "❖", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
   { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
   { id: "settings", label: "Settings", icon: "⚙", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
   { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15", hover: "hover-danger" },
@@ -86,6 +88,7 @@ export function ProfileScreen() {
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         {tab === "summary" && <SummaryTab />}
         {tab === "titles" && <TitlesTab />}
+        {tab === "bestiary" && <BestiaryTab />}
         {tab === "cosmetics" && <CosmeticsTab />}
         {tab === "settings" && <SettingsTab />}
         {tab === "notifications" && <NotificationsTab />}
