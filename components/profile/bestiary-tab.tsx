@@ -193,14 +193,14 @@ function CreatureRow({
   return (
     <div className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1.5">
       <div className="flex items-baseline justify-between gap-2">
-        <span className={cn("text-[14px]", rarityColor(creature.rarity))}>{creature.name}</span>
+        <span className={cn("text-[14px]", rarityColor[creature.rarity])}>{creature.name}</span>
         <span className="shrink-0 text-[12px] text-[color:var(--color-muted-2)]">
-          {rarityLabel(creature.rarity)} · {CLASS_LABEL[creature.kind]}
+          {rarityLabel[creature.rarity]} · {CLASS_LABEL[creature.kind]}
         </span>
       </div>
 
       <div className="text-[13px] leading-relaxed text-[color:var(--color-muted)]">
-        {creature.notes}
+        {creature.description}
       </div>
 
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-[color:var(--color-muted-2)]">
@@ -222,7 +222,9 @@ function CreatureRow({
         <div className="mt-1.5 flex items-center justify-between gap-2 border-t border-[color:var(--color-border)] pt-1.5">
           <span className="text-[12px] text-[color:var(--color-muted-2)]">
             +{pack.carry} carry
-            {pack.temperament ? ` · ${pack.temperament}` : ""}
+            {pack.hardiness > 0 ? ` · -${pack.hardiness} dmg` : ""}
+            {/* pace is a multiplier where negative is faster, so show the sign. */}
+            {pack.pace !== 0 ? ` · ${pack.pace < 0 ? "" : "+"}${Math.round(pack.pace * 100)}% pace` : ""}
           </span>
           {tamed ? (
             <span className="flex shrink-0 items-center gap-1 text-[12px] text-[color:var(--color-lilac)]">

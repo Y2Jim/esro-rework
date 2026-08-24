@@ -598,6 +598,21 @@ export interface Faction {
   maxStanding: number
 }
 
+/** Best result achieved on a single expedition route. */
+export interface RouteRecord {
+  /** Times this route has been completed. */
+  runs: number
+  /**
+   * Best cargo-recovered fraction, 0..1. This is the loot multiplier the run
+   * finished on, so 1 means nothing was lost on the way home.
+   */
+  bestHaul: number
+  /** Most items carried out in one run. */
+  bestItems: number
+  /** When the best run landed, epoch ms. */
+  bestAt: number
+}
+
 /** What the player has learned about one creature, accumulated across runs. */
 export interface BestiaryRecord {
   /** Times met in the field. A record existing at all means "discovered". */
@@ -633,6 +648,11 @@ export interface Profile {
    * every read goes through a `?? {}` fallback.
    */
   bestiary?: Record<string, BestiaryRecord>
+  /**
+   * Per-route bests, keyed by expedition id. Nothing recorded run history
+   * before this, so it starts empty on existing saves and fills as runs land.
+   */
+  routeRecords?: Record<string, RouteRecord>
   /** Creature ids tamed and available as pack animals. */
   tamedBeasts?: string[]
   /** Active pack animal, or null when travelling unmounted. */
