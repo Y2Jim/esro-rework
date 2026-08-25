@@ -26,6 +26,7 @@ import type {
   ProfileTitle,
   QuickAction,
   RecoveryResult,
+  RouteRecord,
   ScreenId,
   Skill,
   Rarity,
@@ -2330,12 +2331,25 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         ? unknownBooks[Math.floor(Math.random() * unknownBooks.length)]
         : null
 
+    // Per-route bests. `mult` is the fraction of cargo that survived the trip,
+    // so it doubles as the haul score; keep the max rather than the latest.
+    const prevRecords = get().profile.routeRecords ?? {}
+    const prevRecord = prevRecords[activeExpedition.id]
+    const isBest = !prevRecord || mult > prevRecord.bestHaul || newItems.length > prevRecord.bestItems
+    const nextRecord: RouteRecord = {
+      runs: (prevRecord?.runs ?? 0) + 1,
+      bestHaul: Math.max(prevRecord?.bestHaul ?? 0, mult),
+      bestItems: Math.max(prevRecord?.bestItems ?? 0, newItems.length),
+      bestAt: isBest ? Date.now() : (prevRecord?.bestAt ?? Date.now()),
+    }
+
     set({
       activeExpedition: null,
       inventory: [...inventory, ...newItems],
       profile: {
         ...get().profile,
         tokens: get().profile.tokens + tokenReward,
+        routeRecords: { ...prevRecords, [activeExpedition.id]: nextRecord },
       },
     })
 

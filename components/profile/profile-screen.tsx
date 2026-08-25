@@ -9,6 +9,7 @@ import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 import { StatAllocation } from "@/components/profile/stat-allocation"
 import { KnownRituals } from "@/components/profile/known-rituals"
 import { BestiaryTab } from "@/components/profile/bestiary-tab"
+import { TrophyCase } from "@/components/profile/trophy-case"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { Shield } from "lucide-react"
@@ -257,6 +258,9 @@ function SummaryTab() {
 
       {/* Known rituals (Focus) */}
       <KnownRituals />
+
+      {/* Personal bests, derived from the fishing log, route records and bestiary. */}
+      <TrophyCase />
 
       {/* Collection summary */}
       <div className="grid grid-cols-3 gap-2 rounded-lg border border-[color:var(--color-border)] p-3">
