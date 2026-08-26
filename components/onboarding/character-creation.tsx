@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles, RefreshCw } from "lucide-react"
+import { ChevronLeft, ChevronRight, Check, Zap, Shield, Heart, Eye, Sparkles, RefreshCw, Info } from "lucide-react"
 
 /** Typewriter/rolling text component for immersive briefings */
 function RollingText({ text, speed = 25, onComplete }: { text: string; speed?: number; onComplete?: () => void }) {
@@ -139,6 +139,8 @@ function generateHandle(): string {
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
 import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS, HEAD_SHAPE_NAMES, HAIR_STYLE_NAMES } from "@/lib/avatar-generator"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
+import { SkillDetail } from "@/components/ops/skill-detail"
+import { createInitialSkills } from "@/lib/skill-effects"
 import type { Race, Courier, CharacterCreationStep, BaseStats, AvatarConfig, AvatarLayer } from "@/lib/types"
 
 interface CharacterCreationProps {
@@ -195,6 +197,8 @@ export function CharacterCreation({ onComplete }: CharacterCreationProps) {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
+  /** Skill name whose effects panel is open, or null when closed. */
+  const [inspectedSkill, setInspectedSkill] = useState<string | null>(null)
   const [generatedHandle, setGeneratedHandle] = useState("")
   const [avatarSeed, setAvatarSeed] = useState("initial-seed")
   const [avatar, setAvatar] = useState<AvatarConfig>(() => generateAvatarFromSeed("initial-seed"))
@@ -345,8 +349,43 @@ if (briefingIndex > 0) {
     }
   }
 
+  /**
+   * The level-1 shape of the skill being inspected. Built with the same factory
+   * that seeds a real character, so the panel previews exactly what picking it
+   * grants rather than a hand-written approximation.
+   */
+  const previewSkill = useMemo(
+    () =>
+      inspectedSkill
+        ? createInitialSkills([inspectedSkill]).find((s) => s.label === inspectedSkill) ?? null
+        : null,
+    [inspectedSkill],
+  )
+
+  /**
+   * Stats the player will actually start with. Race and courier live in local
+   * state until confirm, so the store cannot supply these yet.
+   */
+  const previewStats = useMemo(
+    () =>
+      selectedRace && selectedCourier
+        ? calculateCombinedStats(selectedRace, selectedCourier)
+        : undefined,
+    [selectedRace, selectedCourier],
+  )
+
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-[#0a0b0f] overflow-hidden font-mono">
+      {/* Effects panel, the same one the Skills tab uses so a skill reads
+          identically before and after character creation. */}
+      {previewSkill && (
+        <SkillDetail
+          skill={previewSkill}
+          statsOverride={previewStats}
+          onClose={() => setInspectedSkill(null)}
+        />
+      )}
+
       {/* Scanline */}
       <div 
         className="pointer-events-none absolute inset-0"
@@ -840,37 +879,60 @@ if (briefingIndex > 0) {
                 Choose {STARTER_SKILL_COUNT} starting skills at level 1. Others start locked.
               </p>
               <div className="space-y-1.5">
-                {SKILL_DEFINITIONS.map((skill) => (
-                  <button
-                    key={skill.name}
-                    onClick={() => toggleSkill(skill.name)}
-                    disabled={!selectedSkills.includes(skill.name) && selectedSkills.length >= STARTER_SKILL_COUNT}
-                    className={`w-full rounded-lg border p-2.5 text-left transition-all ${
-                      selectedSkills.includes(skill.name)
-                        ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)]"
-                        : selectedSkills.length >= STARTER_SKILL_COUNT
-                        ? "border-[rgba(255,255,255,0.05)] bg-[rgba(15,16,22,0.5)] opacity-50"
-                        : "border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] hover:border-[rgba(168,123,255,0.3)]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded bg-[rgba(255,255,255,0.05)]">
-                          {STAT_ICONS[skill.linkedStat]}
+                {SKILL_DEFINITIONS.map((skill) => {
+                  const isSelected = selectedSkills.includes(skill.name)
+                  const atCap = !isSelected && selectedSkills.length >= STARTER_SKILL_COUNT
+                  return (
+                    // Row is a flex pair rather than one button: the info
+                    // affordance cannot be nested inside the select button.
+                    <div
+                      key={skill.name}
+                      className={`flex items-stretch overflow-hidden rounded-lg border transition-all ${
+                        isSelected
+                          ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.1)]"
+                          : atCap
+                          ? "border-[rgba(255,255,255,0.05)] bg-[rgba(15,16,22,0.5)]"
+                          : "border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] hover:border-[rgba(168,123,255,0.3)]"
+                      }`}
+                    >
+                      <button
+                        onClick={() => toggleSkill(skill.name)}
+                        disabled={atCap}
+                        // Only the choosing half dims at the cap, so the info
+                        // button stays readable while the picks are full.
+                        className={`flex-1 p-2.5 text-left transition-all ${atCap ? "opacity-50" : ""}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex h-7 w-7 items-center justify-center rounded bg-[rgba(255,255,255,0.05)]">
+                              {STAT_ICONS[skill.linkedStat]}
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-[color:var(--color-text-primary)] text-[14px]">{skill.name}</h4>
+                              <p className="text-[14px] text-[color:var(--color-text-muted)]">{STAT_LABELS[skill.linkedStat]} linked</p>
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
+                              <Check className="h-2.5 w-2.5 text-black" />
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <h4 className="font-medium text-[color:var(--color-text-primary)] text-[14px]">{skill.name}</h4>
-                          <p className="text-[14px] text-[color:var(--color-text-muted)]">{STAT_LABELS[skill.linkedStat]} linked</p>
-                        </div>
-                      </div>
-                      {selectedSkills.includes(skill.name) && (
-                        <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent)]">
-                          <Check className="h-2.5 w-2.5 text-black" />
-                        </div>
-                      )}
+                      </button>
+                      {/* Never disabled: reading up on a skill is exactly what
+                          you want once the picks are full and you're deciding
+                          what to swap out. */}
+                      <button
+                        type="button"
+                        onClick={() => setInspectedSkill(skill.name)}
+                        aria-label={`View ${skill.name} effects`}
+                        className="flex shrink-0 items-center border-l border-[rgba(255,255,255,0.1)] px-2.5 text-[color:var(--color-text-muted)] transition-colors hover:bg-[rgba(168,123,255,0.15)] hover:text-[color:var(--color-accent)]"
+                      >
+                        <Info className="h-4 w-4" />
+                      </button>
                     </div>
-                  </button>
-                ))}
+                  )
+                })}
               </div>
             </motion.div>
           )}

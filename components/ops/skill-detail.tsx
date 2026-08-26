@@ -11,7 +11,7 @@ import {
 } from "@/lib/skill-effects"
 import { useEsroStore } from "@/store/use-esro-store"
 import { STAT_COLORS, STAT_LABELS } from "@/lib/game-data"
-import type { Skill } from "@/lib/types"
+import type { BaseStats, Skill } from "@/lib/types"
 import { X, Lock, Check } from "lucide-react"
 
 /**
@@ -29,14 +29,28 @@ const LOWER_IS_BETTER = new Set<SkillBonusKey>([
  * the same registry the simulation reads, so the numbers here are the numbers
  * that run — no restating of static flavour text.
  */
-export function SkillDetail({ skill, onClose }: { skill: Skill; onClose: () => void }) {
+export function SkillDetail({
+  skill,
+  onClose,
+  statsOverride,
+}: {
+  skill: Skill
+  onClose: () => void
+  /**
+   * Stats to judge threshold unlocks against, for callers whose totals are not
+   * yet in the store. Character creation holds the chosen race and courier in
+   * local state until confirm, so without this the panel would rate gates
+   * against the previous character's stats.
+   */
+  statsOverride?: BaseStats
+}) {
   // Live totals, needed to show progress toward any stat-threshold unlock.
   // getPlayerStats() spreads a new object per call, so selecting its *result*
   // hands useSyncExternalStore a fresh reference on every equality check and
   // spins into "Maximum update depth exceeded". Select the getter (a stable
   // reference) and invoke it during render, as the other call sites do.
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
-  const stats = getPlayerStats()
+  const stats = statsOverride ?? getPlayerStats()
   const mech = getSkillMechanic(skill.label)
   if (!mech) return null
 
