@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { rarityColor, rarityLabel, rarityOrder } from "@/lib/rarity"
 import { getCreature, packContribution } from "@/lib/bestiary"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/cn"
 
 /**
  * Trophy case: the player's personal bests, derived from data already tracked
