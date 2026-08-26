@@ -20,7 +20,8 @@ import {
   type CheckOutcome,
   type ExpEventType,
 } from "@/lib/expedition-sim"
-import { hostilesForTier, tameablesForTier, type RiskTier } from "@/lib/bestiary"
+import { getCreature, hostilesForTier, tameablesForTier, type RiskTier } from "@/lib/bestiary"
+import { pickTarget, playerLine, roleLine, type TargetingStyle } from "@/lib/threat"
 import { aggregateSkillBonuses, getSkillUnlocks, skillPassiveList } from "@/lib/skill-effects"
 import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
 
@@ -198,6 +199,9 @@ export function ActiveExpeditionView() {
   // Selected as raw state (not via getSkillUnlocks(), which builds a new Set on
   // every call and would hand zustand a fresh snapshot each render).
   const debugUnlocks = useEsroStore((s) => s.debugUnlocks)
+  // Marksmanship fights at range, which places the player in the back line
+  // unless they've also invested in holding the front.
+  const hasRangedFocus = useEsroStore((s) => s.skills.some((k) => k.id === "marksmanship" && !k.locked))
   const recordEncounter = useEsroStore((s) => s.recordEncounter)
   const recordDefeat = useEsroStore((s) => s.recordDefeat)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
@@ -375,11 +379,24 @@ export function ActiveExpeditionView() {
     return s.extend
   }
 
-  const damageRandomCrew = (amount = 1) => {
+  /**
+   * Apply damage to one crew member, chosen by threat rather than at random.
+   *
+   * `style` is the attacking creature's targeting behaviour; hazards and other
+   * impersonal damage leave it at the default so position still matters.
+   */
+  const damageRandomCrew = (amount = 1, style: TargetingStyle = "front") => {
     // Only members still standing can take a hit.
     const candidates = crewRef.current.filter((c) => c.hp > 0)
     if (candidates.length === 0) return
-    const target = randItem(candidates)
+    // The player's line comes from their own skills; crew from their role.
+    const weighted = candidates.map((c) => ({
+      line: c.isPlayer ? playerLine(runMods.threat, hasRangedFocus) : roleLine(c.role),
+      // Only the player's threat investment is modelled — crew have no skills.
+      bonus: c.isPlayer ? runMods.threat : 0,
+    }))
+    const idx = pickTarget(weighted, style)
+    const target = candidates[idx]
     const before = target.hp
     let next = Math.max(0, target.hp - amount)
     // Bulwark/Guardwork/Field Medicine can pull someone back from a downing and
@@ -580,7 +597,12 @@ export function ActiveExpeditionView() {
       if (Math.random() < b.plan.counterChance) {
         pushFeed("battle", `Guard turns the blow — ${b.enemy} left open.`, "success")
       } else {
-        damageRandomCrew(b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1)
+        // Route the attack through the creature's own targeting behaviour, so a
+        // back-line hunter bypasses the shield wall instead of feeding it.
+        damageRandomCrew(
+          b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1,
+          getCreature(b.creatureId)?.targeting ?? "front",
+        )
       }
     }
     if (b.hp <= 0) {

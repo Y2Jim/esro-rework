@@ -623,6 +623,14 @@ export interface BestiaryRecord {
   firstSeen: number
   /** Set once the beast has been brought in as a pack animal. */
   tamed?: boolean
+  /**
+   * Set the first time a rare recoloured variant of this creature was seen.
+   * Sticky once earned — a shiny is a permanent bragging right, so later
+   * ordinary sightings must never clear it.
+   */
+  shiny?: boolean
+  /** When the shiny was found, epoch ms. Absent unless `shiny` is set. */
+  shinyAt?: number
 }
 
 export interface Profile {

@@ -116,6 +116,8 @@ export interface RunModifiers {
   finishBonus: number
   /** Chance a crew member who would be downed is spared instead. */
   partyProtection: number
+  /** How strongly the player pulls enemy attacks onto themselves (Bulwark). */
+  threat: number
   /** Multiplier on hostile encounter frequency (negative = fewer). */
   battleFrequency: number
   /** Multiplier on hazard frequency (negative = fewer). */
@@ -162,6 +164,7 @@ function emptyMods(): RunModifiers {
     battleDamage: 0,
     finishBonus: 0,
     partyProtection: 0,
+    threat: 0,
     battleFrequency: 0,
     hazardFrequency: 0,
     anomalyResist: 0,
@@ -325,6 +328,7 @@ export function applySkillBonuses(
   // Several survival skills feed this, so cap it — at 100% no crew could ever be
   // lost, which would remove all risk from a run.
   mods.partyProtection = Math.min(0.75, mods.partyProtection + b("partyProtection"))
+  mods.threat += b("threat")
   mods.battleFrequency += b("battleFrequency")
   mods.hazardFrequency += b("hazardFrequency")
   mods.anomalyResist += b("anomalyResist")

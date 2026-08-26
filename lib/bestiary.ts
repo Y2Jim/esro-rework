@@ -18,6 +18,7 @@
 
 import type { Rarity } from "./types"
 import type { SkillUnlockId } from "./skill-effects"
+import type { TargetingStyle } from "./threat"
 
 export type CreatureClass = "construct" | "anomaly" | "beast" | "scavenger"
 
@@ -55,6 +56,12 @@ export interface Creature {
   /** Risk tiers this creature can appear at. */
   tiers: RiskTier[]
   /**
+   * How it chooses a victim. Defaults to `front` when omitted, so most things
+   * fight the front rank and a tank can do its job. A few fast or incorporeal
+   * creatures use `back` to punish parties that field no front line at all.
+   */
+  targeting?: TargetingStyle
+  /**
    * Pack profile. Present only on tameable beasts; its absence is what makes a
    * construct or anomaly impossible to tame.
    */
@@ -74,6 +81,9 @@ export const CREATURES: Creature[] = [
     description:
       "A standing charge that learned a shape. It drifts along dead cable runs and discharges when the air tastes of iron.",
     tiers: ["Low", "Medium", "High"],
+    // Incorporeal: it drifts straight through the front rank, so a shield wall
+    // does nothing to stop it reaching the specialists.
+    targeting: "back",
   },
   {
     id: "signal_husk",
@@ -98,6 +108,9 @@ export const CREATURES: Creature[] = [
     description:
       "Not one thing but a loose company of them, following caravans at the edge of lamplight and taking what falls behind.",
     tiers: ["Low", "Medium"],
+    // They hunt stragglers by definition, so they skip the line and go for
+    // whoever is trailing at the rear.
+    targeting: "back",
   },
   {
     id: "corrupted_relay",
@@ -122,6 +135,8 @@ export const CREATURES: Creature[] = [
     description:
       "A cloud of small contradictions. Individually harmless; collectively it edits the ground you were about to stand on.",
     tiers: ["High"],
+    // Area effect with no mind behind it: position offers no protection at all.
+    targeting: "any",
   },
   {
     id: "hollow_sentinel",
