@@ -41,6 +41,7 @@ export type SkillBonusKey =
   | "maxHpBonus" // extra crew HP pool
   | "badfailDowngrade" // chance a catastrophic failure becomes an ordinary one
   | "partyProtection" // chance a downed party member is spared
+  | "threat" // pulls enemy attacks onto this character and off the back line
   // --- Combat resolution ---
   | "critChance"
   | "counterChance" // negate an incoming exchange
@@ -84,6 +85,7 @@ export function emptySkillBonuses(): SkillBonuses {
     maxHpBonus: 0,
     badfailDowngrade: 0,
     partyProtection: 0,
+    threat: 0,
     critChance: 0,
     counterChance: 0,
     firstStrike: 0,
@@ -122,6 +124,7 @@ export const BONUS_SYSTEM: Record<SkillBonusKey, string> = {
   maxHpBonus: "Survival",
   badfailDowngrade: "Survival",
   partyProtection: "Survival",
+  threat: "Survival",
   critChance: "Combat",
   counterChance: "Combat",
   firstStrike: "Combat",
@@ -159,6 +162,7 @@ export const BONUS_FORMAT: Record<SkillBonusKey, "pct" | "flat"> = {
   maxHpBonus: "flat",
   badfailDowngrade: "pct",
   partyProtection: "pct",
+  threat: "pct",
   critChance: "pct",
   counterChance: "pct",
   firstStrike: "pct",
@@ -333,7 +337,7 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
       { id: "triage", effect: "badfailDowngrade", perLevel: 0.03, detail: "Chance a critical failure is downgraded" },
       { id: "stabilization", effect: "damageReduction", perLevel: 0.1, detail: "Wounds shaved off failed checks" },
       // Was `recoveryRate`, which nothing read. Repointed to partyProtection so
-      // "gets the crew back on their feet" happens where it matters — mid-run.
+      // "gets the crew back on their feet" happens where it matters ��� mid-run.
       { id: "remedies", effect: "partyProtection", perLevel: 0.02, detail: "Chance to keep a falling ally up" },
     ],
     breakpoints: [
@@ -404,11 +408,17 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Bulwark",
     linkedStat: "def",
-    summary: "Soaks damage for the whole crew and keeps the convoy standing.",
+    // Bulwark = take the hits. Guardwork = avoid them. Stated plainly because
+    // the two DEF skills were previously near-indistinguishable.
+    summary: "Steps in front of the crew and soaks the hits meant for them.",
     hooks: [
       { id: "shielding", effect: "damageReduction", perLevel: 0.15, detail: "Wounds shaved off failed checks" },
       { id: "bracing", effect: "hazardScore", perLevel: 0.02, detail: "Higher hazard check scores" },
-      { id: "interception", effect: "partyProtection", perLevel: 0.02, detail: "Chance to shield a downed ally" },
+      // Repointed from partyProtection, which was a byte-for-byte duplicate of
+      // Guardwork's `escorting` and left the two DEF skills feeling identical.
+      // Interception now means what it says: this character steps in front, so
+      // enemies pick them over the back line.
+      { id: "interception", effect: "threat", perLevel: 0.04, detail: "Draws enemy attacks onto you" },
     ],
     breakpoints: [
       { level: 5, unlock: "escort_contracts", label: "Convoy Guard", detail: "Accept escort contracts" },
@@ -418,7 +428,7 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Guardwork",
     linkedStat: "def",
-    summary: "Fewer ambushes on the road and safer escorts when they come.",
+    summary: "Avoids the fight entirely, and shields whoever falls when it can't.",
     hooks: [
       { id: "formation", effect: "battleFrequency", perLevel: -0.02, detail: "Fewer hostile encounters" },
       { id: "watchkeeping", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
@@ -749,6 +759,7 @@ export const BONUS_LABEL: Record<SkillBonusKey, string> = {
   maxHpBonus: "Max Crew HP",
   badfailDowngrade: "Disaster Downgrade",
   partyProtection: "Ally Protection",
+  threat: "Threat",
   critChance: "Critical Chance",
   counterChance: "Counter Chance",
   firstStrike: "First Strike",

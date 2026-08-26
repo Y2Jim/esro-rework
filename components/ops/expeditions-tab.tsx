@@ -32,6 +32,9 @@ export function ExpeditionsTab() {
   const startExpedition = useEsroStore((s) => s.startExpedition)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const skills = useEsroStore((s) => s.skills)
+  // Rituals are the Ritualism payoff. Read through the store so the UI and the
+  // toggleRitual guard can never disagree about who may prep.
+  const hasRitualism = useEsroStore((s) => s.hasRitualism())
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const getStatBonus = useEsroStore((s) => s.getStatBonus)
@@ -193,7 +196,16 @@ export function ExpeditionsTab() {
               <button
                 key={exp.id}
                 type="button"
-                onClick={() => setPendingExpedition({ id: exp.id, name: exp.label })}
+                onClick={() => {
+                  // Ritual prep is the Ritualism payoff. Without that skill there
+                  // is nothing to choose, so launch straight away rather than
+                  // opening a modal of things the player can never prepare.
+                  if (!hasRitualism) {
+                    startExpedition(exp.id, [])
+                    return
+                  }
+                  setPendingExpedition({ id: exp.id, name: exp.label })
+                }}
                 disabled={!!activeExpedition || !meetsRequirement}
                 className={cn(
                   "w-full rounded-lg border bg-[color:var(--color-panel)] p-3 text-left transition-colors",

@@ -146,6 +146,8 @@ export interface EsroState {
   preparedRituals: string[]
   toggleRitual: (id: string) => void
   learnRitual: (id: string) => void
+  /** Whether the player took Ritualism, which gates all ritual prep. */
+  hasRitualism: () => boolean
 
   // Bestiary + mounts
   /** Record a sighting. First sighting is what discovers the codex entry. */
@@ -781,6 +783,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     used: attunementUsed(get().preparedRituals),
   }),
 
+  hasRitualism: () => get().skills.some((s) => s.id === "ritualism" && !s.locked),
+
   toggleRitual: (id) => {
     const { preparedRituals, profile } = get()
     if (preparedRituals.includes(id)) {
@@ -789,6 +793,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
     const ritual = getRitual(id)
     if (!ritual) return
+    // Prepping anything at all requires Ritualism. Enforced here rather than only
+    // in the UI so the rule holds for every caller, and so a build that never took
+    // the skill can't end up carrying buffs it shouldn't have.
+    if (!get().hasRitualism()) return
     // Rites are taught by a skill unlock rather than a book, so they bypass the
     // known-ritual check and are gated on the unlock instead.
     if (ritual.requiresUnlock) {
@@ -2275,14 +2283,14 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
     const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
-    // Carry now comes from the beast actually hauling the load, so the Beast
-    // Tending unlocks gate *access* to taming while the mount supplies the
-    // number. Falls back to the old flat tiers when travelling unmounted, so an
-    // unlocked-but-untamed player is never worse off than before.
+    // The Beast Tending unlocks keep their flat carry, and an active mount adds
+    // on top. This has to stay additive: replacing the flat bonus with the
+    // mount's own carry made mounting a weak beast (+1) a downgrade for anyone
+    // holding both unlocks (+3), so taming could actively hurt you.
     const mount = getCreature(get().profile.activeMount ?? "")
-    const packSlots = mount
-      ? packContribution(mount).carry
-      : (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
+    const unlockCarry =
+      (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
+    const packSlots = unlockCarry + (mount ? packContribution(mount).carry : 0)
     // Extra loot slots are whole items, so they scale with what made it back.
     const numRewards = baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)
 

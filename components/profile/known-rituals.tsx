@@ -18,10 +18,13 @@ export function KnownRituals() {
   const focus = useEsroStore((s) => s.getPlayerStats().focus)
   const getAttunement = useEsroStore((s) => s.getAttunement)
   const attunement = getAttunement()
+  const hasRitualism = useEsroStore((s) => s.hasRitualism())
 
   if (!profile) return null
 
   const known = getRituals(profile.knownRituals)
+  // Books can be looted by anyone, but only Ritualism can actually prepare them.
+  // The panel stays visible either way so the skill's payoff is legible.
   const locked = RITUALS.filter((r) => !(profile.knownRituals ?? []).includes(r.id))
   // Locked rituals are identified only by where they come from, and several
   // share a source. Listing each one repeats the same line, so group by source
@@ -46,6 +49,13 @@ export function KnownRituals() {
           <span className="text-[color:var(--color-muted-2)]">(FOC {focus})</span>
         </span>
       </div>
+
+      {!hasRitualism && (
+        <div className="mt-2 flex items-center gap-1.5 rounded border border-[color:var(--color-amber)]/30 bg-[color:var(--color-amber)]/5 px-2 py-1.5 text-[13px] text-[color:var(--color-amber)]">
+          <Lock className="h-3 w-3 shrink-0" />
+          <span>Requires Ritualism to prepare on expeditions.</span>
+        </div>
+      )}
 
       <div className="mt-2 flex flex-col gap-1.5">
         {known.map((r) => (
