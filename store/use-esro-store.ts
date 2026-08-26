@@ -2654,3 +2654,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
   },
   }))
+
+// TEMP-V0-DEBUG: remove after visual verification.
+if (typeof window !== "undefined") {
+  ;(window as any).__esro = useEsroStore
+}

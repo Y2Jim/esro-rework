@@ -20,7 +20,14 @@ import {
   type CheckOutcome,
   type ExpEventType,
 } from "@/lib/expedition-sim"
-import { getCreature, hostilesForTier, tameablesForTier, type RiskTier } from "@/lib/bestiary"
+import {
+  SHINY_FILTER,
+  creatureSprite,
+  getCreature,
+  hostilesForTier,
+  tameablesForTier,
+  type RiskTier,
+} from "@/lib/bestiary"
 import { pickTarget, playerLine, roleLine, type TargetingStyle } from "@/lib/threat"
 import { aggregateSkillBonuses, getSkillUnlocks, skillPassiveList } from "@/lib/skill-effects"
 import type { AvatarConfig, BaseStats, RaceId } from "@/lib/types"
@@ -204,6 +211,8 @@ export function ActiveExpeditionView() {
   const hasRangedFocus = useEsroStore((s) => s.skills.some((k) => k.id === "marksmanship" && !k.locked))
   const recordEncounter = useEsroStore((s) => s.recordEncounter)
   const recordDefeat = useEsroStore((s) => s.recordDefeat)
+  // Needed so a shiny foe shows its recolour mid-fight, not just in the codex.
+  const bestiaryRecords = useEsroStore((s) => s.profile?.bestiary)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
 
@@ -797,8 +806,20 @@ export function ActiveExpeditionView() {
                   animate={battle.clash ? { x: [-4, 0], y: "-50%" } : { x: 0, y: "-50%" }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="flex h-6 w-6 -translate-x-1/2 rotate-45 items-center justify-center rounded-sm border border-[color:var(--color-danger)]/60 bg-[color:var(--color-danger)]/15">
-                    <span className="-rotate-45 text-[12px] text-[color:var(--color-danger)]">✶</span>
+                  {/* The foe's actual sprite, so an encounter reads as a
+                      specific creature rather than a generic threat marker.
+                      Kept in the danger-tinted frame that mirrors the crew
+                      token opposite it. */}
+                  <div className="h-7 w-7 -translate-x-1/2 overflow-hidden rounded-sm border border-[color:var(--color-danger)]/60 bg-[color:var(--color-bg)]">
+                    <img
+                      src={creatureSprite(battle.creatureId) || "/placeholder.svg"}
+                      alt=""
+                      className="h-full w-full object-contain"
+                      style={{
+                        imageRendering: "pixelated",
+                        ...(bestiaryRecords?.[battle.creatureId]?.shiny ? { filter: SHINY_FILTER } : {}),
+                      }}
+                    />
                   </div>
                 </motion.div>
               )}
