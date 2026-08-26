@@ -291,6 +291,36 @@ export function packContribution(creature: Creature | undefined): PackStats {
   return creature.pack
 }
 
+/**
+ * Sprite path for a creature. Art is stored under the creature id, so this is a
+ * derivation rather than a per-entry field that could drift out of sync.
+ */
+export function creatureSprite(id: string): string {
+  return `/bestiary/${id}.png`
+}
+
+/**
+ * Odds any given sighting turns up a recoloured variant.
+ *
+ * Deliberately steep: a shiny should be a story, not a milestone you expect to
+ * hit. Kept as a named constant so it can be tuned in one place.
+ */
+export const SHINY_CHANCE = 1 / 512
+
+/** Roll for a shiny on a fresh sighting. */
+export function rollShiny(): boolean {
+  return Math.random() < SHINY_CHANCE
+}
+
+/**
+ * CSS filter that recolours a sprite into its shiny variant.
+ *
+ * Done as a hue rotation over the single base sprite rather than a second set
+ * of images: it guarantees the variant can never go missing for a creature, and
+ * every future creature gets a shiny for free.
+ */
+export const SHINY_FILTER = "hue-rotate(150deg) saturate(1.6) brightness(1.15)"
+
 export const CLASS_LABEL: Record<CreatureClass, string> = {
   construct: "Construct",
   anomaly: "Anomaly",

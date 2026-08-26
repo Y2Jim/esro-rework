@@ -1,10 +1,18 @@
 "use client"
 
 import { useEsroStore } from "@/store/use-esro-store"
-import { CREATURES, CLASS_LABEL, TAMEABLE, packContribution, type Creature } from "@/lib/bestiary"
+import {
+  CREATURES,
+  CLASS_LABEL,
+  SHINY_FILTER,
+  TAMEABLE,
+  creatureSprite,
+  packContribution,
+  type Creature,
+} from "@/lib/bestiary"
 import { rarityColor, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
-import { PawPrint, Lock, Check } from "lucide-react"
+import { PawPrint, Lock, Check, Sparkles } from "lucide-react"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -99,6 +107,13 @@ export function BestiaryTab() {
                   )}
                 >
                   {activeMount === id && <Check className="h-3 w-3 shrink-0" />}
+                  {/* Small sprite so the mount is recognisable at a glance. */}
+                  <img
+                    src={creatureSprite(c.id) || "/placeholder.svg"}
+                    alt=""
+                    className="h-5 w-5 shrink-0 object-contain"
+                    style={{ imageRendering: "pixelated" }}
+                  />
                   {c.name}
                   <span className="text-[color:var(--color-muted-2)]">+{packContribution(c).carry}</span>
                 </button>
@@ -133,6 +148,7 @@ export function BestiaryTab() {
                 defeats={records[c.id]!.defeats}
                 firstSeen={records[c.id]!.firstSeen}
                 tamed={tamed.includes(c.id)}
+                shiny={!!records[c.id]!.shiny}
                 tameState={canTame(c.id)}
                 onTame={() => tameBeast(c.id)}
               />
@@ -151,6 +167,9 @@ export function BestiaryTab() {
                   key={c.id}
                   className="flex items-center gap-1.5 text-[13px] text-[color:var(--color-muted-2)]"
                 >
+                  {/* No sprite here on purpose: the art has an opaque baked
+                      background, so a silhouette filter would render a solid
+                      block rather than a shape. Staying spoiler-free instead. */}
                   <Lock className="h-3 w-3 shrink-0" />
                   {/* Habitat is the hint: enough to hunt for, not a spoiler. */}
                   <span className="truncate">{c.habitat}</span>
@@ -177,6 +196,7 @@ function CreatureRow({
   defeats,
   firstSeen,
   tamed,
+  shiny,
   tameState,
   onTame,
 }: {
@@ -185,6 +205,7 @@ function CreatureRow({
   defeats: number
   firstSeen: number
   tamed: boolean
+  shiny: boolean
   tameState: { ok: boolean; reason?: string }
   onTame: () => void
 }) {
@@ -192,15 +213,55 @@ function CreatureRow({
 
   return (
     <div className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1.5">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className={cn("text-[14px]", rarityColor[creature.rarity])}>{creature.name}</span>
-        <span className="shrink-0 text-[12px] text-[color:var(--color-muted-2)]">
-          {rarityLabel[creature.rarity]} · {CLASS_LABEL[creature.kind]}
-        </span>
-      </div>
+      <div className="flex gap-2">
+        {/* Sprite. Shinies reuse the same art under a hue shift, so a variant can
+            never be missing, and get a ring so they read as special at a glance. */}
+        <div
+          className={cn(
+            // Faint plate rather than a solid fill: the sprites are transparent
+            // cutouts, and several are near-black, so they need some lift to
+            // read against the panel without looking like boxed thumbnails.
+            "relative h-14 w-14 shrink-0 overflow-hidden rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)]",
+            shiny && "border-[color:var(--color-amber)]",
+          )}
+        >
+          <img
+            src={creatureSprite(creature.id) || "/placeholder.svg"}
+            alt=""
+            className="h-full w-full object-contain"
+            // imageRendering keeps the pixel art crisp when scaled; the hue
+            // shift is what turns the base sprite into its shiny variant.
+            style={{
+              imageRendering: "pixelated",
+              ...(shiny ? { filter: SHINY_FILTER } : {}),
+            }}
+          />
+          {shiny && (
+            <Sparkles className="absolute right-0.5 top-0.5 h-3 w-3 text-[color:var(--color-amber)]" />
+          )}
+        </div>
 
-      <div className="text-[13px] leading-relaxed text-[color:var(--color-muted)]">
-        {creature.description}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className={cn("text-[14px]", rarityColor[creature.rarity])}>
+              {/* nowrap keeps the name intact; the [SHINY] tag is what wraps. */}
+              <span className="whitespace-nowrap">{creature.name}</span>
+              {/* Bracketed so the tag never reads as part of the creature name. */}
+              {shiny && (
+                <span className="ml-1.5 whitespace-nowrap text-[12px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                  [shiny]
+                </span>
+              )}
+            </span>
+            <span className="shrink-0 text-[12px] text-[color:var(--color-muted-2)]">
+              {rarityLabel[creature.rarity]} · {CLASS_LABEL[creature.kind]}
+            </span>
+          </div>
+
+          <div className="text-[13px] leading-relaxed text-[color:var(--color-muted)]">
+            {creature.description}
+          </div>
+        </div>
       </div>
 
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-[color:var(--color-muted-2)]">

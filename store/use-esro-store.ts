@@ -97,6 +97,7 @@ import {
   TAME_UNLOCK,
   getCreature,
   packContribution,
+  rollShiny,
 } from "@/lib/bestiary"
 import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
@@ -831,6 +832,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const { profile } = get()
     const bestiary = profile.bestiary ?? {}
     const prev = bestiary[creatureId]
+    // Every sighting gets its own roll, but the flag is sticky: once a shiny has
+    // been logged an ordinary sighting must never overwrite it back to false.
+    const foundShiny = !prev?.shiny && rollShiny()
     set({
       profile: {
         ...profile,
@@ -841,11 +845,24 @@ export const useEsroStore = create<EsroState>((set, get) => ({
             defeats: prev?.defeats ?? 0,
             firstSeen: prev?.firstSeen ?? Date.now(),
             tamed: prev?.tamed,
+            shiny: prev?.shiny || foundShiny,
+            shinyAt: prev?.shinyAt ?? (foundShiny ? Date.now() : undefined),
           },
         },
       },
     })
-    // Only announce the first sighting; repeat encounters would spam the feed.
+    // A shiny is the rarest thing in the game, so it gets its own high-priority
+    // callout on whichever encounter turns it up — not just the first sighting.
+    if (foundShiny) {
+      get().addNotification({
+        title: "Anomalous variant",
+        body: `A shiny ${creature.name}. Recoloured, and the only one you have seen.`,
+        priority: "high",
+        deeplink: { screen: "profile" },
+      })
+      return
+    }
+    // Otherwise only announce the first sighting; repeats would spam the feed.
     if (!prev) {
       get().addNotification({
         title: "Bestiary updated",
@@ -2636,4 +2653,4 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       get().logAdminAction("delete_expedition", expedition.label, "Deleted expedition")
     }
   },
-}))
+  }))
