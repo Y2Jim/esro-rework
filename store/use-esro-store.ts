@@ -53,6 +53,7 @@ import {
 } from "@/config/faction"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import type { BaseStats } from "@/lib/types"
+import { derivedStatScore } from "@/lib/expedition-sim"
 import {
   applyXp,
   emptyAllocation,
@@ -684,8 +685,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       stats.def += allocated.def || 0
       stats.focus += allocated.focus || 0
       stats.luck += allocated.luck || 0
-      // Each point of DEF also thickens the HP pool, so tanky builds feel it.
-      stats.hp += (allocated.def || 0) * 2
+      // HP is intentionally level-driven; DEF remains the sole allocatable
+      // primary for Endurance and cannot be converted into free HP.
     }
 
     // Conditioning and other survivability skills widen the HP pool directly.
@@ -766,10 +767,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   getDerivedStats: () => {
     const s = get().getPlayerStats()
     return [
-      { label: "Combat", value: s.atk + s.def, from: "ATK + DEF" },
-      { label: "Endurance", value: s.def + s.focus, from: "DEF + FOC" },
-      { label: "Insight", value: s.focus + s.luck, from: "FOC + LUK" },
-      { label: "Navigation", value: s.luck + s.focus, from: "LUK + FOC" },
+      { label: "Combat", value: derivedStatScore(s.atk, s.def), from: "ATK + DEF" },
+      { label: "Endurance", value: derivedStatScore(s.def, s.hp), from: "DEF + HP" },
+      { label: "Insight", value: derivedStatScore(s.focus, s.luck), from: "FOC + LUK" },
+      { label: "Navigation", value: derivedStatScore(s.luck, s.focus), from: "LUK + FOC" },
       // The only place the hidden fishing bite-window bonus is surfaced. Left
       // deliberately vague so an attentive player can connect it themselves.
       { label: "Reflex", value: s.focus, from: "FOC" },

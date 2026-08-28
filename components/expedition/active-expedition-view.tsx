@@ -600,19 +600,21 @@ export function ActiveExpeditionView() {
         pushFeed("battle", `Opening found — ${b.enemy} staggered.`, "success")
       }
     }
-    // Squad takes a hit based on how badly outmatched it is, unless Guardwork
-    // negates the blow outright. counterChance was previously never read.
+    // The squad still takes the incoming hit. Riposte is a counter-hit now,
+    // not an immunity roll: when it procs, the enemy loses HP and the blow is
+    // routed through normal threat targeting as usual.
     if (Math.random() < b.plan.squadTakeChance) {
       if (Math.random() < b.plan.counterChance) {
-        pushFeed("battle", `Guard turns the blow — ${b.enemy} left open.`, "success")
-      } else {
-        // Route the attack through the creature's own targeting behaviour, so a
-        // back-line hunter bypasses the shield wall instead of feeding it.
-        damageRandomCrew(
-          b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1,
-          getCreature(b.creatureId)?.targeting ?? "front",
-        )
+        const counterDamage = 1 + b.plan.bonusDamage
+        b.hp = Math.max(0, b.hp - counterDamage)
+        pushFeed("battle", `Riposte — ${b.enemy} takes ${counterDamage} counter-damage.`, "success")
       }
+      // Route every incoming attack through the creature's targeting behaviour,
+      // including attacks that were answered by Riposte.
+      damageRandomCrew(
+        b.plan.overwhelmed && Math.random() < 0.5 ? 2 : 1,
+        getCreature(b.creatureId)?.targeting ?? "front",
+      )
     }
     if (b.hp <= 0) {
       b.active = false

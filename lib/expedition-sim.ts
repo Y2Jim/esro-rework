@@ -27,13 +27,27 @@ export interface StatCheck {
 /** Which stats govern each event type. `rest` has no check (always recovers). */
 export const EVENT_CHECK: Record<ExpEventType, StatCheck | null> = {
   battle: { primary: "atk", secondary: "def", label: "Combat" },
-  hazard: { primary: "def", secondary: "focus", label: "Endurance" },
+  // Endurance is Defense-led; HP is level-driven and therefore cannot be
+  // power-leveled by dumping points into a second allocatable stat.
+  hazard: { primary: "def", secondary: "hp", label: "Endurance" },
   discovery: { primary: "focus", secondary: "luck", label: "Insight" },
   travel: { primary: "luck", secondary: "focus", label: "Navigation" },
   rest: null,
 }
 
 const EMPTY_STATS: BaseStats = { hp: 0, atk: 0, def: 0, focus: 0, luck: 0 }
+
+/**
+ * Convert a primary/secondary pair into a derived check score.
+ * Secondary starts at half-rate (2 points per 1 score) and its cost rises as
+ * it grows, while primary remains the reliable one-for-one investment.
+ */
+export function derivedStatScore(primary: number, secondary: number): number {
+  const p = Math.max(0, primary)
+  const s = Math.max(0, secondary)
+  const secondaryRate = 0.5 / (1 + s / 20)
+  return p + s * secondaryRate
+}
 
 /** Deterministic string hash so derived member stats are stable per handle. */
 function hash(str: string): number {
@@ -413,8 +427,9 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
 
   if (!check) return base // rest: no check, always fine
 
-  // Squad capability for this check (primary fully, secondary at half weight).
-  let score = squad[check.primary] + squad[check.secondary] * 0.5
+  // Primary carries the check; secondary starts at half-rate and gets
+  // progressively more expensive so it cannot replace primary investment.
+  let score = derivedStatScore(squad[check.primary], squad[check.secondary])
   // Luck injects variance — a roll scaled by the squad's collective luck.
   score += rng() * (squad.luck * 0.2 + 2)
   // Apply lineage/faction percentage bonus for this event type.

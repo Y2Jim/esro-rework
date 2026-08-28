@@ -370,7 +370,7 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     summary: "Close-quarters edge work: stronger openings, punishing counters, clean finishes.",
     hooks: [
       { id: "edgework", effect: "battleScore", perLevel: 0.02, detail: "Higher combat check scores" },
-      { id: "riposte", effect: "counterChance", perLevel: 0.02, detail: "Chance to negate an incoming hit" },
+      { id: "riposte", effect: "counterChance", perLevel: 0.02, detail: "Chance to counter an incoming hit" },
       { id: "finishing", effect: "finishBonus", perLevel: 0.03, detail: "Bonus damage to a failing enemy" },
     ],
     breakpoints: [
