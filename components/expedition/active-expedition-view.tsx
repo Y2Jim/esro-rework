@@ -156,8 +156,37 @@ function shortHandle(handle: string) {
   return base.length > 9 ? base.slice(0, 9) : base
 }
 
+/** Calm event types a hostile slot can be defused into. */
+const CALM_EVENTS: EventType[] = ["travel", "discovery", "rest"]
+
+/**
+ * Re-weight a planned timeline to honour an encounter-frequency modifier.
+ *
+ * Negative means "fewer of this event" (Rest Breaks, Formation, Anchors and the
+ * warding ritual all push this way); positive means more. The magnitude is
+ * capped so even a fully-invested tree leaves real danger in a run.
+ */
+function applyEventFrequency(
+  plan: EventType[],
+  type: "battle" | "hazard",
+  freq: number,
+): EventType[] {
+  if (!freq) return plan
+  const magnitude = Math.min(0.75, Math.abs(freq))
+  return plan.map((t) => {
+    if (freq < 0 && t === type) return Math.random() < magnitude ? randItem(CALM_EVENTS) : t
+    if (freq > 0 && CALM_EVENTS.includes(t)) return Math.random() < magnitude ? type : t
+    return t
+  })
+}
+
 /** Build a paced event timeline, weighted by expedition risk. */
-function buildTimeline(risk: string, crew: CrewMember[]): TimelineEvent[] {
+function buildTimeline(
+  risk: string,
+  crew: CrewMember[],
+  battleFrequency = 0,
+  hazardFrequency = 0,
+): TimelineEvent[] {
   const slots = [0.06, 0.14, 0.22, 0.3, 0.38, 0.46, 0.54, 0.62, 0.7, 0.78, 0.86, 0.93]
 
   let plan: EventType[]
@@ -168,6 +197,11 @@ function buildTimeline(risk: string, crew: CrewMember[]): TimelineEvent[] {
   } else {
     plan = ["travel", "discovery", "battle", "travel", "hazard", "discovery", "battle", "rest", "discovery", "travel", "battle", "discovery"]
   }
+
+  // Encounter-frequency skills act here, on the plan itself. Previously these
+  // bonuses were aggregated but never read, so the nodes granting them were inert.
+  plan = applyEventFrequency(plan, "battle", battleFrequency)
+  plan = applyEventFrequency(plan, "hazard", hazardFrequency)
 
   const names = crew.map((c) => c.short)
   const pickPair = () => {
@@ -357,7 +391,12 @@ export function ActiveExpeditionView() {
     rareFindsRef.current = 0
     richFindsRef.current = 0
     cleanHarvestsRef.current = 0
-    timelineRef.current = buildTimeline(risk, initialCrew)
+    timelineRef.current = buildTimeline(
+      risk,
+      initialCrew,
+      runMods.battleFrequency,
+      runMods.hazardFrequency,
+    )
     phaseRef.current = "running"
     setPhase("running")
     forceTick()
