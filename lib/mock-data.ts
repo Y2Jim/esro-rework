@@ -15,6 +15,8 @@ import type {
   Skill,
   VanityItem,
 } from "./types"
+import { emptyAllocation, POINTS_PER_LEVEL } from "./leveling"
+import { STARTER_RITUALS } from "./rituals"
 
 export const channels: Channel[] = [
   {
@@ -455,7 +457,10 @@ export const expeditions: Expedition[] = [
     duration: 900,
     risk: "Low",
     tags: ["recon", "relay"],
-    requiredSkill: "surveying",
+    // Deliberately ungated. Skills can only be chosen at creation and never
+    // unlock afterwards, so gating every run on a skill let a combat-only build
+    // lock itself out of all expeditions permanently. The two Low-risk runs stay
+    // open as a guaranteed entry point.
     suggestedParty: 1,
     rewards: { xp: 35, tokens: 1, materials: ["scrap_wire x3", "relay_glass"] },
   },
@@ -466,7 +471,7 @@ export const expeditions: Expedition[] = [
     duration: 1200,
     risk: "Medium",
     tags: ["archive", "analysis"],
-    requiredSkill: "analysis",
+    requiredSkill: "lorekeeping",
     suggestedParty: 2,
     rewards: {
       xp: 45,
@@ -481,7 +486,7 @@ export const expeditions: Expedition[] = [
     duration: 780,
     risk: "Low",
     tags: ["supply", "logistics"],
-    requiredSkill: "logistics",
+    // Ungated alongside Signal Trace; see the note there.
     suggestedParty: 1,
     rewards: {
       xp: 30,
@@ -517,7 +522,7 @@ export const expeditions: Expedition[] = [
     duration: 1500,
     risk: "Medium",
     tags: ["support", "networking"],
-    requiredSkill: "networking",
+    requiredSkill: "warding",
     suggestedParty: 3,
     minLevel: 8,
     rewards: {
@@ -535,7 +540,7 @@ export const expeditions: Expedition[] = [
     duration: 1080,
     risk: "Low",
     tags: ["supply", "recovery"],
-    requiredSkill: "logistics",
+    requiredSkill: "conditioning",
     suggestedParty: 2,
     minLevel: 3,
     rewards: {
@@ -555,7 +560,7 @@ export const expeditions: Expedition[] = [
     duration: 720,
     risk: "Medium",
     tags: ["security", "patrol"],
-    requiredSkill: "security",
+    requiredSkill: "guardwork",
     suggestedParty: 2,
     minLevel: 1,
     rewards: {
@@ -572,9 +577,10 @@ export const expeditions: Expedition[] = [
     duration: 1800,
     risk: "Medium",
     tags: ["cartography", "exploration"],
-    requiredSkill: "cartography",
+    requiredSkill: "pathfinding",
     suggestedParty: 2,
     minLevel: 6,
+    requiresUnlock: "hidden_routes",
     rewards: {
       xp: 50,
       tokens: 2,
@@ -592,13 +598,14 @@ export const expeditions: Expedition[] = [
     duration: 2400,
     risk: "High",
     tags: ["archive", "rare"],
-    requiredSkill: "analysis",
+    requiredSkill: "lorekeeping",
     suggestedParty: 4,
     minLevel: 12,
+    requiresUnlock: "deep_ruins",
     stages: [
       { id: "s1", label: "Descent", description: "Navigate the outer layers", duration: 600, risk: "Low" },
-      { id: "s2", label: "Search", description: "Locate archive signatures", duration: 900, skillCheck: "analysis", risk: "Medium" },
-      { id: "s3", label: "Recovery", description: "Extract and stabilize finds", duration: 600, skillCheck: "recovery", risk: "High" },
+      { id: "s2", label: "Search", description: "Locate archive signatures", duration: 900, skillCheck: "lorekeeping", risk: "Medium" },
+      { id: "s3", label: "Recovery", description: "Extract and stabilize finds", duration: 600, skillCheck: "scavenging", risk: "High" },
       { id: "s4", label: "Ascent", description: "Return through shifting paths", duration: 300, risk: "Medium" },
     ],
     rewards: {
@@ -1194,6 +1201,9 @@ export const contracts: Contract[] = [
     status: "available",
     type: "neutral",
     difficulty: "hard",
+    // Surveying's `anomaly_zones` breakpoint — safely reading an anomaly is the
+    // entire job, so the contract cannot be signed without it.
+    requiresUnlock: "anomaly_zones",
   },
   {
     id: "n6",
@@ -1227,6 +1237,50 @@ export const contracts: Contract[] = [
     status: "available",
     type: "event",
     difficulty: "hard",
+  },
+
+  // Escort contracts — the content behind the `escort_contracts` breakpoint,
+  // which Field Medicine, Marksmanship, Bulwark and Vigilance all promise.
+  // Protected-convoy work: heavier pay, but it needs a crew that can keep a
+  // client alive rather than just move cargo.
+  {
+    id: "esc1",
+    label: "Physician's Passage",
+    issuer: "Hearth Wardens",
+    description:
+      "Walk a field physician between two outposts. She stops for the wounded whether or not the route is clear — your job is to make sure that never costs her anything.",
+    reward: "95 XP, 5 Relay Tokens, Triage Kit",
+    deadline: "18h",
+    status: "available",
+    type: "escort",
+    difficulty: "medium",
+    requiresUnlock: "escort_contracts",
+  },
+  {
+    id: "esc2",
+    label: "Salt Convoy",
+    issuer: "Open Roads",
+    description:
+      "Six carts of preserved stores crossing pressured ground. Slow, loud, and impossible to hide — the pay assumes you will be seen and holds the line anyway.",
+    reward: "120 XP, 7 Relay Tokens, Convoy Seal",
+    deadline: "24h",
+    status: "available",
+    type: "escort",
+    difficulty: "hard",
+    requiresUnlock: "escort_contracts",
+  },
+  {
+    id: "esc3",
+    label: "The Quiet Client",
+    issuer: "Veiled Circle",
+    description:
+      "One passenger, no cargo manifest, no questions. They pay for a route nobody logs and a crew that forgets the face at the far end.",
+    reward: "110 XP, 9 Relay Tokens, Unmarked Token",
+    deadline: "12h",
+    status: "available",
+    type: "escort",
+    difficulty: "hard",
+    requiresUnlock: "escort_contracts",
   },
 ]
 
@@ -1372,6 +1426,22 @@ export const vanityItems: VanityItem[] = [
   { id: "v62", label: "Eternal Courier's Light", layerType: "flair", variant: 15, rarity: "mythic", unlocked: false, equipped: false },
   { id: "v63", label: "Voidtouched Presence", layerType: "flair", variant: 16, rarity: "mythic", unlocked: false, equipped: false },
   { id: "v64", label: "Primordial Resonance", layerType: "flair", variant: 17, rarity: "mythic", unlocked: false, equipped: false },
+
+  // Tidal Set - accessories, one per rarity tier
+  { id: "v65", label: "Tide Goggles", layerType: "accessory", variant: 22, rarity: "common", unlocked: false, equipped: false },
+  { id: "v66", label: "Ashfall Veil", layerType: "accessory", variant: 23, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v67", label: "Currentweave Mask", layerType: "accessory", variant: 24, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v68", label: "Stormglass Lens", layerType: "accessory", variant: 25, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v69", label: "Leviathan's Regard", layerType: "accessory", variant: 26, rarity: "legendary", unlocked: false, equipped: false },
+  { id: "v70", label: "Tidecaller's Visage", layerType: "accessory", variant: 27, rarity: "mythic", unlocked: false, equipped: false },
+
+  // Tidal Set - hats, one per rarity tier
+  { id: "v71", label: "Reed Hat", layerType: "hat", variant: 24, rarity: "common", unlocked: false, equipped: false },
+  { id: "v72", label: "Lantern Rig", layerType: "hat", variant: 25, rarity: "uncommon", unlocked: false, equipped: false },
+  { id: "v73", label: "Deepline Coil", layerType: "hat", variant: 26, rarity: "rare", unlocked: false, equipped: false },
+  { id: "v74", label: "Stormglass Crown", layerType: "hat", variant: 27, rarity: "epic", unlocked: false, equipped: false },
+  { id: "v75", label: "Kelpwarden Wreath", layerType: "hat", variant: 28, rarity: "legendary", unlocked: false, equipped: false },
+  { id: "v76", label: "Abyssal Diadem", layerType: "hat", variant: 29, rarity: "mythic", unlocked: false, equipped: false },
 ]
 
 export const profile: Profile = {
@@ -1394,6 +1464,17 @@ export const profile: Profile = {
   level: 14,
   xp: 2840,
   xpToNext: 3200,
+  // This demo profile starts mid-game, so it carries the points those 14 levels
+  // would have granted, all unspent.
+  statPoints: 14 * POINTS_PER_LEVEL,
+  allocated: emptyAllocation(),
+  knownRituals: [...STARTER_RITUALS],
+  // A fixed literal rather than a relative Date.now() offset: this seed is
+  // spread into the Figma capture fixtures, and a moving date would make those
+  // snapshots differ on every run. Pinned to midday UTC rather than midnight so
+  // that rendering it in local time still reads as the 9th either side of the
+  // date line, instead of slipping a day for anyone west or far east of UTC.
+  createdAt: Date.UTC(2026, 2, 9, 12),
   tokens: 320,
   vanityItems: vanityItems,
   ownedTitles: [

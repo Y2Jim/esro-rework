@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { rarityColor } from "@/lib/rarity"
 import { STAT_COLORS, SKILL_DEFINITIONS } from "@/lib/game-data"
+import { UNLOCK_LABELS } from "@/lib/skill-effects"
 import type { BaseStats } from "@/lib/types"
+import { RitualPrep } from "@/components/ops/ritual-prep"
 
 /** Map expedition tags to relevant stats for bonus calculation */
 const TAG_STAT_MAP: Record<string, keyof BaseStats> = {
@@ -29,9 +32,18 @@ export function ExpeditionsTab() {
   const startExpedition = useEsroStore((s) => s.startExpedition)
   const cancelExpedition = useEsroStore((s) => s.cancelExpedition)
   const skills = useEsroStore((s) => s.skills)
+  // Rituals are the Ritualism payoff. Read through the store so the UI and the
+  // toggleRitual guard can never disagree about who may prep.
+  const hasRitualism = useEsroStore((s) => s.hasRitualism())
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const getStatBonus = useEsroStore((s) => s.getStatBonus)
-  
+
+  // Site chosen but not yet launched: the ritual prep step sits in between.
+  const [pendingExpedition, setPendingExpedition] = useState<{ id: string; name: string } | null>(
+    null,
+  )
+
   const playerStats = getPlayerStats()
   
   /** Calculate bonus percentage for an expedition based on relevant stats */
@@ -54,9 +66,8 @@ export function ExpeditionsTab() {
     // Check required skill's linked stat
     const skill = skills.find(s => s.id === exp.requiredSkill)
     if (skill && !skill.locked) {
-      const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skill.label)
-      if (skillDef) {
-        const linkedStat = skillDef.linkedStat as keyof BaseStats
+      const linkedStat = skill.linkedStat
+      if (linkedStat) {
         const bonus = getStatBonus(linkedStat)
         if (bonus > 0 && !relevantStats.find(r => r.stat === linkedStat)) {
           relevantStats.push({ stat: linkedStat, bonus })
@@ -171,14 +182,30 @@ export function ExpeditionsTab() {
         <div className="space-y-2">
           {expeditions.map((exp) => {
             const requiredSkill = skills.find(s => s.id === exp.requiredSkill)
-            const meetsRequirement = requiredSkill && !requiredSkill.locked
+            // Locked either by the run's base skill or by an unearned tier breakpoint.
+            const tierLocked = !!exp.requiresUnlock && !hasSkillUnlock(exp.requiresUnlock)
+            // An expedition with no requiredSkill is intentionally open to every
+            // build, so treat a missing requirement as satisfied. Previously the
+            // truthiness check meant "no requirement" read as "unmet", which is
+            // what left ungated runs unselectable.
+            const skillSatisfied = exp.requiredSkill ? !!requiredSkill && !requiredSkill.locked : true
+            const meetsRequirement = skillSatisfied && !tierLocked
             const { totalBonus, relevantStats } = getExpeditionBonus(exp)
 
             return (
               <button
                 key={exp.id}
                 type="button"
-                onClick={() => startExpedition(exp.id)}
+                onClick={() => {
+                  // Ritual prep is the Ritualism payoff. Without that skill there
+                  // is nothing to choose, so launch straight away rather than
+                  // opening a modal of things the player can never prepare.
+                  if (!hasRitualism) {
+                    startExpedition(exp.id, [])
+                    return
+                  }
+                  setPendingExpedition({ id: exp.id, name: exp.label })
+                }}
                 disabled={!!activeExpedition || !meetsRequirement}
                 className={cn(
                   "w-full rounded-lg border bg-[color:var(--color-panel)] p-3 text-left transition-colors",
@@ -196,6 +223,11 @@ export function ExpeditionsTab() {
                       {exp.minLevel && (
                         <span className="text-[13px] text-[color:var(--color-muted)]">
                           Lv.{exp.minLevel}+
+                        </span>
+                      )}
+                      {tierLocked && exp.requiresUnlock && (
+                        <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                          Needs {UNLOCK_LABELS[exp.requiresUnlock]}
                         </span>
                       )}
                     </div>
@@ -302,6 +334,17 @@ export function ExpeditionsTab() {
           })}
         </div>
       </div>
+
+      {pendingExpedition && (
+        <RitualPrep
+          expeditionName={pendingExpedition.name}
+          onClose={() => setPendingExpedition(null)}
+          onLaunch={(ritualIds) => {
+            startExpedition(pendingExpedition.id, ritualIds)
+            setPendingExpedition(null)
+          }}
+        />
+      )}
     </div>
   )
 }

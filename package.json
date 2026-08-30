@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "capture:figma": "node scripts/capture-figma.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -22,7 +23,9 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
+    "playwright": "^1.61.1",
     "postcss": "^8.4.49",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2"
   }

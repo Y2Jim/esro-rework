@@ -2,7 +2,7 @@
 
 import { useEsroStore } from "@/store/use-esro-store"
 import { EsroLogo } from "@/components/brand/esro-logo"
-import { getTitleClass } from "@/lib/rarity"
+import { getTitleStyle } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { Package } from "lucide-react"
 
@@ -26,7 +26,9 @@ export function IdentityBar() {
   // Use the equipped title from profile, fallback to identity
   const activeTitle = profile.title?.label || identity.title
   const activeRarity = profile.title?.rarity || identity.titleRarity
-  const titleClass = getTitleClass(activeRarity)
+  // Resolve by label as well as rarity so transcendent titles get their bespoke
+  // animation instead of the generic mythic gradient.
+  const { animClass, colorClass } = getTitleStyle(activeTitle, activeRarity)
   const itemCount = inventory.reduce((sum, item) => sum + item.qty, 0)
 
   return (
@@ -69,14 +71,15 @@ export function IdentityBar() {
           <div className="text-[15px] font-semibold text-[color:var(--color-foreground)] text-glow-soft">
             {identity.handle}
           </div>
-          <div
+          <span
             className={cn(
               "text-[14px] font-medium uppercase tracking-[0.2em]",
-              titleClass,
+              colorClass,
+              animClass,
             )}
           >
             {activeTitle}
-          </div>
+          </span>
         </div>
       </div>
     </div>

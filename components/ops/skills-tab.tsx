@@ -4,8 +4,10 @@ import { useState, useRef, useCallback } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { SKILL_DEFINITIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
+import { getSkillMechanic } from "@/lib/skill-effects"
 import type { BaseStats, Skill, SkillVariant } from "@/lib/types"
-import { X, Check } from "lucide-react"
+import { X, Check, Info } from "lucide-react"
+import { SkillDetail } from "./skill-detail"
 
 const LONG_PRESS_DURATION = 500 // ms
 
@@ -130,6 +132,7 @@ function SkillButton({
   info,
   onToggle,
   onLongPress,
+  onInspect,
   disabled,
 }: {
   skill: Skill
@@ -137,6 +140,7 @@ function SkillButton({
   info: { stat: keyof BaseStats; label: string; color: string; value: number; summary: string } | null
   onToggle: () => void
   onLongPress: () => void
+  onInspect: () => void
   disabled: boolean
 }) {
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
@@ -171,6 +175,15 @@ function SkillButton({
   const hasVariants = skill.variants && skill.variants.length > 0
 
   return (
+    <div
+      className={cn(
+        "flex items-stretch gap-1 rounded-lg border transition-colors",
+        isEquipped
+          ? "border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/10"
+          : "border-[color:var(--color-border)]",
+        disabled && "opacity-50"
+      )}
+    >
     <button
       type="button"
       onPointerDown={handlePointerDown}
@@ -178,13 +191,7 @@ function SkillButton({
       onPointerLeave={handlePointerLeave}
       onPointerCancel={handlePointerLeave}
       disabled={disabled}
-      className={cn(
-        "flex w-full items-start justify-between rounded-lg border px-3 py-2 text-left transition-colors select-none",
-        isEquipped
-          ? "border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/10 hover:bg-[color:var(--color-accent)]/20"
-          : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50",
-        disabled && "opacity-50"
-      )}
+      className="flex flex-1 items-start justify-between rounded-l-lg px-3 py-2 text-left transition-colors select-none"
     >
       <div className="flex-1">
         <div className="flex items-center gap-2">
@@ -236,6 +243,15 @@ function SkillButton({
         {isEquipped ? "−" : "+"}
       </span>
     </button>
+      <button
+        type="button"
+        onClick={onInspect}
+        aria-label={`View ${skill.label} effects`}
+        className="flex shrink-0 items-center border-l border-[color:var(--color-border)] px-2.5 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-border)]/40 hover:text-[color:var(--color-accent)]"
+      >
+        <Info className="h-4 w-4" />
+      </button>
+    </div>
   )
 }
 
@@ -247,20 +263,24 @@ export function SkillsTab() {
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
 
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null)
+  const [inspectedSkill, setInspectedSkill] = useState<Skill | null>(null)
 
   const playerStats = getPlayerStats()
 
   /** Get linked stat info and summary for a skill */
   const getSkillInfo = (skillLabel: string) => {
+    // Prefer the effects registry: its summaries describe what actually runs,
+    // and several of the original static ones promised absent systems.
+    const mech = getSkillMechanic(skillLabel)
     const skillDef = SKILL_DEFINITIONS.find((sd) => sd.name === skillLabel)
-    if (!skillDef) return null
-    const stat = skillDef.linkedStat as keyof BaseStats
+    const stat = (mech?.linkedStat ?? skillDef?.linkedStat) as keyof BaseStats | undefined
+    if (!stat) return null
     return {
       stat,
       label: STAT_LABELS[stat],
       color: STAT_COLORS[stat],
       value: playerStats[stat],
-      summary: skillDef.summary,
+      summary: mech?.summary ?? skillDef?.summary ?? "",
     }
   }
 
@@ -283,6 +303,11 @@ export function SkillsTab() {
           onSelect={handleSelectVariant}
           onClose={() => setSelectedSkill(null)}
         />
+      )}
+
+      {/* Effects Detail Modal */}
+      {inspectedSkill && (
+        <SkillDetail skill={inspectedSkill} onClose={() => setInspectedSkill(null)} />
       )}
 
       {/* Stats Overview */}
@@ -326,6 +351,7 @@ export function SkillsTab() {
                   info={info}
                   onToggle={() => toggleLoadout(skill.id)}
                   onLongPress={() => setSelectedSkill(skill)}
+                  onInspect={() => setInspectedSkill(skill)}
                   disabled={false}
                 />
               )
@@ -352,6 +378,7 @@ export function SkillsTab() {
                   info={info}
                   onToggle={() => toggleLoadout(skill.id)}
                   onLongPress={() => setSelectedSkill(skill)}
+                  onInspect={() => setInspectedSkill(skill)}
                   disabled={loadout.length >= 4}
                 />
               )

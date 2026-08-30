@@ -1684,7 +1684,10 @@
   display: inline-block;
 }
 
-/* Silence Between Stars - Cosmic emptiness and stellar whispers */
+/* Astral Wayfarer (.title-silence-stars) - Cosmic emptiness and stellar whispers.
+   Class and keyframe names keep the original "silence" slug: they are internal
+   identifiers referenced by the TRANSCENDENT_TITLE_ANIMATIONS maps, so renaming
+   them would be churn with no user-visible effect. */
 @keyframes silence-drift {
   0%, 100% {
     background-position: 0% 50%;
@@ -1849,4 +1852,33 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   color: var(--color-muted);
+}
+
+/* ============================================================
+   FIGMA CAPTURE SYSTEM (development tooling only)
+   Scoped styles used exclusively by the /figma-capture routes.
+   Safe to delete alongside the rest of the capture system.
+   ============================================================ */
+.figma-capture-mode {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+.figma-capture-stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+/* Freeze animated content so screenshots are byte-stable.
+   Zero-duration animations jump to their final (settled) frame. */
+.figma-capture-mode *,
+.figma-capture-mode *::before,
+.figma-capture-mode *::after {
+  animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001s !important;
+  transition-delay: 0s !important;
+  caret-color: transparent !important;
 }

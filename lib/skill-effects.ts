@@ -1,0 +1,788 @@
+import skillsConfig from "@/config/skills.json"
+import type { BaseStats, Skill, SkillStat } from "./types"
+
+/**
+ * ============================================================================
+ * SKILL MECHANICS REGISTRY
+ * ============================================================================
+ *
+ * Single source of truth for what every skill actually *does*. Before this
+ * file, a skill's only mechanical effect was a generic `linkedStat` bump and
+ * the `effects` array was never read by any system — every skill summary was a
+ * promise the game did not keep.
+ *
+ * Three scaling layers stack, so a skill matters at every point of its curve:
+ *
+ *   1. SUB-STAT HOOKS — each of a skill's three sub-stats drives its own
+ *      distinct effect, scaling with that sub-stat's level. This is what makes
+ *      Foraging vs Appraisal a real build decision instead of flavour text.
+ *   2. LINKED-STAT SCALING — the skill's overall level feeds its BaseStat
+ *      (+1 per 2 levels), preserved from the original behaviour.
+ *   3. TIER BREAKPOINTS — at levels 5 / 10 / 15 a skill grants a named unlock
+ *      (content, not numbers) so progression lands in steps you can feel.
+ */
+
+// ---------------------------------------------------------------------------
+// Effect keys
+// ---------------------------------------------------------------------------
+
+/**
+ * Every mechanical lever a skill can pull. Grouped by the system that reads it
+ * so it stays obvious which of these is load-bearing where.
+ */
+export type SkillBonusKey =
+  // --- Expedition stat checks (multiplicative score bonuses) ---
+  | "battleScore"
+  | "hazardScore"
+  | "discoveryScore"
+  | "travelScore"
+  // --- Expedition survivability ---
+  | "damageReduction" // flat wounds shaved off a failed check
+  | "maxHpBonus" // extra crew HP pool
+  | "badfailDowngrade" // chance a catastrophic failure becomes an ordinary one
+  | "partyProtection" // chance a downed party member is spared
+  | "threat" // pulls enemy attacks onto this character and off the back line
+  // --- Combat resolution ---
+  | "critChance"
+  | "counterChance" // negate an incoming exchange
+  | "firstStrike" // free opening exchange
+  | "battleDamage" // damage dealt per exchange
+  | "finishBonus" // bonus damage against a nearly-dead enemy
+  // --- Encounter frequency (fewer bad rolls, not better rolls) ---
+  | "battleFrequency" // negative = fewer hostile encounters
+  | "hazardFrequency" // negative = fewer hazards
+  | "anomalyResist"
+  // --- Gathering ---
+  | "materialYield"
+  | "rareChance"
+  | "gatherSpeed"
+  | "carryCapacity" // extra loot slots per run
+  | "bonusLoot"
+  | "salvageYield" // wreck / ruin nodes
+  | "fishingYield"
+  | "fishingSuccess"
+  // --- Crafting ---
+  | "craftCost" // negative = cheaper
+  | "craftSpeed"
+  | "craftQuality"
+  // --- Economy & meta ---
+  | "xpBonus"
+  | "contractReward"
+  | "factionContribution"
+  | "rollLuck" // rarity weighting in the rolling pool
+  | "hiddenRoute"
+  | "runDuration" // negative = faster expeditions
+
+export type SkillBonuses = Record<SkillBonusKey, number>
+
+export function emptySkillBonuses(): SkillBonuses {
+  return {
+    battleScore: 0,
+    hazardScore: 0,
+    discoveryScore: 0,
+    travelScore: 0,
+    damageReduction: 0,
+    maxHpBonus: 0,
+    badfailDowngrade: 0,
+    partyProtection: 0,
+    threat: 0,
+    critChance: 0,
+    counterChance: 0,
+    firstStrike: 0,
+    battleDamage: 0,
+    finishBonus: 0,
+    battleFrequency: 0,
+    hazardFrequency: 0,
+    anomalyResist: 0,
+    materialYield: 0,
+    rareChance: 0,
+    gatherSpeed: 0,
+    carryCapacity: 0,
+    bonusLoot: 0,
+    salvageYield: 0,
+    fishingYield: 0,
+    fishingSuccess: 0,
+    craftCost: 0,
+    craftSpeed: 0,
+    craftQuality: 0,
+    xpBonus: 0,
+    contractReward: 0,
+    factionContribution: 0,
+    rollLuck: 0,
+    hiddenRoute: 0,
+    runDuration: 0,
+  }
+}
+
+/** Which system consumes a given lever — drives the grouping in the Skills UI. */
+export const BONUS_SYSTEM: Record<SkillBonusKey, string> = {
+  battleScore: "Combat",
+  hazardScore: "Expedition",
+  discoveryScore: "Expedition",
+  travelScore: "Expedition",
+  damageReduction: "Survival",
+  maxHpBonus: "Survival",
+  badfailDowngrade: "Survival",
+  partyProtection: "Survival",
+  threat: "Survival",
+  critChance: "Combat",
+  counterChance: "Combat",
+  firstStrike: "Combat",
+  battleDamage: "Combat",
+  finishBonus: "Combat",
+  battleFrequency: "Expedition",
+  hazardFrequency: "Expedition",
+  anomalyResist: "Survival",
+  materialYield: "Gathering",
+  rareChance: "Gathering",
+  gatherSpeed: "Gathering",
+  carryCapacity: "Gathering",
+  bonusLoot: "Gathering",
+  salvageYield: "Gathering",
+  fishingYield: "Fishing",
+  fishingSuccess: "Fishing",
+  craftCost: "Crafting",
+  craftSpeed: "Crafting",
+  craftQuality: "Crafting",
+  xpBonus: "Progression",
+  contractReward: "Economy",
+  factionContribution: "Faction",
+  rollLuck: "Rolling",
+  hiddenRoute: "Expedition",
+  runDuration: "Expedition",
+}
+
+/** How a lever is rendered: a percentage, a flat number, or a slot count. */
+export const BONUS_FORMAT: Record<SkillBonusKey, "pct" | "flat"> = {
+  battleScore: "pct",
+  hazardScore: "pct",
+  discoveryScore: "pct",
+  travelScore: "pct",
+  damageReduction: "flat",
+  maxHpBonus: "flat",
+  badfailDowngrade: "pct",
+  partyProtection: "pct",
+  threat: "pct",
+  critChance: "pct",
+  counterChance: "pct",
+  firstStrike: "pct",
+  battleDamage: "pct",
+  finishBonus: "pct",
+  battleFrequency: "pct",
+  hazardFrequency: "pct",
+  anomalyResist: "pct",
+  materialYield: "pct",
+  rareChance: "pct",
+  gatherSpeed: "pct",
+  carryCapacity: "flat",
+  bonusLoot: "pct",
+  salvageYield: "pct",
+  fishingYield: "pct",
+  fishingSuccess: "pct",
+  craftCost: "pct",
+  craftSpeed: "pct",
+  craftQuality: "pct",
+  xpBonus: "pct",
+  contractReward: "pct",
+  factionContribution: "pct",
+  rollLuck: "pct",
+  hiddenRoute: "pct",
+  runDuration: "pct",
+}
+
+// ---------------------------------------------------------------------------
+// Unlocks
+// ---------------------------------------------------------------------------
+
+/**
+ * Content gated behind a skill tier. Consumed by the map (node access), the
+ * crafting bench (recipes), and the activity list (fishing, mounts).
+ */
+export type SkillUnlockId =
+  | "hidden_routes"
+  | "deep_ruins"
+  | "rare_nodes"
+  | "quality_harvest"
+  | "fishing_basic"
+  | "fishing_wrecks"
+  | "pack_beasts"
+  | "pack_train"
+  | "field_surgery"
+  | "advanced_recipes"
+  | "master_recipes"
+  | "anomaly_zones"
+  | "escort_contracts"
+  | "faction_rites"
+  | "archive_translation"
+
+/**
+ * Player-facing name for each unlock, for lock labels on buttons and cards.
+ *
+ * Exhaustive by type: adding a SkillUnlockId without a label here is a compile
+ * error. Previously each surface hand-rolled its own if/else chain, which
+ * silently mislabelled every gate it did not explicitly name.
+ */
+export const UNLOCK_LABELS: Record<SkillUnlockId, string> = {
+  hidden_routes: "Hidden Routes",
+  deep_ruins: "Deep Ruins",
+  rare_nodes: "Rare Nodes",
+  quality_harvest: "Quality Harvest",
+  fishing_basic: "Fishing",
+  fishing_wrecks: "Wreck Fishing",
+  pack_beasts: "Pack Beasts",
+  pack_train: "Pack Train",
+  field_surgery: "Field Surgery",
+  advanced_recipes: "Advanced Recipes",
+  master_recipes: "Master Recipes",
+  anomaly_zones: "Anomaly Zones",
+  escort_contracts: "Escort Contracts",
+  faction_rites: "Faction Rites",
+  archive_translation: "Archive Translation",
+}
+
+/** "Requires Deep Ruins" — the standard lock caption for a gated action. */
+export function unlockRequirementLabel(id: SkillUnlockId): string {
+  return `Requires ${UNLOCK_LABELS[id]}`
+}
+
+export interface SkillBreakpoint {
+  level: number
+  unlock: SkillUnlockId
+  label: string
+  detail: string
+}
+
+/**
+ * Content gated behind a raw stat threshold instead of a skill level.
+ *
+ * This exists because a skill cannot gate its own entry point: fishing was
+ * locked behind Fishing Lv.5, but Fishing XP is only earned by fishing, so the
+ * requirement could never be met. Stat gates break that loop because stats come
+ * from race, courier, character level and *other* skills.
+ */
+export interface StatUnlock {
+  unlock: SkillUnlockId
+  stat: keyof BaseStats
+  /** Minimum total stat value required. */
+  value: number
+  label: string
+  detail: string
+  /**
+   * Skill whose detail panel should display this gate. Several skills share a
+   * linked stat, so this is explicit rather than inferred from `stat`.
+   */
+  skill: string
+}
+
+export const STAT_UNLOCKS: StatUnlock[] = [
+  {
+    unlock: "fishing_basic",
+    stat: "luck",
+    value: 15,
+    label: "Cast Line",
+    detail: "Fish at water nodes",
+    skill: "Fishing",
+  },
+]
+
+export interface SubStatHook {
+  /** Sub-stat id, matching config/skills.json. */
+  id: string
+  effect: SkillBonusKey
+  /** Bonus contributed per level of this sub-stat. */
+  perLevel: number
+  /** Plain-language description for the UI. */
+  detail: string
+}
+
+export interface SkillMechanic {
+  /** Matches the `name` in config/skills.json. */
+  name: string
+  linkedStat: keyof BaseStats
+  /** Corrected summary — several originals promised systems that did not exist. */
+  summary: string
+  hooks: SubStatHook[]
+  breakpoints: SkillBreakpoint[]
+}
+
+// ---------------------------------------------------------------------------
+// The registry: 15 skills x 3 sub-stats = 45 distinct mechanical hooks
+// ---------------------------------------------------------------------------
+
+export const SKILL_MECHANICS: SkillMechanic[] = [
+  // ======================= HP =======================
+  {
+    name: "Conditioning",
+    linkedStat: "hp",
+    // Original read "+3% expedition duration", which as written was a penalty
+    // (longer runs). Inverted to a speed gain, which is what it clearly meant.
+    summary: "Shortens expeditions and blunts fatigue. Heavier packs, longer marches.",
+    hooks: [
+      { id: "marching", effect: "runDuration", perLevel: -0.006, detail: "Faster expedition legs" },
+      // Was `recoveryRate`. There is no post-run healing timer to speed up, so it
+      // never did anything; a tougher crew is the same promise the system can keep.
+      { id: "recovery", effect: "maxHpBonus", perLevel: 0.5, detail: "Hardier crew, more HP" },
+      { id: "loadbearing", effect: "carryCapacity", perLevel: 0.2, detail: "Extra loot slots per run" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "deep_ruins", label: "Long March", detail: "Endure the deep ruin routes" },
+      { level: 10, unlock: "pack_train", label: "Pack Discipline", detail: "Handle a second loaded pack animal" },
+    ],
+  },
+  {
+    name: "Field Medicine",
+    linkedStat: "hp",
+    summary: "Turns disasters into setbacks and gets the crew back on their feet faster.",
+    hooks: [
+      { id: "triage", effect: "badfailDowngrade", perLevel: 0.03, detail: "Chance a critical failure is downgraded" },
+      { id: "stabilization", effect: "damageReduction", perLevel: 0.1, detail: "Wounds shaved off failed checks" },
+      // Was `recoveryRate`, which nothing read. Repointed to partyProtection so
+      // "gets the crew back on their feet" happens where it matters ��� mid-run.
+      { id: "remedies", effect: "partyProtection", perLevel: 0.02, detail: "Chance to keep a falling ally up" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "field_surgery", label: "Field Surgery", detail: "Revive a downed crew member mid-run" },
+      { level: 10, unlock: "escort_contracts", label: "Medical Escort", detail: "Take on protected-convoy contracts" },
+    ],
+  },
+  {
+    name: "Beast Tending",
+    linkedStat: "hp",
+    summary: "Pack animals haul more and keep a steadier pace, raising what a run brings home.",
+    hooks: [
+      { id: "handling", effect: "carryCapacity", perLevel: 0.25, detail: "Extra loot slots per run" },
+      // Was `mountFatigue`, a lever no system ever read. Repointed to
+      // runDuration so well-tended animals genuinely shorten the route.
+      { id: "soothing", effect: "runDuration", perLevel: -0.004, detail: "Steadier pace shortens the route" },
+      { id: "harnessing", effect: "materialYield", perLevel: 0.015, detail: "More hauled back per haul" },
+    ],
+    breakpoints: [
+      // Label kept in pack-animal terms: there is no mount system to ride.
+      { level: 5, unlock: "pack_beasts", label: "First Beast", detail: "Pack animal adds a loot slot per run" },
+      { level: 10, unlock: "pack_train", label: "Pack Train", detail: "A second animal adds two more slots" },
+    ],
+  },
+
+  // ======================= ATK =======================
+  {
+    name: "Bladecraft",
+    linkedStat: "atk",
+    summary: "Close-quarters edge work: stronger openings, punishing counters, clean finishes.",
+    hooks: [
+      { id: "edgework", effect: "battleScore", perLevel: 0.02, detail: "Higher combat check scores" },
+      { id: "riposte", effect: "counterChance", perLevel: 0.02, detail: "Chance to counter an incoming hit" },
+      { id: "finishing", effect: "finishBonus", perLevel: 0.03, detail: "Bonus damage to a failing enemy" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "deep_ruins", label: "Cut Deeper", detail: "Clear the guarded ruin approaches" },
+      { level: 10, unlock: "advanced_recipes", label: "Blade Smithing", detail: "Craft advanced edged gear" },
+    ],
+  },
+  {
+    name: "Marksmanship",
+    linkedStat: "atk",
+    summary: "Opens fights at range and lands more critical hits.",
+    hooks: [
+      { id: "sighting", effect: "battleScore", perLevel: 0.015, detail: "Higher combat check scores" },
+      { id: "draw", effect: "firstStrike", perLevel: 0.025, detail: "Chance of a free opening shot" },
+      { id: "precision", effect: "critChance", perLevel: 0.02, detail: "Critical hit chance" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "escort_contracts", label: "Overwatch", detail: "Accept escort contracts" },
+      { level: 10, unlock: "advanced_recipes", label: "Munitions", detail: "Craft advanced ranged gear" },
+    ],
+  },
+  {
+    name: "Brawling",
+    linkedStat: "atk",
+    summary: "Hits harder up close and discourages hostiles from starting anything.",
+    hooks: [
+      { id: "clinch", effect: "battleScore", perLevel: 0.015, detail: "Higher combat check scores" },
+      { id: "breaks", effect: "battleFrequency", perLevel: -0.015, detail: "Fewer hostile encounters" },
+      { id: "impact", effect: "battleDamage", perLevel: 0.02, detail: "Damage dealt per exchange" },
+    ],
+    breakpoints: [{ level: 5, unlock: "deep_ruins", label: "Hold the Line", detail: "Push into contested ruins" }],
+  },
+
+  // ======================= DEF =======================
+  {
+    name: "Bulwark",
+    linkedStat: "def",
+    // Bulwark = take the hits. Guardwork = avoid them. Stated plainly because
+    // the two DEF skills were previously near-indistinguishable.
+    summary: "Steps in front of the crew and soaks the hits meant for them.",
+    hooks: [
+      { id: "shielding", effect: "damageReduction", perLevel: 0.15, detail: "Wounds shaved off failed checks" },
+      { id: "bracing", effect: "hazardScore", perLevel: 0.02, detail: "Higher hazard check scores" },
+      // Repointed from partyProtection, which was a byte-for-byte duplicate of
+      // Guardwork's `escorting` and left the two DEF skills feeling identical.
+      // Interception now means what it says: this character steps in front, so
+      // enemies pick them over the back line.
+      { id: "interception", effect: "threat", perLevel: 0.04, detail: "Draws enemy attacks onto you" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "escort_contracts", label: "Convoy Guard", detail: "Accept escort contracts" },
+      { level: 10, unlock: "anomaly_zones", label: "Storm Wall", detail: "Enter anomaly-touched zones" },
+    ],
+  },
+  {
+    name: "Guardwork",
+    linkedStat: "def",
+    summary: "Avoids the fight entirely, and shields whoever falls when it can't.",
+    hooks: [
+      { id: "formation", effect: "battleFrequency", perLevel: -0.02, detail: "Fewer hostile encounters" },
+      { id: "watchkeeping", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
+      { id: "escorting", effect: "partyProtection", perLevel: 0.02, detail: "Chance to shield a downed ally" },
+    ],
+    breakpoints: [{ level: 5, unlock: "escort_contracts", label: "Escort Duty", detail: "Accept escort contracts" }],
+  },
+  {
+    name: "Warding",
+    linkedStat: "def",
+    summary: "Holds anomalies at arm's length and cuts how often they strike.",
+    hooks: [
+      { id: "barriers", effect: "hazardScore", perLevel: 0.02, detail: "Higher hazard check scores" },
+      { id: "anchors", effect: "hazardFrequency", perLevel: -0.02, detail: "Fewer hazard events" },
+      { id: "resistance", effect: "anomalyResist", perLevel: 0.025, detail: "Reduced anomaly exposure" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "anomaly_zones", label: "Ward Walker", detail: "Enter anomaly-touched zones" },
+      { level: 10, unlock: "faction_rites", label: "Sealed Circles", detail: "Lead faction warding rites" },
+    ],
+  },
+
+  // ======================= LUCK =======================
+  {
+    name: "Gathering",
+    linkedStat: "luck",
+    summary: "More materials per node, gathered faster, at better quality.",
+    hooks: [
+      { id: "foraging", effect: "materialYield", perLevel: 0.025, detail: "Material quantity per node" },
+      { id: "harvesting", effect: "gatherSpeed", perLevel: 0.02, detail: "Gathering speed" },
+      { id: "appraisal", effect: "rareChance", perLevel: 0.015, detail: "Chance of a higher rarity tier" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "quality_harvest", label: "Clean Harvest", detail: "Harvest without degrading a node" },
+      { level: 10, unlock: "rare_nodes", label: "Rich Seams", detail: "Work rare material nodes" },
+    ],
+  },
+  {
+    name: "Fishing",
+    linkedStat: "luck",
+    summary: "Works water and wreck sites for catches and submerged salvage.",
+    hooks: [
+      { id: "casting", effect: "fishingYield", perLevel: 0.03, detail: "Catch quantity" },
+      { id: "tension", effect: "fishingSuccess", perLevel: 0.02, detail: "Chance to land a catch" },
+      { id: "salvage", effect: "salvageYield", perLevel: 0.025, detail: "Yield from wreck sites" },
+    ],
+    // "fishing_basic" deliberately lives in STAT_UNLOCKS (Luck 15) rather than
+    // here — gating the rod behind Fishing Lv.5 was unreachable, since Fishing
+    // XP only comes from fishing. Wreck diving stays a skill gate because by
+    // then the player can actually earn Fishing levels.
+    breakpoints: [
+      { level: 10, unlock: "fishing_wrecks", label: "Wreck Diving", detail: "Salvage submerged wrecks" },
+    ],
+  },
+  {
+    name: "Scavenging",
+    linkedStat: "luck",
+    summary: "Spots what others walked past, and strips more out of every find.",
+    hooks: [
+      { id: "spotting", effect: "discoveryScore", perLevel: 0.02, detail: "Higher discovery check scores" },
+      { id: "extraction", effect: "bonusLoot", perLevel: 0.02, detail: "Chance of bonus loot" },
+      // Was `sellValue`, but there is no market or selling system to price into.
+      // Repointed to salvageYield, which keeps the "worth more per find" idea.
+      { id: "haggling", effect: "salvageYield", perLevel: 0.02, detail: "More stripped from each find" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "deep_ruins", label: "Ruin Crawler", detail: "Search the deep ruin levels" },
+      { level: 10, unlock: "rare_nodes", label: "Tech Stripper", detail: "Strip rare component caches" },
+    ],
+  },
+
+  // ======================= FOCUS =======================
+  {
+    name: "Pathfinding",
+    linkedStat: "focus",
+    summary: "Reads the ground, finds routes nobody charted, and shortens the trip.",
+    hooks: [
+      { id: "surveying", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
+      { id: "routing", effect: "hiddenRoute", perLevel: 0.025, detail: "Chance to reveal a hidden route" },
+      { id: "survival", effect: "runDuration", perLevel: -0.005, detail: "Shorter expedition legs" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "hidden_routes", label: "Trailblazer", detail: "Hidden map routes become visible" },
+      { level: 10, unlock: "anomaly_zones", label: "Deep Survey", detail: "Chart anomaly-touched zones" },
+    ],
+  },
+  {
+    name: "Ritualism",
+    linkedStat: "focus",
+    summary: "Sharpens contract terms, marks better gear, and carries weight in the faction.",
+    hooks: [
+      { id: "channeling", effect: "contractReward", perLevel: 0.02, detail: "Contract payouts" },
+      { id: "sigils", effect: "craftQuality", perLevel: 0.02, detail: "Crafted item quality" },
+      { id: "invocation", effect: "factionContribution", perLevel: 0.025, detail: "Faction contribution value" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "faction_rites", label: "Rite Keeper", detail: "Lead faction rites" },
+      { level: 10, unlock: "master_recipes", label: "Marked Work", detail: "Craft master-tier gear" },
+    ],
+  },
+  {
+    name: "Lorekeeping",
+    linkedStat: "focus",
+    summary: "Turns archives into experience, and knows what a find is really worth.",
+    hooks: [
+      { id: "recall", effect: "xpBonus", perLevel: 0.02, detail: "Experience gained" },
+      { id: "translation", effect: "discoveryScore", perLevel: 0.02, detail: "Higher discovery check scores" },
+      { id: "analysis", effect: "rollLuck", perLevel: 0.015, detail: "Better rarity odds when rolling" },
+    ],
+    breakpoints: [
+      { level: 5, unlock: "archive_translation", label: "Translator", detail: "Read sealed archive fragments" },
+      { level: 10, unlock: "master_recipes", label: "Lost Techniques", detail: "Craft master-tier gear" },
+    ],
+  },
+]
+
+export function getSkillMechanic(name: string): SkillMechanic | undefined {
+  return SKILL_MECHANICS.find((m) => m.name === name)
+}
+
+// ---------------------------------------------------------------------------
+// Runtime skill construction
+// ---------------------------------------------------------------------------
+
+/**
+ * Stable slug for a skill name, e.g. "Field Medicine" -> "field_medicine".
+ * Used as the runtime `Skill.id` so saves and expedition `requiredSkill`
+ * references stay readable.
+ */
+export function skillIdFromName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "_")
+}
+
+interface RawSkillDef {
+  name: string
+  linkedStat: string
+  summary: string
+  stats: { id: string; name: string }[]
+}
+
+const RAW_SKILLS = skillsConfig.skills as RawSkillDef[]
+
+/**
+ * Starting levels for the demo profile. Previously the runtime skill list was a
+ * separate, hand-written set whose names mostly did not exist in
+ * config/skills.json — so all but one skill silently contributed nothing. These
+ * levels keep the old demo's shape (a few developed skills, the rest to earn)
+ * while running on the canonical 15.
+ */
+const DEMO_SKILL_LEVELS: Record<string, number> = {
+  Scavenging: 6,
+  Gathering: 5,
+  Pathfinding: 4,
+  Lorekeeping: 3,
+  Conditioning: 2,
+  Bladecraft: 2,
+}
+
+/** Spread a skill's level across its three sub-stats, front-weighted. */
+function distribute(level: number, count: number): number[] {
+  const out = Array<number>(count).fill(0)
+  for (let i = 0; i < level; i++) out[i % count] += 1
+  return out
+}
+
+/**
+ * Build the canonical runtime skill list from config/skills.json.
+ *
+ * This is the single source of truth: the same 15 skills the character-creation
+ * screen offers are the ones the store holds, so every skill resolves to a
+ * mechanic instead of falling through.
+ */
+export function createInitialSkills(unlockedNames?: string[]): Skill[] {
+  return RAW_SKILLS.map((def) => {
+    const mech = getSkillMechanic(def.name)
+    const level = unlockedNames
+      ? unlockedNames.includes(def.name)
+        ? 1
+        : 0
+      : (DEMO_SKILL_LEVELS[def.name] ?? 0)
+    const spread = distribute(level, def.stats.length)
+
+    const stats: SkillStat[] = def.stats.map((s, i) => ({
+      id: s.id,
+      name: s.name,
+      level: spread[i],
+      progress: 0,
+    }))
+
+    return {
+      id: skillIdFromName(def.name),
+      label: def.name,
+      // Prefer the registry summary: several config summaries described systems
+      // that did not exist, and Conditioning's was inverted into a penalty.
+      summary: mech?.summary ?? def.summary,
+      level,
+      maxLevel: 20,
+      locked: level <= 0,
+      linkedStat: def.linkedStat as keyof BaseStats,
+      stats,
+    }
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Aggregation
+// ---------------------------------------------------------------------------
+
+/** Tier thresholds. A skill's breakpoints fire as its level crosses these. */
+export const SKILL_TIERS = [5, 10, 15] as const
+
+/**
+ * Roll every unlocked skill's sub-stat hooks into one bonus set.
+ *
+ * A sub-stat contributes `perLevel * subStatLevel`. When a skill has no
+ * per-sub-stat detail recorded we fall back to the skill's own level spread
+ * evenly across its hooks, so a skill is never silently worth nothing.
+ */
+export function aggregateSkillBonuses(skills: Skill[]): SkillBonuses {
+  const out = emptySkillBonuses()
+
+  for (const skill of skills) {
+    if (skill.locked || skill.level <= 0) continue
+    const mech = getSkillMechanic(skill.label)
+    if (!mech) continue
+
+    for (const hook of mech.hooks) {
+      const sub = skill.stats?.find((s) => s.id === hook.id)
+      // Fall back to the parent skill level when sub-stats aren't tracked yet.
+      const lvl = sub ? sub.level : skill.level
+      out[hook.effect] += hook.perLevel * lvl
+    }
+  }
+
+  return out
+}
+
+/**
+ * The strongest effect from each unlocked skill, formatted for the expedition
+ * readiness panel so skills read as first-class passives next to lineage and
+ * faction traits.
+ */
+export function skillPassiveList(
+  skills: Skill[],
+): { source: "Skill"; name: string; effect: string }[] {
+  const out: { source: "Skill"; name: string; effect: string }[] = []
+
+  for (const skill of skills) {
+    if (skill.locked || skill.level <= 0) continue
+    const mech = getSkillMechanic(skill.label)
+    if (!mech) continue
+
+    // Rank this skill's hooks by contribution and surface the top one.
+    let best: { effect: SkillBonusKey; value: number } | null = null
+    for (const hook of mech.hooks) {
+      const sub = skill.stats?.find((s) => s.id === hook.id)
+      const lvl = sub ? sub.level : skill.level
+      if (lvl <= 0) continue
+      const value = hook.perLevel * lvl
+      if (!best || Math.abs(value) > Math.abs(best.value)) {
+        best = { effect: hook.effect, value }
+      }
+    }
+    if (!best) continue
+
+    out.push({
+      source: "Skill",
+      name: `${skill.label} Lv.${skill.level}`,
+      effect: `${BONUS_LABEL[best.effect]} ${formatBonus(best.effect, best.value)}`,
+    })
+  }
+
+  return out
+}
+
+/** Every unlock the player's current skill levels have earned. */
+export function getSkillUnlocks(skills: Skill[], stats?: BaseStats): Set<SkillUnlockId> {
+  const unlocked = new Set<SkillUnlockId>()
+  for (const skill of skills) {
+    if (skill.locked || skill.level <= 0) continue
+    const mech = getSkillMechanic(skill.label)
+    if (!mech) continue
+    for (const bp of mech.breakpoints) {
+      if (skill.level >= bp.level) unlocked.add(bp.unlock)
+    }
+  }
+  // Stat-threshold gates. Stats are optional so callers that only care about
+  // skill tiers keep working; those simply see no stat unlocks.
+  if (stats) {
+    for (const gate of STAT_UNLOCKS) {
+      if (stats[gate.stat] >= gate.value) unlocked.add(gate.unlock)
+    }
+  }
+  return unlocked
+}
+
+/** The next breakpoint a skill is working toward, for the progress UI. */
+export function nextBreakpoint(skill: Skill): SkillBreakpoint | undefined {
+  const mech = getSkillMechanic(skill.label)
+  if (!mech) return undefined
+  return mech.breakpoints.find((bp) => skill.level < bp.level)
+}
+
+/** Linked-stat contribution: +1 per 2 skill levels (original behaviour). */
+export function skillStatContribution(skill: Skill): { stat: keyof BaseStats; amount: number } | null {
+  const mech = getSkillMechanic(skill.label)
+  if (!mech || skill.locked || skill.level <= 0) return null
+  return { stat: mech.linkedStat, amount: Math.floor(skill.level / 2) }
+}
+
+/** Format a bonus for display, e.g. "+12%" or "+2". */
+export function formatBonus(key: SkillBonusKey, value: number): string {
+  if (BONUS_FORMAT[key] === "flat") {
+    const rounded = Math.round(value * 10) / 10
+    return `${rounded >= 0 ? "+" : ""}${rounded}`
+  }
+  const pct = Math.round(value * 1000) / 10
+  return `${pct >= 0 ? "+" : ""}${pct}%`
+}
+
+/** Human-readable label for a lever, derived from its key. */
+export const BONUS_LABEL: Record<SkillBonusKey, string> = {
+  battleScore: "Combat Score",
+  hazardScore: "Hazard Score",
+  discoveryScore: "Discovery Score",
+  travelScore: "Travel Score",
+  damageReduction: "Damage Reduction",
+  maxHpBonus: "Max Crew HP",
+  badfailDowngrade: "Disaster Downgrade",
+  partyProtection: "Ally Protection",
+  threat: "Threat",
+  critChance: "Critical Chance",
+  counterChance: "Counter Chance",
+  firstStrike: "First Strike",
+  battleDamage: "Combat Damage",
+  finishBonus: "Finishing Blow",
+  battleFrequency: "Hostile Encounters",
+  hazardFrequency: "Hazard Events",
+  anomalyResist: "Anomaly Resistance",
+  materialYield: "Material Yield",
+  rareChance: "Rare Find Chance",
+  gatherSpeed: "Gathering Speed",
+  carryCapacity: "Carry Capacity",
+  bonusLoot: "Bonus Loot Chance",
+  salvageYield: "Salvage Yield",
+  fishingYield: "Catch Yield",
+  fishingSuccess: "Catch Rate",
+  craftCost: "Crafting Cost",
+  craftSpeed: "Crafting Speed",
+  craftQuality: "Craft Quality",
+  xpBonus: "Experience Gain",
+  contractReward: "Contract Rewards",
+  factionContribution: "Faction Contribution",
+  rollLuck: "Roll Rarity Odds",
+  hiddenRoute: "Hidden Route Chance",
+  runDuration: "Expedition Duration",
+}

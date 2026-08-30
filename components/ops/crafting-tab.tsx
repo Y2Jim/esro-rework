@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
-import { CRAFTING_RECIPES, CATEGORY_CONFIG } from "@/config/crafting-recipes"
+import { CRAFTING_RECIPES, CATEGORY_CONFIG, recipeUnlockFor } from "@/config/crafting-recipes"
+import { craftingBonusesFrom } from "@/config/faction"
 import type { CraftingCategory, CraftingRecipe } from "@/lib/types"
 import { rarityColor } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 
-const categories: CraftingCategory[] = ["food", "potion", "component", "gear", "special"]
+const categories: CraftingCategory[] = ["food", "potion", "component", "gear", "special", "bait"]
 
 export function CraftingTab() {
   const inventory = useEsroStore((s) => s.inventory)
@@ -15,7 +16,29 @@ export function CraftingTab() {
   const activeCraft = useEsroStore((s) => s.activeCraft)
   const craftItem = useEsroStore((s) => s.craftItem)
   const completeCraft = useEsroStore((s) => s.completeCraft)
-  
+  const factionBuildings = useEsroStore((s) => s.factionBuildings)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+  const getSkillBonuses = useEsroStore((s) => s.getSkillBonuses)
+
+  // Faction building buffs plus skill bonuses, matching how the store computes
+  // the craft so displayed costs and times never drift from what is consumed.
+  const buildingBonuses = craftingBonusesFrom(factionBuildings)
+  const skillFx = getSkillBonuses()
+  const bonuses = {
+    cost: buildingBonuses.cost + skillFx.craftCost,
+    speed: buildingBonuses.speed + skillFx.craftSpeed,
+    yield: buildingBonuses.yield + skillFx.craftQuality,
+  }
+  const hasBuffs = bonuses.speed > 0 || bonuses.yield > 0 || bonuses.cost > 0
+  // Mirror the store's material-cost reduction so the UI matches what is actually consumed.
+  const effQty = (qty: number) => Math.max(1, Math.ceil(qty * (1 - bonuses.cost)))
+
+  /** Tier breakpoint a recipe needs but the player has not earned yet. */
+  const missingUnlock = (recipe: CraftingRecipe) => {
+    const needed = recipeUnlockFor(recipe.output.rarity)
+    return needed && !hasSkillUnlock(needed) ? needed : null
+  }
+
   const [selectedCategory, setSelectedCategory] = useState<CraftingCategory>("food")
   const [selectedRecipe, setSelectedRecipe] = useState<CraftingRecipe | null>(null)
   const [craftMessage, setCraftMessage] = useState<string | null>(null)
@@ -26,12 +49,13 @@ export function CraftingTab() {
     (i) => ["supply", "salvage", "herb", "mineral", "essence", "material"].includes(i.aspect)
   )
 
-  // Check if player has ingredients for a recipe
+  // Check if player has ingredients for a recipe (against the buffed requirement)
   const canCraft = (recipe: CraftingRecipe) => {
     if (!recipe.unlocked) return false
+    if (missingUnlock(recipe)) return false
     for (const ing of recipe.ingredients) {
       const owned = inventory.find(i => i.id === ing.itemId || i.label === ing.label)
-      if (!owned || owned.qty < ing.qty) return false
+      if (!owned || owned.qty < effQty(ing.qty)) return false
     }
     return true
   }
@@ -86,6 +110,33 @@ export function CraftingTab() {
           Materials <span className="text-[color:var(--color-text)]">{materials.length}</span>
         </span>
       </div>
+
+      {/* Faction building buffs */}
+      {hasBuffs && (
+        <div className="rounded-lg border border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/10 p-2">
+          <div className="flex items-center gap-1.5 text-[12px] uppercase tracking-wider text-[color:var(--color-accent)]">
+            <span aria-hidden="true">⚒</span>
+            Faction Bench Buffs
+          </div>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {bonuses.speed > 0 && (
+              <span className="rounded border border-[color:var(--color-cyan)]/40 bg-[color:var(--color-cyan)]/10 px-1.5 py-0.5 text-[12px] text-[color:var(--color-cyan)]">
+                -{Math.round(bonuses.speed * 100)}% craft time
+              </span>
+            )}
+            {bonuses.yield > 0 && (
+              <span className="rounded border border-[color:var(--color-green)]/40 bg-[color:var(--color-green)]/10 px-1.5 py-0.5 text-[12px] text-[color:var(--color-green)]">
+                +{Math.round(bonuses.yield * 100)}% bonus yield
+              </span>
+            )}
+            {bonuses.cost > 0 && (
+              <span className="rounded border border-[color:var(--color-amber)]/40 bg-[color:var(--color-amber)]/10 px-1.5 py-0.5 text-[12px] text-[color:var(--color-amber)]">
+                -{Math.round(bonuses.cost * 100)}% material cost
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Active craft progress */}
       {activeCraft && (
@@ -149,6 +200,7 @@ export function CraftingTab() {
           {filteredRecipes.map((recipe) => {
             const craftable = canCraft(recipe)
             const isSelected = selectedRecipe?.id === recipe.id
+            const tierLock = missingUnlock(recipe)
             return (
               <button
                 key={recipe.id}
@@ -168,14 +220,28 @@ export function CraftingTab() {
                   <span className={cn("text-[14px] font-medium", rarityColor[recipe.output.rarity])}>
                     {recipe.label}
                   </span>
-                  {craftable && !activeCraft && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-green)]" />
+                  {tierLock ? (
+                    <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                      Locked
+                    </span>
+                  ) : (
+                    craftable &&
+                    !activeCraft && <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-green)]" />
                   )}
                 </div>
-                {!recipe.unlocked && recipe.requiredSkill && (
+                {tierLock ? (
                   <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
-                    Requires {recipe.requiredSkill} Lv.{recipe.requiredSkillLevel}
+                    {tierLock === "master_recipes"
+                      ? "Needs Ritualism 10 or Lorekeeping 10"
+                      : "Needs Bladecraft 10 or Marksmanship 10"}
                   </div>
+                ) : (
+                  !recipe.unlocked &&
+                  recipe.requiredSkill && (
+                    <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
+                      Requires {recipe.requiredSkill} Lv.{recipe.requiredSkillLevel}
+                    </div>
+                  )
                 )}
               </button>
             )
@@ -204,7 +270,9 @@ export function CraftingTab() {
                 <div className="space-y-1">
                   {selectedRecipe.ingredients.map((ing, idx) => {
                     const owned = getOwnedQty(ing.itemId, ing.label)
-                    const hasEnough = owned >= ing.qty
+                    const need = effQty(ing.qty)
+                    const reduced = need < ing.qty
+                    const hasEnough = owned >= need
                     return (
                       <div
                         key={idx}
@@ -212,7 +280,10 @@ export function CraftingTab() {
                       >
                         <span className="text-[color:var(--color-text)]">{ing.label}</span>
                         <span className={hasEnough ? "text-[color:var(--color-green)]" : "text-[color:var(--color-danger)]"}>
-                          {owned}/{ing.qty}
+                          {reduced && (
+                            <span className="mr-1 text-[color:var(--color-muted)] line-through">{ing.qty}</span>
+                          )}
+                          {owned}/{need}
                         </span>
                       </div>
                     )
@@ -230,9 +301,18 @@ export function CraftingTab() {
                     <span className={cn("text-[14px] font-medium", rarityColor[selectedRecipe.output.rarity])}>
                       {selectedRecipe.output.label}
                     </span>
-                    <span className="text-[13px] text-[color:var(--color-muted)]">
-                      x{selectedRecipe.output.qty}
-                    </span>
+                    {(() => {
+                      const bonusQty = Math.round(selectedRecipe.output.qty * bonuses.yield)
+                      const totalQty = selectedRecipe.output.qty + bonusQty
+                      return (
+                        <span className="text-[13px] text-[color:var(--color-muted)]">
+                          x{totalQty}
+                          {bonusQty > 0 && (
+                            <span className="ml-1 text-[color:var(--color-green)]">(+{bonusQty})</span>
+                          )}
+                        </span>
+                      )
+                    })()}
                   </div>
                   {selectedRecipe.output.effects && (
                     <div className="mt-1 space-y-0.5">
@@ -247,9 +327,19 @@ export function CraftingTab() {
               </div>
 
               {/* Craft time */}
-              <div className="text-[12px] text-[color:var(--color-muted)]">
-                Craft time: {selectedRecipe.craftTime}s
-              </div>
+              {(() => {
+                const effTime = Math.round(selectedRecipe.craftTime * (1 - bonuses.speed))
+                const reduced = effTime < selectedRecipe.craftTime
+                return (
+                  <div className="text-[12px] text-[color:var(--color-muted)]">
+                    Craft time:{" "}
+                    {reduced && (
+                      <span className="mr-1 line-through">{selectedRecipe.craftTime}s</span>
+                    )}
+                    <span className={reduced ? "text-[color:var(--color-cyan)]" : undefined}>{effTime}s</span>
+                  </div>
+                )
+              })()}
 
               {/* Craft button */}
               <button

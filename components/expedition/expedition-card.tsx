@@ -23,7 +23,8 @@ export function ExpeditionCard({ exp }: { exp: Expedition }) {
             {exp.label}
           </h4>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0 text-[13px] uppercase tracking-[0.22em] text-[color:var(--color-muted)]">
-            <span>req · {exp.requiredSkill}</span>
+            {/* Ungated runs have no requiredSkill; don't render "req · undefined". */}
+            <span>{exp.requiredSkill ? `req · ${exp.requiredSkill}` : "open to all"}</span>
             <span className="text-[color:var(--color-muted-2)]">·</span>
             <span>party {exp.suggestedParty}</span>
           </div>

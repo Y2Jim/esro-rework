@@ -11,8 +11,14 @@ import type {
   Expedition,
   ActiveExpedition,
   FactionProject,
+  FactionBuilding,
+  FactionRally,
+  FactionActivity,
+  FactionView,
   Friend,
   InventoryItem,
+  FishingCatch,
+  FishingState,
   OpsTab,
   PartyMember,
   Profile,
@@ -20,6 +26,7 @@ import type {
   ProfileTitle,
   QuickAction,
   RecoveryResult,
+  RouteRecord,
   ScreenId,
   Skill,
   Rarity,
@@ -36,7 +43,32 @@ import type {
   AdminAction,
 } from "@/lib/types"
 import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById, DEFAULT_BASE_STATS, SKILL_DEFINITIONS } from "@/lib/game-data"
+import {
+  FACTION_BUILDINGS,
+  RANK_TIERS,
+  buildingUpgradeCost,
+  craftingBonusesFrom,
+  seedFactionActivity,
+  seedFactionRallies,
+} from "@/config/faction"
+import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import type { BaseStats } from "@/lib/types"
+import { derivedStatScore } from "@/lib/expedition-sim"
+import {
+  applyXp,
+  emptyAllocation,
+  POINTS_PER_LEVEL,
+  spentPoints,
+  type AllocatableStat,
+} from "@/lib/leveling"
+import {
+  attunementCapacity,
+  attunementUsed,
+  getRitual,
+  getRituals,
+  MAJOR_RITUAL_BOOKS,
+  MINOR_RITUAL_BOOKS,
+} from "@/lib/rituals"
 import {
   channels as seedChannels,
   contracts as seedContracts,
@@ -50,8 +82,31 @@ import {
   quickActions as seedQuickActions,
   recoveryResults as seedRecovery,
   shards as seedShards,
-  skills as seedSkills,
 } from "@/lib/mock-data"
+import {
+  aggregateSkillBonuses,
+  createInitialSkills,
+  getSkillMechanic,
+  getSkillUnlocks,
+  skillIdFromName,
+  type SkillBonuses,
+  type SkillUnlockId,
+} from "@/lib/skill-effects"
+import {
+  CLASS_LABEL,
+  TAME_MASTER_UNLOCK,
+  TAME_UNLOCK,
+  getCreature,
+  packContribution,
+  rollShiny,
+} from "@/lib/bestiary"
+import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
+import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
+import { recipeUnlockFor } from "@/config/crafting-recipes"
+import { dayKey, rotateContracts } from "@/lib/contract-rotation"
+
+/** Archive reconstruction passes, cheapest first. */
+export type RecoveryMode = "standard" | "focused" | "translation"
 
 export interface EsroState {
   booted: boolean
@@ -75,12 +130,51 @@ export interface EsroState {
   // Player Stats
   getPlayerStats: () => BaseStats
   getStatBonus: (stat: keyof BaseStats) => number
-  
+
+  // Leveling & stat allocation
+  /** Award XP and resolve any level-ups it triggers. */
+  awardXp: (amount: number) => void
+  /** Spend one unspent point on a core stat. */
+  allocateStat: (stat: AllocatableStat, amount?: number) => void
+  /** Refund every spent point back into the pool. */
+  respecStats: () => void
+  /** Sub-stats derived from the core stats, as used by expedition checks. */
+  getDerivedStats: () => { label: string; value: number; from: string }[]
+
+  // Rituals (Focus)
+  /** Attunement capacity from Focus, and how much the given set consumes. */
+  getAttunement: () => { capacity: number; used: number }
+  /** Rituals prepped for the next launch. */
+  preparedRituals: string[]
+  toggleRitual: (id: string) => void
+  learnRitual: (id: string) => void
+  /** Whether the player took Ritualism, which gates all ritual prep. */
+  hasRitualism: () => boolean
+
+  // Bestiary + mounts
+  /** Record a sighting. First sighting is what discovers the codex entry. */
+  recordEncounter: (creatureId: string) => void
+  /** Record a kill. Field notes only; taming is gated on encounters, not kills. */
+  recordDefeat: (creatureId: string) => void
+  /** Bring a beast in as a pack animal. No-op unless `canTame` allows it. */
+  tameBeast: (creatureId: string) => void
+  /** Set the active pack animal, or pass null to travel unmounted. */
+  setActiveMount: (creatureId: string | null) => void
+  /** Whether this beast can be tamed right now, plus why not when it can't. */
+  canTame: (creatureId: string) => { ok: boolean; reason?: string }
+
+
   // Navigation
   screen: ScreenId
   setScreen: (s: ScreenId) => void
   opsTab: OpsTab
   setOpsTab: (t: OpsTab) => void
+  /** World-map node to preselect when the Map tab mounts (deep-link target). */
+  mapFocusNodeId: string | null
+  setMapFocus: (id: string | null) => void
+  /** Faction sub-view to open when the Faction tab mounts (deep-link target). */
+  factionViewRequest: FactionView | null
+  requestFactionView: (v: FactionView | null) => void
 
   // Terminal (Chat)
   channel: ChannelId
@@ -101,7 +195,11 @@ export interface EsroState {
   // Ops - Expeditions
   expeditions: Expedition[]
   activeExpedition: ActiveExpedition | null
-  startExpedition: (id: string) => void
+  /**
+   * Launch a run. `ritualIds` is optional so existing call sites that launch
+   * without a prep step keep working; omitted means "use preparedRituals".
+   */
+  startExpedition: (id: string, ritualIds?: string[]) => void
   cancelExpedition: () => void
 
   // Ops - Skills
@@ -111,29 +209,85 @@ export interface EsroState {
   /** Alias of toggleLoadout used by loadout UI components */
   toggleLoadoutSkill: (id: string) => void
   setSkillVariant: (skillId: string, variantId: string) => void
+  /** Aggregated mechanical effects of every unlocked skill sub-stat. */
+  getSkillBonuses: () => SkillBonuses
+  /** Content unlocked by skill tier breakpoints (levels 5 / 10 / 15). */
+  getSkillUnlocks: () => Set<string>
+  hasSkillUnlock: (id: string) => boolean
+  /** Unlock ids forced on via admin dev tools, bypassing the skill requirement. */
+  debugUnlocks: SkillUnlockId[]
+  toggleDebugUnlock: (id: SkillUnlockId) => void
+  clearDebugUnlocks: () => void
 
   // Ops - Crafting/Rolling
   inventory: InventoryItem[]
   shards: typeof seedShards
   recovery: RecoveryResult[]
   lastRecovered: RecoveryResult | null
-  runRecovery: (mode: "standard" | "focused") => void
+  /**
+   * "translation" is the Lorekeeping payoff: it reads the sealed packets the
+   * other two passes cannot, and is gated on the `archive_translation` unlock.
+   */
+  runRecovery: (mode: RecoveryMode) => void
   clearLastRecovered: () => void
   activeCraft: { recipeId: string; label: string; startedAt: number; duration: number } | null
   craftItem: (recipeId: string) => { success: boolean; message: string }
   completeCraft: () => void
   addMaterials: () => void // Admin function to add crafting materials
 
+  // Ops - Fishing (gated behind the Fishing skill's tier unlocks)
+  fishing: FishingState
+  /** Bait the player has chosen to fish with. Required to cast. */
+  selectedBaitId: string | null
+  setBait: (baitId: string) => void
+  /** How much of a given bait is in the inventory. */
+  getBaitCount: (baitId: string) => number
+  /** Timestamp of the last free grub dig, for the cooldown. */
+  lastDigAt: number | null
+  /**
+   * Free fallback bait so "bait required" can never hard-lock a courier who
+   * has no materials. Returns false while still on cooldown.
+   */
+  digForGrubs: () => boolean
+  /**
+   * Drop the line at a spot with a bait. Consumes one bait.
+   * Returns false if the spot is locked or the bait is not in the inventory.
+   */
+  castLine: (spotId: string, baitId: string) => boolean
+  /** A fish has taken the bait; the store picks which one and opens the window. */
+  triggerBite: () => void
+  /** Player struck. Lands the catch if the window is still open. */
+  setHook: () => void
+  /** Window closed without a strike, or the player reeled in early. */
+  reelIn: () => void
+  fishingLog: FishingCatch[]
+
   // Contracts
   contracts: Contract[]
+  /** Every contract that can be drawn; `contracts` is today's subset. */
+  contractPool: Contract[]
+  /** Local day key the current board was generated for. */
+  contractDay: string
+  rotateContractsIfStale: () => void
   acceptContract: (id: string) => void
   cancelContract: (id: string) => void
   
   // Social - Party
   party: PartyMember[]
-  
+  invitePartyMember: () => { success: boolean; message: string }
+  removePartyMember: (slot: number) => void
+  setPartyMemberRole: (slot: number, role: string) => void
+  readyUpParty: () => void
+
   // Social - Faction
   factionProjects: FactionProject[]
+  factionBuildings: FactionBuilding[]
+  factionRallies: FactionRally[]
+  factionActivity: FactionActivity[]
+  contributeToProject: (projectId: string, amount: number) => { success: boolean; message: string }
+  upgradeBuilding: (buildingId: string) => { success: boolean; message: string }
+  joinRally: (rallyId: string) => void
+  contributeToRally: (rallyId: string, amount: number) => { success: boolean; message: string }
   
   // Social - Friends
   friends: Friend[]
@@ -148,6 +302,10 @@ export interface EsroState {
   profileTab: "summary" | "notifications"
   setProfileTab: (tab: "summary" | "notifications") => void
   setActiveTitle: (titleId: string) => void
+  /** Push a new unread notification; id and timestamp are assigned here. */
+  addNotification: (
+    n: Omit<ProfileNotification, "id" | "state" | "createdAt">
+  ) => void
   markNotificationRead: (id: number) => void
   openNotification: (notification: ProfileNotification) => void
   clearNotification: (id: number) => void
@@ -162,7 +320,7 @@ export interface EsroState {
   unlockAllCosmetics: () => void
   unlockAllTitles: () => void
   simulateExpedition: (expeditionId?: string) => void
-  completeActiveExpedition: () => void
+  completeActiveExpedition: (lootMultiplier?: number) => void
   injectTestChatMessages: () => void
   
   // Admin Panel
@@ -190,8 +348,13 @@ export interface EsroState {
   deleteExpedition: (id: string) => void
 }
 
-function rollRarity(focused: boolean): Rarity {
-  const r = Math.random()
+/**
+ * @param luck Rollcraft / Lorekeeping bonus. Shrinks the random draw so it
+ *   lands in the rarer bands more often — luck of 0.2 makes a roll behave as
+ *   if it came in 20% lower.
+ */
+function rollRarity(focused: boolean, luck = 0): Rarity {
+  const r = Math.random() * (1 - Math.min(0.6, Math.max(0, luck)))
   if (focused) {
     if (r < 0.02) return "legendary"
     if (r < 0.1) return "epic"
@@ -226,11 +389,13 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Basic Shades", type: "cosmetic", vanityData: { layerType: "accessory", variant: 5 } },
     { label: "Dust Goggles", type: "cosmetic", vanityData: { layerType: "accessory", variant: 6 } },
     { label: "Worn Bandana", type: "cosmetic", vanityData: { layerType: "accessory", variant: 7 } },
+    { label: "Tide Goggles", type: "cosmetic", vanityData: { layerType: "accessory", variant: 22 } },
     // Hats
     { label: "Route Cap", type: "cosmetic", vanityData: { layerType: "hat", variant: 1 } },
     { label: "Dust Hood", type: "cosmetic", vanityData: { layerType: "hat", variant: 7 } },
     { label: "Signal Beanie", type: "cosmetic", vanityData: { layerType: "hat", variant: 8 } },
     { label: "Worn Helmet", type: "cosmetic", vanityData: { layerType: "hat", variant: 9 } },
+    { label: "Reed Hat", type: "cosmetic", vanityData: { layerType: "hat", variant: 24 } },
     // Flair
     { label: "Soft Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 4 } },
     { label: "Dust Motes", type: "cosmetic", vanityData: { layerType: "flair", variant: 5 } },
@@ -250,11 +415,13 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Relay Earpiece", type: "cosmetic", vanityData: { layerType: "accessory", variant: 8 } },
     { label: "Signal Monocle", type: "cosmetic", vanityData: { layerType: "accessory", variant: 9 } },
     { label: "Route Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 10 } },
+    { label: "Ashfall Veil", type: "cosmetic", vanityData: { layerType: "accessory", variant: 23 } },
     // Hats
     { label: "Signal Antenna", type: "cosmetic", vanityData: { layerType: "hat", variant: 3 } },
     { label: "Relay Headset", type: "cosmetic", vanityData: { layerType: "hat", variant: 10 } },
     { label: "Archive Hood", type: "cosmetic", vanityData: { layerType: "hat", variant: 11 } },
     { label: "Scout Helm", type: "cosmetic", vanityData: { layerType: "hat", variant: 12 } },
+    { label: "Lantern Rig", type: "cosmetic", vanityData: { layerType: "hat", variant: 25 } },
     // Flair
     { label: "Signal Flicker", type: "cosmetic", vanityData: { layerType: "flair", variant: 6 } },
     { label: "Route Trails", type: "cosmetic", vanityData: { layerType: "flair", variant: 7 } },
@@ -272,11 +439,13 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Deep Scanner", type: "cosmetic", vanityData: { layerType: "accessory", variant: 11 } },
     { label: "Rift Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 12 } },
     { label: "Echo Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 13 } },
+    { label: "Currentweave Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 24 } },
     // Hats
     { label: "Relay Horns", type: "cosmetic", vanityData: { layerType: "hat", variant: 4 } },
     { label: "Drift Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 13 } },
     { label: "Echo Circlet", type: "cosmetic", vanityData: { layerType: "hat", variant: 14 } },
     { label: "Signal Crest", type: "cosmetic", vanityData: { layerType: "hat", variant: 15 } },
+    { label: "Deepline Coil", type: "cosmetic", vanityData: { layerType: "hat", variant: 26 } },
     // Flair
     { label: "Sparkle Effect", type: "cosmetic", vanityData: { layerType: "flair", variant: 3 } },
     { label: "Echo Ripples", type: "cosmetic", vanityData: { layerType: "flair", variant: 8 } },
@@ -292,10 +461,12 @@ const POOL: Record<Rarity, PoolItem[]> = {
     // Accessories
     { label: "Void Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 14 } },
     { label: "Prismatic Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 15 } },
+    { label: "Stormglass Lens", type: "cosmetic", vanityData: { layerType: "accessory", variant: 25 } },
     // Hats
     { label: "Archive Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 5 } },
     { label: "Void Helm", type: "cosmetic", vanityData: { layerType: "hat", variant: 16 } },
     { label: "Rift Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 17 } },
+    { label: "Stormglass Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 27 } },
     // Flair
     { label: "Static Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 2 } },
     { label: "Pulse Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 1 } },
@@ -309,9 +480,11 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Signal Sovereign", type: "title" },
     // Accessories
     { label: "All-Seeing Eye", type: "cosmetic", vanityData: { layerType: "accessory", variant: 16 } },
+    { label: "Leviathan's Regard", type: "cosmetic", vanityData: { layerType: "accessory", variant: 26 } },
     // Hats
     { label: "Crown of Routes", type: "cosmetic", vanityData: { layerType: "hat", variant: 6 } },
     { label: "Primordial Antlers", type: "cosmetic", vanityData: { layerType: "hat", variant: 18 } },
+    { label: "Kelpwarden Wreath", type: "cosmetic", vanityData: { layerType: "hat", variant: 28 } },
     // Flair
     { label: "Prismatic Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 11 } },
     { label: "Celestial Flame", type: "cosmetic", vanityData: { layerType: "flair", variant: 12 } },
@@ -320,12 +493,76 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Origin Cipher", type: "title" },
     { label: "Worldcurrent Antlers", type: "cosmetic", vanityData: { layerType: "hat", variant: 19 } },
     { label: "Genesis Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 13 } },
+    { label: "Tidecaller's Visage", type: "cosmetic", vanityData: { layerType: "accessory", variant: 27 } },
+    { label: "Abyssal Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 29 } },
   ],
   admin: [
     { label: "Architect's Seal", type: "title" },
     { label: "Root Access Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 20 } },
   ],
 }
+
+// ============ FACTION HELPERS ============
+
+function randItem<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+let factionActivitySeq = 0
+
+/** Prepend a faction activity entry, capping the log length. */
+function pushActivity(
+  list: FactionActivity[],
+  entry: Omit<FactionActivity, "id" | "at"> & { at?: number },
+): FactionActivity[] {
+  factionActivitySeq += 1
+  const full: FactionActivity = {
+    id: `fa-live-${factionActivitySeq}`,
+    at: entry.at ?? Date.now(),
+    ...entry,
+  }
+  return [full, ...list].slice(0, 40)
+}
+
+/**
+ * Apply a standing gain to the profile's faction, handling rank-ups against the
+ * cumulative RANK_TIERS thresholds. `bonus` is a fractional multiplier (0.15 = +15%).
+ */
+function applyStanding(
+  profile: Profile,
+  rawAmount: number,
+  bonus: number,
+): { profile: Profile; gained: number; rankedUp: boolean; newRank: number } {
+  if (!profile.faction) return { profile, gained: 0, rankedUp: false, newRank: 0 }
+  const gained = Math.max(0, Math.round(rawAmount * (1 + bonus)))
+  let { rank, standing, maxStanding } = profile.faction
+  standing += gained
+  let rankedUp = false
+  const maxRank = RANK_TIERS.length - 1
+  while (standing >= maxStanding && rank < maxRank) {
+    standing -= maxStanding
+    rank += 1
+    rankedUp = true
+    const nextDelta =
+      (RANK_TIERS[rank + 1]?.standing ?? RANK_TIERS[rank].standing + 1000) - RANK_TIERS[rank].standing
+    maxStanding = Math.max(100, nextDelta)
+  }
+  if (rank >= maxRank) standing = Math.min(standing, maxStanding)
+  return {
+    profile: { ...profile, faction: { ...profile.faction, rank, standing, maxStanding } },
+    gained,
+    rankedUp,
+    newRank: rank,
+  }
+}
+
+const PARTY_ROLES = ["Logistics", "Surveying", "Analysis", "Security", "Relay Tuning", "Scavenging"]
+const PARTY_TITLES: { label: string; rarity: Rarity }[] = [
+  { label: "Route Tender", rarity: "common" },
+  { label: "Signal Keeper", rarity: "uncommon" },
+  { label: "Archive Listener", rarity: "rare" },
+  { label: "Waystone Keeper", rarity: "epic" },
+]
 
 export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
@@ -347,6 +584,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       characterRace: race,
       characterCourier: courier,
       isNewUser: false,
+      // The player's chosen starter skills start unlocked at level 1; the rest
+      // stay locked to be earned. Previously starterSkills was accepted and
+      // then discarded, so character creation had no mechanical effect.
+      skills: createInitialSkills(starterSkills),
+      loadout: starterSkills.slice(0, 4).map(skillIdFromName),
       identity: {
         ...identity,
         handle: `@${handle}`,
@@ -358,6 +600,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         handle: `@${handle}`,
         race: race,
         courier: courier,
+        // Stamped once, here, so it records when the courier was actually made
+        // rather than when the profile was last touched.
+        createdAt: Date.now(),
       },
     })
   },
@@ -418,18 +663,332 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     stats.focus += levelBonus
     stats.luck += levelBonus
     
-    // Add skill bonuses (each unlocked skill linked to a stat gives +1 to that stat)
-    skills.forEach(skill => {
-      if (!skill.locked && skill.level > 0) {
-        const skillDef = SKILL_DEFINITIONS.find(sd => sd.name === skill.label)
-        if (skillDef) {
-          const linkedStat = skillDef.linkedStat as keyof BaseStats
-          stats[linkedStat] += Math.floor(skill.level / 2) // +1 per 2 skill levels
-        }
+    // Add skill bonuses (+1 to the linked stat per 2 skill levels).
+    // Reads linkedStat off the skill itself, which is populated from
+    // config/skills.json. The old lookup matched skill.label against
+    // SKILL_DEFINITIONS and missed on all but one skill, so 8 of 9 skills
+    // contributed nothing.
+    skills.forEach((skill) => {
+      if (skill.locked || skill.level <= 0) return
+      const linkedStat = skill.linkedStat ?? getSkillMechanic(skill.label)?.linkedStat
+      if (linkedStat) {
+        stats[linkedStat] += Math.floor(skill.level / 2)
       }
     })
-    
+
+    // Points the player spent from level-ups. Added here so every consumer —
+    // expedition checks, the Luck 15 fishing gate, the readiness panel — picks
+    // them up without any further wiring.
+    const allocated = profile.allocated
+    if (allocated) {
+      stats.atk += allocated.atk || 0
+      stats.def += allocated.def || 0
+      stats.focus += allocated.focus || 0
+      stats.luck += allocated.luck || 0
+      // HP is intentionally level-driven; DEF remains the sole allocatable
+      // primary for Endurance and cannot be converted into free HP.
+    }
+
+    // Conditioning and other survivability skills widen the HP pool directly.
+    stats.hp += Math.round(get().getSkillBonuses().maxHpBonus)
+
     return stats
+  },
+
+  /**
+   * Award XP and resolve level-ups. This is the only place XP enters the
+   * profile; before it existed, `rewards.xp` was dead data and levels never
+   * moved, so stat points were unreachable.
+   */
+  awardXp: (amount) => {
+    if (amount <= 0) return
+    const { profile } = get()
+    const result = applyXp(profile, amount)
+
+    set({
+      profile: {
+        ...profile,
+        level: result.level,
+        xp: result.xp,
+        xpToNext: result.xpToNext,
+        statPoints: result.statPoints,
+      },
+    })
+
+    // One notification per level crossed, so a multi-level award is legible.
+    for (const lvl of result.levelsGained) {
+      get().addNotification({
+        title: `Level ${lvl}`,
+        body: `You reached level ${lvl}. ${POINTS_PER_LEVEL} stat points available.`,
+        priority: "high",
+        deeplink: { screen: "profile" },
+      })
+    }
+
+    // Reaching a level can satisfy the faction gate.
+    if (result.levelsGained.length) get().checkFactionUnlock()
+  },
+
+  allocateStat: (stat, amount = 1) => {
+    const { profile } = get()
+    const points = profile.statPoints ?? 0
+    // Never spend more than the pool holds, so the UI cannot overdraw.
+    const spend = Math.max(0, Math.min(amount, points))
+    if (spend === 0) return
+
+    const allocated = { ...(profile.allocated ?? emptyAllocation()) }
+    allocated[stat] = (allocated[stat] || 0) + spend
+
+    set({
+      profile: { ...profile, allocated, statPoints: points - spend },
+    })
+  },
+
+  respecStats: () => {
+    const { profile } = get()
+    // Refund exactly what was spent rather than recomputing from level, so a
+    // partially spent pool is never inflated or truncated.
+    const refund = spentPoints(profile.allocated)
+    if (refund === 0) return
+    set({
+      profile: {
+        ...profile,
+        allocated: emptyAllocation(),
+        statPoints: (profile.statPoints ?? 0) + refund,
+      },
+    })
+  },
+
+  /**
+   * The sub-stats expedition checks actually roll against. These already
+   * existed inside the sim's EVENT_CHECK table but were never surfaced, which
+   * is why spending points felt disconnected from outcomes.
+   */
+  getDerivedStats: () => {
+    const s = get().getPlayerStats()
+    return [
+      { label: "Combat", value: derivedStatScore(s.atk, s.def), from: "ATK + DEF" },
+      { label: "Endurance", value: derivedStatScore(s.def, s.hp), from: "DEF + HP" },
+      { label: "Insight", value: derivedStatScore(s.focus, s.luck), from: "FOC + LUK" },
+      { label: "Navigation", value: derivedStatScore(s.luck, s.focus), from: "LUK + FOC" },
+      // The only place the hidden fishing bite-window bonus is surfaced. Left
+      // deliberately vague so an attentive player can connect it themselves.
+      { label: "Reflex", value: s.focus, from: "FOC" },
+    ]
+  },
+
+  // ---- Rituals ----
+  preparedRituals: [],
+
+  getAttunement: () => ({
+    capacity: attunementCapacity(get().getPlayerStats().focus),
+    used: attunementUsed(get().preparedRituals),
+  }),
+
+  hasRitualism: () => get().skills.some((s) => s.id === "ritualism" && !s.locked),
+
+  toggleRitual: (id) => {
+    const { preparedRituals, profile } = get()
+    if (preparedRituals.includes(id)) {
+      set({ preparedRituals: preparedRituals.filter((r) => r !== id) })
+      return
+    }
+    const ritual = getRitual(id)
+    if (!ritual) return
+    // Prepping anything at all requires Ritualism. Enforced here rather than only
+    // in the UI so the rule holds for every caller, and so a build that never took
+    // the skill can't end up carrying buffs it shouldn't have.
+    if (!get().hasRitualism()) return
+    // Rites are taught by a skill unlock rather than a book, so they bypass the
+    // known-ritual check and are gated on the unlock instead.
+    if (ritual.requiresUnlock) {
+      if (!get().hasSkillUnlock(ritual.requiresUnlock)) return
+    } else if (!profile.knownRituals?.includes(id)) {
+      // Can only prep what is known, and only within Focus capacity.
+      return
+    }
+    const { capacity, used } = get().getAttunement()
+    if (used + ritual.attunement > capacity) return
+    set({ preparedRituals: [...preparedRituals, id] })
+  },
+
+  learnRitual: (id) => {
+    const { profile } = get()
+    const known = profile.knownRituals ?? []
+    if (known.includes(id)) return
+    const ritual = getRitual(id)
+    if (!ritual) return
+    set({ profile: { ...profile, knownRituals: [...known, id] } })
+    get().addNotification({
+      title: "Ritual learned",
+      body: `${ritual.label} — ${ritual.description}`,
+      priority: "normal",
+      deeplink: { screen: "profile" },
+    })
+  },
+
+  recordEncounter: (creatureId) => {
+    const creature = getCreature(creatureId)
+    if (!creature) return
+    const { profile } = get()
+    const bestiary = profile.bestiary ?? {}
+    const prev = bestiary[creatureId]
+    // Every sighting gets its own roll, but the flag is sticky: once a shiny has
+    // been logged an ordinary sighting must never overwrite it back to false.
+    const foundShiny = !prev?.shiny && rollShiny()
+    set({
+      profile: {
+        ...profile,
+        bestiary: {
+          ...bestiary,
+          [creatureId]: {
+            encounters: (prev?.encounters ?? 0) + 1,
+            defeats: prev?.defeats ?? 0,
+            firstSeen: prev?.firstSeen ?? Date.now(),
+            tamed: prev?.tamed,
+            shiny: prev?.shiny || foundShiny,
+            shinyAt: prev?.shinyAt ?? (foundShiny ? Date.now() : undefined),
+          },
+        },
+      },
+    })
+    // A shiny is the rarest thing in the game, so it gets its own high-priority
+    // callout on whichever encounter turns it up — not just the first sighting.
+    if (foundShiny) {
+      get().addNotification({
+        title: "Anomalous variant",
+        body: `A shiny ${creature.name}. Recoloured, and the only one you have seen.`,
+        priority: "high",
+        deeplink: { screen: "profile" },
+      })
+      return
+    }
+    // Otherwise only announce the first sighting; repeats would spam the feed.
+    if (!prev) {
+      get().addNotification({
+        title: "Bestiary updated",
+        body: `${creature.name} recorded — ${creature.habitat}.`,
+        priority: "normal",
+        deeplink: { screen: "profile" },
+      })
+    }
+  },
+
+  recordDefeat: (creatureId) => {
+    const { profile } = get()
+    const bestiary = profile.bestiary ?? {}
+    const prev = bestiary[creatureId]
+    // A defeat implies a sighting, so seed the record rather than dropping it.
+    set({
+      profile: {
+        ...profile,
+        bestiary: {
+          ...bestiary,
+          [creatureId]: {
+            encounters: prev?.encounters ?? 1,
+            defeats: (prev?.defeats ?? 0) + 1,
+            firstSeen: prev?.firstSeen ?? Date.now(),
+            tamed: prev?.tamed,
+          },
+        },
+      },
+    })
+  },
+
+  canTame: (creatureId) => {
+    const creature = getCreature(creatureId)
+    if (!creature) return { ok: false, reason: "Unknown creature" }
+    if (!creature.pack) return { ok: false, reason: `${CLASS_LABEL[creature.kind]} — cannot be tamed` }
+    const { profile } = get()
+    if ((profile.tamedBeasts ?? []).includes(creatureId)) return { ok: false, reason: "Already tamed" }
+    if (!get().hasSkillUnlock(TAME_UNLOCK)) return { ok: false, reason: "Requires Pack Beasts" }
+    // Must have met it in the field first; the codex is the prerequisite.
+    if (!(profile.bestiary ?? {})[creatureId]) return { ok: false, reason: "Not yet encountered" }
+    // The sturdiest beasts need the second Beast Tending tier.
+    const heavy = creature.rarity === "epic" || creature.rarity === "legendary"
+    if (heavy && !get().hasSkillUnlock(TAME_MASTER_UNLOCK)) {
+      return { ok: false, reason: "Requires Pack Train" }
+    }
+    return { ok: true }
+  },
+
+  tameBeast: (creatureId) => {
+    // Route through canTame so the UI and any caller share one rule set.
+    if (!get().canTame(creatureId).ok) return
+    const creature = getCreature(creatureId)
+    if (!creature) return
+    const { profile } = get()
+    const bestiary = profile.bestiary ?? {}
+    const prev = bestiary[creatureId]
+    const tamed = [...(profile.tamedBeasts ?? []), creatureId]
+    set({
+      profile: {
+        ...profile,
+        tamedBeasts: tamed,
+        bestiary: {
+          ...bestiary,
+          [creatureId]: {
+            encounters: prev?.encounters ?? 1,
+            defeats: prev?.defeats ?? 0,
+            firstSeen: prev?.firstSeen ?? Date.now(),
+            tamed: true,
+          },
+        },
+        // First beast becomes the active mount so the bonus applies immediately
+        // rather than sitting unused until the player notices the selector.
+        activeMount: profile.activeMount ?? creatureId,
+      },
+    })
+    get().addNotification({
+      title: "Beast tamed",
+      body: `${creature.name} joins your pack — +${creature.pack?.carry ?? 0} carry.`,
+      priority: "high",
+      deeplink: { screen: "profile" },
+    })
+  },
+
+  setActiveMount: (creatureId) => {
+    const { profile } = get()
+    // Guard against mounting something that was never tamed.
+    if (creatureId !== null && !(profile.tamedBeasts ?? []).includes(creatureId)) return
+    set({ profile: { ...profile, activeMount: creatureId } })
+  },
+
+  /** Aggregated sub-stat effects across every unlocked skill. */
+  getSkillBonuses: () => aggregateSkillBonuses(get().skills),
+
+  /**
+   * Content unlocked by skill tier breakpoints (levels 5 / 10 / 15), plus the
+   * stat-threshold gates in STAT_UNLOCKS (e.g. fishing needs Luck 15).
+   */
+  getSkillUnlocks: () => {
+    const earned = getSkillUnlocks(get().skills, get().getPlayerStats())
+    // Admin/debug forces are merged in here rather than at each call site, so a
+    // single toggle covers every gate that reads hasSkillUnlock.
+    for (const id of get().debugUnlocks) earned.add(id)
+    return earned
+  },
+
+  hasSkillUnlock: (id) => get().getSkillUnlocks().has(id),
+
+  debugUnlocks: [],
+  toggleDebugUnlock: (id) => {
+    const active = get().debugUnlocks.includes(id)
+    set({
+      debugUnlocks: active
+        ? get().debugUnlocks.filter((u) => u !== id)
+        : [...get().debugUnlocks, id],
+    })
+    get().logAdminAction(
+      "debug_unlock",
+      id,
+      active ? `Cleared forced unlock ${id}` : `Forced unlock ${id}`
+    )
+  },
+  clearDebugUnlocks: () => {
+    if (get().debugUnlocks.length === 0) return
+    set({ debugUnlocks: [] })
+    get().logAdminAction("debug_unlock", undefined, "Cleared all forced unlocks")
   },
   
   getStatBonus: (stat) => {
@@ -443,6 +1002,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   setScreen: (s) => set({ screen: s }),
   opsTab: "expeditions",
   setOpsTab: (t) => set({ opsTab: t }),
+  mapFocusNodeId: null,
+  setMapFocus: (id) => set({ mapFocusNodeId: id }),
+  factionViewRequest: null,
+  requestFactionView: (v) => set({ factionViewRequest: v }),
 
   // Terminal
   channel: "PUBLIC",
@@ -455,7 +1018,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   sendMessage: (channel, body) => {
     const trimmed = body.trim()
     if (!trimmed) return
-    const { identity, messages, channels } = get()
+    const { identity, profile, messages, channels } = get()
     const channelDef = channels.find((ch) => ch.id === channel)
     if (channelDef?.readOnly) return
     const next: ChatMessage = {
@@ -463,8 +1026,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       channel,
       kind: "player",
       handle: identity.handle,
-      title: identity.title,
-      titleRarity: identity.titleRarity,
+      // Prefer the equipped title so messages reflect what the player selected,
+      // falling back to the seed identity before anything is equipped.
+      title: profile.title?.label ?? identity.title,
+      titleRarity: profile.title?.rarity ?? identity.titleRarity,
       body: trimmed.slice(0, 220),
       at: Date.now(),
     }
@@ -492,9 +1057,27 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Expeditions
   expeditions: seedExpeditions,
   activeExpedition: null,
-  startExpedition: (id) => {
+  startExpedition: (id, ritualIds) => {
     const exp = get().expeditions.find((e) => e.id === id)
     if (!exp || get().activeExpedition) return
+    // Tier gate: some sites only open once the matching skill breakpoint is hit.
+    if (exp.requiresUnlock && !get().hasSkillUnlock(exp.requiresUnlock)) return
+
+    // Callers may pass an explicit ritual set; otherwise use whatever the prep
+    // dialog left staged. Filter to known rituals and re-check capacity so a
+    // stale selection can never exceed current Focus.
+    const known = get().profile.knownRituals ?? []
+    const capacity = attunementCapacity(get().getPlayerStats().focus)
+    const requested = (ritualIds ?? get().preparedRituals).filter((r) =>
+      known.includes(r)
+    )
+    const rituals: string[] = []
+    for (const rid of requested) {
+      const ritual = getRitual(rid)
+      if (!ritual) continue
+      if (attunementUsed(rituals) + ritual.attunement > capacity) continue
+      rituals.push(rid)
+    }
 
     // Assemble the deploying squad from available party members (leader first),
     // capped at the expedition's suggested party size.
@@ -526,7 +1109,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         totalStages,
         partyMembers: squadHandles,
         startedAt: Date.now(),
+        rituals,
       },
+      // The staged set has been copied onto the run, so release it now. Clearing
+      // only on completion let a cancelled run leak its selection into the next
+      // launch that relies on the preparedRituals fallback.
+      preparedRituals: [],
     })
   },
   cancelExpedition: () => {
@@ -535,9 +1123,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({ activeExpedition: null })
   },
 
-  // Skills
-  skills: seedSkills,
-  loadout: ["analysis", "surveying", "logistics", "scavenging"],
+  // Skills — the canonical 15 from config/skills.json, so every skill resolves
+  // to a real mechanic in lib/skill-effects.ts.
+  skills: createInitialSkills(),
+  loadout: ["scavenging", "gathering", "pathfinding", "lorekeeping"],
   toggleLoadout: (id) =>
     set((s) => {
       if (s.loadout.includes(id)) {
@@ -560,11 +1149,22 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   recovery: seedRecovery,
   lastRecovered: null,
   runRecovery: (mode) => {
-    const cost = mode === "focused" ? 2 : 1
-    const currencyKey = mode === "focused" ? "resonance" : "relay_tokens"
+    // Translation reads sealed packets, so it needs the Lorekeeping unlock and
+    // spends salvage rather than relay or resonance.
+    if (mode === "translation" && !get().hasSkillUnlock("archive_translation")) return
+    const COSTS = {
+      standard: { cost: 1, currencyKey: "relay_tokens" },
+      focused: { cost: 2, currencyKey: "resonance" },
+      translation: { cost: 3, currencyKey: "signal_salvage" },
+    } as const
+    const { cost, currencyKey } = COSTS[mode]
     const { shards, recovery, profile, inventory } = get()
     if ((shards as any)[currencyKey] < cost) return
-    const rarity = rollRarity(mode === "focused")
+    // Translation inherits the focused odds table and adds its own luck on top.
+    const rarity = rollRarity(
+      mode !== "standard",
+      get().getSkillBonuses().rollLuck + (mode === "translation" ? 0.15 : 0),
+    )
     const pool = POOL[rarity]
     const pick = pool[Math.floor(Math.random() * pool.length)]
     
@@ -707,11 +1307,36 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const recipe = CRAFTING_RECIPES.find((r: any) => r.id === recipeId)
     if (!recipe) return { success: false, message: "Recipe not found" }
     if (!recipe.unlocked) return { success: false, message: "Recipe locked" }
-    
-    // Check ingredients
+
+    // Tier gate: epic/legendary work needs the matching Bladecraft or Ritualism
+    // breakpoint. Enforced here so the rule holds no matter which UI calls in.
+    const needed = recipeUnlockFor(recipe.output.rarity)
+    if (needed && !get().hasSkillUnlock(needed)) {
+      return {
+        success: false,
+        message:
+          needed === "master_recipes"
+            ? "Requires Ritualism 10 (Marked Work) or Lorekeeping 10 (Lost Techniques)"
+            : "Requires Bladecraft 10 (Blade Smithing) or Marksmanship 10 (Munitions)",
+      }
+    }
+
+    // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
+    const buildingBonuses = craftingBonusesFrom(get().factionBuildings)
+    // Skills stack on top: Ritualism (Inscription) trims cost, Bladecraft
+    // (Maintenance) and Gathering (Harvesting) speed the work up.
+    const skillFx = get().getSkillBonuses()
+    const bonuses = {
+      cost: buildingBonuses.cost + skillFx.craftCost,
+      speed: buildingBonuses.speed + skillFx.craftSpeed,
+      yield: buildingBonuses.yield + skillFx.craftQuality,
+    }
+    const effQty = (qty: number) => Math.max(1, Math.ceil(qty * (1 - bonuses.cost)))
+
+    // Check ingredients (against the reduced requirement)
     for (const ing of recipe.ingredients) {
       const owned = inventory.find(i => i.id === ing.itemId || i.label === ing.label)
-      if (!owned || owned.qty < ing.qty) {
+      if (!owned || owned.qty < effQty(ing.qty)) {
         return { success: false, message: `Missing ${ing.label}` }
       }
     }
@@ -719,12 +1344,13 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     // Consume ingredients
     let updatedInventory = [...inventory]
     for (const ing of recipe.ingredients) {
+      const need = effQty(ing.qty)
       const idx = updatedInventory.findIndex(i => i.id === ing.itemId || i.label === ing.label)
       if (idx !== -1) {
-        if (updatedInventory[idx].qty <= ing.qty) {
+        if (updatedInventory[idx].qty <= need) {
           updatedInventory = updatedInventory.filter((_, i) => i !== idx)
         } else {
-          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - ing.qty }
+          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - need }
         }
       }
     }
@@ -735,7 +1361,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         recipeId: recipe.id,
         label: recipe.label,
         startedAt: Date.now(),
-        duration: recipe.craftTime * 1000,
+        duration: Math.round(recipe.craftTime * 1000 * (1 - bonuses.speed)),
       },
     })
     
@@ -752,6 +1378,11 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return
     }
     
+    // Relay Forge upgrade plus skill yield bonuses on each craft.
+    const yieldBonus =
+      craftingBonusesFrom(get().factionBuildings).yield + get().getSkillBonuses().craftQuality
+    const outputQty = recipe.output.qty + Math.round(recipe.output.qty * yieldBonus)
+
     // Add crafted item to inventory
     const existingItem = inventory.find(i => i.id === recipe.output.itemId)
     let updatedInventory: InventoryItem[]
@@ -759,7 +1390,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     if (existingItem) {
       updatedInventory = inventory.map(i =>
         i.id === recipe.output.itemId
-          ? { ...i, qty: i.qty + recipe.output.qty }
+          ? { ...i, qty: i.qty + outputQty }
           : i
       )
     } else {
@@ -768,7 +1399,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         label: recipe.output.label,
         aspect: recipe.output.aspect,
         rarity: recipe.output.rarity,
-        qty: recipe.output.qty,
+        qty: outputQty,
         identified: true,
         description: recipe.output.description,
         effects: recipe.output.effects,
@@ -807,16 +1438,222 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({ inventory: updatedInventory })
   },
 
-  // Contracts
-  contracts: seedContracts,
-  acceptContract: (id) =>
+  // Ops - Fishing
+  fishing: {
+    phase: "idle",
+    spotId: null,
+    baitId: null,
+    fishId: null,
+    biteAt: null,
+    windowMs: 0,
+    lastQty: 0,
+    streak: 0,
+  },
+  fishingLog: [],
+
+  selectedBaitId: null,
+  lastDigAt: null,
+
+  setBait: (baitId) => set({ selectedBaitId: baitId }),
+
+  getBaitCount: (baitId) => get().inventory.find((i) => i.id === baitId)?.qty ?? 0,
+
+  digForGrubs: () => {
+    const { lastDigAt } = get()
+    const now = Date.now()
+    if (lastDigAt !== null && now - lastDigAt < DIG_COOLDOWN_MS) return false
+
+    const qty = DIG_MIN + Math.floor(Math.random() * (DIG_MAX - DIG_MIN + 1))
+    const def = getBait(DIG_BAIT_ID)
+    if (!def) return false
+
+    set((s) => {
+      const existing = s.inventory.find((i) => i.id === DIG_BAIT_ID)
+      return {
+        lastDigAt: now,
+        selectedBaitId: s.selectedBaitId ?? DIG_BAIT_ID,
+        inventory: existing
+          ? s.inventory.map((i) => (i.id === DIG_BAIT_ID ? { ...i, qty: i.qty + qty } : i))
+          : [
+              ...s.inventory,
+              {
+                id: def.id,
+                label: def.label,
+                aspect: "consumable" as const,
+                rarity: def.rarity,
+                qty,
+                identified: true,
+                description: def.description,
+                type: "consumable" as const,
+              },
+            ],
+      }
+    })
+    return true
+  },
+
+  castLine: (spotId, baitId) => {
+    const spot = FISHING_SPOTS.find((s) => s.id === spotId)
+    if (!spot) return false
+    if (spot.requires && !get().hasSkillUnlock(spot.requires)) return false
+    if (get().fishing.phase === "casting" || get().fishing.phase === "bite") return false
+
+    // Bait is required, and one is spent per cast whether or not anything bites.
+    // Enforced here rather than in the view so the component cannot cast for
+    // free, matching how triggerBite refuses to let the view pick its own fish.
+    if (!getBait(baitId)) return false
+    if (get().getBaitCount(baitId) < 1) return false
+
+    set((s) => ({
+      selectedBaitId: baitId,
+      inventory: s.inventory
+        .map((i) => (i.id === baitId ? { ...i, qty: i.qty - 1 } : i))
+        .filter((i) => i.qty > 0),
+      fishing: {
+        ...s.fishing,
+        phase: "casting",
+        spotId,
+        baitId,
+        fishId: null,
+        biteAt: null,
+      },
+    }))
+    return true
+  },
+
+  triggerBite: () => {
+    const { fishing } = get()
+    if (fishing.phase !== "casting" || !fishing.spotId) return
+
+    const spot = FISHING_SPOTS.find((s) => s.id === fishing.spotId)
+    if (!spot) return
+
+    // Pick what bit here in the store, not in the view: the component only
+    // reports "a bite happened", so it can never nominate its own rare fish.
+    // Rollcraft/Lorekeeping luck also biases the fishing table toward rarity.
+    const luck = get().getSkillBonuses().rollLuck
+    const bait = fishing.baitId ? getBait(fishing.baitId) : undefined
+
+    // Better bait keeps more of the debris off the hook.
+    const junkChance = spot.junkChance * (bait?.junkMult ?? 1)
+    const fish =
+      Math.random() < junkChance ? JUNK : pickFish(spot, luck, Math.random, bait)
+    const fishId = fish.id
+
+    // Casting (Tension) widens the strike window, so a trained angler gets a
+    // more forgiving reaction test on the same fish.
+    const success = get().getSkillBonuses().fishingSuccess
+
+    // Focus quietly buys reaction time: a high-FOC courier gets a longer beat
+    // between the bite and the fish spitting the hook. Deliberately unadvertised
+    // in the fishing UI — the only tell is the "Reflex" derived stat on Profile.
+    // Capped at +50% so stacking Focus can never make the strike test trivial.
+    const focus = get().getPlayerStats().focus
+    const focusGrace = 1 + Math.min(0.5, focus * 0.02)
+
+    const windowMs = Math.round(fish.biteWindow * 1000 * (1 + success) * focusGrace)
+
+    set((s) => ({
+      fishing: { ...s.fishing, phase: "bite", fishId, biteAt: Date.now(), windowMs },
+    }))
+  },
+
+  setHook: () => {
+    const { fishing } = get()
+    if (fishing.phase !== "bite" || !fishing.fishId || fishing.biteAt === null) return
+
+    // Struck too late — the window already closed.
+    if (Date.now() - fishing.biteAt > fishing.windowMs) {
+      get().reelIn()
+      return
+    }
+
+    const fish = getFish(fishing.fishId)
+    if (!fish) return
+
+    // Casting (Casting) raises how many land per successful catch.
+    const yieldBonus = get().getSkillBonuses().fishingYield
+    const qty = Math.max(1, Math.round((1 + yieldBonus) * (1 + Math.random() * 0.5)))
+    const item = fishToItem(fish, qty)
+    const isJunk = fish.id === JUNK.id
+
+    set((s) => {
+      const existing = s.inventory.find((i) => i.id === item.id)
+      return {
+        inventory: existing
+          ? s.inventory.map((i) => (i.id === item.id ? { ...i, qty: i.qty + qty } : i))
+          : [...s.inventory, item],
+        fishing: {
+          ...s.fishing,
+          phase: "landed",
+          lastQty: qty,
+          // Junk breaks the streak; a real fish extends it.
+          streak: isJunk ? 0 : s.fishing.streak + 1,
+        },
+        fishingLog: [
+          { fishId: fish.id, label: fish.label, rarity: fish.rarity, qty, at: Date.now() },
+          ...s.fishingLog,
+        ].slice(0, 12),
+      }
+    })
+
+  },
+
+  reelIn: () =>
+    set((s) => ({
+      fishing: {
+        ...s.fishing,
+        phase: s.fishing.phase === "bite" ? "escaped" : "idle",
+        streak: s.fishing.phase === "bite" ? 0 : s.fishing.streak,
+      },
+    })),
+
+  // Contracts — the board is the day's rotated subset of the full pool, not the
+  // whole pool. contractPool keeps every contract available to draw from.
+  contractPool: seedContracts,
+  contracts: rotateContracts(seedContracts),
+  contractDay: dayKey(),
+  /**
+   * Rolls the board to the current day if it has changed. Active and completed
+   * contracts carry over so a reset never cancels work in progress.
+   */
+  rotateContractsIfStale: () => {
+    const today = dayKey()
+    if (get().contractDay === today) return
+    const keep = get().contracts.filter((c) => c.status !== "available")
+    set({
+      contractDay: today,
+      contracts: rotateContracts(get().contractPool, new Date(), keep),
+    })
+  },
+  acceptContract: (id) => {
+    // Tier gate: escort and anomaly work needs the matching skill breakpoint.
+    // Mirrors startExpedition so a locked job cannot be signed from any surface.
+    const target = get().contracts.find((c) => c.id === id)
+    if (target?.requiresUnlock && !get().hasSkillUnlock(target.requiresUnlock)) return
+
+    // Negotiation (Lorekeeping) and Appraisal raise the agreed payout at the
+    // moment the contract is signed, so the bonus is locked into the terms.
+    const rewardBonus = get().getSkillBonuses().contractReward
     set((s) => ({
       contracts: s.contracts.map((c) =>
         c.id === id && c.status === "available"
-          ? { ...c, status: "active" as const }
-          : c
+          ? {
+              ...c,
+              status: "active" as const,
+              // reward is a display string ("120 relay tokens"); scale the
+              // numbers inside it and leave the wording intact.
+              reward:
+                rewardBonus > 0
+                  ? c.reward.replace(/\d+/g, (n) =>
+                      String(Math.round(Number(n) * (1 + rewardBonus))),
+                    )
+                  : c.reward,
+            }
+          : c,
       ),
-    })),
+    }))
+  },
   cancelContract: (id) =>
     set((s) => ({
       contracts: s.contracts.map((c) =>
@@ -828,7 +1665,256 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Faction
   party: seedParty,
+  invitePartyMember: () => {
+    const { party } = get()
+    const maxSlots = 4
+    if (party.length >= maxSlots) return { success: false, message: "Party is full" }
+    const usedSlots = new Set(party.map((m) => m.slot))
+    let slot = 1
+    while (usedSlots.has(slot)) slot += 1
+    const suffix = Math.random().toString(16).slice(2, 7)
+    const handle = `@Relay${suffix}`
+    const title = randItem(PARTY_TITLES)
+    const member: PartyMember = {
+      slot,
+      handle,
+      title: title.label,
+      titleRarity: title.rarity,
+      role: randItem(PARTY_ROLES),
+      status: "idle",
+      avatar: generateAvatarFromSeed(handle),
+      joinedAt: Date.now(),
+      contribution: 0,
+      expeditionsCompleted: 0,
+    }
+    set((s) => ({
+      party: [...s.party, member].sort((a, b) => a.slot - b.slot),
+      factionActivity: pushActivity(s.factionActivity, {
+        kind: "join",
+        handle,
+        text: "joined your party",
+      }),
+    }))
+    return { success: true, message: `${handle} joined the party` }
+  },
+  removePartyMember: (slot) =>
+    set((s) => ({
+      party: s.party.filter((m) => m.slot !== slot || m.leader),
+    })),
+  setPartyMemberRole: (slot, role) =>
+    set((s) => ({
+      party: s.party.map((m) => (m.slot === slot ? { ...m, role } : m)),
+    })),
+  readyUpParty: () =>
+    set((s) => ({
+      party: s.party.map((m) => (m.status === "idle" ? { ...m, status: "ready" as const } : m)),
+    })),
+
   factionProjects: seedFactionProjects,
+  factionBuildings: FACTION_BUILDINGS,
+  factionRallies: seedFactionRallies,
+  factionActivity: seedFactionActivity,
+
+  contributeToProject: (projectId, amount) => {
+    const { factionProjects, profile } = get()
+    const project = factionProjects.find((p) => p.id === projectId)
+    if (!project) return { success: false, message: "Project not found" }
+    if (project.complete) return { success: false, message: "Project already complete" }
+    const cost = amount // tokens spent equals units contributed
+    if (profile.tokens < cost) return { success: false, message: "Not enough tokens" }
+
+    // Ritualism (Consecration) makes each token contributed count for more.
+    const skillFx = get().getSkillBonuses()
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing
+    const effAmount = Math.round(amount * (1 + skillFx.factionContribution))
+    const newProgress = Math.min(project.goal, project.progress + effAmount)
+    const willComplete = newProgress >= project.goal
+
+    // Standing reward scales with contribution; completion grants a bonus.
+    const standingReward = Math.round(amount * 0.5) + (willComplete ? 100 : 0)
+    const { profile: afterStanding, gained, rankedUp, newRank } = applyStanding(
+      { ...profile, tokens: profile.tokens - cost },
+      standingReward,
+      bonus,
+    )
+
+    set((s) => {
+      let activity = pushActivity(s.factionActivity, {
+        kind: "contribution",
+        handle: s.identity.handle,
+        text: `contributed to ${project.label}`,
+        amount,
+      })
+      if (willComplete) {
+        activity = pushActivity(activity, {
+          kind: "project_complete",
+          handle: s.profile.faction?.label ?? "Faction",
+          text: `completed ${project.label}`,
+        })
+      }
+      if (rankedUp) {
+        activity = pushActivity(activity, {
+          kind: "rank_up",
+          handle: s.identity.handle,
+          text: `reached Rank ${newRank} — ${RANK_TIERS[newRank]?.title ?? ""}`,
+        })
+      }
+      return {
+        profile: afterStanding,
+        factionProjects: s.factionProjects.map((p) =>
+          p.id === projectId
+            ? {
+                ...p,
+                progress: newProgress,
+                complete: willComplete,
+                contributors: p.contributors + (p.progress === 0 ? 1 : 0),
+              }
+            : p,
+        ),
+        factionActivity: activity,
+      }
+    })
+
+    return {
+      success: true,
+      message: willComplete
+        ? `Project complete! +${gained} standing`
+        : `Contributed ${amount} · +${gained} standing`,
+    }
+  },
+
+  upgradeBuilding: (buildingId) => {
+    const { factionBuildings, profile, inventory } = get()
+    const building = factionBuildings.find((b) => b.id === buildingId)
+    if (!building) return { success: false, message: "Building not found" }
+    if ((profile.faction?.rank ?? 0) < building.requiredRank) {
+      return { success: false, message: `Requires Rank ${building.requiredRank}` }
+    }
+    if (building.level >= building.maxLevel) return { success: false, message: "Max level reached" }
+
+    const cost = buildingUpgradeCost(building)
+    if (profile.tokens < cost.tokens) return { success: false, message: "Not enough tokens" }
+    for (const mat of cost.materials) {
+      const owned = inventory.find((i) => i.id === mat.itemId || i.label === mat.label)
+      if (!owned || owned.qty < mat.qty) return { success: false, message: `Missing ${mat.label}` }
+    }
+
+    // Consume materials
+    let updatedInventory = [...inventory]
+    for (const mat of cost.materials) {
+      const idx = updatedInventory.findIndex((i) => i.id === mat.itemId || i.label === mat.label)
+      if (idx !== -1) {
+        if (updatedInventory[idx].qty <= mat.qty) {
+          updatedInventory = updatedInventory.filter((_, i) => i !== idx)
+        } else {
+          updatedInventory[idx] = { ...updatedInventory[idx], qty: updatedInventory[idx].qty - mat.qty }
+        }
+      }
+    }
+
+    const newLevel = building.level + 1
+    set((s) => ({
+      inventory: updatedInventory,
+      profile: { ...s.profile, tokens: s.profile.tokens - cost.tokens },
+      factionBuildings: s.factionBuildings.map((b) =>
+        b.id === buildingId ? { ...b, level: newLevel } : b,
+      ),
+      factionActivity: pushActivity(s.factionActivity, {
+        kind: "building",
+        handle: s.identity.handle,
+        text: `upgraded the ${building.label} to Lv.${newLevel}`,
+      }),
+    }))
+    return { success: true, message: `${building.label} upgraded to Lv.${newLevel}` }
+  },
+
+  joinRally: (rallyId) =>
+    set((s) => {
+      const rally = s.factionRallies.find((r) => r.id === rallyId)
+      if (!rally || rally.joined) return {}
+      return {
+        factionRallies: s.factionRallies.map((r) => (r.id === rallyId ? { ...r, joined: true } : r)),
+        factionActivity: pushActivity(s.factionActivity, {
+          kind: "rally",
+          handle: s.identity.handle,
+          text: `joined ${rally.label}`,
+        }),
+      }
+    }),
+
+  contributeToRally: (rallyId, amount) => {
+    const { factionRallies, profile } = get()
+    const rally = factionRallies.find((r) => r.id === rallyId)
+    if (!rally) return { success: false, message: "Rally not found" }
+    if (rally.complete) return { success: false, message: "Rally already complete" }
+    if (Date.now() > rally.endsAt) return { success: false, message: "Rally has ended" }
+    if (profile.tokens < amount) return { success: false, message: "Not enough tokens" }
+
+    // Ritualism (Consecration) amplifies rally contributions the same way.
+    const skillFx = get().getSkillBonuses()
+    const effAmount = Math.round(amount * (1 + skillFx.factionContribution))
+    const newProgress = Math.min(rally.goal, rally.progress + effAmount)
+    const willComplete = newProgress >= rally.goal
+    const bonus = craftingBonusesFrom(get().factionBuildings).standing
+
+    // Personal standing for helping; the full reward lands when the rally completes.
+    let standingReward = Math.round(amount * 0.4)
+    let tokenRefund = 0
+    if (willComplete) {
+      standingReward += rally.reward.standing
+      tokenRefund = rally.reward.tokens
+    }
+    const { profile: afterStanding, gained, rankedUp, newRank } = applyStanding(
+      { ...profile, tokens: profile.tokens - amount + tokenRefund },
+      standingReward,
+      bonus,
+    )
+
+    set((s) => {
+      let activity = pushActivity(s.factionActivity, {
+        kind: "rally",
+        handle: s.identity.handle,
+        text: `pushed ${rally.label} forward`,
+        amount,
+      })
+      if (willComplete) {
+        activity = pushActivity(activity, {
+          kind: "rally",
+          handle: s.profile.faction?.label ?? "Faction",
+          text: `completed ${rally.label}`,
+        })
+      }
+      if (rankedUp) {
+        activity = pushActivity(activity, {
+          kind: "rank_up",
+          handle: s.identity.handle,
+          text: `reached Rank ${newRank} — ${RANK_TIERS[newRank]?.title ?? ""}`,
+        })
+      }
+      return {
+        profile: afterStanding,
+        factionRallies: s.factionRallies.map((r) =>
+          r.id === rallyId
+            ? {
+                ...r,
+                progress: newProgress,
+                complete: willComplete,
+                joined: true,
+                contribution: r.contribution + amount,
+              }
+            : r,
+        ),
+        factionActivity: activity,
+      }
+    })
+
+    return {
+      success: true,
+      message: willComplete
+        ? `Rally complete! +${gained} standing, +${tokenRefund} tokens`
+        : `Contributed ${amount} · +${gained} standing`,
+    }
+  },
 
   // Friends
   friends: [
@@ -918,6 +2004,23 @@ export const useEsroStore = create<EsroState>((set, get) => ({
           equipped: t.id === titleId,
         })),
         title: s.profile.ownedTitles.find((t) => t.id === titleId) || s.profile.title,
+      },
+    })),
+  addNotification: (notification) =>
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        notifications: [
+          {
+            ...notification,
+            // Monotonic id derived from the current max, so rapid successive
+            // pushes (e.g. a multi-level XP award) cannot collide.
+            id: s.profile.notifications.reduce((max, n) => Math.max(max, n.id), 0) + 1,
+            state: "unread" as const,
+            createdAt: Date.now(),
+          },
+          ...s.profile.notifications,
+        ],
       },
     })),
   markNotificationRead: (id) =>
@@ -1043,12 +2146,21 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const rarities: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary", "mythic"]
     
     // Generate all possible cosmetic variants for each layer type (including mythic transcendent tier)
-    const layers: { type: AvatarLayerType; maxVariants: number; labels: string[]; mythicStart?: number }[] = [
+    // The Tidal Set (accessory 22-27, hat 24-29) deliberately spans every rarity
+    // tier, so it cannot use the `mythicStart` rule that assumes all high
+    // variants are mythic. rarityByVariant pins each one explicitly.
+    const TIDAL_ACCESSORY_RARITY: Record<number, Rarity> = {
+      22: "common", 23: "uncommon", 24: "rare", 25: "epic", 26: "legendary", 27: "mythic",
+    }
+    const TIDAL_HAT_RARITY: Record<number, Rarity> = {
+      24: "common", 25: "uncommon", 26: "rare", 27: "epic", 28: "legendary", 29: "mythic",
+    }
+    const layers: { type: AvatarLayerType; maxVariants: number; labels: string[]; mythicStart?: number; rarityByVariant?: Record<number, Rarity> }[] = [
       { type: "hair", maxVariants: 8, labels: ["Short Cut", "Long Flow", "Spiky", "Slicked", "Braided", "Mohawk", "Curly", "Bald Fade"] },
       { type: "eyes", maxVariants: 6, labels: ["Standard", "Narrow", "Wide", "Glowing", "Cyber", "Ancient"] },
       { type: "mouth", maxVariants: 5, labels: ["Neutral", "Smirk", "Frown", "Open", "Masked"] },
-      { type: "accessory", maxVariants: 22, mythicStart: 17, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask", "Worn Bandana", "Relay Earpiece", "Signal Monocle", "Route Mask", "Deep Scanner", "Rift Lens", "Echo Mask", "Void Visor", "Prismatic Lens", "All-Seeing Eye", "Voidtouched Gaze", "Relay Sea Mask", "Shardheart Visor", "Eternal Courier's Mark", "Primordial Echo"] },
-      { type: "hat", maxVariants: 24, mythicStart: 19, labels: ["None", "Cap", "Hood", "Antenna", "Horns", "Halo", "Crown", "Dust Hood", "Signal Beanie", "Worn Helmet", "Relay Headset", "Archive Hood", "Scout Helm", "Drift Crown", "Echo Circlet", "Signal Crest", "Void Helm", "Rift Diadem", "Primordial Antlers", "Crown of the Relay Sea", "Shardheart Coronet", "Eternal Courier's Crest", "Voidtouched Halo", "Primordial Echo Crown"] },
+      { type: "accessory", maxVariants: 28, mythicStart: 17, rarityByVariant: TIDAL_ACCESSORY_RARITY, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask", "Worn Bandana", "Relay Earpiece", "Signal Monocle", "Route Mask", "Deep Scanner", "Rift Lens", "Echo Mask", "Void Visor", "Prismatic Lens", "All-Seeing Eye", "Voidtouched Gaze", "Relay Sea Mask", "Shardheart Visor", "Eternal Courier's Mark", "Primordial Echo", "Tide Goggles", "Ashfall Veil", "Currentweave Mask", "Stormglass Lens", "Leviathan's Regard", "Tidecaller's Visage"] },
+      { type: "hat", maxVariants: 30, mythicStart: 19, rarityByVariant: TIDAL_HAT_RARITY, labels: ["None", "Cap", "Hood", "Antenna", "Horns", "Halo", "Crown", "Dust Hood", "Signal Beanie", "Worn Helmet", "Relay Headset", "Archive Hood", "Scout Helm", "Drift Crown", "Echo Circlet", "Signal Crest", "Void Helm", "Rift Diadem", "Primordial Antlers", "Crown of the Relay Sea", "Shardheart Coronet", "Eternal Courier's Crest", "Voidtouched Halo", "Primordial Echo Crown", "Reed Hat", "Lantern Rig", "Deepline Coil", "Stormglass Crown", "Kelpwarden Wreath", "Abyssal Diadem"] },
       { type: "flair", maxVariants: 18, mythicStart: 13, labels: ["None", "Pulse Glow", "Static Aura", "Sparkle", "Soft Glow", "Dust Motes", "Signal Flicker", "Route Trails", "Echo Ripples", "Data Stream", "Void Shimmer", "Prismatic Aura", "Celestial Flame", "Relay Sea Aura", "Shardheart Radiance", "Eternal Courier's Light", "Voidtouched Presence", "Primordial Resonance"] },
     ]
     
@@ -1056,7 +2168,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       for (let v = 1; v < layer.maxVariants; v++) {
         // Determine rarity - mythic for transcendent tier items
         let rarity: Rarity
-        if (layer.mythicStart && v >= layer.mythicStart) {
+        if (layer.rarityByVariant?.[v]) {
+          rarity = layer.rarityByVariant[v]
+        } else if (layer.mythicStart && v >= layer.mythicStart) {
           rarity = "mythic"
         } else {
           rarity = rarities[Math.min(Math.floor(v / 2), rarities.length - 2)] // Cap at legendary for non-mythic
@@ -1111,7 +2225,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "voidtouched_oracle", label: "Voidtouched Oracle", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "primordial_flame", label: "Primordial Flame", rarity: "mythic", equipped: false, source: "Admin unlock" },
-      { id: "silence_between_stars", label: "Silence Between Stars", rarity: "mythic", equipped: false, source: "Admin unlock" },
+      { id: "silence_between_stars", label: "Astral Wayfarer", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "dreamer_unchained", label: "Dreamer Unchained", rarity: "mythic", equipped: false, source: "Admin unlock" },
       { id: "ashen_sovereign", label: "Ashen Sovereign", rarity: "mythic", equipped: false, source: "Admin unlock" },
       // Admin exclusive
@@ -1167,49 +2281,112 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
   },
   
-  // Admin/Debug - instantly complete active expedition
-  completeActiveExpedition: () => {
+  // Complete the active expedition. `lootMultiplier` scales the haul that makes
+  // it back: 1 = survivors deliver everything, 0 = total squad wipe (no rewards).
+  completeActiveExpedition: (lootMultiplier = 1) => {
     const { activeExpedition, inventory } = get()
     if (!activeExpedition) return
-    
-    // Generate random loot rewards
+
+    const mult = Math.max(0, Math.min(1, lootMultiplier))
+
+    // Total wipe: all cargo is lost, no rewards granted.
+    if (mult <= 0) {
+      set({ activeExpedition: null })
+      return
+    }
+
+    // Gathering skill shapes the haul: carryCapacity adds slots, rareChance
+    // biases the rarity roll, materialYield/salvageYield grow the stack sizes.
+    const fx = get().getSkillBonuses()
+
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
-    const rarities: Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"]
-    const numRewards = 2 + Math.floor(Math.random() * 3) // 2-4 items
-    
+    const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
+    // The Beast Tending unlocks keep their flat carry, and an active mount adds
+    // on top. This has to stay additive: replacing the flat bonus with the
+    // mount's own carry made mounting a weak beast (+1) a downgrade for anyone
+    // holding both unlocks (+3), so taming could actively hurt you.
+    const mount = getCreature(get().profile.activeMount ?? "")
+    const unlockCarry =
+      (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
+    const packSlots = unlockCarry + (mount ? packContribution(mount).carry : 0)
+    // Extra loot slots are whole items, so they scale with what made it back.
+    const numRewards = baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)
+
     const newItems: InventoryItem[] = []
     for (let i = 0; i < numRewards; i++) {
-      const rarityRoll = Math.random()
+      // Shrinking the roll pushes it up through the rarity bands.
+      const rarityRoll = Math.random() * (1 - Math.min(0.6, Math.max(0, fx.rareChance)))
       let rarity: Rarity = "common"
       if (rarityRoll > 0.95) rarity = "legendary"
       else if (rarityRoll > 0.85) rarity = "epic"
       else if (rarityRoll > 0.65) rarity = "rare"
       else if (rarityRoll > 0.40) rarity = "uncommon"
-      
+
       const lootLabel = lootTypes[Math.floor(Math.random() * lootTypes.length)]
+      const baseQty = 1 + Math.floor(Math.random() * 3)
       newItems.push({
         id: `loot-${Date.now()}-${i}`,
         label: lootLabel,
         aspect: "material",
         rarity,
-        qty: 1 + Math.floor(Math.random() * 3),
+        qty: Math.max(1, Math.round(baseQty * (1 + fx.materialYield + fx.salvageYield))),
         identified: true,
         description: `Salvaged ${lootLabel.toLowerCase()} recovered during the expedition.`,
         type: "material",
       })
     }
     
-    // Add token reward
-    const tokenReward = 50 + Math.floor(Math.random() * 150)
-    
+    // Add token reward, scaled by the loot that made it back.
+    const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult)
+
+    // Ritual book drops. Hidden/deep routes are the main source; ordinary
+    // routes have a small chance at the minor books only.
+    const expDef = get().expeditions.find((e) => e.id === activeExpedition.id)
+    const isHiddenRoute = Boolean(expDef?.requiresUnlock)
+    const bookPool = isHiddenRoute
+      ? [...MAJOR_RITUAL_BOOKS, ...MINOR_RITUAL_BOOKS]
+      : MINOR_RITUAL_BOOKS
+    const bookChance = (isHiddenRoute ? 0.35 : 0.06) * mult
+    // Only roll against books the player does not already know, so a drop is
+    // never wasted on a duplicate.
+    const unknownBooks = bookPool.filter(
+      (id) => !(get().profile.knownRituals ?? []).includes(id)
+    )
+    const learnedBook =
+      unknownBooks.length > 0 && Math.random() < bookChance
+        ? unknownBooks[Math.floor(Math.random() * unknownBooks.length)]
+        : null
+
+    // Per-route bests. `mult` is the fraction of cargo that survived the trip,
+    // so it doubles as the haul score; keep the max rather than the latest.
+    const prevRecords = get().profile.routeRecords ?? {}
+    const prevRecord = prevRecords[activeExpedition.id]
+    const isBest = !prevRecord || mult > prevRecord.bestHaul || newItems.length > prevRecord.bestItems
+    const nextRecord: RouteRecord = {
+      runs: (prevRecord?.runs ?? 0) + 1,
+      bestHaul: Math.max(prevRecord?.bestHaul ?? 0, mult),
+      bestItems: Math.max(prevRecord?.bestItems ?? 0, newItems.length),
+      bestAt: isBest ? Date.now() : (prevRecord?.bestAt ?? Date.now()),
+    }
+
     set({
       activeExpedition: null,
       inventory: [...inventory, ...newItems],
       profile: {
         ...get().profile,
         tokens: get().profile.tokens + tokenReward,
+        routeRecords: { ...prevRecords, [activeExpedition.id]: nextRecord },
       },
     })
+
+    // XP is awarded after the loot commit so a level-up notification lands last.
+    // This also revives Lorekeeping's xpBonus hook, which had nothing to scale.
+    const baseXp = expDef?.rewards.xp ?? 0
+    if (baseXp > 0) {
+      get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult))
+    }
+
+    if (learnedBook) get().learnRitual(learnedBook)
   },
   
   // Admin/Debug - inject test chat messages with all title rarities to PUBLIC channel
@@ -1434,18 +2611,26 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Admin Contract Management
   createContract: (contract) => {
-    const { contracts } = get()
+    const { contracts, contractPool } = get()
     const newContract: Contract = {
       ...contract,
       id: `contract-${Date.now()}`,
     }
-    set({ contracts: [...contracts, newContract] })
+    // Added to both the pool (so it can be drawn on later days) and today's
+    // board (so it shows up immediately).
+    set({
+      contractPool: [...contractPool, newContract],
+      contracts: [...contracts, newContract],
+    })
     get().logAdminAction("create_contract", newContract.label, `Created ${contract.type} contract`)
   },
   deleteContract: (id) => {
-    const { contracts } = get()
-    const contract = contracts.find((c) => c.id === id)
-    set({ contracts: contracts.filter((c) => c.id !== id) })
+    const { contracts, contractPool } = get()
+    const contract = contracts.find((c) => c.id === id) ?? contractPool.find((c) => c.id === id)
+    set({
+      contractPool: contractPool.filter((c) => c.id !== id),
+      contracts: contracts.filter((c) => c.id !== id),
+    })
     if (contract) {
       get().logAdminAction("delete_contract", contract.label, "Deleted contract")
     }
@@ -1469,4 +2654,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       get().logAdminAction("delete_expedition", expedition.label, "Deleted expedition")
     }
   },
-}))
+  }))
+
+// TEMP-V0-DEBUG: remove after visual verification.
+if (typeof window !== "undefined") {
+  ;(window as any).__esro = useEsroStore
+}

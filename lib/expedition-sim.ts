@@ -1,4 +1,6 @@
 import type { BaseStats, RaceId } from "./types"
+import { getRituals } from "./rituals"
+import type { SkillUnlockId } from "./skill-effects"
 
 /**
  * Pure simulation helpers for the active expedition view.
@@ -25,13 +27,27 @@ export interface StatCheck {
 /** Which stats govern each event type. `rest` has no check (always recovers). */
 export const EVENT_CHECK: Record<ExpEventType, StatCheck | null> = {
   battle: { primary: "atk", secondary: "def", label: "Combat" },
-  hazard: { primary: "def", secondary: "focus", label: "Endurance" },
+  // Endurance is Defense-led; HP is level-driven and therefore cannot be
+  // power-leveled by dumping points into a second allocatable stat.
+  hazard: { primary: "def", secondary: "hp", label: "Endurance" },
   discovery: { primary: "focus", secondary: "luck", label: "Insight" },
   travel: { primary: "luck", secondary: "focus", label: "Navigation" },
   rest: null,
 }
 
 const EMPTY_STATS: BaseStats = { hp: 0, atk: 0, def: 0, focus: 0, luck: 0 }
+
+/**
+ * Convert a primary/secondary pair into a derived check score.
+ * Secondary starts at half-rate (2 points per 1 score) and its cost rises as
+ * it grows, while primary remains the reliable one-for-one investment.
+ */
+export function derivedStatScore(primary: number, secondary: number): number {
+  const p = Math.max(0, primary)
+  const s = Math.max(0, secondary)
+  const secondaryRate = 0.5 / (1 + s / 20)
+  return p + s * secondaryRate
+}
 
 /** Deterministic string hash so derived member stats are stable per handle. */
 function hash(str: string): number {
@@ -80,7 +96,7 @@ export function aggregateStats(list: BaseStats[]): BaseStats {
 }
 
 export interface ActivePassive {
-  source: "Lineage" | "Faction"
+  source: "Lineage" | "Faction" | "Skill" | "Ritual"
   name: string
   effect: string
 }
@@ -98,6 +114,53 @@ export interface RunModifiers {
   partyXpBonus: boolean
   /** Human-readable passives for the readiness panel. */
   passives: ActivePassive[]
+
+  // --- Skill-driven (see lib/skill-effects.ts) ---
+  /** Chance a catastrophic failure is downgraded to an ordinary one. */
+  badfailDowngrade: number
+  /** Chance to land a critical blow in a battle exchange. */
+  critChance: number
+  /** Chance to negate an incoming battle exchange. */
+  counterChance: number
+  /** Squad opens battles with a free exchange. */
+  firstStrike: number
+  /** Bonus damage dealt per battle exchange. */
+  battleDamage: number
+  /** Extra damage multiplier against an enemy that is nearly down. */
+  finishBonus: number
+  /** Chance a crew member who would be downed is spared instead. */
+  partyProtection: number
+  /** How strongly the player pulls enemy attacks onto themselves (Bulwark). */
+  threat: number
+  /** Multiplier on hostile encounter frequency (negative = fewer). */
+  battleFrequency: number
+  /** Multiplier on hazard frequency (negative = fewer). */
+  hazardFrequency: number
+  /** Reduces the severity of anomalies. */
+  anomalyResist: number
+  /** Extra loot slots carried per run. */
+  carryCapacity: number
+  /** Chance a harvest upgrades to a rarer tier. */
+  rareChance: number
+  /** Multiplier on gathered material quantity. */
+  materialYield: number
+  /** Extra yield at wreck / ruin nodes. */
+  salvageYield: number
+  /** Multiplier on run duration (negative = faster). */
+  runDuration: number
+  /** Multiplier on XP earned. */
+  xpBonus: number
+
+  /**
+   * Skill-tree content unlocks active for this run.
+   *
+   * Every behavior keyed off this set is strictly *additive*: when an id is
+   * absent the sim must run exactly as it did before the unlock existed. In
+   * particular, any new `rng()` draw has to live **inside** the unlock guard —
+   * an unconditional draw would shift the random stream and silently change
+   * every downstream outcome even with the unlock off.
+   */
+  unlocks: ReadonlySet<SkillUnlockId>
 }
 
 function emptyMods(): RunModifiers {
@@ -108,6 +171,24 @@ function emptyMods(): RunModifiers {
     hiddenRouteChance: 0,
     partyXpBonus: false,
     passives: [],
+    badfailDowngrade: 0,
+    critChance: 0,
+    counterChance: 0,
+    firstStrike: 0,
+    battleDamage: 0,
+    finishBonus: 0,
+    partyProtection: 0,
+    threat: 0,
+    battleFrequency: 0,
+    hazardFrequency: 0,
+    anomalyResist: 0,
+    carryCapacity: 0,
+    rareChance: 0,
+    materialYield: 0,
+    salvageYield: 0,
+    runDuration: 0,
+    xpBonus: 0,
+    unlocks: new Set(),
   }
 }
 
@@ -115,8 +196,16 @@ function addBonus(mods: RunModifiers, type: ExpEventType, amt: number) {
   mods.scoreBonus[type] = (mods.scoreBonus[type] ?? 0) + amt
 }
 
-/** Combine the player's lineage + faction into a single set of squad modifiers. */
-export function getRunModifiers(raceId: RaceId | undefined, factionId: RaceId | undefined): RunModifiers {
+/**
+ * Combine the player's lineage + faction + prepped rituals into one set of
+ * squad modifiers. `ritualIds` is optional so callers that predate the ritual
+ * system keep working unchanged.
+ */
+export function getRunModifiers(
+  raceId: RaceId | undefined,
+  factionId: RaceId | undefined,
+  ritualIds?: string[]
+): RunModifiers {
   const mods = emptyMods()
 
   // ---- Lineage (race) passives ----
@@ -202,6 +291,71 @@ export function getRunModifiers(raceId: RaceId | undefined, factionId: RaceId | 
       break
   }
 
+  // ---- Rituals (Focus) ----
+  // Ritual effect keys deliberately mirror the skill-bonus keys, so the same
+  // additive merge handles both and rituals stack with lineage/faction/skills.
+  const rituals = getRituals(ritualIds)
+  for (const ritual of rituals) {
+    applySkillBonuses(mods, ritual.effects as Record<string, number>)
+    mods.passives.push({
+      source: "Ritual",
+      name: ritual.label,
+      effect: ritual.description,
+    })
+  }
+
+  return mods
+}
+
+/**
+ * Fold aggregated skill bonuses into a set of run modifiers.
+ *
+ * Lineage/faction passives and skills stack additively: a skill-driven +12%
+ * battle score adds to a lineage's +10% rather than overwriting it.
+ */
+export function applySkillBonuses(
+  mods: RunModifiers,
+  bonuses: Partial<Record<string, number>>,
+  skillPassives: ActivePassive[] = [],
+  /** Content unlocks earned from skill breakpoints. Optional so existing
+   *  callers (and the no-unlock baseline) keep their exact behavior. */
+  unlocks: Iterable<SkillUnlockId> = [],
+): RunModifiers {
+  const b = (k: string) => bonuses[k] ?? 0
+  mods.unlocks = new Set(unlocks)
+
+  addBonus(mods, "battle", b("battleScore"))
+  addBonus(mods, "hazard", b("hazardScore"))
+  addBonus(mods, "discovery", b("discoveryScore"))
+  addBonus(mods, "travel", b("travelScore"))
+
+  mods.damageReduction += b("damageReduction")
+  mods.bonusLootChance += b("bonusLoot")
+  mods.hiddenRouteChance += b("hiddenRoute")
+
+  mods.badfailDowngrade += b("badfailDowngrade")
+  mods.critChance += b("critChance")
+  mods.counterChance += b("counterChance")
+  mods.firstStrike += b("firstStrike")
+  mods.battleDamage += b("battleDamage")
+  mods.finishBonus += b("finishBonus")
+  // Several survival skills feed this, so cap it — at 100% no crew could ever be
+  // lost, which would remove all risk from a run.
+  mods.partyProtection = Math.min(0.75, mods.partyProtection + b("partyProtection"))
+  mods.threat += b("threat")
+  mods.battleFrequency += b("battleFrequency")
+  mods.hazardFrequency += b("hazardFrequency")
+  mods.anomalyResist += b("anomalyResist")
+  mods.carryCapacity += b("carryCapacity")
+  mods.rareChance += b("rareChance")
+  mods.materialYield += b("materialYield")
+  mods.salvageYield += b("salvageYield")
+  // Gathering (Harvesting) speeds up node work, which shortens the run the same
+  // way runDuration does — hence the sign flip on a positive-is-faster stat.
+  mods.runDuration += b("runDuration") - b("gatherSpeed")
+  mods.xpBonus += b("xpBonus")
+
+  mods.passives.push(...skillPassives)
   return mods
 }
 
@@ -235,7 +389,18 @@ export interface ResolveResult {
   bonusLoot: boolean
   /** A hidden route was revealed (travel). */
   hiddenRoute: boolean
+  /** Appraisal/Prospecting upgraded the find to a rarer tier. */
+  rareFind: boolean
+  /** `rare_nodes`: the node held a tier above an ordinary rare find. */
+  richFind: boolean
+  /** `quality_harvest`: the node was worked clean and gave an extra unit. */
+  extraYield: boolean
 }
+
+/** Chance `rare_nodes` promotes an already-rare find to the richest tier. */
+const RARE_NODE_UPGRADE = 0.35
+/** Chance `quality_harvest` yields one additional unit from a clean node. */
+const CLEAN_HARVEST_CHANCE = 0.4
 
 /**
  * Resolve a single event as a stat check. Returns the outcome plus any
@@ -255,12 +420,16 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
     loot: false,
     bonusLoot: false,
     hiddenRoute: false,
+    rareFind: false,
+    richFind: false,
+    extraYield: false,
   }
 
   if (!check) return base // rest: no check, always fine
 
-  // Squad capability for this check (primary fully, secondary at half weight).
-  let score = squad[check.primary] + squad[check.secondary] * 0.5
+  // Primary carries the check; secondary starts at half-rate and gets
+  // progressively more expensive so it cannot replace primary investment.
+  let score = derivedStatScore(squad[check.primary], squad[check.secondary])
   // Luck injects variance — a roll scaled by the squad's collective luck.
   score += rng() * (squad.luck * 0.2 + 2)
   // Apply lineage/faction percentage bonus for this event type.
@@ -278,6 +447,15 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
   else if (margin >= -threshold * 0.3) outcome = "fail"
   else outcome = "badfail"
 
+  // Field Medicine (Triage) can blunt a catastrophe into an ordinary setback.
+  if (outcome === "badfail" && rng() < mods.badfailDowngrade) {
+    outcome = "fail"
+  }
+  // Bladecraft (Precision) and Marksmanship can turn a clean pass into a crit.
+  if (outcome === "success" && type === "battle" && rng() < mods.critChance) {
+    outcome = "crit"
+  }
+
   const result: ResolveResult = { ...base, outcome, score, threshold }
   const passed = outcome === "crit" || outcome === "success"
 
@@ -285,6 +463,16 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
     result.loot = passed
     if (passed) {
       result.bonusLoot = outcome === "crit" || rng() < mods.bonusLootChance
+      // Gathering (Appraisal) / Scavenging (Prospecting) upgrade the tier.
+      result.rareFind = rng() < mods.rareChance
+      // Both draws below are deliberately inside their unlock guard: an
+      // unconditional rng() here would shift the stream for every locked run.
+      if (result.rareFind && mods.unlocks.has("rare_nodes")) {
+        result.richFind = rng() < RARE_NODE_UPGRADE
+      }
+      if (mods.unlocks.has("quality_harvest")) {
+        result.extraYield = rng() < CLEAN_HARVEST_CHANCE
+      }
     }
   } else if (type === "travel") {
     if (passed) {
@@ -317,20 +505,48 @@ export interface BattlePlan {
   squadTakeChance: number
   /** Squad is overwhelmed — heavier losses, a member may be downed. */
   overwhelmed: boolean
+  /** Extra damage per landed hit (Brawling / Marksmanship). */
+  bonusDamage: number
+  /** Chance to negate an incoming hit entirely (Guardwork / Bulwark). */
+  counterChance: number
+  /** Squad lands a free opening hit before the enemy can act (Marksmanship). */
+  firstStrike: boolean
+  /** Extra damage once the enemy is nearly down (Bladecraft's Finishing Blow). */
+  finishBonus: number
+  /** Chance a crew member who would be downed is spared (Bulwark / Guardwork). */
+  partyProtection: number
 }
 
-export function planBattle(outcome: CheckOutcome, risk: "Low" | "Medium" | "High", stageIndex: number): BattlePlan {
+export function planBattle(
+  outcome: CheckOutcome,
+  risk: "Low" | "Medium" | "High",
+  stageIndex: number,
+  mods?: RunModifiers,
+  rng: () => number = Math.random,
+): BattlePlan {
   const riskHp = risk === "High" ? 6 : risk === "Medium" ? 5 : 4
   const enemyHp = riskHp + Math.floor(stageIndex / 2)
+
+  // Skill-driven combat edges. Applied on top of the outcome profile so a
+  // well-built squad wins exchanges faster and absorbs fewer of them.
+  const bonusDamage = Math.round(mods?.battleDamage ?? 0)
+  const counterChance = mods?.counterChance ?? 0
+  const firstStrike = rng() < (mods?.firstStrike ?? 0)
+
+  const finishBonus = mods?.finishBonus ?? 0
+  const partyProtection = mods?.partyProtection ?? 0
+
+  const base = { bonusDamage, counterChance, firstStrike, finishBonus, partyProtection }
+
   switch (outcome) {
     case "crit":
-      return { enemyHp, squadHitChance: 0.95, squadTakeChance: 0.2, overwhelmed: false }
+      return { ...base, enemyHp, squadHitChance: 0.95, squadTakeChance: 0.2, overwhelmed: false }
     case "success":
-      return { enemyHp, squadHitChance: 0.8, squadTakeChance: 0.4, overwhelmed: false }
+      return { ...base, enemyHp, squadHitChance: 0.8, squadTakeChance: 0.4, overwhelmed: false }
     case "fail":
-      return { enemyHp: enemyHp + 1, squadHitChance: 0.55, squadTakeChance: 0.7, overwhelmed: false }
+      return { ...base, enemyHp: enemyHp + 1, squadHitChance: 0.55, squadTakeChance: 0.7, overwhelmed: false }
     default: // badfail
-      return { enemyHp: enemyHp + 2, squadHitChance: 0.4, squadTakeChance: 0.9, overwhelmed: true }
+      return { ...base, enemyHp: enemyHp + 2, squadHitChance: 0.4, squadTakeChance: 0.9, overwhelmed: true }
   }
 }
 

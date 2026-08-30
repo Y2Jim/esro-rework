@@ -6,6 +6,10 @@ import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor, rarityAnimation, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
+import { StatAllocation } from "@/components/profile/stat-allocation"
+import { KnownRituals } from "@/components/profile/known-rituals"
+import { BestiaryTab } from "@/components/profile/bestiary-tab"
+import { TrophyCase } from "@/components/profile/trophy-case"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { Shield } from "lucide-react"
@@ -13,11 +17,29 @@ import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
 import type { RaceId, Rarity, VanityItem } from "@/lib/types"
 
-type ProfileTab = "summary" | "titles" | "cosmetics" | "settings" | "notifications"
+const MONTH_LABELS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+]
+
+/**
+ * Formats a creation timestamp as e.g. "9 Mar 2026".
+ *
+ * Deliberately hand-rolled instead of using toLocaleDateString: the locale
+ * formatter resolves differently on the server than in the browser, which turns
+ * this into a hydration mismatch on first paint.
+ */
+function formatCreatedAt(ts: number): string {
+  const d = new Date(ts)
+  return `${d.getDate()} ${MONTH_LABELS[d.getMonth()]} ${d.getFullYear()}`
+}
+
+type ProfileTab = "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications"
 
 const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15", hover: "hover-lilac" },
   { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+  { id: "bestiary", label: "Bestiary", icon: "❖", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
   { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
   { id: "settings", label: "Settings", icon: "⚙", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
   { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15", hover: "hover-danger" },
@@ -67,6 +89,7 @@ export function ProfileScreen() {
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         {tab === "summary" && <SummaryTab />}
         {tab === "titles" && <TitlesTab />}
+        {tab === "bestiary" && <BestiaryTab />}
         {tab === "cosmetics" && <CosmeticsTab />}
         {tab === "settings" && <SettingsTab />}
         {tab === "notifications" && <NotificationsTab />}
@@ -127,6 +150,17 @@ function SummaryTab() {
           <div className="mt-1 text-[13px] text-[color:var(--color-muted)]">
             {identity.established ? "Established identity" : "New arrival"}
           </div>
+          {/* Own line rather than an inline separator: the profile renders in a
+              narrow phone frame, where a "·" delimiter wraps and strands the dot
+              at the end of the previous line. */}
+          {profile.createdAt !== null && (
+            <div className="text-[13px] text-[color:var(--color-muted)]">
+              Courier since{" "}
+              <time dateTime={new Date(profile.createdAt).toISOString()}>
+                {formatCreatedAt(profile.createdAt)}
+              </time>
+            </div>
+          )}
         </div>
       </div>
 
@@ -191,7 +225,7 @@ function SummaryTab() {
         </div>
       )}
 
-      {/* Character Stats */}
+      {/* Character Stats — HP shown here since it cannot be spent into. */}
       <div className="rounded-lg border border-[color:var(--color-border)] p-3">
         <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
           Character Stats
@@ -218,6 +252,15 @@ function SummaryTab() {
           ))}
         </div>
       </div>
+
+      {/* Level-up point spending + the sub-stats those points feed. */}
+      <StatAllocation />
+
+      {/* Known rituals (Focus) */}
+      <KnownRituals />
+
+      {/* Personal bests, derived from the fishing log, route records and bestiary. */}
+      <TrophyCase />
 
       {/* Collection summary */}
       <div className="grid grid-cols-3 gap-2 rounded-lg border border-[color:var(--color-border)] p-3">
@@ -746,7 +789,7 @@ const ALL_TITLES: { id: string; label: string; rarity: Rarity }[] = [
   { id: "eternal_courier", label: "Eternal Courier", rarity: "mythic" },
   { id: "voidtouched_oracle", label: "Voidtouched Oracle", rarity: "mythic" },
   { id: "primordial_flame", label: "Primordial Flame", rarity: "mythic" },
-  { id: "silence_between_stars", label: "Silence Between Stars", rarity: "mythic" },
+  { id: "silence_between_stars", label: "Astral Wayfarer", rarity: "mythic" },
   { id: "dreamer_unchained", label: "Dreamer Unchained", rarity: "mythic" },
   { id: "ashen_sovereign", label: "Ashen Sovereign", rarity: "mythic" },
   // Admin - exclusive red title
@@ -1078,7 +1121,7 @@ function AdminUnlockButton() {
             </div>
             <button
               type="button"
-              onClick={completeActiveExpedition}
+              onClick={() => completeActiveExpedition(1)}
               className="w-full rounded border border-[color:var(--color-green)]/50 bg-[color:var(--color-green)]/10 px-3 py-2 text-[14px] text-[color:var(--color-green)] transition-colors hover:bg-[color:var(--color-green)]/20"
             >
               Complete Expedition (Get Loot)

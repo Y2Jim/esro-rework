@@ -4,8 +4,72 @@ import { useState, useMemo } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
+import { SKILL_MECHANICS, STAT_UNLOCKS, type SkillUnlockId } from "@/lib/skill-effects"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { Wrench } from "lucide-react"
+
+/**
+ * Every tier breakpoint in the registry as a togglable list, keyed by unlock id.
+ * Several unlocks are granted by more than one skill (either route opens the
+ * content), so those are merged into one row listing each path.
+ * Fishing is surfaced first since it is the most common thing to test.
+ */
+const UNLOCK_OVERRIDES = (() => {
+  const byUnlock = new Map<
+    SkillUnlockId,
+    {
+      unlock: SkillUnlockId
+      label: string
+      detail: string
+      skills: string[]
+      skillName: string
+      level: number
+    }
+  >()
+  for (const mech of SKILL_MECHANICS) {
+    for (const bp of mech.breakpoints) {
+      const existing = byUnlock.get(bp.unlock)
+      if (existing) {
+        existing.skills.push(`${mech.name} Lv.${bp.level}`)
+        continue
+      }
+      byUnlock.set(bp.unlock, {
+        unlock: bp.unlock,
+        label: bp.label,
+        detail: bp.detail,
+        skills: [`${mech.name} Lv.${bp.level}`],
+        // Kept separate from the display strings so sorting compares the skill
+        // name and the numeric level rather than "Lv.10" vs "Lv.5" as text.
+        skillName: mech.name,
+        level: bp.level,
+      })
+    }
+  }
+  // Stat-threshold gates (e.g. fishing entry needs Luck 15) live outside the
+  // skill registry, so merge them in or they would drop off this list entirely.
+  for (const gate of STAT_UNLOCKS) {
+    const requirement = `${gate.stat.toUpperCase()} ${gate.value}`
+    const existing = byUnlock.get(gate.unlock)
+    if (existing) {
+      existing.skills.push(requirement)
+      continue
+    }
+    byUnlock.set(gate.unlock, {
+      unlock: gate.unlock,
+      label: gate.label,
+      detail: gate.detail,
+      skills: [requirement],
+      skillName: requirement,
+      level: gate.value,
+    })
+  }
+  return [...byUnlock.values()].sort((a, b) => {
+    const aFish = a.unlock.startsWith("fishing")
+    const bFish = b.unlock.startsWith("fishing")
+    if (aFish !== bFish) return aFish ? -1 : 1
+    return a.skillName.localeCompare(b.skillName) || a.level - b.level
+  })
+})()
 
 export function AdminDevTools() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
@@ -20,6 +84,10 @@ export function AdminDevTools() {
   const identity = useEsroStore((s) => s.identity)
   const logAdminAction = useEsroStore((s) => s.logAdminAction)
   const setHandle = useEsroStore((s) => s.setHandle)
+  const debugUnlocks = useEsroStore((s) => s.debugUnlocks)
+  const toggleDebugUnlock = useEsroStore((s) => s.toggleDebugUnlock)
+  const clearDebugUnlocks = useEsroStore((s) => s.clearDebugUnlocks)
+  const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   
   const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean }>({
     cosmetics: false,
@@ -239,12 +307,73 @@ export function AdminDevTools() {
         {activeExpedition && (
           <button
             type="button"
-            onClick={completeActiveExpedition}
+            onClick={() => completeActiveExpedition(1)}
             className="w-full rounded border border-[#60d060]/50 bg-[#60d060]/10 px-3 py-2 text-[14px] text-[#60d060] transition-colors hover:bg-[#60d060]/20"
           >
             Complete Active Expedition
           </button>
         )}
+      </div>
+
+      {/* Content Unlock Overrides */}
+      <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Force Content Unlocks
+          </div>
+          {debugUnlocks.length > 0 && (
+            <button
+              type="button"
+              onClick={clearDebugUnlocks}
+              className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-0.5 text-[13px] text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-text)]"
+            >
+              Clear All
+            </button>
+          )}
+        </div>
+        <p className="text-[12px] text-[color:var(--color-muted)]">
+          Bypasses the skill level requirement so gated content can be tested directly.
+        </p>
+        <div className="space-y-1.5">
+          {UNLOCK_OVERRIDES.map((entry) => {
+            const forced = debugUnlocks.includes(entry.unlock)
+            const earned = !forced && hasSkillUnlock(entry.unlock)
+            return (
+              <button
+                key={entry.unlock}
+                type="button"
+                onClick={() => toggleDebugUnlock(entry.unlock)}
+                className={cn(
+                  "flex w-full items-center justify-between gap-2 rounded border px-3 py-2 text-left transition-colors",
+                  forced
+                    ? "border-[#60d060]/50 bg-[#60d060]/10"
+                    : "border-[color:var(--color-border)] bg-[color:var(--color-panel)] hover:border-[#5dd0ff]/50"
+                )}
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-[14px] text-[color:var(--color-text)]">
+                    {entry.label}
+                  </span>
+                  <span className="block truncate text-[12px] text-[color:var(--color-muted)]">
+                    {entry.skills.join(" or ")} — {entry.detail}
+                  </span>
+                </span>
+                <span
+                  className={cn(
+                    "shrink-0 text-[12px] uppercase tracking-wider",
+                    forced
+                      ? "text-[#60d060]"
+                      : earned
+                        ? "text-[#5dd0ff]"
+                        : "text-[color:var(--color-muted)]"
+                  )}
+                >
+                  {forced ? "Forced" : earned ? "Earned" : "Locked"}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Flair Preview */}

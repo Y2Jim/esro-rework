@@ -1,3 +1,7 @@
+// Type-only import: erased at build time, so this does not create a runtime
+// cycle with skill-effects.ts (which imports types from here).
+import type { SkillUnlockId } from "./skill-effects"
+
 export type ChannelId =
   | "PUBLIC"
   | "TRADE"
@@ -24,7 +28,16 @@ export type ScreenId =
 
 export type SocialTab = "party" | "faction" | "friends" | "trade"
 
-export type OpsTab = "expeditions" | "skills" | "crafting" | "rolling"
+export type OpsTab = "map" | "expeditions" | "skills" | "crafting" | "fishing" | "rolling"
+
+/** Sub-views inside the Faction tab, used for cross-screen deep links. */
+export type FactionView =
+  | "overview"
+  | "projects"
+  | "buildings"
+  | "rallies"
+  | "ranks"
+  | "activity"
 
 export interface QuickAction {
   id: string
@@ -37,7 +50,7 @@ export interface QuickAction {
   }
 }
 
-export type ContractType = "faction" | "neutral" | "event"
+export type ContractType = "faction" | "neutral" | "event" | "escort"
 
 export interface Contract {
   id: string
@@ -49,6 +62,11 @@ export interface Contract {
   status: "available" | "active" | "completed"
   type: ContractType
   difficulty?: "easy" | "medium" | "hard"
+  /**
+   * Skill-tree content unlock required to sign this contract. Mirrors
+   * `Expedition.requiresUnlock`; enforced by acceptContract in the store.
+   */
+  requiresUnlock?: SkillUnlockId
   }
 
 export interface FactionProject {
@@ -58,6 +76,82 @@ export interface FactionProject {
   progress: number
   goal: number
   contributors: number
+  /** Whether the project has reached its goal. */
+  complete?: boolean
+}
+
+// ============ FACTION SYSTEMS ============
+
+export type FactionActivityKind =
+  | "contribution"
+  | "rank_up"
+  | "project_complete"
+  | "building"
+  | "rally"
+  | "join"
+  | "perk"
+
+export interface FactionActivity {
+  id: string
+  kind: FactionActivityKind
+  /** Actor handle. */
+  handle: string
+  text: string
+  /** unix ms */
+  at: number
+  amount?: number
+}
+
+export type FactionBuildingEffect =
+  | "craft_speed"
+  | "craft_yield"
+  | "cost_reduction"
+  | "standing_gain"
+
+export interface FactionBuilding {
+  id: string
+  label: string
+  description: string
+  icon: string
+  /** 0 = not yet built. */
+  level: number
+  maxLevel: number
+  effect: FactionBuildingEffect
+  /** Fractional bonus granted per level (e.g. 0.08 = 8%). */
+  perLevel: number
+  /** Human-readable effect summary (per level). */
+  effectLabel: string
+  requiredRank: number
+  /** Token cost for the first level; scales up per level. */
+  baseTokenCost: number
+  /** Materials consumed for the first level; scales up per level. */
+  baseMaterials: { itemId: string; label: string; qty: number }[]
+}
+
+export interface FactionPerk {
+  id: string
+  label: string
+  description: string
+  icon: string
+  requiredRank: number
+  /** Short buff summary shown on the perk card. */
+  effectLabel: string
+}
+
+export interface FactionRally {
+  id: string
+  label: string
+  description: string
+  icon: string
+  progress: number
+  goal: number
+  /** unix ms deadline. */
+  endsAt: number
+  reward: { tokens: number; standing: number; item?: string }
+  /** The player's personal contribution to this rally. */
+  contribution: number
+  joined: boolean
+  complete?: boolean
 }
 
 export type MessageKind = "player" | "system" | "whisper"
@@ -203,6 +297,13 @@ export interface Skill {
   primaryExpeditions?: string[]
   /** Effects granted per level */
   effects?: SkillEffect[]
+  /** The BaseStat this skill feeds, from config/skills.json */
+  linkedStat?: keyof BaseStats
+  /**
+   * The three sub-stats that drive this skill's distinct mechanical hooks.
+   * Each one maps to its own effect in lib/skill-effects.ts.
+   */
+  stats?: SkillStat[]
   }
 
 export interface ExpeditionStage {
@@ -222,9 +323,17 @@ export interface Expedition {
   duration: number
   risk: "Low" | "Medium" | "High"
   tags: string[]
-  requiredSkill: string
+  /**
+   * Skill id needed to launch. Optional because the Low-risk starter runs are
+   * deliberately ungated: skills can only be chosen at character creation and
+   * never unlock afterwards, so a build that took no exploration skills would
+   * otherwise have no reachable expedition at all.
+   */
+  requiredSkill?: string
   suggestedParty: number
   minLevel?: number
+  /** Skill tier breakpoint required to launch this run at all. */
+  requiresUnlock?: SkillUnlockId
   stages?: ExpeditionStage[]
   factionAttunement?: string // faction id for bonus standing
   rewards: {
@@ -249,6 +358,8 @@ export interface ActiveExpedition {
   partyMembers?: string[] // handles
   startedAt: number
   skillGains?: { skill: string; xp: number }[]
+  /** Rituals prepped at launch; their effects apply for the whole run. */
+  rituals?: string[]
 }
 
 export type ItemAspect =
@@ -279,7 +390,35 @@ export interface InventoryItem {
   duration?: number // in seconds for buffs
 }
 
-export type CraftingCategory = "food" | "potion" | "gear" | "component" | "special"
+/** Where the line currently is in the cast -> bite -> hook loop. */
+export type FishingPhase = "idle" | "casting" | "bite" | "landed" | "escaped"
+
+export interface FishingState {
+  phase: FishingPhase
+  spotId: string | null
+  /** Bait spent on the current cast. Drives the rarity pull and junk rate. */
+  baitId: string | null
+  /** Fish currently on the hook (during "bite") or just resolved. */
+  fishId: string | null
+  /** Timestamp the bite window opened, for the reaction bar. */
+  biteAt: number | null
+  /** How long the player has to strike, in ms. */
+  windowMs: number
+  /** Quantity landed on the last successful catch. */
+  lastQty: number
+  /** Consecutive successful catches — drives the streak readout. */
+  streak: number
+}
+
+export interface FishingCatch {
+  fishId: string
+  label: string
+  rarity: Rarity
+  qty: number
+  at: number
+}
+
+export type CraftingCategory = "food" | "potion" | "gear" | "component" | "special" | "bait"
 
 export interface CraftingIngredient {
   itemId: string
@@ -459,6 +598,41 @@ export interface Faction {
   maxStanding: number
 }
 
+/** Best result achieved on a single expedition route. */
+export interface RouteRecord {
+  /** Times this route has been completed. */
+  runs: number
+  /**
+   * Best cargo-recovered fraction, 0..1. This is the loot multiplier the run
+   * finished on, so 1 means nothing was lost on the way home.
+   */
+  bestHaul: number
+  /** Most items carried out in one run. */
+  bestItems: number
+  /** When the best run landed, epoch ms. */
+  bestAt: number
+}
+
+/** What the player has learned about one creature, accumulated across runs. */
+export interface BestiaryRecord {
+  /** Times met in the field. A record existing at all means "discovered". */
+  encounters: number
+  /** Times put down. Field notes only; gates nothing. */
+  defeats: number
+  /** First sighting, epoch ms. */
+  firstSeen: number
+  /** Set once the beast has been brought in as a pack animal. */
+  tamed?: boolean
+  /**
+   * Set the first time a rare recoloured variant of this creature was seen.
+   * Sticky once earned — a shiny is a permanent bragging right, so later
+   * ordinary sightings must never clear it.
+   */
+  shiny?: boolean
+  /** When the shiny was found, epoch ms. Absent unless `shiny` is set. */
+  shinyAt?: number
+}
+
 export interface Profile {
   handle: string
   title: OwnedTitle | null
@@ -468,6 +642,36 @@ export interface Profile {
   level: number
   xp: number
   xpToNext: number
+  /** Unspent stat points earned from level-ups. */
+  statPoints: number
+  /** Points spent per core stat; folded into getPlayerStats(). */
+  allocated: BaseStats
+  /** Ritual ids the player knows, from starters and looted books. */
+  knownRituals: string[]
+  /**
+   * Creature id -> what the player knows about it. Absent key means undiscovered,
+   * which is what lets the codex show silhouettes for everything not yet met.
+   *
+   * Optional so saves and seeds created before the bestiary existed stay valid;
+   * every read goes through a `?? {}` fallback.
+   */
+  bestiary?: Record<string, BestiaryRecord>
+  /**
+   * Per-route bests, keyed by expedition id. Nothing recorded run history
+   * before this, so it starts empty on existing saves and fills as runs land.
+   */
+  routeRecords?: Record<string, RouteRecord>
+  /** Creature ids tamed and available as pack animals. */
+  tamedBeasts?: string[]
+  /** Active pack animal, or null when travelling unmounted. */
+  activeMount?: string | null
+  /**
+   * When the character was created, as an epoch ms timestamp. Stamped by
+   * setCharacterData. Nullable so the profile can omit the line entirely rather
+   * than invent a date for a courier that was never created; the mid-game demo
+   * seed carries a fixed backdated value.
+   */
+  createdAt: number | null
   /** Currency balance earned from expeditions and contracts */
   tokens: number
   ownedTitles: OwnedTitle[]
@@ -636,6 +840,7 @@ export type AdminAction =
   | "unlock_cosmetics"
   | "unlock_titles"
   | "edit_player"
+  | "debug_unlock"
 
 export interface AdminLog {
   id: string

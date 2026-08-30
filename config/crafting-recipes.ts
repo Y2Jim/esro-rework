@@ -1,4 +1,16 @@
-import type { CraftingRecipe, InventoryItem } from "@/lib/types"
+import type { SkillUnlockId } from "@/lib/skill-effects"
+import type { CraftingRecipe, InventoryItem, Rarity } from "@/lib/types"
+
+/**
+ * Tier gate for a recipe, derived from what it produces rather than tagged on
+ * each recipe: epic output needs Marked Work, legendary needs Lost Techniques.
+ * Returns null for recipes anyone can attempt.
+ */
+export function recipeUnlockFor(rarity: Rarity): SkillUnlockId | null {
+  if (rarity === "legendary" || rarity === "mythic") return "master_recipes"
+  if (rarity === "epic") return "advanced_recipes"
+  return null
+}
 
 // Base crafting materials that can be found or gathered
 export const CRAFTING_MATERIALS: InventoryItem[] = [
@@ -455,6 +467,118 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
     requiredSkillLevel: 5,
     unlocked: false,
   },
+
+  // ===== BAIT RECIPES =====
+  // Bait is required to cast (see config/bait.ts). The tier-3+ recipes eat fish
+  // you have already landed, so fishing feeds its own progression: grind common
+  // Silverfin into lures that pull the rare end of the table.
+  // Void Chum outputs epic rarity, so recipeUnlockFor() gates it behind
+  // "advanced_recipes" automatically — no extra gating code needed here.
+  {
+    id: "bait_grubs",
+    label: "Pale Grubs",
+    category: "bait",
+    description: "Gravel grubs packed in damp cloth. The bait of last resort.",
+    ingredients: [{ itemId: "fungal_flour", label: "Fungal Flour", qty: 1 }],
+    output: {
+      itemId: "bait_grubs",
+      label: "Pale Grubs",
+      aspect: "consumable",
+      rarity: "common",
+      qty: 3,
+      description: "Gravel grubs packed in damp cloth. The bait of last resort.",
+      effects: ["Fishing bait", "Draws Silverfin"],
+    },
+    craftTime: 15,
+    unlocked: true,
+  },
+  {
+    id: "bait_dough",
+    label: "Fungal Dough",
+    category: "bait",
+    description: "Sticky dough that clings to a hook in fast water.",
+    ingredients: [
+      { itemId: "fungal_flour", label: "Fungal Flour", qty: 2 },
+      { itemId: "pure_water", label: "Pure Water", qty: 1 },
+    ],
+    output: {
+      itemId: "bait_dough",
+      label: "Fungal Dough",
+      aspect: "consumable",
+      rarity: "common",
+      qty: 4,
+      description: "Sticky dough that clings to a hook in fast water.",
+      effects: ["Fishing bait", "Draws Silverfin and Glass Carp", "Less junk"],
+    },
+    craftTime: 30,
+    unlocked: true,
+  },
+  {
+    id: "bait_glowlure",
+    label: "Glowcap Lure",
+    category: "bait",
+    description: "A glowcap pinch bound to a hook. Visible six feet down.",
+    ingredients: [
+      { itemId: "glowcap", label: "Glowcap Mushroom", qty: 1 },
+      { itemId: "iron_dust", label: "Iron Dust", qty: 1 },
+      { itemId: "fish_silverfin", label: "Silverfin", qty: 2 },
+    ],
+    output: {
+      itemId: "bait_glowlure",
+      label: "Glowcap Lure",
+      aspect: "consumable",
+      rarity: "uncommon",
+      qty: 3,
+      description: "A glowcap pinch bound to a hook. Visible six feet down.",
+      effects: ["Fishing bait", "Draws Glass Carp and Echo Eel", "Pulls rarer fish"],
+    },
+    craftTime: 60,
+    unlocked: true,
+  },
+  {
+    id: "bait_voltchum",
+    label: "Volt Chum",
+    category: "bait",
+    description: "Ground carp cut with crystal dust. It hums against the tin.",
+    ingredients: [
+      { itemId: "crystal_shard", label: "Crystal Shard", qty: 1 },
+      { itemId: "signal_essence", label: "Signal Essence", qty: 1 },
+      { itemId: "fish_glasscarp", label: "Glass Carp", qty: 2 },
+    ],
+    output: {
+      itemId: "bait_voltchum",
+      label: "Volt Chum",
+      aspect: "consumable",
+      rarity: "rare",
+      qty: 3,
+      description: "Ground carp cut with crystal dust. It hums against the tin.",
+      effects: ["Fishing bait", "Draws Echo Eel and Gold Relay", "Strong rarity pull"],
+    },
+    craftTime: 120,
+    unlocked: true,
+  },
+  {
+    id: "bait_voidchum",
+    label: "Void Chum",
+    category: "bait",
+    description: "Something in the water recognises this and comes up to look.",
+    ingredients: [
+      { itemId: "void_salt", label: "Void Salt", qty: 1 },
+      { itemId: "void_essence", label: "Void Essence", qty: 1 },
+      { itemId: "fish_echo_eel", label: "Echo Eel", qty: 1 },
+    ],
+    output: {
+      itemId: "bait_voidchum",
+      label: "Void Chum",
+      aspect: "consumable",
+      rarity: "epic",
+      qty: 2,
+      description: "Something in the water recognises this and comes up to look.",
+      effects: ["Fishing bait", "Draws Gold Relay and Prism Leviathan", "Severe rarity pull"],
+    },
+    craftTime: 240,
+    unlocked: true,
+  },
 ]
 
 // Category labels and colors
@@ -464,4 +588,5 @@ export const CATEGORY_CONFIG: Record<string, { label: string; color: string; ico
   gear: { label: "Gear", color: "var(--color-cyan)", icon: "◆" },
   component: { label: "Components", color: "var(--color-muted)", icon: "◇" },
   special: { label: "Special", color: "var(--color-violet-bright)", icon: "★" },
+  bait: { label: "Bait", color: "var(--color-cyan)", icon: "≈" },
 }
