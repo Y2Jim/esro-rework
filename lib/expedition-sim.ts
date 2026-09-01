@@ -483,12 +483,16 @@ export function resolveCheck(input: ResolveInput): ResolveResult {
       result.damage = Math.max(outcome === "badfail" ? 1 : 0, raw - mods.damageReduction)
     }
   } else if (type === "hazard") {
+    // Hazards are the environmental/anomalous danger, so Anomaly wards stack
+    // with generic damage reduction here. Previously anomalyResist was
+    // aggregated but never read, leaving those skill nodes inert.
+    const hazardMitigation = mods.damageReduction + mods.anomalyResist
     if (!passed) {
       const raw = outcome === "badfail" ? 3 : 2
-      result.damage = Math.max(1, raw - mods.damageReduction)
+      result.damage = Math.max(1, raw - hazardMitigation)
     } else if (outcome === "success") {
       // Mitigated but not perfectly.
-      result.damage = Math.max(0, 1 - mods.damageReduction)
+      result.damage = Math.max(0, 1 - hazardMitigation)
     }
   }
   // battle damage is handled by the token-clash loop using `outcome`.
