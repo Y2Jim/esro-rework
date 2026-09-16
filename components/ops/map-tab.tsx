@@ -86,7 +86,7 @@ export function MapTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[15px] uppercase tracking-wider text-[color:var(--color-text)]">
-            World Map
+            The Astral Marches
           </h2>
           <p className="text-[12px] text-[color:var(--color-muted)]">
             {MAP_REGIONS.length} regions · {MAP_NODES.length} locations
