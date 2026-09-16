@@ -137,7 +137,7 @@ function generateHandle(): string {
   return base
 }
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
-import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, UNDERTONES, DEFAULT_UNDERTONE_INDEX, HAIR_COLORS, EYE_COLORS, HEAD_SHAPE_NAMES, HAIR_STYLE_NAMES } from "@/lib/avatar-generator"
+import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, UNDERTONES, DEFAULT_UNDERTONE_INDEX, HAIR_COLORS, EYE_COLORS, HEAD_SHAPE_NAMES, HAIR_STYLE_NAMES, deriveSkinColor } from "@/lib/avatar-generator"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { SkillDetail } from "@/components/ops/skill-detail"
 import { createInitialSkills } from "@/lib/skill-effects"
@@ -788,7 +788,7 @@ if (briefingIndex > 0) {
                         >
                           <span
                             className="h-3 w-3 shrink-0 rounded-full border border-[rgba(255,255,255,0.2)]"
-                            style={{ backgroundColor: undertone.accent }}
+                            style={{ backgroundColor: deriveSkinColor(currentSkin, i) }}
                           />
                           {undertone.name}
                         </button>
