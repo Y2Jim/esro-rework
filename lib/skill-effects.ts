@@ -245,6 +245,31 @@ export function unlockRequirementLabel(id: SkillUnlockId): string {
   return `Requires ${UNLOCK_LABELS[id]}`
 }
 
+/**
+ * Whether an unlock opens a new place to travel (a route/zone on the map and
+ * expedition board) or a new system to use (fishing, crafting, contracts…).
+ * Drives the "New route" vs "New feature" split in unlock notifications.
+ *
+ * Exhaustive by type: a new SkillUnlockId without a kind here is a compile error.
+ */
+export const UNLOCK_KIND: Record<SkillUnlockId, "route" | "feature"> = {
+  hidden_routes: "route",
+  deep_ruins: "route",
+  rare_nodes: "route",
+  anomaly_zones: "route",
+  quality_harvest: "feature",
+  fishing_basic: "feature",
+  fishing_wrecks: "feature",
+  pack_beasts: "feature",
+  pack_train: "feature",
+  field_surgery: "feature",
+  advanced_recipes: "feature",
+  master_recipes: "feature",
+  escort_contracts: "feature",
+  faction_rites: "feature",
+  archive_translation: "feature",
+}
+
 export interface SkillBreakpoint {
   level: number
   unlock: SkillUnlockId

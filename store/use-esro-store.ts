@@ -120,6 +120,8 @@ import {
   getSkillMechanic,
   getSkillUnlocks,
   skillIdFromName,
+  UNLOCK_LABELS,
+  UNLOCK_KIND,
   type SkillBonuses,
   type SkillUnlockId,
 } from "@/lib/skill-effects"
@@ -158,6 +160,14 @@ export interface EsroState {
   setUiTheme: (theme: string) => void
   unlockTheme: (themeId: string) => void
   checkFactionUnlock: () => void
+  /** Unlock ids already announced to the player, so each fires exactly once. */
+  seenUnlocks: string[]
+  /**
+   * Diff current skill/stat unlocks against what has been announced and push a
+   * "new route"/"new feature" notification for each newcomer. Pass silent to
+   * re-baseline without notifying (used at character creation).
+   */
+  syncUnlocks: (opts?: { silent?: boolean }) => void
   
   // Player Stats
   getPlayerStats: () => BaseStats
@@ -708,6 +718,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   characterCourier: null,
   characterFaction: null,
   factionUnlocked: false,
+  // Baseline of unlocks a default character already has, so the first sync only
+  // ever announces things earned during play — never the starting kit on load.
+  seenUnlocks: Array.from(getSkillUnlocks(createInitialSkills(), DEFAULT_BASE_STATS)),
   uiTheme: "default",
   unlockedThemes: [], // Start with no rollable themes unlocked
   setCharacterData: (race, courier, handle, starterSkills, avatar) => {
@@ -738,6 +751,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         createdAt: Date.now(),
       },
     })
+    // The chosen race/courier/starter skills define the real starting kit, so
+    // re-baseline against them silently — anything earned later then announces.
+    get().syncUnlocks({ silent: true })
   },
   setFaction: (factionId) => {
     const faction = FACTIONS.find(f => f.id === factionId)
@@ -760,6 +776,34 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const { profile, factionUnlocked } = get()
     if (!factionUnlocked && profile.level >= FACTION_UNLOCK_LEVEL) {
       set({ factionUnlocked: true })
+    }
+  },
+
+  syncUnlocks: (opts) => {
+    const current = get().getSkillUnlocks()
+    const seen = new Set(get().seenUnlocks)
+    const newly = [...current].filter((id) => !seen.has(id)) as SkillUnlockId[]
+    if (newly.length === 0) return
+    // Re-baseline first so a notification's own re-render can never double-fire.
+    set({ seenUnlocks: [...current] })
+    if (opts?.silent) return
+    // Escort work lives on the contracts board and faction rites on the faction
+    // page; everything else is reached from the ops hub (map, crafting, archive).
+    const deeplinkFor: Partial<Record<SkillUnlockId, ScreenId>> = {
+      escort_contracts: "contracts",
+      faction_rites: "social",
+    }
+    for (const id of newly) {
+      const label = UNLOCK_LABELS[id] ?? id
+      const isRoute = UNLOCK_KIND[id] === "route"
+      get().addNotification({
+        title: isRoute ? "New route unlocked" : "New feature unlocked",
+        body: isRoute
+          ? `${label} — a new destination is open on the expedition map.`
+          : `${label} is now available.`,
+        priority: "high",
+        deeplink: { screen: deeplinkFor[id] ?? "ops" },
+      })
     }
   },
   
@@ -858,8 +902,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       })
     }
 
-    // Reaching a level can satisfy the faction gate.
-    if (result.levelsGained.length) get().checkFactionUnlock()
+    // Reaching a level can satisfy the faction gate and open level-tier routes
+    // and features (deep ruins, escort contracts, anomaly zones…).
+    if (result.levelsGained.length) {
+      get().checkFactionUnlock()
+      get().syncUnlocks()
+    }
   },
 
   allocateStat: (stat, amount = 1) => {
@@ -875,6 +923,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({
       profile: { ...profile, allocated, statPoints: points - spend },
     })
+    // Spending points can cross a stat gate (e.g. Luck 15 opens fishing).
+    get().syncUnlocks()
   },
 
   respecStats: () => {
@@ -1138,6 +1188,13 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         ? get().debugUnlocks.filter((u) => u !== id)
         : [...get().debugUnlocks, id],
     })
+    // Forcing an unlock on announces it like any other; forcing it off just
+    // drops it from the seen set so it can announce again if re-earned.
+    if (active) {
+      set({ seenUnlocks: get().seenUnlocks.filter((u) => u !== id) })
+    } else {
+      get().syncUnlocks()
+    }
     get().logAdminAction(
       "debug_unlock",
       id,
