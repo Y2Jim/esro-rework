@@ -53,7 +53,38 @@ import {
 } from "@/config/faction"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import type { BaseStats } from "@/lib/types"
-import { derivedStatScore } from "@/lib/expedition-sim"
+import type {
+  NodeControl,
+  StoredGroup,
+  FactionBaseState,
+  TerritoryBattle,
+  TerritoryBattleKind,
+} from "@/lib/types"
+import { derivedStatScore, deriveMemberStats } from "@/lib/expedition-sim"
+import {
+  MAP_NODES,
+  buildInitialNodeControl,
+  isNodeClaimableBy,
+  getAdjacentNodeIds,
+  getControlledNodeIds,
+  getNodeById,
+  nodeRequiredLevel,
+  isClaimableNode,
+  getNodeForExpedition,
+  isContestedNode,
+} from "@/lib/world-map"
+import {
+  buildMonsterGarrison,
+  buildFactionGarrison,
+  buildInitialFactionBases,
+  snapshotGroup,
+  simulateTerritoryBattle,
+  planBaseAssaultDamage,
+  recoverBaseState,
+  ENDGAME_NODE_LEVEL,
+  BASE_DEFENSE_LEVEL,
+  BUILDING_DISABLE_MS,
+} from "@/lib/territory-sim"
 import {
   applyXp,
   emptyAllocation,
@@ -332,6 +363,36 @@ export interface EsroState {
   simulateExpedition: (expeditionId?: string) => void
   completeActiveExpedition: (lootMultiplier?: number) => void
   injectTestChatMessages: () => void
+
+  // ============ TERRITORY WAR ============
+  /** Controlling faction per node id; null/absent = neutral. */
+  nodeControl: NodeControl
+  /** Stored defender garrison per claimed node. */
+  nodeGarrisons: Record<string, StoredGroup>
+  /** Per-faction home base integrity + buildings. */
+  factionBases: Record<string, FactionBaseState>
+  /** The battle currently being watched, or null. */
+  activeBattle: TerritoryBattle | null
+  /** A claim/assault awaiting its expedition to finish before the battle. */
+  pendingTerritory: { nodeId: string; kind: TerritoryBattleKind } | null
+  /** The player's faction id, or null if factionless. */
+  getPlayerFactionId: () => RaceId | null
+  /** Whether the player may claim a node right now, with a reason when not. */
+  canClaimNode: (nodeId: string) => { ok: boolean; reason?: string }
+  /** Whether the player may assault a rival base right now. */
+  canAssaultBase: (nodeId: string) => { ok: boolean; reason?: string }
+  /** Launch a claim: runs the node's expedition, then a battle on arrival. */
+  startTerritoryClaim: (nodeId: string) => void
+  /** Launch a base raid on a rival HQ (immediate battle, no expedition). */
+  startBaseAssault: (nodeId: string) => void
+  /** Build + simulate the pending battle so the view can play it back. */
+  beginTerritoryBattle: (nodeId: string, kind: TerritoryBattleKind, attacker: StoredGroup) => void
+  /** Apply the watched battle's outcome, then run the rival expansion tick. */
+  resolveTerritoryBattle: () => void
+  /** Each rival faction makes one adjacency-limited expansion attempt. */
+  runRivalExpansionTick: () => void
+  /** Elapsed-time integrity + building recovery across all bases. */
+  recoverBases: () => void
   
   // Admin Panel
   isAdmin: boolean
@@ -598,6 +659,43 @@ const PARTY_TITLES: { label: string; rarity: Rarity }[] = [
   { label: "Archive Listener", rarity: "rare" },
   { label: "Waystone Keeper", rarity: "epic" },
 ]
+
+/**
+ * Freeze a squad of handles into a stored group for a territory battle. The
+ * player uses their live derived stats (no run buffs — those never enter
+ * getPlayerStats), party members use their deterministic derived stats.
+ */
+function groupFromHandles(
+  handles: string[],
+  factionId: RaceId,
+  identity: { handle: string; avatar?: AvatarConfig },
+  party: PartyMember[],
+  playerStats: BaseStats,
+): StoredGroup {
+  const members = handles.map((h) => {
+    if (h === identity.handle) {
+      return { handle: h, role: "Courier", avatar: identity.avatar, stats: playerStats }
+    }
+    const pm = party.find((m) => m.handle === h)
+    const role = pm?.role ?? "Crew"
+    return { handle: h, role, avatar: pm?.avatar, stats: deriveMemberStats(h, role) }
+  })
+  return snapshotGroup(members, factionId)
+}
+
+/** Assemble the deployable squad (leader first), capped at `maxSquad`. */
+function assembleSquadHandles(
+  party: PartyMember[],
+  playerHandle: string,
+  maxSquad: number,
+): string[] {
+  const available = [...party]
+    .filter((m) => m.avatar && (m.status === "ready" || m.status === "idle" || m.leader))
+    .sort((a, b) => (b.leader ? 1 : 0) - (a.leader ? 1 : 0))
+  const handles = available.slice(0, maxSquad).map((m) => m.handle)
+  if (!handles.includes(playerHandle)) handles.unshift(playerHandle)
+  return handles
+}
 
 export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
@@ -1131,6 +1229,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     if (get().getExpeditionCooldownRemaining() > 0) return
     // Tier gate: some sites only open once the matching skill breakpoint is hit.
     if (exp.requiresUnlock && !get().hasSkillUnlock(exp.requiresUnlock)) return
+    // Faction-warfare gate: contested frontier sites are endgame faction ground.
+    // Only warfare-unlocked faction members may deploy there — this blocks the
+    // expedition DEPLOY button too, not just the Claim/Assault actions, so a
+    // factionless courier can never slip into contested territory.
+    const originNode = getNodeForExpedition(id)
+    if (originNode && isContestedNode(originNode)) {
+      if (!get().getPlayerFactionId()) return
+      if (!get().factionUnlocked) return
+    }
 
     // Callers may pass an explicit ritual set; otherwise use whatever the prep
     // dialog left staged. Filter to known rituals and re-check capacity so a
@@ -2358,12 +2465,23 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     const mult = Math.max(0, Math.min(1, lootMultiplier))
 
+    // A territory claim run travels via the normal sim, then fights a battle on
+    // arrival. Capture the squad + pending target before activeExpedition clears.
+    const pending = get().pendingTerritory
+    const pendingNode = pending ? getNodeById(pending.nodeId) : null
+    const isTerritoryRun = Boolean(
+      pending && pendingNode && pendingNode.expeditionIds.includes(activeExpedition.id),
+    )
+    const claimSquad = isTerritoryRun ? [...(activeExpedition.partyMembers ?? [])] : []
+
     // Total wipe: all cargo is lost, no rewards granted, and a recovery
-    // cooldown blocks new launches so failure carries a real cost.
+    // cooldown blocks new launches so failure carries a real cost. A wiped claim
+    // run never reaches the battle.
     if (mult <= 0) {
       set({
         activeExpedition: null,
         expeditionCooldownUntil: Date.now() + EXPEDITION_FAIL_COOLDOWN_MS,
+        ...(isTerritoryRun ? { pendingTerritory: null } : {}),
       })
       return
     }
@@ -2460,8 +2578,259 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
 
     if (learnedBook) get().learnRitual(learnedBook)
+
+    // Squad reached the contested site — trigger the invaders-vs-defenders battle.
+    if (isTerritoryRun && pending) {
+      const factionId = get().getPlayerFactionId()
+      if (factionId) {
+        const { party, identity } = get()
+        const attacker = groupFromHandles(
+          claimSquad,
+          factionId,
+          identity,
+          party,
+          get().getPlayerStats(),
+        )
+        get().beginTerritoryBattle(pending.nodeId, pending.kind, attacker)
+      } else {
+        set({ pendingTerritory: null })
+      }
+    }
   },
-  
+
+  // ============ TERRITORY WAR ============
+  nodeControl: buildInitialNodeControl(),
+  nodeGarrisons: {},
+  factionBases: buildInitialFactionBases(FACTIONS.map((f) => f.id), null),
+  activeBattle: null,
+  pendingTerritory: null,
+
+  getPlayerFactionId: () => {
+    const { characterFaction, profile } = get()
+    return (characterFaction?.id ?? profile.faction?.id ?? null) as RaceId | null
+  },
+
+  canClaimNode: (nodeId) => {
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return { ok: false, reason: "Join a faction to contest territory." }
+    if (!get().factionUnlocked)
+      return { ok: false, reason: `Reach level ${FACTION_UNLOCK_LEVEL} to unlock faction warfare.` }
+    const node = getNodeById(nodeId)
+    if (!node || !isClaimableNode(node)) return { ok: false, reason: "This site can't be claimed." }
+    if (get().nodeControl[nodeId] === factionId)
+      return { ok: false, reason: "Your faction already holds this site." }
+    if (!isNodeClaimableBy(get().nodeControl, factionId, nodeId))
+      return { ok: false, reason: "Not connected to your territory — claim an adjacent site first." }
+    const required = Math.max(nodeRequiredLevel(node), ENDGAME_NODE_LEVEL)
+    if (get().profile.level < required)
+      return { ok: false, reason: `Requires level ${required} — come prepared.` }
+    return { ok: true }
+  },
+
+  canAssaultBase: (nodeId) => {
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return { ok: false, reason: "Join a faction to raid rival bases." }
+    if (!get().factionUnlocked)
+      return { ok: false, reason: `Reach level ${FACTION_UNLOCK_LEVEL} to unlock faction warfare.` }
+    const node = getNodeById(nodeId)
+    if (!node || node.kind !== "faction_hq" || !node.factionId)
+      return { ok: false, reason: "This isn't a faction base." }
+    if (node.factionId === factionId) return { ok: false, reason: "This is your own base." }
+    const frontier = new Set(getControlledNodeIds(get().nodeControl, factionId))
+    const adjacent = getAdjacentNodeIds(nodeId).some((a) => frontier.has(a))
+    if (!adjacent)
+      return { ok: false, reason: "Push your territory adjacent to this base first." }
+    return { ok: true }
+  },
+
+  startTerritoryClaim: (nodeId) => {
+    if (!get().canClaimNode(nodeId).ok) return
+    if (get().activeExpedition || get().activeBattle) return
+    const node = getNodeById(nodeId)
+    if (!node) return
+    const expId = node.expeditionIds[0]
+    if (expId) {
+      // Travel to the site via the normal expedition sim; the battle fires on
+      // arrival (see completeActiveExpedition).
+      set({ pendingTerritory: { nodeId, kind: "claim" } })
+      get().startExpedition(expId)
+    } else {
+      const factionId = get().getPlayerFactionId()
+      if (!factionId) return
+      const { party, identity } = get()
+      const handles = assembleSquadHandles(party, identity.handle, 4)
+      const attacker = groupFromHandles(handles, factionId, identity, party, get().getPlayerStats())
+      get().beginTerritoryBattle(nodeId, "claim", attacker)
+    }
+  },
+
+  startBaseAssault: (nodeId) => {
+    if (!get().canAssaultBase(nodeId).ok) return
+    if (get().activeExpedition || get().activeBattle) return
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return
+    const { party, identity } = get()
+    const handles = assembleSquadHandles(party, identity.handle, 4)
+    const attacker = groupFromHandles(handles, factionId, identity, party, get().getPlayerStats())
+    get().beginTerritoryBattle(nodeId, "base_assault", attacker)
+  },
+
+  beginTerritoryBattle: (nodeId, kind, attacker) => {
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return
+    const node = getNodeById(nodeId)
+    if (!node) return
+
+    let defenderGroup: StoredGroup
+    let defenderFaction: RaceId | null
+    let monster = false
+    if (kind === "claim") {
+      const stored = get().nodeGarrisons[nodeId]
+      if (stored) {
+        defenderGroup = stored
+        defenderFaction = stored.factionId
+      } else {
+        defenderGroup = buildMonsterGarrison(Math.max(nodeRequiredLevel(node), ENDGAME_NODE_LEVEL))
+        defenderFaction = null
+        monster = true
+      }
+    } else {
+      defenderFaction = node.factionId ?? null
+      defenderGroup = buildFactionGarrison(defenderFaction ?? factionId, BASE_DEFENSE_LEVEL)
+    }
+
+    const { log, result, margin } = simulateTerritoryBattle(attacker, defenderGroup)
+
+    let buildingsHit: string[] | undefined
+    let integrityLost: number | undefined
+    if (kind === "base_assault" && result === "win" && defenderFaction) {
+      const base = get().factionBases[defenderFaction]
+      if (base) {
+        const dmg = planBaseAssaultDamage(margin, base)
+        buildingsHit = dmg.buildingsHit
+        integrityLost = dmg.integrityLost
+      }
+    }
+
+    set({
+      activeBattle: {
+        nodeId,
+        nodeLabel: node.label,
+        kind,
+        attacker: { factionId, group: attacker },
+        defender: { factionId: defenderFaction, group: defenderGroup, monster },
+        log,
+        result,
+        margin,
+        buildingsHit,
+        integrityLost,
+      },
+      pendingTerritory: null,
+    })
+  },
+
+  resolveTerritoryBattle: () => {
+    const battle = get().activeBattle
+    if (!battle) return
+
+    if (battle.result === "win") {
+      if (battle.kind === "claim") {
+        set((s) => ({
+          nodeControl: { ...s.nodeControl, [battle.nodeId]: battle.attacker.factionId },
+          // Store the victors as the site's new garrison — buffs already stripped.
+          nodeGarrisons: { ...s.nodeGarrisons, [battle.nodeId]: battle.attacker.group },
+        }))
+      } else if (battle.kind === "base_assault" && battle.defender.factionId) {
+        const now = Date.now()
+        set((s) => {
+          const base = s.factionBases[battle.defender.factionId as RaceId]
+          if (!base) return {}
+          const hit = new Set(battle.buildingsHit ?? [])
+          const buildings = base.buildings.map((b) =>
+            hit.has(b.id) ? { ...b, disabledUntil: now + BUILDING_DISABLE_MS } : b,
+          )
+          const integrity = Math.max(0, base.integrity - (battle.integrityLost ?? 0))
+          return {
+            factionBases: {
+              ...s.factionBases,
+              [base.factionId]: { ...base, integrity, buildings, lastRecoveredAt: now },
+            },
+          }
+        })
+      }
+    }
+
+    set({ activeBattle: null })
+    // A siege just happened — rivals answer with their own expansion.
+    get().runRivalExpansionTick()
+  },
+
+  runRivalExpansionTick: () => {
+    const playerFaction = get().getPlayerFactionId()
+    const rivals = FACTIONS.map((f) => f.id).filter((id) => id !== playerFaction)
+    const control: NodeControl = { ...get().nodeControl }
+    const garrisons: Record<string, StoredGroup> = { ...get().nodeGarrisons }
+    const lostNodes: string[] = []
+
+    for (const rival of rivals) {
+      const candidates = MAP_NODES.filter((n) => isNodeClaimableBy(control, rival, n.id))
+      if (candidates.length === 0) continue
+      // Prefer soft neutral ground; fall back to biting into a held node.
+      const neutral = candidates.filter((n) => !control[n.id])
+      const pool = neutral.length ? neutral : candidates
+      const target = pool[Math.floor(Math.random() * pool.length)]
+
+      const rivalGroup = buildFactionGarrison(rival, ENDGAME_NODE_LEVEL)
+      const defender =
+        garrisons[target.id] ??
+        buildMonsterGarrison(Math.max(nodeRequiredLevel(target), ENDGAME_NODE_LEVEL))
+      const { result } = simulateTerritoryBattle(rivalGroup, defender)
+      if (result === "win") {
+        if (control[target.id] === playerFaction) lostNodes.push(target.label)
+        control[target.id] = rival
+        garrisons[target.id] = rivalGroup
+      }
+    }
+
+    set({ nodeControl: control, nodeGarrisons: garrisons })
+
+    if (lostNodes.length > 0) {
+      const now = Date.now()
+      set((s) => ({
+        profile: {
+          ...s.profile,
+          notifications: [
+            {
+              id: now,
+              title: "Territory lost",
+              body: `Rival factions seized ${lostNodes.join(", ")}.`,
+              priority: "high" as const,
+              state: "unread" as const,
+              createdAt: now,
+            },
+            ...s.profile.notifications,
+          ],
+        },
+      }))
+    }
+  },
+
+  recoverBases: () => {
+    const now = Date.now()
+    set((s) => {
+      let changed = false
+      const bases: Record<string, FactionBaseState> = { ...s.factionBases }
+      for (const key of Object.keys(bases)) {
+        const next = recoverBaseState(bases[key], now)
+        if (next !== bases[key]) {
+          bases[key] = next
+          changed = true
+        }
+      }
+      return changed ? { factionBases: bases } : {}
+    })
+  },
+
   // Admin/Debug - inject test chat messages with all title rarities to PUBLIC channel
   injectTestChatMessages: () => {
     const { messages } = get()

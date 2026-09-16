@@ -10,6 +10,7 @@ import { CraftingTab } from "./crafting-tab"
 import { FishingTab } from "./fishing-tab"
 import { RollingTab } from "./rolling-tab"
 import { ActiveExpeditionView } from "@/components/expedition/active-expedition-view"
+import { TerritoryBattleView } from "@/components/territory/territory-battle-view"
 
 const tabs: { id: OpsTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
   { id: "map", label: "Map", icon: "◈", color: "text-[color:var(--color-accent)]", bgColor: "bg-[color:var(--color-accent)]/15", hover: "hover-violet" },
@@ -24,6 +25,7 @@ export function OpsScreen() {
   const opsTab = useEsroStore((s) => s.opsTab)
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
+  const activeBattle = useEsroStore((s) => s.activeBattle)
   // Fishing only exists once its skill gate (Luck 15 -> "fishing_basic") is met.
   const canFish = useEsroStore((s) => s.hasSkillUnlock("fishing_basic"))
 
@@ -33,6 +35,11 @@ export function OpsScreen() {
   // If the player was parked on Fishing and then lost the unlock (e.g. a dev
   // reset), fall back to Map so the content area never renders a hidden tab.
   const effectiveTab = opsTab === "fishing" && !canFish ? "map" : opsTab
+
+  // A territory battle (claim resolution or base assault) takes over everything.
+  if (activeBattle) {
+    return <TerritoryBattleView />
+  }
 
   // An active expedition takes over the entire Ops screen.
   if (activeExpedition) {

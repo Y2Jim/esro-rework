@@ -126,6 +126,12 @@ export interface FactionBuilding {
   baseTokenCost: number
   /** Materials consumed for the first level; scales up per level. */
   baseMaterials: { itemId: string; label: string; qty: number }[]
+  /**
+   * Transient: epoch ms until which a base-assault has knocked this building
+   * offline. While set and in the future, the building's bonus is suppressed
+   * and it shows a "damaged — recovering" state. Absent on undamaged buildings.
+   */
+  disabledUntil?: number
 }
 
 export interface FactionPerk {
@@ -791,6 +797,76 @@ export type FactionSelectionStep =
   | "confirm"
   | "pledged"
   | "complete"
+
+// ============ TERRITORY WAR ============
+
+/** A single line in a cinematic battle feed. */
+export interface BattleLine {
+  /** Who acted / whose beat this is. */
+  side: "attacker" | "defender" | "system"
+  text: string
+  /** Attacker HP fraction after this beat, 0..1. */
+  attackerHp: number
+  /** Defender HP fraction after this beat, 0..1. */
+  defenderHp: number
+}
+
+/**
+ * A defender garrison stored on a claimed node, or an attacking group about to
+ * siege one. Run buffs are intentionally stripped — only base + equipment
+ * derived stats survive into the snapshot.
+ */
+export interface StoredGroup {
+  /** Owning faction, or null for a monster/neutral garrison. */
+  factionId: RaceId | null
+  members: {
+    handle: string
+    role: string
+    avatar?: AvatarConfig
+    stats: BaseStats
+  }[]
+  /** Aggregate combat power, precomputed at snapshot time. */
+  power: number
+  /** True for the hard AI monster garrison that holds unclaimed nodes. */
+  monster?: boolean
+  /** epoch ms the snapshot was taken. */
+  capturedAt: number
+}
+
+/** Controlling faction per node id; null (or absent) = neutral. */
+export type NodeControl = Record<string, RaceId | null>
+
+/**
+ * A faction's home base. Bases are never captured — an assault reduces
+ * integrity and knocks specific buildings offline instead.
+ */
+export interface FactionBaseState {
+  factionId: RaceId
+  integrity: number
+  maxIntegrity: number
+  buildings: FactionBuilding[]
+  /** epoch ms of the last recovery tick applied. */
+  lastRecoveredAt: number
+}
+
+export type TerritoryBattleKind = "claim" | "base_assault"
+
+export interface TerritoryBattle {
+  nodeId: string
+  kind: TerritoryBattleKind
+  attacker: { factionId: RaceId; group: StoredGroup }
+  defender: { factionId: RaceId | null; group: StoredGroup; monster: boolean }
+  log: BattleLine[]
+  result: "win" | "loss"
+  /** 0..1 victory margin; drives base-assault damage. */
+  margin: number
+  /** Building ids knocked offline (base_assault wins only). */
+  buildingsHit?: string[]
+  /** Integrity removed from the target base (base_assault wins only). */
+  integrityLost?: number
+  /** Node label, cached for the result panel. */
+  nodeLabel: string
+}
 
 // ============ ADMIN SYSTEM ============
 

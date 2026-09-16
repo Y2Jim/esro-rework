@@ -654,6 +654,8 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
   const upgradeBuilding = useEsroStore((s) => s.upgradeBuilding)
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const profileFactionId = useEsroStore((s) => s.profile.faction?.id)
+  const factionBases = useEsroStore((s) => s.factionBases)
+  const recoverBases = useEsroStore((s) => s.recoverBases)
   const setScreen = useEsroStore((s) => s.setScreen)
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
   const setMapFocus = useEsroStore((s) => s.setMapFocus)
@@ -663,6 +665,22 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
   const hqNode =
     getFactionHqNode(characterFaction?.id) ??
     getFactionHqNode(profileFactionId as RaceId | undefined)
+
+  // Surface the player's own base health so rival raids are visible here.
+  const playerFactionId = (characterFaction?.id ?? profileFactionId) as RaceId | undefined
+  const base = playerFactionId ? factionBases[playerFactionId] : undefined
+  const now = Date.now()
+  const disabledIds = new Set(
+    (base?.buildings ?? [])
+      .filter((b) => b.disabledUntil && b.disabledUntil > now)
+      .map((b) => b.id),
+  )
+  const integrityPct = base ? Math.round((base.integrity / base.maxIntegrity) * 100) : 100
+
+  // Tick recovery whenever this panel is opened.
+  useEffect(() => {
+    recoverBases()
+  }, [recoverBases])
 
   const handleViewOnMap = () => {
     if (hqNode) setMapFocus(hqNode.id)
@@ -700,6 +718,57 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
           </button>
         )}
       </div>
+
+      {/* Base integrity — reflects rival raids on your HQ */}
+      {base && (
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Base Integrity
+            </span>
+            <span
+              className="text-[13px]"
+              style={{
+                color:
+                  integrityPct >= 66
+                    ? "var(--color-success)"
+                    : integrityPct >= 33
+                      ? "var(--color-amber)"
+                      : "var(--color-danger)",
+              }}
+            >
+              {integrityPct}%
+            </span>
+          </div>
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-[color:var(--color-panel)]">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${integrityPct}%`,
+                backgroundColor:
+                  integrityPct >= 66
+                    ? "var(--color-success)"
+                    : integrityPct >= 33
+                      ? "var(--color-amber)"
+                      : "var(--color-danger)",
+              }}
+            />
+          </div>
+          {disabledIds.size > 0 ? (
+            <div className="mt-2 text-[12px] text-[color:var(--color-danger)]">
+              {disabledIds.size} structure{disabledIds.size > 1 ? "s" : ""} knocked offline by raiders — recovering over time.
+            </div>
+          ) : integrityPct < 100 ? (
+            <div className="mt-2 text-[12px] text-[color:var(--color-muted)]">
+              Damaged by a recent raid. Integrity regenerates over time.
+            </div>
+          ) : (
+            <div className="mt-2 text-[12px] text-[color:var(--color-muted)]">
+              All structures operational.
+            </div>
+          )}
+        </div>
+      )}
       {buildings.map((b) => {
         const maxed = b.level >= b.maxLevel
         const rankLocked = rank < b.requiredRank

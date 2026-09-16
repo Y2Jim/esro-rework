@@ -1,6 +1,6 @@
 import { expeditions } from "@/lib/mock-data"
 import { FACTIONS } from "@/lib/game-data"
-import type { Expedition, FactionData, RaceId } from "@/lib/types"
+import type { Expedition, FactionData, NodeControl, RaceId } from "@/lib/types"
 
 /**
  * Canonical world geography for ESRO.
@@ -448,6 +448,20 @@ export function getExpeditionsForNode(node: MapNode): Expedition[] {
     .filter((e): e is Expedition => Boolean(e))
 }
 
+/** The node whose expedition list includes `expeditionId`, if any. */
+export function getNodeForExpedition(expeditionId: string): MapNode | undefined {
+  return MAP_NODES.find((n) => n.expeditionIds.includes(expeditionId))
+}
+
+/**
+ * Contested frontier sites are faction-warfare ground: only faction members
+ * who have unlocked warfare may deploy there. Regular claimable sites
+ * (settlements, ruins, wilds) stay open to everyone for normal PvE.
+ */
+export function isContestedNode(node: MapNode): boolean {
+  return node.kind === "contested"
+}
+
 /** Lowest level requirement across a node's expeditions (1 if unrestricted). */
 export function nodeRequiredLevel(node: MapNode): number {
   const levels = getExpeditionsForNode(node).map((e) => e.minLevel ?? 1)
@@ -461,4 +475,75 @@ export function getFactionHqNode(factionId: RaceId | null | undefined): MapNode 
 
 export function getNodesInRegion(regionId: string): MapNode[] {
   return MAP_NODES.filter((n) => n.regionId === regionId)
+}
+
+// ============ TERRITORY WAR ============
+
+/** Bases (faction HQs) are assault-only — they can never be captured. */
+export function isBaseNode(node: MapNode): boolean {
+  return node.kind === "faction_hq"
+}
+
+/**
+ * A node factions can actually own. Everything except the faction HQs and the
+ * neutral home waystation is claimable ground.
+ */
+export function isClaimableNode(node: MapNode): boolean {
+  return !isBaseNode(node) && node.id !== "waystation_prime"
+}
+
+/** Neighbouring node ids via any path, in either direction. */
+export function getAdjacentNodeIds(nodeId: string): string[] {
+  const ids = new Set<string>()
+  for (const path of MAP_PATHS) {
+    if (path.from === nodeId) ids.add(path.to)
+    if (path.to === nodeId) ids.add(path.from)
+  }
+  return [...ids]
+}
+
+/**
+ * Seed control: each faction owns only its home base at the start of the war.
+ * Every other node is neutral, so factions must expand outward one adjacent
+ * node at a time.
+ */
+export function buildInitialNodeControl(): NodeControl {
+  const control: NodeControl = {}
+  for (const node of MAP_NODES) {
+    control[node.id] = isBaseNode(node) && node.factionId ? node.factionId : null
+  }
+  return control
+}
+
+/**
+ * Nodes a faction currently controls, including its (never-lost) home base.
+ * Used as the frontier set for adjacency-limited expansion.
+ */
+export function getControlledNodeIds(control: NodeControl, factionId: RaceId): string[] {
+  const owned = MAP_NODES.filter((n) => control[n.id] === factionId).map((n) => n.id)
+  const hq = getFactionHqNode(factionId)
+  if (hq && !owned.includes(hq.id)) owned.push(hq.id)
+  return owned
+}
+
+/**
+ * Whether `factionId` may claim `nodeId`: the node must be claimable, currently
+ * held by someone else (or neutral), and adjacent to ground the faction already
+ * controls. Base nodes are excluded because they are never captured.
+ */
+export function isNodeClaimableBy(
+  control: NodeControl,
+  factionId: RaceId,
+  nodeId: string,
+): boolean {
+  const node = getNodeById(nodeId)
+  if (!node || !isClaimableNode(node)) return false
+  if (control[nodeId] === factionId) return false
+  const frontier = new Set(getControlledNodeIds(control, factionId))
+  return getAdjacentNodeIds(nodeId).some((adj) => frontier.has(adj))
+}
+
+/** Rival HQ nodes a faction could assault (any faction base but its own). */
+export function getAssaultableBaseNodes(factionId: RaceId): MapNode[] {
+  return MAP_NODES.filter((n) => isBaseNode(n) && n.factionId && n.factionId !== factionId)
 }
