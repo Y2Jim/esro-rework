@@ -25,9 +25,9 @@ import {
   MAP_NODES,
 } from "@/lib/world-map"
 import type { SocialTab, RaceId } from "@/lib/types"
-import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
+import { SubTabBar, type SubTabItem } from "@/components/shell/sub-tab-bar"
 
-const socialTabs: (IconRailItem & { id: SocialTab })[] = [
+const socialTabs: (SubTabItem & { id: SocialTab })[] = [
   { id: "party", label: "Party", icon: "⋈", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
   { id: "faction", label: "Faction", icon: "⬡", accentClass: "text-[color:var(--color-violet-bright)]", activeBgClass: "bg-[color:var(--color-violet-bright)]/15", hoverClass: "hover-violet", accentBar: "var(--color-violet-bright)" },
   { id: "friends", label: "Friends", icon: "◇", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
@@ -51,19 +51,17 @@ export function SocialScreen() {
   }, [factionViewRequest])
 
   return (
-    <div className="flex h-full">
-      {/* Social sub-rail */}
-      <IconRail
-        railId="social"
+    <div className="flex h-full flex-col">
+      {/* Social sub-tabs */}
+      <SubTabBar
         ariaLabel="social sections"
-        className="border-r border-[color:var(--color-border)]"
         items={socialTabs}
         activeId={tab}
         onSelect={(id) => setTab(id as SocialTab)}
       />
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         {tab === "party" && <PartyTab party={party} />}
         {tab === "faction" && <FactionTab faction={faction} projects={factionProjects} />}
         {tab === "friends" && <FriendsTab friends={friends} />}

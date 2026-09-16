@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useEsroStore } from "@/store/use-esro-store"
 import { StatusBar } from "./status-bar"
 import { IdentityBar } from "./identity-bar"
-import { NavRail } from "./nav-rail"
+import { SideNav } from "./side-nav"
 import { NavRailProvider } from "./nav-rail-context"
 import { Watermark } from "./watermark"
 import { ChatScreen } from "@/components/chat/chat-screen"
@@ -30,7 +30,7 @@ export function AppShell() {
 
         {/* global rail + screen content */}
         <div className="relative flex min-h-0 flex-1 overflow-hidden">
-          <NavRail />
+          <SideNav />
 
           <div className="relative min-h-0 flex-1 overflow-hidden">
             <AnimatePresence mode="wait" initial={false}>

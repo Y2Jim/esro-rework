@@ -14,10 +14,10 @@ export function ChatScreen() {
   const readOnly = current?.readOnly
 
   return (
-    <div className="relative flex h-full w-full">
+    <div className="relative flex h-full w-full flex-col">
       <ChannelTabs />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* channel header strip */}
         <div className="relative z-10 flex items-center justify-between gap-2 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/70 px-3 py-1.5">
           <div className="flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">

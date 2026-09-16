@@ -3,28 +3,21 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react"
 
 type NavRailContextValue = {
-  /** id of the rail currently expanded, or null when all are collapsed */
-  expandedRail: string | null
-  isExpanded: (id: string) => boolean
-  toggleRail: (id: string) => void
-  collapseAll: () => void
+  /** whether the single left menu is expanded (labels + group headings visible) */
+  expanded: boolean
+  toggle: () => void
+  setExpanded: (v: boolean) => void
 }
 
 const NavRailContext = createContext<NavRailContextValue | null>(null)
 
 export function NavRailProvider({ children }: { children: ReactNode }) {
-  const [expandedRail, setExpandedRail] = useState<string | null>(null)
+  // Closed by default: the menu starts as a slim icon-only rail until tapped.
+  const [expanded, setExpanded] = useState(false)
 
-  const isExpanded = useCallback((id: string) => expandedRail === id, [expandedRail])
-  // Accordion behavior: opening one rail collapses any other so two overlays
-  // can never stack on top of each other in the narrow phone frame.
-  const toggleRail = useCallback((id: string) => setExpandedRail((cur) => (cur === id ? null : id)), [])
-  const collapseAll = useCallback(() => setExpandedRail(null), [])
+  const toggle = useCallback(() => setExpanded((v) => !v), [])
 
-  const value = useMemo(
-    () => ({ expandedRail, isExpanded, toggleRail, collapseAll }),
-    [expandedRail, isExpanded, toggleRail, collapseAll],
-  )
+  const value = useMemo(() => ({ expanded, toggle, setExpanded }), [expanded, toggle])
   return <NavRailContext.Provider value={value}>{children}</NavRailContext.Provider>
 }
 

@@ -2,7 +2,7 @@
 
 import { useEsroStore } from "@/store/use-esro-store"
 import type { OpsTab } from "@/lib/types"
-import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
+import { SubTabBar, type SubTabItem } from "@/components/shell/sub-tab-bar"
 import { MapTab } from "./map-tab"
 import { ExpeditionsTab } from "./expeditions-tab"
 import { SkillsTab } from "./skills-tab"
@@ -12,7 +12,7 @@ import { RollingTab } from "./rolling-tab"
 import { ActiveExpeditionView } from "@/components/expedition/active-expedition-view"
 import { TerritoryBattleView } from "@/components/territory/territory-battle-view"
 
-const tabs: (IconRailItem & { id: OpsTab })[] = [
+const tabs: (SubTabItem & { id: OpsTab })[] = [
   { id: "map", label: "Map", icon: "◈", accentClass: "text-[color:var(--color-accent)]", activeBgClass: "bg-[color:var(--color-accent)]/15", hoverClass: "hover-violet", accentBar: "var(--color-accent)" },
   { id: "expeditions", label: "Expeditions", icon: "▷", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
   { id: "skills", label: "Skills", icon: "◆", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
@@ -47,12 +47,10 @@ export function OpsScreen() {
   }
 
   return (
-    <div className="flex h-full">
-      {/* Contextual sub-rail */}
-      <IconRail
-        railId="ops"
+    <div className="flex h-full flex-col">
+      {/* Contextual sub-tabs */}
+      <SubTabBar
         ariaLabel="ops sections"
-        className="border-r border-[color:var(--color-border)]"
         items={visibleTabs}
         activeId={effectiveTab}
         onSelect={(id) => setOpsTab(id as OpsTab)}

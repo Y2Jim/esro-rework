@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
-import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
+import { SubTabBar, type SubTabItem } from "@/components/shell/sub-tab-bar"
 import { formatResetIn, msUntilNextDay } from "@/lib/contract-rotation"
 import { unlockRequirementLabel } from "@/lib/skill-effects"
 import type { ContractType } from "@/lib/types"
@@ -11,7 +11,7 @@ import { RotateCcw, Lock } from "lucide-react"
 
 type ContractFilter = "all" | ContractType
 
-const FILTER_TABS: (IconRailItem & { id: ContractFilter })[] = [
+const FILTER_TABS: (SubTabItem & { id: ContractFilter })[] = [
   { id: "all", label: "All", icon: "≡", accentClass: "text-[color:var(--color-accent)]", activeBgClass: "bg-[color:var(--color-accent)]/20", accentBar: "var(--color-accent)" },
   { id: "neutral", label: "Open", icon: "⚡", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/20", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
   { id: "faction", label: "Faction", icon: "⬡", accentClass: "text-[color:var(--color-accent)]", activeBgClass: "bg-[color:var(--color-accent)]/20", hoverClass: "hover-violet", accentBar: "var(--color-accent)" },
@@ -64,19 +64,17 @@ export function ContractsScreen() {
   const active = filteredContracts.filter((c) => c.status === "active")
 
   return (
-    <div className="flex h-full">
-      {/* Filter sub-rail */}
-      <IconRail
-        railId="contracts"
+    <div className="flex h-full flex-col">
+      {/* Filter sub-tabs */}
+      <SubTabBar
         ariaLabel="contract filters"
-        className="border-r border-[color:var(--color-border)]"
         items={FILTER_TABS}
         activeId={filter}
         onSelect={(id) => setFilter(id as ContractFilter)}
       />
 
       {/* Contract list */}
-      <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         <div className="mb-3 flex items-center gap-1.5 text-[13px] text-[color:var(--color-muted)]">
           <RotateCcw className="h-3 w-3" />
           <span>New contracts in {formatResetIn(resetIn)}</span>

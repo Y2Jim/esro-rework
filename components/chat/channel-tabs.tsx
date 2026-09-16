@@ -2,7 +2,7 @@
 
 import { channels } from "@/lib/mock-data"
 import { useEsroStore } from "@/store/use-esro-store"
-import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
+import { SubTabBar, type SubTabItem } from "@/components/shell/sub-tab-bar"
 import type { ChannelId } from "@/lib/types"
 
 const channelStyle: Record<ChannelId, { accentClass: string; activeBgClass: string; accentBar: string; icon: string; hover: string }> = {
@@ -21,7 +21,7 @@ export function ChannelTabs() {
   const setChannel = useEsroStore((s) => s.setChannel)
   const unread = useEsroStore((s) => s.unread)
 
-  const items: IconRailItem[] = channels.map((c) => {
+  const items: SubTabItem[] = channels.map((c) => {
     const style = channelStyle[c.id]
     return {
       id: c.id,
@@ -38,10 +38,8 @@ export function ChannelTabs() {
   })
 
   return (
-    <IconRail
-      railId="channels"
+    <SubTabBar
       ariaLabel="channels"
-      className="border-r border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/85 backdrop-blur"
       items={items}
       activeId={current}
       onSelect={(id) => setChannel(id as ChannelId)}

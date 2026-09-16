@@ -5,7 +5,7 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor, rarityAnimation, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
-import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
+import { SubTabBar, type SubTabItem } from "@/components/shell/sub-tab-bar"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 import { StatAllocation } from "@/components/profile/stat-allocation"
 import { KnownRituals } from "@/components/profile/known-rituals"
@@ -49,7 +49,7 @@ function formatCreatedAt(ts: number): string {
 
 type ProfileTab = "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications"
 
-const profileTabs: (IconRailItem & { id: ProfileTab })[] = [
+const profileTabs: (SubTabItem & { id: ProfileTab })[] = [
   { id: "summary", label: "Summary", icon: "◉", accentClass: "text-[color:var(--color-lilac)]", activeBgClass: "bg-[color:var(--color-lilac)]/15", hoverClass: "hover-lilac", accentBar: "var(--color-lilac)" },
   { id: "titles", label: "Titles", icon: "◇", accentClass: "text-[color:var(--color-amber)]", activeBgClass: "bg-[color:var(--color-amber)]/15", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
   { id: "bestiary", label: "Bestiary", icon: "❖", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
@@ -77,19 +77,17 @@ export function ProfileScreen() {
   const effectiveTab = tab === "bestiary" && !canTame ? "summary" : tab
 
   return (
-    <div className="flex h-full">
-      {/* Profile sub-rail */}
-      <IconRail
-        railId="profile"
+    <div className="flex h-full flex-col">
+      {/* Profile sub-tabs */}
+      <SubTabBar
         ariaLabel="profile sections"
-        className="border-r border-[color:var(--color-border)]"
         items={visibleProfileTabs}
         activeId={effectiveTab}
         onSelect={(id) => setTab(id as ProfileTab)}
       />
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         {effectiveTab === "summary" && <SummaryTab />}
         {effectiveTab === "titles" && <TitlesTab />}
         {effectiveTab === "bestiary" && canTame && <BestiaryTab />}
