@@ -59,7 +59,8 @@ const profileTabs: (SubTabItem & { id: ProfileTab })[] = [
 ]
 
 export function ProfileScreen() {
-  const [tab, setTab] = useState<ProfileTab>("summary")
+  const tab = useEsroStore((s) => s.profileTab) as ProfileTab
+  const setTab = useEsroStore((s) => s.setProfileTab)
   const profile = useEsroStore((s) => s.profile)
   const identity = useEsroStore((s) => s.identity)
   // The Bestiary is the taming payoff, so it stays hidden until "Pack Beasts".

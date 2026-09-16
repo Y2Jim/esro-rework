@@ -6,7 +6,9 @@ import { cn } from "@/lib/cn"
 import { useNavRail } from "./nav-rail-context"
 
 type NavItem = {
-  id: ScreenId
+  // "settings" is not a screen of its own — it deep-links into the Profile
+  // screen's settings tab. Every other id maps directly to a ScreenId.
+  id: ScreenId | "settings"
   label: string
   icon: string
   accentClass: string
@@ -27,6 +29,7 @@ const GAME_ITEMS: NavItem[] = [
   { id: "ops", label: "ops", icon: "↯", accentClass: "text-[color:var(--color-amber)]", glowClass: "text-glow-amber", activeBgClass: "bg-[color:var(--color-amber)]/15", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
   { id: "contracts", label: "contracts", icon: "★", accentClass: "text-[color:var(--color-green)]", glowClass: "text-glow-green", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
   { id: "profile", label: "profile", icon: "●", accentClass: "text-[color:var(--color-lilac)]", glowClass: "text-glow-soft", activeBgClass: "bg-[color:var(--color-lilac)]/15", hoverClass: "hover-lilac", accentBar: "var(--color-lilac)" },
+  { id: "settings", label: "settings", icon: "⚙", accentClass: "text-[color:var(--color-cyan)]", glowClass: "text-glow-cyan", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
 ]
 
 /**
@@ -38,19 +41,33 @@ const GAME_ITEMS: NavItem[] = [
 export function SideNav() {
   const screen = useEsroStore((s) => s.screen)
   const setScreen = useEsroStore((s) => s.setScreen)
+  const profileTab = useEsroStore((s) => s.profileTab)
+  const setProfileTab = useEsroStore((s) => s.setProfileTab)
   const profile = useEsroStore((s) => s.profile)
   const { expanded, toggle } = useNavRail()
 
   const unread = profile.notifications.filter((n) => n.state === "unread").length
 
   const renderItem = (it: NavItem) => {
-    const active = it.id === screen
+    // Settings lives inside Profile; treat it as active only while that tab is
+    // open, and keep Profile from also lighting up in that case.
+    const onSettings = screen === "profile" && profileTab === "settings"
+    const active =
+      it.id === "settings" ? onSettings : it.id === screen && !(it.id === "profile" && onSettings)
     const badge = it.id === "profile" ? unread : 0
+    const handleClick = () => {
+      if (it.id === "settings") {
+        setScreen("profile")
+        setProfileTab("settings")
+      } else {
+        setScreen(it.id)
+      }
+    }
     return (
       <li key={it.id}>
         <button
           type="button"
-          onClick={() => setScreen(it.id)}
+          onClick={handleClick}
           title={it.label}
           aria-label={it.label}
           aria-current={active ? "page" : undefined}

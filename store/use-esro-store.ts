@@ -348,8 +348,8 @@ export interface EsroState {
   // Profile
   identity: typeof seedIdentity
   profile: Profile
-  profileTab: "summary" | "notifications"
-  setProfileTab: (tab: "summary" | "notifications") => void
+  profileTab: "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications"
+  setProfileTab: (tab: "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications") => void
   setActiveTitle: (titleId: string) => void
   /** Push a new unread notification; id and timestamp are assigned here. */
   addNotification: (
