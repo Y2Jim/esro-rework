@@ -254,8 +254,7 @@ export function MapTab() {
               aria-label={`${node.label} — ${meta.label}`}
               aria-pressed={isSelected}
               className={cn(
-                "group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 hover:z-20 focus-visible:z-20",
-                isSelected && "z-20"
+                "group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 hover:z-20 focus-visible:z-20"
               )}
               style={{ left: `${node.x}%`, top: `${node.y}%` }}
             >
