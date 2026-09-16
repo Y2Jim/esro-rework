@@ -512,6 +512,21 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Genesis Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 13 } },
     { label: "Tidecaller's Visage", type: "cosmetic", vanityData: { layerType: "accessory", variant: 27 } },
     { label: "Abyssal Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 29 } },
+    // Mythic accessories that previously had no in-game unlock path.
+    { label: "Voidtouched Gaze", type: "cosmetic", vanityData: { layerType: "accessory", variant: 17 } },
+    { label: "Relay Sea Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 18 } },
+    { label: "Shardheart Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 19 } },
+    { label: "Eternal Courier's Mark", type: "cosmetic", vanityData: { layerType: "accessory", variant: 20 } },
+    { label: "Primordial Echo", type: "cosmetic", vanityData: { layerType: "accessory", variant: 21 } },
+    // Mythic hats that previously had no in-game unlock path.
+    { label: "Eternal Courier's Crest", type: "cosmetic", vanityData: { layerType: "hat", variant: 21 } },
+    { label: "Voidtouched Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 22 } },
+    { label: "Primordial Echo Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 23 } },
+    // Mythic flair that previously had no in-game unlock path.
+    { label: "Shardheart Radiance", type: "cosmetic", vanityData: { layerType: "flair", variant: 14 } },
+    { label: "Eternal Courier's Light", type: "cosmetic", vanityData: { layerType: "flair", variant: 15 } },
+    { label: "Voidtouched Presence", type: "cosmetic", vanityData: { layerType: "flair", variant: 16 } },
+    { label: "Primordial Resonance", type: "cosmetic", vanityData: { layerType: "flair", variant: 17 } },
   ],
   admin: [
     { label: "Architect's Seal", type: "title" },
