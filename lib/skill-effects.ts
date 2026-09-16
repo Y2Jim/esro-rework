@@ -565,7 +565,7 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     ],
     breakpoints: [
       { level: 5, unlock: "archive_translation", label: "Translator", detail: "Read sealed archive fragments for lost recipes" },
-      { level: 10, unlock: "master_recipes", label: "Lost Techniques", detail: "Craft master-tier gear" },
+      { level: 15, unlock: "master_recipes", label: "Lost Techniques", detail: "Craft master-tier gear" },
     ],
   },
 ]

@@ -1575,7 +1575,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         success: false,
         message:
           needed === "master_recipes"
-            ? "Requires Ritualism 10 (Marked Work) or Lorekeeping 10 (Lost Techniques)"
+                ? "Requires Ritualism 10 (Marked Work) or Lorekeeping 15 (Lost Techniques)"
             : "Requires Bladecraft 10 (Blade Smithing) or Marksmanship 10 (Munitions)",
       }
     }
