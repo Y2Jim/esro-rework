@@ -453,11 +453,11 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Guardwork",
     linkedStat: "def",
-    summary: "Avoids the fight entirely, and shields whoever falls when it can't.",
+    summary: "Avoids the fight entirely, and drags a failing ally clear before they drop when it can't.",
     hooks: [
       { id: "formation", effect: "battleFrequency", perLevel: -0.02, detail: "Fewer hostile encounters" },
       { id: "watchkeeping", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
-      { id: "escorting", effect: "partyProtection", perLevel: 0.02, detail: "Chance to shield a downed ally" },
+      { id: "escorting", effect: "partyProtection", perLevel: 0.02, detail: "Chance to keep a falling ally on their feet" },
     ],
     breakpoints: [{ level: 5, unlock: "escort_contracts", label: "Escort Duty", detail: "Accept escort contracts" }],
   },
