@@ -103,6 +103,11 @@ export function ProfileScreen() {
 function ActiveMountCard() {
   const profile = useEsroStore((s) => s.profile)
   const setActiveMount = useEsroStore((s) => s.setActiveMount)
+  // The whole pack-beast feature is gated behind the "Pack Beasts" unlock, so a
+  // player without it should never see the mount card — not even the unmounted shell.
+  const canTame = useEsroStore((s) => s.hasSkillUnlock("pack_beasts"))
+
+  if (!canTame) return null
 
   const tamed = profile.tamedBeasts ?? []
   // Nothing tamed yet: keep the profile clean rather than showing an empty shell.
