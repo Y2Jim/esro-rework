@@ -275,7 +275,7 @@ export interface EsroState {
   recovery: RecoveryResult[]
   lastRecovered: RecoveryResult | null
   /**
-   * "translation" is the Lorekeeping payoff: it reads the sealed packets the
+   * "translation" is the Artisanry payoff: it reads the sealed packets the
    * other two passes cannot, and is gated on the `archive_translation` unlock.
    */
   runRecovery: (mode: RecoveryMode) => void
@@ -447,7 +447,7 @@ export interface EsroState {
 }
 
 /**
- * @param luck Rollcraft / Lorekeeping bonus. Shrinks the random draw so it
+ * @param luck Rollcraft / Artisanry bonus. Shrinks the random draw so it
  *   lands in the rarer bands more often — luck of 0.2 makes a roll behave as
  *   if it came in 20% lower.
  */
@@ -1379,7 +1379,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Skills — the canonical 15 from config/skills.json, so every skill resolves
   // to a real mechanic in lib/skill-effects.ts.
   skills: createInitialSkills(),
-  loadout: ["scavenging", "gathering", "pathfinding", "lorekeeping"],
+    loadout: ["scavenging", "gathering", "pathfinding", "artisanry"],
   toggleLoadout: (id) =>
     set((s) => {
       if (s.loadout.includes(id)) {
@@ -1402,7 +1402,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   recovery: seedRecovery,
   lastRecovered: null,
   runRecovery: (mode) => {
-    // Translation reads sealed packets, so it needs the Lorekeeping unlock and
+    // Translation reads sealed packets, so it needs the Artisanry unlock and
     // spends salvage rather than relay or resonance.
     if (mode === "translation" && !get().hasSkillUnlock("archive_translation")) return
     const COSTS = {
@@ -1575,15 +1575,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         success: false,
         message:
           needed === "master_recipes"
-                ? "Requires Ritualism 10 (Marked Work) or Lorekeeping 15 (Lost Techniques)"
+                ? "Requires Ritualism 10 (Marked Work) or Artisanry 15 (Lost Techniques)"
             : "Requires Bladecraft 10 (Blade Smithing) or Marksmanship 10 (Munitions)",
       }
     }
 
     // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
     const buildingBonuses = craftingBonusesFrom(get().factionBuildings)
-    // Skills stack on top: Lorekeeping (Efficiency) trims material cost,
-    // Lorekeeping (Technique) speeds the work up, and Ritualism (Sigils)
+    // Skills stack on top: Artisanry (Efficiency) trims material cost,
+    // Artisanry (Technique) speeds the work up, and Ritualism (Sigils)
     // raises yield.
     const skillFx = get().getSkillBonuses()
     const bonuses = {
@@ -1790,7 +1790,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     // Pick what bit here in the store, not in the view: the component only
     // reports "a bite happened", so it can never nominate its own rare fish.
-    // Rollcraft/Lorekeeping luck also biases the fishing table toward rarity.
+    // Rollcraft/Artisanry luck also biases the fishing table toward rarity.
     const luck = get().getSkillBonuses().rollLuck
     const bait = fishing.baitId ? getBait(fishing.baitId) : undefined
 
@@ -1892,7 +1892,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const target = get().contracts.find((c) => c.id === id)
     if (target?.requiresUnlock && !get().hasSkillUnlock(target.requiresUnlock)) return
 
-    // Negotiation (Lorekeeping) and Appraisal raise the agreed payout at the
+    // Negotiation (Artisanry) and Appraisal raise the agreed payout at the
     // moment the contract is signed, so the bonus is locked into the terms.
     const rewardBonus = get().getSkillBonuses().contractReward
     set((s) => ({

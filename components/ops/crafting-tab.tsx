@@ -232,7 +232,7 @@ export function CraftingTab() {
                 {tierLock ? (
                   <div className="mt-0.5 text-[12px] text-[color:var(--color-muted)]">
                     {tierLock === "master_recipes"
-                        ? "Needs Ritualism 10 or Lorekeeping 15"
+                        ? "Needs Ritualism 10 or Artisanry 15"
                       : "Needs Bladecraft 10 or Marksmanship 10"}
                   </div>
                 ) : (

@@ -555,7 +555,7 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     ],
   },
   {
-    name: "Lorekeeping",
+    name: "Artisanry",
     linkedStat: "focus",
     summary: "Turns studied blueprints into cheaper, faster crafting, and still appraises what a find is worth.",
     hooks: [
@@ -607,7 +607,7 @@ const DEMO_SKILL_LEVELS: Record<string, number> = {
   Scavenging: 6,
   Gathering: 5,
   Pathfinding: 4,
-  Lorekeeping: 3,
+  Artisanry: 3,
   Conditioning: 2,
   Bladecraft: 2,
 }
