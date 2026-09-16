@@ -131,14 +131,17 @@ export const MAP_REGIONS: MapRegion[] = [
 // ============ NODES ============
 
 /**
- * Every faction homeland holds exactly four sites — one seat of power, two
- * deployable locations, and one contested frontier site — laid out in mirrored
- * positions around the hub, so no faction has more ground, more work, or more
- * to fight over than any other.
+ * Every faction homeland holds exactly six sites — one seat of power, four
+ * deployable or claimable locations, and one contested frontier site — laid out
+ * in mirrored positions around the hub, so no faction has more ground, more
+ * work, or more to fight over than any other. The layout mirrors across x about
+ * 50 and across y about the hub line at 46, so every bottom slot is 92 - top_y.
  *
  * Slot template, mirrored into each quadrant:
  *   outer-crest  (32 / 68  ·  11 / 81)   a ruin or wilds
  *   outer-flank  (16 / 84  ·  20 / 72)   a relay or settlement
+ *   far-flank    (14 / 86  ·  36 / 56)   an outlying wilds or ruin
+ *   upper-court  (44 / 56  ·  22 / 70)   a settlement or ruin near the crest
  *   inner-seat   (26 / 74  ·  30 / 62)   the faction HQ, facing the hub
  *   frontier     (38 / 62  ·  38 / 54)   a contested site on the hub border
  */
@@ -213,6 +216,28 @@ export const MAP_NODES: MapNode[] = [
       "A collapsed causeway on the Reach border. Whoever holds it can watch every road into the Terraces — so nobody holds it for long.",
     expeditionIds: ["contest_terrace"],
   },
+  {
+    id: "gt_lamplighter",
+    label: "Lamplighter's Row",
+    regionId: "gilded_terraces",
+    x: 14,
+    y: 36,
+    kind: "settlement",
+    blurb:
+      "A working street of lamp-tenders and ledger clerks on the terrace approach. The Courts keep it lit, and lightly watched.",
+    expeditionIds: [],
+  },
+  {
+    id: "gt_gallery",
+    label: "The Sealed Gallery",
+    regionId: "gilded_terraces",
+    x: 44,
+    y: 22,
+    kind: "ruin",
+    blurb:
+      "A gallery of pre-collapse portraits the Courts walled shut. The seal is old, and the door behind it is older.",
+    expeditionIds: [],
+  },
 
   // --- The Gloaming (Veiled Circle) ---
   {
@@ -259,6 +284,28 @@ export const MAP_NODES: MapNode[] = [
     blurb:
       "A flooded bridge where the Gloaming meets the Reach. The Circle wants it dark; everyone else wants it watched.",
     expeditionIds: ["contest_basin"],
+  },
+  {
+    id: "gl_stillwater",
+    label: "The Still Water",
+    regionId: "the_gloaming",
+    x: 86,
+    y: 36,
+    kind: "wilds",
+    blurb:
+      "A black mere the Circle uses to lose things in. Nothing that goes under comes up, which is how they like it.",
+    expeditionIds: [],
+  },
+  {
+    id: "gl_landing",
+    label: "The Hushed Landing",
+    regionId: "the_gloaming",
+    x: 56,
+    y: 22,
+    kind: "settlement",
+    blurb:
+      "A quiet dock where unmarked boats change hands. No lamps, no names, no records — only the tide's own schedule.",
+    expeditionIds: [],
   },
 
   // --- Emberhold Vale (Hearth Wardens) ---
@@ -307,6 +354,28 @@ export const MAP_NODES: MapNode[] = [
       "An abandoned forge on the vale's edge, its salvage still rich. The Wardens claim it by right; the roads claim it by need.",
     expeditionIds: ["contest_vale"],
   },
+  {
+    id: "ev_ashyard",
+    label: "The Ashen Yard",
+    regionId: "emberhold_vale",
+    x: 14,
+    y: 56,
+    kind: "wilds",
+    blurb:
+      "A cooling-field of spent forge-slag and half-burnt salvage. The Wardens let it rest, then work it again.",
+    expeditionIds: [],
+  },
+  {
+    id: "ev_kettle",
+    label: "Kettle Watch",
+    regionId: "emberhold_vale",
+    x: 44,
+    y: 70,
+    kind: "settlement",
+    blurb:
+      "A shelter-post where the vale's road-wardens keep a pot on and an eye out. Nobody arrives cold or unseen.",
+    expeditionIds: [],
+  },
 
   // --- The Wandering Flats (Open Roads Chorus) ---
   {
@@ -354,6 +423,28 @@ export const MAP_NODES: MapNode[] = [
       "The one crossroads the Flats can't keep mapped. Every faction has run a caravan through it, and every faction has lost one here.",
     expeditionIds: ["contest_crossroads"],
   },
+  {
+    id: "wf_camp",
+    label: "The Wayfarer's Camp",
+    regionId: "wandering_flats",
+    x: 86,
+    y: 56,
+    kind: "settlement",
+    blurb:
+      "A rolling camp that is never in quite the same place twice. The Chorus swears it is, and the maps disagree.",
+    expeditionIds: [],
+  },
+  {
+    id: "wf_detour",
+    label: "The Long Detour",
+    regionId: "wandering_flats",
+    x: 56,
+    y: 70,
+    kind: "wilds",
+    blurb:
+      "The track everyone takes when the direct road goes bad. It always goes bad, so the detour is the real road now.",
+    expeditionIds: [],
+  },
 ]
 
 // ============ PATHS ============
@@ -362,8 +453,9 @@ export const MAP_NODES: MapNode[] = [
  * Each faction is reachable by the same shape of journey: one spoke from the
  * neutral hub to its outer flank, a leg on to its outer crest, then a final
  * leg to its seat — plus one lateral link to the neighbouring homeland. Each
- * homeland also has a direct hub spoke to its contested frontier site. Five
- * edges per faction, so no homeland is better connected than another.
+ * homeland also has a direct hub spoke to its contested frontier site, and two
+ * short legs out to its far-flank and upper-court sites. Seven edges per
+ * faction, so no homeland is better connected than another.
  */
 export const MAP_PATHS: MapPath[] = [
   // Hub spokes — one per homeland, plus the neutral cordon
@@ -382,18 +474,26 @@ export const MAP_PATHS: MapPath[] = [
   // Gilded Terraces
   { from: "signal_spire", to: "the_archive", kind: "road" },
   { from: "the_archive", to: "hq_crownborn", kind: "road" },
+  { from: "signal_spire", to: "gt_lamplighter", kind: "road" },
+  { from: "the_archive", to: "gt_gallery", kind: "road" },
 
   // The Gloaming — the Circle keeps its own approaches off the open charts
   { from: "sunken_vault", to: "cartographers_rest", kind: "hidden" },
   { from: "cartographers_rest", to: "hq_gloamwhisper", kind: "hidden" },
+  { from: "sunken_vault", to: "gl_stillwater", kind: "hidden" },
+  { from: "cartographers_rest", to: "gl_landing", kind: "hidden" },
 
   // Emberhold Vale
   { from: "relay_array", to: "salvage_flats", kind: "road" },
   { from: "salvage_flats", to: "hq_hearthkin", kind: "road" },
+  { from: "relay_array", to: "ev_ashyard", kind: "road" },
+  { from: "salvage_flats", to: "ev_kettle", kind: "road" },
 
   // Wandering Flats
   { from: "courier_road", to: "cache_hollow", kind: "road" },
   { from: "cache_hollow", to: "hq_roadsinger", kind: "road" },
+  { from: "courier_road", to: "wf_camp", kind: "road" },
+  { from: "cache_hollow", to: "wf_detour", kind: "road" },
 
   // Lateral links between neighbouring homelands
   { from: "the_archive", to: "cartographers_rest", kind: "hidden" },
