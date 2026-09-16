@@ -3,19 +3,20 @@
 import { useEffect, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
+import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
 import { formatResetIn, msUntilNextDay } from "@/lib/contract-rotation"
 import { unlockRequirementLabel } from "@/lib/skill-effects"
 import type { ContractType } from "@/lib/types"
-import { Zap, Users, Calendar, RotateCcw, Shield, Lock } from "lucide-react"
+import { RotateCcw, Lock } from "lucide-react"
 
 type ContractFilter = "all" | ContractType
 
-const FILTER_TABS: { id: ContractFilter; label: string; icon?: React.ReactNode }[] = [
-  { id: "all", label: "All" },
-  { id: "neutral", label: "Open", icon: <Zap className="h-3 w-3" /> },
-  { id: "faction", label: "Faction", icon: <Users className="h-3 w-3" /> },
-  { id: "event", label: "Event", icon: <Calendar className="h-3 w-3" /> },
-  { id: "escort", label: "Escort", icon: <Shield className="h-3 w-3" /> },
+const FILTER_TABS: (IconRailItem & { id: ContractFilter })[] = [
+  { id: "all", label: "All", icon: "≡", accentClass: "text-[color:var(--color-accent)]", activeBgClass: "bg-[color:var(--color-accent)]/20", accentBar: "var(--color-accent)" },
+  { id: "neutral", label: "Open", icon: "⚡", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/20", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
+  { id: "faction", label: "Faction", icon: "⬡", accentClass: "text-[color:var(--color-accent)]", activeBgClass: "bg-[color:var(--color-accent)]/20", hoverClass: "hover-violet", accentBar: "var(--color-accent)" },
+  { id: "event", label: "Event", icon: "◆", accentClass: "text-[color:var(--color-amber)]", activeBgClass: "bg-[color:var(--color-amber)]/20", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
+  { id: "escort", label: "Escort", icon: "⛨", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/20", hoverClass: "hover-green", accentBar: "var(--color-green)" },
 ]
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -63,35 +64,23 @@ export function ContractsScreen() {
   const active = filteredContracts.filter((c) => c.status === "active")
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Filter tabs */}
-      <div className="shrink-0 border-b border-[color:var(--color-border)] px-3 py-2">
-        <div className="mb-2 flex items-center gap-1.5 text-[13px] text-[color:var(--color-muted)]">
-          <RotateCcw className="h-3 w-3" />
-          <span>New contracts in {formatResetIn(resetIn)}</span>
-        </div>
-        <div className="flex gap-1">
-          {FILTER_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setFilter(tab.id)}
-              className={cn(
-                "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[14px] font-medium transition-colors",
-                filter === tab.id
-                  ? "bg-[color:var(--color-accent)]/20 text-[color:var(--color-accent)]"
-                  : "text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
-              )}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="flex h-full">
+      {/* Filter sub-rail */}
+      <IconRail
+        railId="contracts"
+        ariaLabel="contract filters"
+        className="border-r border-[color:var(--color-border)]"
+        items={FILTER_TABS}
+        activeId={filter}
+        onSelect={(id) => setFilter(id as ContractFilter)}
+      />
 
       {/* Contract list */}
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+        <div className="mb-3 flex items-center gap-1.5 text-[13px] text-[color:var(--color-muted)]">
+          <RotateCcw className="h-3 w-3" />
+          <span>New contracts in {formatResetIn(resetIn)}</span>
+        </div>
         <div className="space-y-4">
           {/* Active */}
           {active.length > 0 && (

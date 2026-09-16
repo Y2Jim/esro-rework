@@ -25,12 +25,13 @@ import {
   MAP_NODES,
 } from "@/lib/world-map"
 import type { SocialTab, RaceId } from "@/lib/types"
+import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
 
-const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
-  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
-  { id: "faction", label: "Faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
-  { id: "friends", label: "Friends", icon: "◇", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
-  { id: "trade", label: "Trade", icon: "⇄", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+const socialTabs: (IconRailItem & { id: SocialTab })[] = [
+  { id: "party", label: "Party", icon: "⋈", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
+  { id: "faction", label: "Faction", icon: "⬡", accentClass: "text-[color:var(--color-violet-bright)]", activeBgClass: "bg-[color:var(--color-violet-bright)]/15", hoverClass: "hover-violet", accentBar: "var(--color-violet-bright)" },
+  { id: "friends", label: "Friends", icon: "◇", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
+  { id: "trade", label: "Trade", icon: "⇄", accentClass: "text-[color:var(--color-amber)]", activeBgClass: "bg-[color:var(--color-amber)]/15", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
 ]
 
 export function SocialScreen() {
@@ -50,30 +51,16 @@ export function SocialScreen() {
   }, [factionViewRequest])
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Tab bar */}
-      <div 
-        className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-2 py-1.5"
-        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
-      >
-        {socialTabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={cn(
-              "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
-              t.hover,
-              tab === t.id
-                ? cn(t.bgColor, t.color)
-                : "text-[color:var(--color-muted)]"
-            )}
-          >
-            <span className="text-[14px]">{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
-      </div>
+    <div className="flex h-full">
+      {/* Social sub-rail */}
+      <IconRail
+        railId="social"
+        ariaLabel="social sections"
+        className="border-r border-[color:var(--color-border)]"
+        items={socialTabs}
+        activeId={tab}
+        onSelect={(id) => setTab(id as SocialTab)}
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>

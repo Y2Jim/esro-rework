@@ -5,6 +5,7 @@ import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { rarityColor, rarityAnimation, rarityLabel } from "@/lib/rarity"
 import { cn } from "@/lib/cn"
+import { IconRail, type IconRailItem } from "@/components/shell/icon-rail"
 import { TitleDisplay, TitleBadgeRow } from "@/components/ui/title-display"
 import { StatAllocation } from "@/components/profile/stat-allocation"
 import { KnownRituals } from "@/components/profile/known-rituals"
@@ -37,13 +38,13 @@ function formatCreatedAt(ts: number): string {
 
 type ProfileTab = "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications"
 
-const profileTabs: { id: ProfileTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
-  { id: "summary", label: "Summary", icon: "◉", color: "text-[color:var(--color-lilac)]", bgColor: "bg-[color:var(--color-lilac)]/15", hover: "hover-lilac" },
-  { id: "titles", label: "Titles", icon: "◇", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
-  { id: "bestiary", label: "Bestiary", icon: "❖", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
-  { id: "cosmetics", label: "Cosmetics", icon: "✦", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
-  { id: "settings", label: "Settings", icon: "⚙", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
-  { id: "notifications", label: "Alerts", icon: "◈", color: "text-[color:var(--color-danger)]", bgColor: "bg-[color:var(--color-danger)]/15", hover: "hover-danger" },
+const profileTabs: (IconRailItem & { id: ProfileTab })[] = [
+  { id: "summary", label: "Summary", icon: "◉", accentClass: "text-[color:var(--color-lilac)]", activeBgClass: "bg-[color:var(--color-lilac)]/15", hoverClass: "hover-lilac", accentBar: "var(--color-lilac)" },
+  { id: "titles", label: "Titles", icon: "◇", accentClass: "text-[color:var(--color-amber)]", activeBgClass: "bg-[color:var(--color-amber)]/15", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
+  { id: "bestiary", label: "Bestiary", icon: "❖", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
+  { id: "cosmetics", label: "Cosmetics", icon: "✦", accentClass: "text-[color:var(--color-violet-bright)]", activeBgClass: "bg-[color:var(--color-violet-bright)]/15", hoverClass: "hover-violet", accentBar: "var(--color-violet-bright)" },
+  { id: "settings", label: "Settings", icon: "⚙", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
+  { id: "notifications", label: "Alerts", icon: "◈", accentClass: "text-[color:var(--color-danger)]", activeBgClass: "bg-[color:var(--color-danger)]/15", hoverClass: "hover-danger", accentBar: "var(--color-danger)" },
 ]
 
 export function ProfileScreen() {
@@ -59,39 +60,22 @@ export function ProfileScreen() {
 
   // Drop the Bestiary tab until taming is unlocked. If the player was viewing it
   // and lost the unlock, fall back to Summary so no hidden tab renders.
-  const visibleProfileTabs = profileTabs.filter((t) => t.id !== "bestiary" || canTame)
+  const visibleProfileTabs = profileTabs
+    .filter((t) => t.id !== "bestiary" || canTame)
+    .map((t) => (t.id === "notifications" ? { ...t, badge: unreadCount } : t))
   const effectiveTab = tab === "bestiary" && !canTame ? "summary" : tab
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Tab bar */}
-      <div 
-        className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-2 py-1.5"
-        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
-      >
-        {visibleProfileTabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={cn(
-              "relative flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
-              t.hover,
-              effectiveTab === t.id
-                ? cn(t.bgColor, t.color)
-                : "text-[color:var(--color-muted)]"
-            )}
-          >
-            <span className="text-[14px]">{t.icon}</span>
-            {t.label}
-            {t.id === "notifications" && unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-[color:var(--color-danger)] text-[13px] text-white">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
+    <div className="flex h-full">
+      {/* Profile sub-rail */}
+      <IconRail
+        railId="profile"
+        ariaLabel="profile sections"
+        className="border-r border-[color:var(--color-border)]"
+        items={visibleProfileTabs}
+        activeId={effectiveTab}
+        onSelect={(id) => setTab(id as ProfileTab)}
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
