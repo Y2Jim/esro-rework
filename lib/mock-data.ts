@@ -1554,6 +1554,7 @@ export const profile: Profile = {
   // date line, instead of slipping a day for anyone west or far east of UTC.
   createdAt: Date.UTC(2026, 2, 9, 12),
   tokens: 320,
+  appearanceResetTokens: 1,
   vanityItems: vanityItems,
   ownedTitles: [
     {

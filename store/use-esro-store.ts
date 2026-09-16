@@ -363,6 +363,13 @@ export interface EsroState {
   // Avatar & Vanity
   equipVanity: (vanityId: string) => void
   unequipVanity: (layerType: AvatarLayerType) => void
+  /**
+   * Spend one Appearance Reset Token to overwrite the base look (head, skin,
+   * eyes, hair) with the supplied config and clear every equipped cosmetic.
+   * Owned cosmetics are kept (still unlocked), only unequipped. Returns false
+   * without changing anything when no token is held.
+   */
+  resetBaseAppearance: (nextAvatar: AvatarConfig) => boolean
   
   // Admin/Debug
   setHandle: (newHandle: string) => void
@@ -541,6 +548,8 @@ const POOL: Record<Rarity, PoolItem[]> = {
   ],
   epic: [
     // Non-cosmetics
+    // Consumable: re-opens the base appearance editor without discarding cosmetics.
+    { label: "Appearance Reset Token", type: "appearance_token" },
     { label: "Relay Warden", type: "title" },
     { label: "Depth Touched", type: "title" },
     { label: "Void Speaker", type: "title" },
@@ -1515,6 +1524,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
           ),
         }
       }
+    } else if (pick.type === "appearance_token") {
+      // Consumable — stack it onto the player's held count.
+      updatedProfile = {
+        ...profile,
+        appearanceResetTokens: (profile.appearanceResetTokens ?? 0) + 1,
+      }
     }
     
     set({
@@ -2360,6 +2375,32 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       profile: { ...profile, vanityItems: updatedItems },
       identity: { ...identity, avatar: updatedAvatar },
     })
+  },
+
+  resetBaseAppearance: (nextAvatar) => {
+    const { profile, identity } = get()
+    if ((profile.appearanceResetTokens ?? 0) < 1) return false
+
+    // The editor only owns the base look. Force every cosmetic layer back to
+    // "none" so a reset gives a clean face; owned cosmetics stay unlocked and
+    // can simply be re-equipped from the wardrobe afterwards.
+    const COSMETIC_LAYERS: AvatarLayerType[] = ["mouth", "accessory", "hat", "flair"]
+    const layers = nextAvatar.layers.map((l) =>
+      COSMETIC_LAYERS.includes(l.type) ? { ...l, variant: 0 } : l
+    )
+
+    set({
+      identity: {
+        ...identity,
+        avatar: { ...identity.avatar, seed: nextAvatar.seed, layers },
+      },
+      profile: {
+        ...profile,
+        appearanceResetTokens: (profile.appearanceResetTokens ?? 0) - 1,
+        vanityItems: profile.vanityItems.map((v) => ({ ...v, equipped: false })),
+      },
+    })
+    return true
   },
   
   // Admin/Debug - set handle (admin only)

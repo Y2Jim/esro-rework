@@ -14,10 +14,21 @@ import { TrophyCase } from "@/components/profile/trophy-case"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { getCreature, packContribution, creatureSprite } from "@/lib/bestiary"
-import { Shield } from "lucide-react"
+import { Shield, Sparkles, X } from "lucide-react"
 import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
-import type { RaceId, Rarity, VanityItem } from "@/lib/types"
+import type { RaceId, Rarity, VanityItem, AvatarConfig, AvatarLayerType } from "@/lib/types"
+import {
+  LAYER_VARIANTS,
+  SKIN_COLORS,
+  UNDERTONES,
+  DEFAULT_UNDERTONE_INDEX,
+  HAIR_COLORS,
+  EYE_COLORS,
+  HEAD_SHAPE_NAMES,
+  HAIR_STYLE_NAMES,
+  deriveSkinColor,
+} from "@/lib/avatar-generator"
 
 const MONTH_LABELS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -399,11 +410,236 @@ function TitlesTab() {
   )
 }
 
+/**
+ * Base-appearance editor unlocked by spending an Appearance Reset Token.
+ * Edits only the base look (head, skin, undertone, hair, eyes) — the same set
+ * offered at character creation. Confirming spends the token, applies the new
+ * look, and unequips all cosmetics (kept in the wardrobe). Cancelling costs
+ * nothing.
+ */
+function AppearanceResetEditor({ onClose }: { onClose: () => void }) {
+  const identity = useEsroStore((s) => s.identity)
+  const resetBaseAppearance = useEsroStore((s) => s.resetBaseAppearance)
+
+  const [draft, setDraft] = useState<AvatarConfig>(() => ({
+    ...identity.avatar,
+    layers: identity.avatar.layers.map((l) => ({ ...l })),
+  }))
+
+  const setLayer = (type: AvatarLayerType, variant: number, color?: number) => {
+    setDraft((prev) => ({
+      ...prev,
+      layers: prev.layers.map((l) =>
+        l.type === type ? { ...l, variant, ...(color !== undefined ? { color } : {}) } : l
+      ),
+    }))
+  }
+
+  const skinLayer = draft.layers.find((l) => l.type === "skin")
+  const currentSkin = skinLayer?.variant ?? 0
+  const currentUndertone = skinLayer?.color ?? DEFAULT_UNDERTONE_INDEX
+  const currentHair = draft.layers.find((l) => l.type === "hair")
+  const currentEyes = draft.layers.find((l) => l.type === "eyes")
+  const currentBase = draft.layers.find((l) => l.type === "base")?.variant ?? 0
+
+  const confirm = () => {
+    if (resetBaseAppearance(draft)) onClose()
+  }
+
+  const swatchBtn = "h-6 w-6 shrink-0 rounded-full border-2 transition-all"
+  const chipBtn = "rounded border px-2 py-1 text-[13px] font-mono transition-all"
+  const activeChip =
+    "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)]"
+  const idleChip =
+    "border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] text-[color:var(--color-text-secondary)] hover:border-[color:var(--color-accent)]/50"
+
+  return (
+    <div className="space-y-3 rounded-lg border border-[color:var(--color-accent)]/40 bg-[color:var(--color-panel)]/60 p-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-[color:var(--color-accent)]" />
+          <span className="text-[14px] font-medium text-[color:var(--color-text)]">Reset Appearance</span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cancel appearance reset"
+          className="rounded p-1 text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="flex items-center justify-center rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel-2)] p-3">
+        <PixelAvatar config={draft} size="lg" />
+      </div>
+
+      {/* Skin Tone */}
+      <div>
+        <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Skin Tone</div>
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {SKIN_COLORS.map((color, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setLayer("skin", i, currentUndertone)}
+              aria-label={`Skin tone ${i + 1}`}
+              aria-pressed={currentSkin === i}
+              className={cn(
+                swatchBtn,
+                currentSkin === i ? "border-[color:var(--color-accent)] scale-110" : "border-transparent"
+              )}
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Undertone */}
+      <div>
+        <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Undertone</div>
+        <div className="flex gap-1.5">
+          {UNDERTONES.map((undertone, i) => (
+            <button
+              key={undertone.id}
+              type="button"
+              onClick={() => setLayer("skin", currentSkin, i)}
+              aria-pressed={currentUndertone === i}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5",
+                chipBtn,
+                currentUndertone === i ? activeChip : idleChip
+              )}
+            >
+              <span
+                className="h-3 w-3 shrink-0 rounded-full border border-[color:var(--color-border)]"
+                style={{ backgroundColor: deriveSkinColor(currentSkin, i) }}
+              />
+              {undertone.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Hair */}
+      <div>
+        <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Hair Style</div>
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {HAIR_STYLE_NAMES.map((name, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setLayer("hair", i, currentHair?.color)}
+              className={cn(chipBtn, (currentHair?.variant ?? 0) === i ? activeChip : idleChip)}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+        <div className="mb-1 text-[12px] text-[color:var(--color-muted)]">Hair Color</div>
+        <div className="flex flex-wrap gap-1.5">
+          {HAIR_COLORS.map((color, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setLayer("hair", currentHair?.variant ?? 0, i)}
+              aria-label={`Hair color ${i + 1}`}
+              className={cn(
+                "h-5 w-5 rounded-full border-2 transition-all",
+                (currentHair?.color ?? 0) === i ? "border-[color:var(--color-accent)] scale-110" : "border-transparent"
+              )}
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Eyes */}
+      <div>
+        <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Eyes</div>
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {Array.from({ length: LAYER_VARIANTS.eyes }, (_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setLayer("eyes", i, currentEyes?.color)}
+              className={cn(
+                "h-7 w-7",
+                chipBtn,
+                (currentEyes?.variant ?? 0) === i ? activeChip : idleChip
+              )}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        <div className="mb-1 text-[12px] text-[color:var(--color-muted)]">Eye Color</div>
+        <div className="flex flex-wrap gap-1.5">
+          {EYE_COLORS.map((color, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setLayer("eyes", currentEyes?.variant ?? 0, i)}
+              aria-label={`Eye color ${i + 1}`}
+              className={cn(
+                "h-5 w-5 rounded-full border-2 transition-all",
+                (currentEyes?.color ?? 0) === i ? "border-[color:var(--color-accent)] scale-110" : "border-transparent"
+              )}
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Head Shape */}
+      <div>
+        <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Head Shape</div>
+        <div className="flex flex-wrap gap-1.5">
+          {HEAD_SHAPE_NAMES.map((name, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setLayer("base", i)}
+              className={cn(chipBtn, currentBase === i ? activeChip : idleChip)}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-[12px] leading-relaxed text-[color:var(--color-muted)]">
+        Confirming spends 1 token and unequips your cosmetics. Your unlocked cosmetics stay in the wardrobe and can be
+        re-equipped anytime.
+      </p>
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex-1 rounded-lg border border-[color:var(--color-border)] py-2 text-[14px] text-[color:var(--color-text-secondary)] transition-colors hover:border-[color:var(--color-accent)]/50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={confirm}
+          className="flex-1 rounded-lg border border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/15 py-2 text-[14px] font-medium text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/25"
+        >
+          Confirm Reset
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function CosmeticsTab() {
   const profile = useEsroStore((s) => s.profile)
   const identity = useEsroStore((s) => s.identity)
   const equipVanity = useEsroStore((s) => s.equipVanity)
   const unequipVanity = useEsroStore((s) => s.unequipVanity)
+  const [editingAppearance, setEditingAppearance] = useState(false)
+  const resetTokens = profile.appearanceResetTokens ?? 0
 
   const vanityItems = profile.vanityItems || []
   const unlocked = vanityItems.filter(v => v.unlocked)
@@ -454,6 +690,38 @@ function CosmeticsTab() {
           <div className="mt-1 text-[13px] text-[color:var(--color-muted)]">No cosmetics equipped</div>
         )}
       </div>
+
+      {/* Appearance Reset Token */}
+      {editingAppearance ? (
+        <AppearanceResetEditor onClose={() => setEditingAppearance(false)} />
+      ) : (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3">
+          <div className="flex items-start gap-2">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-accent)]" />
+            <div>
+              <div className="text-[14px] font-medium text-[color:var(--color-text)]">Appearance Reset</div>
+              <div className="text-[12px] leading-relaxed text-[color:var(--color-muted)]">
+                {resetTokens > 0
+                  ? `${resetTokens} token${resetTokens === 1 ? "" : "s"} — redo your base look without losing cosmetics`
+                  : "Recover a token from the Archive to redo your base look"}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={resetTokens < 1}
+            onClick={() => setEditingAppearance(true)}
+            className={cn(
+              "shrink-0 rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors",
+              resetTokens > 0
+                ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/15 text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent)]/25"
+                : "cursor-not-allowed border-[color:var(--color-border)] text-[color:var(--color-muted)] opacity-60"
+            )}
+          >
+            Use Token
+          </button>
+        </div>
+      )}
 
       <div className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
         Cosmetics ({unlocked.length} unlocked)

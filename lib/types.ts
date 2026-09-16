@@ -537,7 +537,7 @@ export interface TradeHistoryEntry {
 export interface RecoveryResult {
   id: string
   label: string
-  type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair" | "salvage"
+  type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair" | "salvage" | "appearance_token"
   rarity: Rarity
   recoveredAt: number
   vanityData?: {
@@ -680,6 +680,13 @@ export interface Profile {
   createdAt: number | null
   /** Currency balance earned from expeditions and contracts */
   tokens: number
+  /**
+   * Appearance Reset Tokens held. Each one lets the player re-open the base
+   * appearance editor and re-pick their look without discarding owned cosmetics.
+   * Optional so saves/seeds created before the feature stay valid; every read
+   * goes through a `?? 0` fallback.
+   */
+  appearanceResetTokens?: number
   ownedTitles: OwnedTitle[]
   badges: ProfileBadge[]
   notifications: ProfileNotification[]
