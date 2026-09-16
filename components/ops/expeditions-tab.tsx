@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn"
 import { rarityColor } from "@/lib/rarity"
 import { STAT_COLORS, SKILL_DEFINITIONS } from "@/lib/game-data"
 import { UNLOCK_LABELS } from "@/lib/skill-effects"
+import { getNodeForExpedition, nodeRequiredLevel, isContestedNode } from "@/lib/world-map"
 import type { BaseStats } from "@/lib/types"
 import { RitualPrep } from "@/components/ops/ritual-prep"
 
@@ -39,6 +40,14 @@ export function ExpeditionsTab() {
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const getStatBonus = useEsroStore((s) => s.getStatBonus)
   const cooldownUntil = useEsroStore((s) => s.expeditionCooldownUntil)
+  // Location-access inputs: an expedition tied to a map location is only
+  // available once the player can actually reach that location — the same
+  // rules the map panel and startExpedition enforce.
+  const profile = useEsroStore((s) => s.profile)
+  const getPlayerFactionId = useEsroStore((s) => s.getPlayerFactionId)
+  const factionUnlocked = useEsroStore((s) => s.factionUnlocked)
+  const playerLevel = profile?.level ?? 1
+  const playerFactionId = getPlayerFactionId()
 
   // Site chosen but not yet launched: the ritual prep step sits in between.
   const [pendingExpedition, setPendingExpedition] = useState<{ id: string; name: string } | null>(
@@ -229,7 +238,20 @@ export function ExpeditionsTab() {
             // truthiness check meant "no requirement" read as "unmet", which is
             // what left ungated runs unselectable.
             const skillSatisfied = exp.requiredSkill ? !!requiredSkill && !requiredSkill.locked : true
-            const meetsRequirement = skillSatisfied && !tierLocked
+            // Location unlock gate: expeditions that deploy from a non-home map
+            // location are only available once that location is actually
+            // reachable. Home (Waystation Prime) and unlinked expeditions stay
+            // open. Mirrors the map panel + startExpedition rules.
+            const originNode = getNodeForExpedition(exp.id)
+            const isNonHomeLocation = !!originNode && originNode.id !== "waystation_prime"
+            const locReqLevel = isNonHomeLocation ? nodeRequiredLevel(originNode) : 1
+            const locationLevelLocked = isNonHomeLocation && playerLevel < locReqLevel
+            const contestedLocked =
+              isNonHomeLocation &&
+              isContestedNode(originNode) &&
+              (!playerFactionId || !factionUnlocked)
+            const locationLocked = locationLevelLocked || contestedLocked
+            const meetsRequirement = skillSatisfied && !tierLocked && !locationLocked
             const { totalBonus, relevantStats } = getExpeditionBonus(exp)
 
             return (
@@ -268,6 +290,16 @@ export function ExpeditionsTab() {
                       {tierLocked && exp.requiresUnlock && (
                         <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
                           Needs {UNLOCK_LABELS[exp.requiresUnlock]}
+                        </span>
+                      )}
+                      {locationLevelLocked && (
+                        <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                          Locked · Lv.{locReqLevel}
+                        </span>
+                      )}
+                      {contestedLocked && !locationLevelLocked && (
+                        <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-amber)]">
+                          Faction warfare
                         </span>
                       )}
                     </div>
@@ -364,9 +396,17 @@ export function ExpeditionsTab() {
                   </div>
                 )}
 
-                {!meetsRequirement && requiredSkill && (
+                {!skillSatisfied && requiredSkill && (
                   <div className="mt-2 rounded border border-[color:var(--color-danger-muted)]/30 bg-[color:var(--color-danger)]/5 px-2 py-1 text-[13px] text-[color:var(--color-danger-muted)]">
                     Requires: {requiredSkill.label}
+                  </div>
+                )}
+
+                {locationLocked && originNode && (
+                  <div className="mt-2 rounded border border-[color:var(--color-amber)]/30 bg-[color:var(--color-amber)]/5 px-2 py-1 text-[13px] text-[color:var(--color-amber)]">
+                    {contestedLocked && !locationLevelLocked
+                      ? `Unlock faction warfare to reach ${originNode.label}`
+                      : `Reach Lv.${locReqLevel} to unlock ${originNode.label}`}
                   </div>
                 )}
               </button>
