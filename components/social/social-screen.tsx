@@ -15,7 +15,15 @@ import {
   buildingEffectDescription,
   formatRelativeTime,
 } from "@/config/faction"
-import { getFactionHqNode } from "@/lib/world-map"
+import {
+  getFactionHqNode,
+  getFactionById,
+  getControlledNodeIds,
+  getNodeById,
+  getRegionById,
+  isContestedNode,
+  MAP_NODES,
+} from "@/lib/world-map"
 import type { SocialTab, RaceId } from "@/lib/types"
 
 const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
@@ -231,7 +239,7 @@ function FactionTab({
   projects: EsroState["factionProjects"] 
 }) {
   const [subTab, setSubTab] = useState<
-    "overview" | "projects" | "buildings" | "rallies" | "ranks" | "activity"
+    "overview" | "territories" | "projects" | "buildings" | "rallies" | "ranks" | "activity"
   >("overview")
   const [showFactionSelection, setShowFactionSelection] = useState(false)
   const characterFaction = useEsroStore((s) => s.characterFaction)
@@ -406,7 +414,7 @@ function FactionTab({
         className="flex gap-1 overflow-x-auto pb-1"
         style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
       >
-        {(["overview", "projects", "buildings", "rallies", "ranks", "activity"] as const).map((t) => (
+        {(["overview", "territories", "projects", "buildings", "rallies", "ranks", "activity"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -428,11 +436,176 @@ function FactionTab({
       </div>
 
       {subTab === "overview" && <FactionOverviewNew factionData={characterFaction} faction={faction} />}
+      {subTab === "territories" && <FactionTerritories accent={characterFaction.color} factionId={characterFaction.id} />}
       {subTab === "projects" && <FactionProjects projects={projects} accent={characterFaction.color} />}
       {subTab === "buildings" && <FactionBuildings accent={characterFaction.color} rank={faction?.rank || 0} />}
       {subTab === "rallies" && <FactionRallies accent={characterFaction.color} />}
       {subTab === "ranks" && <FactionRanks currentRank={faction?.rank || 0} />}
       {subTab === "activity" && <FactionActivityFeed accent={characterFaction.color} />}
+    </div>
+  )
+}
+
+function FactionTerritories({ accent, factionId }: { accent: string; factionId: RaceId }) {
+  const nodeControl = useEsroStore((s) => s.nodeControl)
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const setOpsTab = useEsroStore((s) => s.setOpsTab)
+  const setMapFocus = useEsroStore((s) => s.setMapFocus)
+
+  // Every node this faction currently controls, split into the home base and
+  // frontline territory captured through warfare.
+  const controlledIds = getControlledNodeIds(nodeControl, factionId)
+  const controlled = controlledIds
+    .map((id) => getNodeById(id))
+    .filter((n): n is NonNullable<typeof n> => Boolean(n))
+
+  const hqNodes = controlled.filter((n) => n.kind === "faction_hq")
+  const frontline = controlled.filter((n) => n.kind !== "faction_hq")
+
+  // Contested nodes still up for grabs or held by a rival — shown as targets.
+  const contestedTotal = MAP_NODES.filter(isContestedNode)
+  const heldContested = contestedTotal.filter((n) => nodeControl[n.id] === factionId)
+  const openTargets = contestedTotal.filter((n) => nodeControl[n.id] !== factionId)
+
+  const viewOnMap = (id: string) => {
+    setMapFocus(id)
+    setOpsTab("map")
+    setScreen("ops")
+  }
+
+  const regionName = (regionId: string) => getRegionById(regionId)?.label ?? regionId
+
+  return (
+    <div className="space-y-3">
+      <div className="text-[13px] text-[color:var(--color-muted)]">
+        Every location your faction holds. Capture contested ground on the map to expand your border outward from the home base.
+      </div>
+
+      {/* Holdings summary */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="text-[24px] font-bold leading-none" style={{ color: accent }}>
+            {controlled.length}
+          </div>
+          <div className="mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Locations held
+          </div>
+        </div>
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="text-[24px] font-bold leading-none" style={{ color: accent }}>
+            {heldContested.length}
+            <span className="text-[14px] text-[color:var(--color-muted)]">/{contestedTotal.length}</span>
+          </div>
+          <div className="mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Frontlines won
+          </div>
+        </div>
+      </div>
+
+      {/* Home base */}
+      {hqNodes.map((n) => (
+        <button
+          key={n.id}
+          type="button"
+          onClick={() => viewOnMap(n.id)}
+          className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors"
+          style={{ borderColor: `${accent}55`, backgroundColor: `${accent}12` }}
+        >
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[16px]"
+            style={{ backgroundColor: `${accent}22`, color: accent }}
+          >
+            ⬡
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[14px] font-medium text-[color:var(--color-text)]">{n.label}</div>
+            <div className="text-[12px] text-[color:var(--color-muted)]">
+              {regionName(n.regionId)} · Home Base
+            </div>
+          </div>
+          <span className="shrink-0 text-[12px] uppercase tracking-wider" style={{ color: accent }}>
+            View
+          </span>
+        </button>
+      ))}
+
+      {/* Captured frontline territory */}
+      <div>
+        <div className="mb-1.5 mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Captured Territory
+        </div>
+        {frontline.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3 text-[13px] text-[color:var(--color-muted)]">
+            No frontline territory captured yet. Deploy to a contested site on the map to claim your first.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {frontline.map((n) => (
+              <button
+                key={n.id}
+                type="button"
+                onClick={() => viewOnMap(n.id)}
+                className="flex w-full items-center gap-3 rounded-lg border border-[color:var(--color-border)] p-3 text-left transition-colors hover:border-[color:var(--color-border-soft)]"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--color-panel)] text-[16px]">
+                  ⚑
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[14px] font-medium text-[color:var(--color-text)]">{n.label}</div>
+                  <div className="text-[12px] text-[color:var(--color-muted)]">
+                    {regionName(n.regionId)}
+                    {n.kind === "contested" ? " · Frontline" : ""}
+                  </div>
+                </div>
+                <span className="shrink-0 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                  View
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Open frontlines to conquer */}
+      {openTargets.length > 0 && (
+        <div>
+          <div className="mb-1.5 mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Open Frontlines
+          </div>
+          <div className="space-y-2">
+            {openTargets.map((n) => {
+              const holder = nodeControl[n.id]
+              const holderFaction = holder ? getFactionById(holder) : undefined
+              return (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => viewOnMap(n.id)}
+                  className="flex w-full items-center gap-3 rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3 text-left transition-colors hover:border-[color:var(--color-border)]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--color-panel)] text-[16px] text-[color:var(--color-muted)]">
+                    ⚔
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[14px] font-medium text-[color:var(--color-text)]">{n.label}</div>
+                    <div className="text-[12px] text-[color:var(--color-muted)]">
+                      {regionName(n.regionId)} ·{" "}
+                      {holderFaction ? (
+                        <span style={{ color: holderFaction.color }}>Held by {holderFaction.name}</span>
+                      ) : (
+                        "Uncontested (feral)"
+                      )}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                    Target
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
