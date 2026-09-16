@@ -52,6 +52,17 @@ export const EYE_COLORS = [
   "#7a6a4a", // amber
 ]
 
+// Lipstick colors keyed by mouth variant. Variant 0 is the neutral mouth line
+// (no entry here). Variant 1 (Rose) ships unlocked; 2-6 are gacha rewards.
+export const LIPSTICK_COLORS: Record<number, { base: string; highlight: string; name: string }> = {
+  1: { base: "#c0395b", highlight: "#e06a86", name: "Rose" },
+  2: { base: "#a01028", highlight: "#d13a54", name: "Crimson" },
+  3: { base: "#e0564a", highlight: "#ff8577", name: "Coral" },
+  4: { base: "#7d2748", highlight: "#a84a6e", name: "Berry" },
+  5: { base: "#5e2a56", highlight: "#8a4d80", name: "Plum" },
+  6: { base: "#b07a6a", highlight: "#c99686", name: "Nude" },
+}
+
 // Head shape names for UI
 export const HEAD_SHAPE_NAMES = ["Round", "Square", "Oval"]
 
@@ -84,7 +95,7 @@ export const LAYER_VARIANTS: Record<AvatarLayerType, number> = {
   base: 3,        // head shapes: round, square, oval
   skin: SKIN_COLORS.length,
   eyes: 6,
-  mouth: 5,       // Neutral, Smirk, Frown, Open, Masked
+  mouth: 7,       // 0=neutral line, 1-6=lipstick colors (see LIPSTICK_COLORS)
   hair: 10,       // increased hair options
   accessory: 28,  // 0=none, 1-16 standard, 17-21 mythic, 22-27 tidal set
   hat: 30,        // 0=none, 1-18 standard, 19-23 mythic, 24-29 tidal set
@@ -248,20 +259,20 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
   }
   
-  // Draw mouth. Variant 0 = neutral line (default face). Variant 1 = lipstick,
-  // a fuller colored lip cosmetic that ships unlocked for everyone.
+  // Draw mouth. Variant 0 = neutral line (default face). Variants 1-6 are
+  // lipstick colors (see LIPSTICK_COLORS). Variant 1 (rose) ships unlocked for
+  // everyone; the rest are recovered from the gacha.
   const mouthLayer = getLayer(config, "mouth")
   const mouthVariant = mouthLayer?.variant ?? 0
   const mouthY = 8
-  if (mouthVariant === 1) {
-    const lipColor = "#c0395b" // rose lipstick
-    const lipHighlight = "#e06a86"
-    setPixel(grid, 5, mouthY, lipColor)
-    setPixel(grid, 6, mouthY, lipHighlight)
-    setPixel(grid, 7, mouthY, lipHighlight)
-    setPixel(grid, 8, mouthY, lipColor)
-    setPixel(grid, 6, mouthY + 1, lipColor)
-    setPixel(grid, 7, mouthY + 1, lipColor)
+  const lipstick = LIPSTICK_COLORS[mouthVariant]
+  if (lipstick) {
+    setPixel(grid, 5, mouthY, lipstick.base)
+    setPixel(grid, 6, mouthY, lipstick.highlight)
+    setPixel(grid, 7, mouthY, lipstick.highlight)
+    setPixel(grid, 8, mouthY, lipstick.base)
+    setPixel(grid, 6, mouthY + 1, lipstick.base)
+    setPixel(grid, 7, mouthY + 1, lipstick.base)
   } else {
     setPixel(grid, 5, mouthY, mouthColor)
     setPixel(grid, 6, mouthY, mouthColor)

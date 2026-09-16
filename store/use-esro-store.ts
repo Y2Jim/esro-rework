@@ -409,6 +409,10 @@ const POOL: Record<Rarity, PoolItem[]> = {
     // Flair
     { label: "Soft Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 4 } },
     { label: "Dust Motes", type: "cosmetic", vanityData: { layerType: "flair", variant: 5 } },
+    // Lipstick colors (Rose ships unlocked; these are the low-tier gacha shades)
+    { label: "Crimson Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 2 } },
+    { label: "Coral Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 3 } },
+    { label: "Berry Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 4 } },
   ],
   uncommon: [
     // Non-cosmetics
@@ -435,6 +439,9 @@ const POOL: Record<Rarity, PoolItem[]> = {
     // Flair
     { label: "Signal Flicker", type: "cosmetic", vanityData: { layerType: "flair", variant: 6 } },
     { label: "Route Trails", type: "cosmetic", vanityData: { layerType: "flair", variant: 7 } },
+    // Lipstick colors (deeper shades)
+    { label: "Plum Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 5 } },
+    { label: "Nude Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 6 } },
   ],
   rare: [
     // Non-cosmetics
