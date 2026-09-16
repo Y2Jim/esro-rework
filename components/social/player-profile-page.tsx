@@ -132,6 +132,8 @@ export function PlayerProfilePage() {
   const back = useEsroStore((s) => s.clearViewedProfile)
   const removeFriend = useEsroStore((s) => s.removeFriend)
   const inviteFriendToParty = useEsroStore((s) => s.inviteFriendToParty)
+  const openConversation = useEsroStore((s) => s.openConversation)
+  const setScreen = useEsroStore((s) => s.setScreen)
   const [flash, setFlash] = useState<{ ok: boolean; message: string } | null>(null)
 
   const derived = useMemo(() => (player ? derivePublicProfile(player) : null), [player])
@@ -376,6 +378,11 @@ export function PlayerProfilePage() {
           <div className="grid grid-cols-2 gap-3 pt-1">
             <button
               type="button"
+              onClick={() => {
+                openConversation(player.handle)
+                back()
+                setScreen("messages")
+              }}
               className="flex items-center justify-center gap-1.5 rounded-lg border border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/10 px-3 py-2.5 text-[14px] font-medium text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
             >
               <MessageSquare className="h-4 w-4" />

@@ -39,6 +39,8 @@ export function PlayerProfileModal() {
   const removeFriend = useEsroStore((s) => s.removeFriend)
   const openProfilePage = useEsroStore((s) => s.openPlayerProfilePage)
   const inviteFriendToParty = useEsroStore((s) => s.inviteFriendToParty)
+  const openConversation = useEsroStore((s) => s.openConversation)
+  const setScreen = useEsroStore((s) => s.setScreen)
   const [inviteFlash, setInviteFlash] = useState<{ ok: boolean; message: string } | null>(null)
 
   // Close on Escape while the modal is open.
@@ -191,6 +193,11 @@ export function PlayerProfileModal() {
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button
               type="button"
+              onClick={() => {
+                openConversation(player.handle)
+                close()
+                setScreen("messages")
+              }}
               className="flex items-center justify-center gap-1.5 rounded-lg border border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent)]/10 px-3 py-2 text-[13px] font-medium text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
             >
               <MessageSquare className="h-4 w-4" />

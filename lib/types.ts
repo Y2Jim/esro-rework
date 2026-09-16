@@ -14,6 +14,7 @@ export type ChannelId =
 
 export type ScreenId =
   | "terminal"
+  | "messages"
   | "ops"
   | "contracts"
   | "social"
@@ -177,10 +178,16 @@ export interface ChatMessage {
   reactions?: { emoji: string; count: number }[]
 }
 
+/**
+ * A single private message in a one-to-one conversation. Conversation-centric:
+ * every message records the *other* participant (`withHandle`) and whether it
+ * was sent or received (`direction`), so grouping never depends on knowing the
+ * player's own handle. `read` is only meaningful for incoming messages.
+ */
 export interface DirectMessage {
   id: string
-  fromHandle: string
-  toHandle: string
+  withHandle: string
+  direction: "in" | "out"
   body: string
   at: number
   read: boolean

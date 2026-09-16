@@ -1401,6 +1401,8 @@ function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
   const removeFriend = useEsroStore((s) => s.removeFriend)
   const viewPlayer = useEsroStore((s) => s.viewPlayer)
   const inviteFriendToParty = useEsroStore((s) => s.inviteFriendToParty)
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const openConversation = useEsroStore((s) => s.openConversation)
 
   const friendAvatar = friend.avatar || generateAvatarFromSeed(friend.handle)
 
@@ -1408,6 +1410,11 @@ function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
     const res = inviteFriendToParty(friend)
     setFlash({ ok: res.success, message: res.message })
     window.setTimeout(() => setFlash(null), 2600)
+  }
+
+  const handleMessage = () => {
+    openConversation(friend.handle)
+    setScreen("messages")
   }
 
   const openProfile = () =>
@@ -1470,6 +1477,7 @@ function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
           </button>
           <button
             type="button"
+            onClick={handleMessage}
             className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
             title="Message"
           >

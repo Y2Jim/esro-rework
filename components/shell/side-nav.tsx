@@ -22,6 +22,7 @@ type NavItem = {
 // social/comms surfaces; GAME holds the play + character surfaces.
 const CHAT_ITEMS: NavItem[] = [
   { id: "terminal", label: "terminal", icon: "⌘", accentClass: "text-[color:var(--color-cyan)]", glowClass: "text-glow-cyan", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
+  { id: "messages", label: "messages", icon: "✉", accentClass: "text-[color:var(--color-cyan)]", glowClass: "text-glow-cyan", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
   { id: "social", label: "social", icon: "⬡", accentClass: "text-[color:var(--color-violet-bright)]", glowClass: "text-glow-soft", activeBgClass: "bg-[color:var(--color-violet-bright)]/15", hoverClass: "hover-violet", accentBar: "var(--color-violet-bright)" },
 ]
 
@@ -44,9 +45,11 @@ export function SideNav() {
   const profileTab = useEsroStore((s) => s.profileTab)
   const setProfileTab = useEsroStore((s) => s.setProfileTab)
   const profile = useEsroStore((s) => s.profile)
+  const directMessages = useEsroStore((s) => s.directMessages)
   const { expanded, toggle } = useNavRail()
 
   const unread = profile.notifications.filter((n) => n.state === "unread").length
+  const dmUnread = directMessages.filter((m) => m.direction === "in" && !m.read).length
 
   const renderItem = (it: NavItem) => {
     // Settings lives inside Profile; treat it as active only while that tab is
@@ -54,7 +57,7 @@ export function SideNav() {
     const onSettings = screen === "profile" && profileTab === "settings"
     const active =
       it.id === "settings" ? onSettings : it.id === screen && !(it.id === "profile" && onSettings)
-    const badge = it.id === "profile" ? unread : 0
+    const badge = it.id === "profile" ? unread : it.id === "messages" ? dmUnread : 0
     const handleClick = () => {
       if (it.id === "settings") {
         setScreen("profile")

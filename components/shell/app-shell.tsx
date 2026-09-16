@@ -8,6 +8,7 @@ import { SideNav } from "./side-nav"
 import { NavRailProvider } from "./nav-rail-context"
 import { Watermark } from "./watermark"
 import { ChatScreen } from "@/components/chat/chat-screen"
+import { MessagesScreen } from "@/components/messages/messages-screen"
 import { OpsScreen } from "@/components/ops/ops-screen"
 import { ContractsScreen } from "@/components/contracts/contracts-screen"
 import { SocialScreen } from "@/components/social/social-screen"
@@ -47,6 +48,7 @@ export function AppShell() {
                 }}
               >
                 {screen === "terminal" && <ChatScreen />}
+                {screen === "messages" && <MessagesScreen />}
                 {screen === "ops" && <OpsScreen />}
                 {screen === "contracts" && <ContractsScreen />}
                 {screen === "social" && <SocialScreen />}

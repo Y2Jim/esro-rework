@@ -8,6 +8,7 @@ import type {
   Channel,
   ChatMessage,
   Contract,
+  DirectMessage,
   Expedition,
   ActiveExpedition,
   FactionProject,
@@ -231,6 +232,19 @@ export interface EsroState {
   pageOffset: number
   nudgePage: (delta: number) => void
   resetPage: () => void
+
+  // Direct messages (private one-to-one)
+  directMessages: DirectMessage[]
+  /** Handle of the conversation currently open in the Messages screen, or null for the inbox list. */
+  activeConversation: string | null
+  /** Open a conversation with a player, switching to the Messages screen and marking it read. */
+  openConversation: (handle: string) => void
+  /** Select a conversation within the Messages screen (null returns to the inbox list). */
+  setActiveConversation: (handle: string | null) => void
+  /** Send a private message to another player. */
+  sendDirectMessage: (toHandle: string, body: string) => void
+  /** Mark every incoming message from a handle as read. */
+  markConversationRead: (handle: string) => void
 
   // Quick Actions
   quickActions: QuickAction[]
@@ -2250,6 +2264,60 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   viewedPlayer: null,
   viewPlayer: (player) => set({ viewedPlayer: player }),
   closePlayerProfile: () => set({ viewedPlayer: null }),
+
+  // Direct messages (private one-to-one) — seeded fresh each session.
+  directMessages: [
+    { id: "dm-1", withHandle: "@Relay3e8f2", direction: "in", body: "Hey — you running the deep ruins circuit tonight?", at: Date.now() - 1000 * 60 * 62, read: true },
+    { id: "dm-2", withHandle: "@Relay3e8f2", direction: "out", body: "Planning to. Need a fourth for the escort leg?", at: Date.now() - 1000 * 60 * 60, read: true },
+    { id: "dm-3", withHandle: "@Relay3e8f2", direction: "in", body: "Yeah, ping me when your party opens up.", at: Date.now() - 1000 * 60 * 12, read: false },
+    { id: "dm-4", withHandle: "@Relay9d2e7", direction: "in", body: "Got that archive fragment translated. Sending coords.", at: Date.now() - 1000 * 60 * 60 * 5, read: false },
+    { id: "dm-5", withHandle: "@Relay6c4d3", direction: "out", body: "Thanks for the route tip, saved me a whole leg.", at: Date.now() - 1000 * 60 * 60 * 26, read: true },
+    { id: "dm-6", withHandle: "@Relay6c4d3", direction: "in", body: "Anytime. Safe roads.", at: Date.now() - 1000 * 60 * 60 * 25, read: true },
+  ] as DirectMessage[],
+  activeConversation: null,
+  openConversation: (handle) => {
+    set((state) => ({
+      screen: "messages",
+      activeConversation: handle,
+      directMessages: state.directMessages.map((m) =>
+        m.withHandle === handle && m.direction === "in" ? { ...m, read: true } : m,
+      ),
+    }))
+  },
+  setActiveConversation: (handle) => {
+    set((state) => ({
+      activeConversation: handle,
+      directMessages: handle
+        ? state.directMessages.map((m) =>
+            m.withHandle === handle && m.direction === "in" ? { ...m, read: true } : m,
+          )
+        : state.directMessages,
+    }))
+  },
+  sendDirectMessage: (toHandle, body) => {
+    const trimmed = body.trim()
+    if (!trimmed) return
+    set((state) => ({
+      directMessages: [
+        ...state.directMessages,
+        {
+          id: `dm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          withHandle: toHandle,
+          direction: "out",
+          body: trimmed,
+          at: Date.now(),
+          read: true,
+        },
+      ],
+    }))
+  },
+  markConversationRead: (handle) => {
+    set((state) => ({
+      directMessages: state.directMessages.map((m) =>
+        m.withHandle === handle && m.direction === "in" ? { ...m, read: true } : m,
+      ),
+    }))
+  },
   // Open the full profile page: switch to the Profile screen showing this player
   // (read-only) and dismiss the quick-look modal in the same update.
   viewedProfile: null,
