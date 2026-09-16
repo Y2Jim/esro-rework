@@ -12,6 +12,7 @@ import { BestiaryTab } from "@/components/profile/bestiary-tab"
 import { TrophyCase } from "@/components/profile/trophy-case"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
+import { getCreature, packContribution, creatureSprite } from "@/lib/bestiary"
 import { Shield } from "lucide-react"
 import type { BaseStats } from "@/lib/types"
 import { ROLLABLE_THEMES } from "@/lib/rollable-themes"
@@ -49,10 +50,17 @@ export function ProfileScreen() {
   const [tab, setTab] = useState<ProfileTab>("summary")
   const profile = useEsroStore((s) => s.profile)
   const identity = useEsroStore((s) => s.identity)
+  // The Bestiary is the taming payoff, so it stays hidden until "Pack Beasts".
+  const canTame = useEsroStore((s) => s.hasSkillUnlock("pack_beasts"))
 
   if (!profile) return null
 
   const unreadCount = profile.notifications?.filter(n => n.state === "unread").length || 0
+
+  // Drop the Bestiary tab until taming is unlocked. If the player was viewing it
+  // and lost the unlock, fall back to Summary so no hidden tab renders.
+  const visibleProfileTabs = profileTabs.filter((t) => t.id !== "bestiary" || canTame)
+  const effectiveTab = tab === "bestiary" && !canTame ? "summary" : tab
 
   return (
     <div className="flex h-full flex-col">
@@ -61,7 +69,7 @@ export function ProfileScreen() {
         className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-2 py-1.5"
         style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
       >
-        {profileTabs.map((t) => (
+        {visibleProfileTabs.map((t) => (
           <button
             key={t.id}
             type="button"
@@ -69,7 +77,7 @@ export function ProfileScreen() {
             className={cn(
               "relative flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
               t.hover,
-              tab === t.id
+              effectiveTab === t.id
                 ? cn(t.bgColor, t.color)
                 : "text-[color:var(--color-muted)]"
             )}
@@ -87,13 +95,70 @@ export function ProfileScreen() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
-        {tab === "summary" && <SummaryTab />}
-        {tab === "titles" && <TitlesTab />}
-        {tab === "bestiary" && <BestiaryTab />}
-        {tab === "cosmetics" && <CosmeticsTab />}
-        {tab === "settings" && <SettingsTab />}
-        {tab === "notifications" && <NotificationsTab />}
+        {effectiveTab === "summary" && <SummaryTab />}
+        {effectiveTab === "titles" && <TitlesTab />}
+        {effectiveTab === "bestiary" && canTame && <BestiaryTab />}
+        {effectiveTab === "cosmetics" && <CosmeticsTab />}
+        {effectiveTab === "settings" && <SettingsTab />}
+        {effectiveTab === "notifications" && <NotificationsTab />}
       </div>
+    </div>
+  )
+}
+
+function ActiveMountCard() {
+  const profile = useEsroStore((s) => s.profile)
+  const setActiveMount = useEsroStore((s) => s.setActiveMount)
+
+  const tamed = profile.tamedBeasts ?? []
+  // Nothing tamed yet: keep the profile clean rather than showing an empty shell.
+  if (tamed.length === 0) return null
+
+  const mount = getCreature(profile.activeMount ?? "")
+  const carry = mount ? packContribution(mount).carry : 0
+
+  return (
+    <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Active Mount
+        </span>
+        {mount && (
+          <span className="text-[13px] text-[color:var(--color-green)]">+{carry} carry</span>
+        )}
+      </div>
+      {mount ? (
+        <div className="flex items-center gap-3">
+          <img
+            src={creatureSprite(mount.id) || "/placeholder.svg"}
+            alt={mount.name}
+            className="h-10 w-10 shrink-0"
+            style={{ imageRendering: "pixelated" }}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[15px] font-medium text-[color:var(--color-text)]">
+              {mount.name}
+            </div>
+            <div className="truncate text-[13px] text-[color:var(--color-muted)]">
+              {mount.habitat}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveMount(null)}
+            className="shrink-0 rounded border border-[color:var(--color-border)] px-2 py-1 text-[13px] text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-text)]"
+          >
+            Dismount
+          </button>
+        </div>
+      ) : (
+        <div className="text-[14px] text-[color:var(--color-muted)]">
+          Travelling unmounted —{" "}
+          <span className="text-[color:var(--color-muted-2)]">
+            equip a beast from the Bestiary tab.
+          </span>
+        </div>
+      )}
     </div>
   )
 }
@@ -252,6 +317,10 @@ function SummaryTab() {
           ))}
         </div>
       </div>
+
+      {/* Active mount — mirrors the pack selector in the Bestiary tab so the
+          equipped beast and its carry bonus are visible at a glance here too. */}
+      <ActiveMountCard />
 
       {/* Level-up point spending + the sub-stats those points feed. */}
       <StatAllocation />

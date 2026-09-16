@@ -74,11 +74,14 @@ const UNLOCK_OVERRIDES = (() => {
 export function AdminDevTools() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
   const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)
+  const devUnlockAllMounts = useEsroStore((s) => s.devUnlockAllMounts)
   const simulateExpedition = useEsroStore((s) => s.simulateExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
   const addMaterials = useEsroStore((s) => s.addMaterials)
   const injectTestChatMessages = useEsroStore((s) => s.injectTestChatMessages)
+  const addNotification = useEsroStore((s) => s.addNotification)
+  const setProfileTab = useEsroStore((s) => s.setProfileTab)
   const setScreen = useEsroStore((s) => s.setScreen)
   const unlockTheme = useEsroStore((s) => s.unlockTheme)
   const identity = useEsroStore((s) => s.identity)
@@ -89,12 +92,13 @@ export function AdminDevTools() {
   const clearDebugUnlocks = useEsroStore((s) => s.clearDebugUnlocks)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   
-  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean }>({
+  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean; mounts: boolean }>({
     cosmetics: false,
     titles: false,
     materials: false,
     chat: false,
     themes: false,
+    mounts: false,
   })
   
   const [newHandle, setNewHandle] = useState(identity.handle.replace("@", ""))
@@ -132,6 +136,11 @@ export function AdminDevTools() {
     setUnlocked((prev) => ({ ...prev, themes: true }))
   }
 
+  const handleUnlockMounts = () => {
+    devUnlockAllMounts()
+    setUnlocked((prev) => ({ ...prev, mounts: true }))
+  }
+
   const handleAddMaterials = () => {
     addMaterials()
     setUnlocked((prev) => ({ ...prev, materials: true }))
@@ -142,6 +151,19 @@ export function AdminDevTools() {
     injectTestChatMessages()
     setUnlocked((prev) => ({ ...prev, chat: true }))
     setScreen("terminal")
+  }
+
+  const fireTestNotification = (priority: "low" | "normal" | "high") => {
+    const copy = {
+      low: { title: "Routine Sync", body: "Relay logs archived. No action needed." },
+      normal: { title: "Contract Available", body: "A new courier contract is open for bidding." },
+      high: { title: "Priority Alert", body: "Anomaly surge detected near your last route. Respond now." },
+    }[priority]
+    addNotification({ ...copy, priority })
+    // Send the tester to where the notification lands so it can be inspected.
+    setScreen("profile")
+    setProfileTab("notifications")
+    logAdminAction("broadcast", undefined, `Fired ${priority} test notification`)
   }
 
   return (
@@ -242,6 +264,20 @@ export function AdminDevTools() {
         >
           {unlocked.themes ? "All UI Themes Unlocked" : "Unlock All UI Themes"}
         </button>
+
+        <button
+          type="button"
+          onClick={handleUnlockMounts}
+          disabled={unlocked.mounts}
+          className={cn(
+            "w-full rounded border px-3 py-2 text-[14px] transition-colors",
+            unlocked.mounts
+              ? "border-[#60d060]/50 bg-[#60d060]/10 text-[#60d060]"
+              : "border-[#60d060]/50 bg-[#60d060]/10 text-[#60d060] hover:bg-[#60d060]/20"
+          )}
+        >
+          {unlocked.mounts ? "All Mounts Tamed" : "Tame All Mounts"}
+        </button>
       </div>
 
       {/* Chat Testing */}
@@ -263,6 +299,39 @@ export function AdminDevTools() {
         </button>
         <p className="text-[12px] text-[color:var(--color-muted)]">
           Adds messages with all rarity titles to PUBLIC channel
+        </p>
+      </div>
+
+      {/* Notification Testing */}
+      <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
+        <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Notification Testing
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => fireTestNotification("low")}
+            className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-3 py-2 text-[14px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-text)]/40 hover:text-[color:var(--color-text)]"
+          >
+            Low
+          </button>
+          <button
+            type="button"
+            onClick={() => fireTestNotification("normal")}
+            className="rounded border border-[#5dd0ff]/50 bg-[#5dd0ff]/10 px-3 py-2 text-[14px] text-[#5dd0ff] transition-colors hover:bg-[#5dd0ff]/20"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            onClick={() => fireTestNotification("high")}
+            className="rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-3 py-2 text-[14px] text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
+          >
+            High
+          </button>
+        </div>
+        <p className="text-[12px] text-[color:var(--color-muted)]">
+          Fires a test notification and jumps to the Notifications tab to inspect it.
         </p>
       </div>
 

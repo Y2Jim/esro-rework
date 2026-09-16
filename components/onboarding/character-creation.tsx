@@ -436,30 +436,39 @@ if (briefingIndex > 0) {
               transition={{ duration: 0.4 }}
               className="mx-auto max-w-sm flex flex-col items-center justify-center min-h-[300px]"
             >
-              {/* Pulsing signal icon */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  opacity: [0.6, 1, 0.6]
-                }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="mb-6 relative"
-              >
-                <div className="w-16 h-16 rounded-full border-2 border-[color:var(--color-accent)] flex items-center justify-center">
+              {/* Pulsing signal icon.
+                  The ripple rings are siblings of (not children of) the pulsing
+                  core: nesting them made the core's scale transform compound
+                  with each ring's own scale, so restarts snapped/jittered.
+                  Each ring loops on its own fixed period with an even
+                  repeatDelay, and the offsets are expressed via repeatDelay
+                  rather than `delay` (which only applies to the first cycle and
+                  let the two rings drift into sync). */}
+              <div className="mb-6 relative flex items-center justify-center w-16 h-16">
+                {[0, 1].map((i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ scale: 1, opacity: 0.4 }}
+                    animate={{ scale: 2, opacity: 0 }}
+                    transition={{
+                      duration: 1,
+                      ease: "easeOut",
+                      repeat: Infinity,
+                      // Two rings, 2s total cadence, evenly offset by one second.
+                      repeatDelay: 1,
+                      delay: i * 1,
+                    }}
+                    className="absolute inset-0 rounded-full border border-[color:var(--color-accent)]"
+                  />
+                ))}
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity }}
+                  className="relative w-16 h-16 rounded-full border-2 border-[color:var(--color-accent)] flex items-center justify-center"
+                >
                   <Zap className="w-7 h-7 text-[color:var(--color-accent)]" />
-                </div>
-                {/* Ripple rings */}
-                <motion.div
-                  animate={{ scale: [1, 2], opacity: [0.4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 rounded-full border border-[color:var(--color-accent)]"
-                />
-                <motion.div
-                  animate={{ scale: [1, 2], opacity: [0.4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                  className="absolute inset-0 rounded-full border border-[color:var(--color-accent)]"
-                />
-              </motion.div>
+                </motion.div>
+              </div>
 
               <motion.div
                 initial={{ opacity: 0 }}

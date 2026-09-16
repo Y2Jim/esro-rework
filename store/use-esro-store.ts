@@ -96,6 +96,7 @@ import {
   CLASS_LABEL,
   TAME_MASTER_UNLOCK,
   TAME_UNLOCK,
+  TAMEABLE,
   getCreature,
   packContribution,
   rollShiny,
@@ -201,6 +202,13 @@ export interface EsroState {
    */
   startExpedition: (id: string, ritualIds?: string[]) => void
   cancelExpedition: () => void
+  /**
+   * Epoch ms until which new expeditions are locked after a failed run, or null
+   * when no cooldown is active. A "failed" run is a total wipe (no cargo home).
+   */
+  expeditionCooldownUntil: number | null
+  /** Seconds left on the failure cooldown, clamped to 0. */
+  getExpeditionCooldownRemaining: () => number
 
   // Ops - Skills
   skills: Skill[]
@@ -319,6 +327,8 @@ export interface EsroState {
   setHandle: (newHandle: string) => void
   unlockAllCosmetics: () => void
   unlockAllTitles: () => void
+  /** Dev-only: tame every pack beast, bypassing encounter and skill gates. */
+  devUnlockAllMounts: () => void
   simulateExpedition: (expeditionId?: string) => void
   completeActiveExpedition: (lootMultiplier?: number) => void
   injectTestChatMessages: () => void
@@ -555,6 +565,9 @@ function applyStanding(
     newRank: rank,
   }
 }
+
+/** Recovery lockout after a failed (fully wiped) expedition. */
+const EXPEDITION_FAIL_COOLDOWN_MS = 2 * 60 * 1000
 
 const PARTY_ROLES = ["Logistics", "Surveying", "Analysis", "Security", "Relay Tuning", "Scavenging"]
 const PARTY_TITLES: { label: string; rarity: Rarity }[] = [
@@ -954,6 +967,32 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({ profile: { ...profile, activeMount: creatureId } })
   },
 
+  devUnlockAllMounts: () => {
+    const { profile } = get()
+    const bestiary = { ...(profile.bestiary ?? {}) }
+    // Tame every pack beast and mark it discovered, ignoring the usual
+    // encounter/skill prerequisites so mounts can be tested from a fresh save.
+    for (const creature of TAMEABLE) {
+      const prev = bestiary[creature.id]
+      bestiary[creature.id] = {
+        encounters: prev?.encounters ?? 1,
+        defeats: prev?.defeats ?? 0,
+        firstSeen: prev?.firstSeen ?? Date.now(),
+        tamed: true,
+      }
+    }
+    const tamed = TAMEABLE.map((c) => c.id)
+    set({
+      profile: {
+        ...profile,
+        tamedBeasts: tamed,
+        bestiary,
+        // Equip one so the profile card has something to show immediately.
+        activeMount: profile.activeMount ?? tamed[0] ?? null,
+      },
+    })
+  },
+
   /** Aggregated sub-stat effects across every unlocked skill. */
   getSkillBonuses: () => aggregateSkillBonuses(get().skills),
 
@@ -1057,9 +1096,17 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Expeditions
   expeditions: seedExpeditions,
   activeExpedition: null,
+  expeditionCooldownUntil: null,
+  getExpeditionCooldownRemaining: () => {
+    const until = get().expeditionCooldownUntil
+    if (!until) return 0
+    return Math.max(0, Math.ceil((until - Date.now()) / 1000))
+  },
   startExpedition: (id, ritualIds) => {
     const exp = get().expeditions.find((e) => e.id === id)
     if (!exp || get().activeExpedition) return
+    // A failed run locks out new launches until the recovery cooldown elapses.
+    if (get().getExpeditionCooldownRemaining() > 0) return
     // Tier gate: some sites only open once the matching skill breakpoint is hit.
     if (exp.requiresUnlock && !get().hasSkillUnlock(exp.requiresUnlock)) return
 
@@ -2289,9 +2336,13 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     const mult = Math.max(0, Math.min(1, lootMultiplier))
 
-    // Total wipe: all cargo is lost, no rewards granted.
+    // Total wipe: all cargo is lost, no rewards granted, and a recovery
+    // cooldown blocks new launches so failure carries a real cost.
     if (mult <= 0) {
-      set({ activeExpedition: null })
+      set({
+        activeExpedition: null,
+        expeditionCooldownUntil: Date.now() + EXPEDITION_FAIL_COOLDOWN_MS,
+      })
       return
     }
 

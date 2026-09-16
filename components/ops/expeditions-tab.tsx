@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { cn } from "@/lib/cn"
 import { rarityColor } from "@/lib/rarity"
@@ -38,11 +38,27 @@ export function ExpeditionsTab() {
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const getPlayerStats = useEsroStore((s) => s.getPlayerStats)
   const getStatBonus = useEsroStore((s) => s.getStatBonus)
+  const cooldownUntil = useEsroStore((s) => s.expeditionCooldownUntil)
 
   // Site chosen but not yet launched: the ritual prep step sits in between.
   const [pendingExpedition, setPendingExpedition] = useState<{ id: string; name: string } | null>(
     null,
   )
+
+  // Tick every second while a failure cooldown is running so the countdown and
+  // the disabled launch buttons update live without a store write each frame.
+  const [cooldownLeft, setCooldownLeft] = useState(0)
+  useEffect(() => {
+    if (!cooldownUntil) {
+      setCooldownLeft(0)
+      return
+    }
+    const tick = () => setCooldownLeft(Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000)))
+    tick()
+    const timer = setInterval(tick, 1000)
+    return () => clearInterval(timer)
+  }, [cooldownUntil])
+  const onCooldown = cooldownLeft > 0
 
   const playerStats = getPlayerStats()
   
@@ -90,6 +106,23 @@ export function ExpeditionsTab() {
 
   return (
     <div className="space-y-4">
+      {/* Recovery cooldown after a failed run */}
+      {onCooldown && !activeExpedition && (
+        <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[13px] uppercase tracking-wider text-[color:var(--color-danger)]">
+              Squad recovering
+            </span>
+            <span className="font-mono text-[14px] tabular-nums text-[color:var(--color-danger)]">
+              {Math.floor(cooldownLeft / 60)}:{String(cooldownLeft % 60).padStart(2, "0")}
+            </span>
+          </div>
+          <p className="mt-1 text-[13px] text-[color:var(--color-muted)]">
+            The last expedition ended in disaster. New launches are locked until the squad regroups.
+          </p>
+        </div>
+      )}
+
       {/* Active Expedition */}
       {activeExpedition && (
         <div className="rounded-lg border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/5 p-3">
@@ -206,10 +239,10 @@ export function ExpeditionsTab() {
                   }
                   setPendingExpedition({ id: exp.id, name: exp.label })
                 }}
-                disabled={!!activeExpedition || !meetsRequirement}
+                disabled={!!activeExpedition || !meetsRequirement || onCooldown}
                 className={cn(
                   "w-full rounded-lg border bg-[color:var(--color-panel)] p-3 text-left transition-colors",
-                  activeExpedition || !meetsRequirement
+                  activeExpedition || !meetsRequirement || onCooldown
                     ? "border-[color:var(--color-border-soft)] opacity-60"
                     : "border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]/50"
                 )}

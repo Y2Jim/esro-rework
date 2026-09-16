@@ -21,6 +21,9 @@ export function KnownRituals() {
   const hasRitualism = useEsroStore((s) => s.hasRitualism())
 
   if (!profile) return null
+  // Rituals are the Ritualism payoff: the whole codex stays hidden until the
+  // skill is trained, rather than advertising locked entries to everyone.
+  if (!hasRitualism) return null
 
   const known = getRituals(profile.knownRituals)
   // Books can be looted by anyone, but only Ritualism can actually prepare them.

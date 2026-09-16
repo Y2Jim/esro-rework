@@ -24,6 +24,15 @@ export function OpsScreen() {
   const opsTab = useEsroStore((s) => s.opsTab)
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
+  // Fishing only exists once its skill gate (Luck 15 -> "fishing_basic") is met.
+  const canFish = useEsroStore((s) => s.hasSkillUnlock("fishing_basic"))
+
+  // Hide the Fishing tab until its skill unlock is earned.
+  const visibleTabs = tabs.filter((tab) => tab.id !== "fishing" || canFish)
+
+  // If the player was parked on Fishing and then lost the unlock (e.g. a dev
+  // reset), fall back to Map so the content area never renders a hidden tab.
+  const effectiveTab = opsTab === "fishing" && !canFish ? "map" : opsTab
 
   // An active expedition takes over the entire Ops screen.
   if (activeExpedition) {
@@ -37,7 +46,7 @@ export function OpsScreen() {
         className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-3 py-2"
         style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
       >
-        {tabs.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -45,7 +54,7 @@ export function OpsScreen() {
             className={cn(
               "flex shrink-0 items-center gap-1.5 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
               tab.hover,
-              opsTab === tab.id
+              effectiveTab === tab.id
                 ? cn(tab.bgColor, tab.color)
                 : "text-[color:var(--color-muted)]"
             )}
@@ -58,12 +67,12 @@ export function OpsScreen() {
 
       {/* Tab content */}
       <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
-        {opsTab === "map" && <MapTab />}
-        {opsTab === "expeditions" && <ExpeditionsTab />}
-        {opsTab === "skills" && <SkillsTab />}
-        {opsTab === "crafting" && <CraftingTab />}
-        {opsTab === "fishing" && <FishingTab />}
-        {opsTab === "rolling" && <RollingTab />}
+        {effectiveTab === "map" && <MapTab />}
+        {effectiveTab === "expeditions" && <ExpeditionsTab />}
+        {effectiveTab === "skills" && <SkillsTab />}
+        {effectiveTab === "crafting" && <CraftingTab />}
+        {effectiveTab === "fishing" && canFish && <FishingTab />}
+        {effectiveTab === "rolling" && <RollingTab />}
       </div>
     </div>
   )
