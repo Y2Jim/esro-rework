@@ -494,6 +494,28 @@ export interface Friend {
   note?: string
 }
 
+/**
+ * Normalized view of another player, assembled from a Friend or PartyMember so
+ * the shared player-profile modal can render either source consistently.
+ */
+export interface PlayerView {
+  handle: string
+  title?: string
+  titleRarity?: Rarity
+  avatar?: AvatarConfig
+  faction?: string
+  /** Presence label, normalized across Friend and PartyMember status sets. */
+  status?: "online" | "away" | "offline" | "ready" | "idle" | "deployed"
+  role?: string
+  contribution?: number
+  expeditionsCompleted?: number
+  note?: string
+  lastSeen?: number
+  leader?: boolean
+  /** Where this player was opened from, so the modal shows the right actions. */
+  source: "friend" | "party"
+}
+
 export interface FriendRequest {
   id: string
   fromHandle: string

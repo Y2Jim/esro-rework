@@ -21,6 +21,7 @@ import type {
   FishingState,
   OpsTab,
   PartyMember,
+  PlayerView,
   Profile,
   ProfileNotification,
   ProfileTitle,
@@ -341,6 +342,11 @@ export interface EsroState {
   // Social - Friends
   friends: Friend[]
   removeFriend: (handle: string) => void
+
+  // Social - Player profile viewer
+  viewedPlayer: PlayerView | null
+  viewPlayer: (player: PlayerView) => void
+  closePlayerProfile: () => void
   
   // Social - Trade
   tradeOffers: TradeOffer[]
@@ -2196,8 +2202,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   removeFriend: (handle) => {
     set((state) => ({
       friends: state.friends.filter((f) => f.handle !== handle),
+      // If the removed player is currently open in the viewer, close it.
+      viewedPlayer: state.viewedPlayer?.handle === handle ? null : state.viewedPlayer,
     }))
   },
+
+  // Player profile viewer — shared modal opened from friends or party lists.
+  viewedPlayer: null,
+  viewPlayer: (player) => set({ viewedPlayer: player }),
+  closePlayerProfile: () => set({ viewedPlayer: null }),
   
   // Trade
   tradeOffers: [
