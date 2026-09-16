@@ -703,18 +703,24 @@
     --color-border: color-mix(in srgb, var(--rollable-accent) 50%, transparent);
   }
   
-  /* Void Rift: Slow pulsing border glow */
+  /* Void Rift: Slow breathing border glow (glow swells, content never dims) */
   .theme-effect-rift [class*="border-"] {
-    box-shadow: 
-      0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
-      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent),
-      inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 20%, transparent);
-    animation: theme-rift-pulse 3s ease-in-out infinite;
+    animation: theme-rift-border-pulse 4s ease-in-out infinite;
   }
   
-  @keyframes theme-rift-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.75; }
+  @keyframes theme-rift-border-pulse {
+    0%, 100% {
+      box-shadow: 
+        0 0 3px color-mix(in srgb, var(--rollable-accent) 45%, transparent),
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 18%, transparent),
+        inset 0 0 2px color-mix(in srgb, var(--rollable-accent) 15%, transparent);
+    }
+    50% {
+      box-shadow: 
+        0 0 7px color-mix(in srgb, var(--rollable-accent) 75%, transparent),
+        0 0 16px color-mix(in srgb, var(--rollable-accent) 40%, transparent),
+        inset 0 0 3px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    }
   }
   
   /* Void Rift: Tear effect at edges */
@@ -800,19 +806,26 @@
     }
   }
   
-  /* Void Rift: Text with slow pulsing glow */
+  /* Void Rift: Text with slow breathing glow (no opacity fade) */
   .theme-effect-rift .text-\[color\:var\(--color-accent\)\] {
-    text-shadow: 
-      0 0 4px var(--rollable-accent),
-      0 0 8px color-mix(in srgb, var(--rollable-accent) 40%, transparent);
-    animation: theme-rift-pulse 3s ease-in-out infinite;
+    animation: theme-rift-text-pulse 4s ease-in-out infinite;
+  }
+  
+  @keyframes theme-rift-text-pulse {
+    0%, 100% {
+      text-shadow: 
+        0 0 3px color-mix(in srgb, var(--rollable-accent) 80%, transparent),
+        0 0 6px color-mix(in srgb, var(--rollable-accent) 25%, transparent);
+    }
+    50% {
+      text-shadow: 
+        0 0 5px var(--rollable-accent),
+        0 0 12px color-mix(in srgb, var(--rollable-accent) 50%, transparent);
+    }
   }
   
   .theme-effect-rift button {
-    box-shadow: 
-      0 0 4px color-mix(in srgb, var(--rollable-accent) 60%, transparent),
-      0 0 8px color-mix(in srgb, var(--rollable-accent) 30%, transparent);
-    animation: theme-rift-pulse 3s ease-in-out infinite;
+    animation: theme-rift-border-pulse 4s ease-in-out infinite;
   }
 
   /* ===== MYTHIC: Quantum Flux - Reality-bending chromatic shifts ===== */
