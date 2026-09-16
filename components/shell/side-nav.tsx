@@ -59,6 +59,11 @@ export function SideNav() {
       if (it.id === "settings") {
         setScreen("profile")
         setProfileTab("settings")
+      } else if (it.id === "profile") {
+        // Settings is a standalone destination that also lives under the profile
+        // screen; opening Profile should never land on the Settings view.
+        setScreen("profile")
+        if (profileTab === "settings") setProfileTab("summary")
       } else {
         setScreen(it.id)
       }

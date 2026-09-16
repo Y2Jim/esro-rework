@@ -55,7 +55,6 @@ const profileTabs: (SubTabItem & { id: ProfileTab })[] = [
   { id: "titles", label: "Titles", icon: "◇", accentClass: "text-[color:var(--color-amber)]", activeBgClass: "bg-[color:var(--color-amber)]/15", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
   { id: "bestiary", label: "Bestiary", icon: "❖", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
   { id: "cosmetics", label: "Cosmetics", icon: "✦", accentClass: "text-[color:var(--color-violet-bright)]", activeBgClass: "bg-[color:var(--color-violet-bright)]/15", hoverClass: "hover-violet", accentBar: "var(--color-violet-bright)" },
-  { id: "settings", label: "Settings", icon: "⚙", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
   { id: "notifications", label: "Alerts", icon: "◈", accentClass: "text-[color:var(--color-danger)]", activeBgClass: "bg-[color:var(--color-danger)]/15", hoverClass: "hover-danger", accentBar: "var(--color-danger)" },
 ]
 
@@ -71,6 +70,19 @@ export function ProfileScreen() {
 
   if (viewedProfile) return <PlayerProfilePage />
   if (!profile) return null
+
+  // Settings is its own standalone destination reached from the sidebar — it no
+  // longer lives in the profile sub-tab scroller, so render it on its own with
+  // no SubTabBar above it.
+  if (tab === "settings") {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+          <SettingsTab />
+        </div>
+      </div>
+    )
+  }
 
   const unreadCount = profile.notifications?.filter(n => n.state === "unread").length || 0
 
@@ -97,7 +109,6 @@ export function ProfileScreen() {
         {effectiveTab === "titles" && <TitlesTab />}
         {effectiveTab === "bestiary" && canTame && <BestiaryTab />}
         {effectiveTab === "cosmetics" && <CosmeticsTab />}
-        {effectiveTab === "settings" && <SettingsTab />}
         {effectiveTab === "notifications" && <NotificationsTab />}
       </div>
     </div>
