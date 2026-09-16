@@ -61,6 +61,13 @@ export function ExpeditionsTab() {
   const onCooldown = cooldownLeft > 0
 
   const playerStats = getPlayerStats()
+
+  // Faction expeditions (the contested-frontier runs that grant faction standing)
+  // sort to the bottom so the general-purpose runs lead the list. A stable sort
+  // keeps the relative order within each group untouched.
+  const sortedExpeditions = [...expeditions].sort(
+    (a, b) => Number(!!a.factionAttunement) - Number(!!b.factionAttunement),
+  )
   
   /** Calculate bonus percentage for an expedition based on relevant stats */
   const getExpeditionBonus = (exp: typeof expeditions[0]) => {
@@ -213,7 +220,7 @@ export function ExpeditionsTab() {
         </div>
 
         <div className="space-y-2">
-          {expeditions.map((exp) => {
+          {sortedExpeditions.map((exp) => {
             const requiredSkill = skills.find(s => s.id === exp.requiredSkill)
             // Locked either by the run's base skill or by an unearned tier breakpoint.
             const tierLocked = !!exp.requiresUnlock && !hasSkillUnlock(exp.requiresUnlock)
