@@ -129,7 +129,7 @@
       "stats": [
         { "id": "surveying", "name": "Surveying" },
         { "id": "routing", "name": "Routing" },
-        { "id": "survival", "name": "Survival" }
+        { "id": "fieldcraft", "name": "Fieldcraft" }
       ]
     },
     {

@@ -2694,7 +2694,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
 
     // XP is awarded after the loot commit so a level-up notification lands last.
-    // xpBonus is fed by ritual effects (e.g. Scholar's Rite).
+    // xpBonus is fed by the Scholar's Wake ritual and by Pathfinding's Fieldcraft sub-stat.
     const baseXp = expDef?.rewards.xp ?? 0
     if (baseXp > 0) {
       get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult))
@@ -2702,7 +2702,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     if (learnedBook) get().learnRitual(learnedBook)
 
-    // Squad reached the contested site — trigger the invaders-vs-defenders battle.
+    // Squad reached the contested site �� trigger the invaders-vs-defenders battle.
     if (isTerritoryRun && pending) {
       const factionId = get().getPlayerFactionId()
       if (factionId) {

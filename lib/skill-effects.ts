@@ -529,11 +529,16 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Pathfinding",
     linkedStat: "focus",
-    summary: "Reads the ground, finds routes nobody charted, and shortens the trip.",
+    summary: "Reads the ground, finds routes nobody charted, and turns hard roads into hard-won experience.",
     hooks: [
       { id: "surveying", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
       { id: "routing", effect: "hiddenRoute", perLevel: 0.025, detail: "Chance to reveal a hidden route" },
-      { id: "survival", effect: "runDuration", perLevel: -0.005, detail: "Shorter expedition legs" },
+      // Was runDuration, the game's most duplicated lever (Conditioning, Beast
+      // Tending, and the Long Marches rite all already shorten runs). Repointed
+      // to xpBonus so a seasoned trailblazer learns more from every journey —
+      // and so xpBonus finally has a steady skill source, not just the
+      // Scholar's Wake ritual.
+      { id: "fieldcraft", effect: "xpBonus", perLevel: 0.02, detail: "Bonus expedition XP" },
     ],
     breakpoints: [
       { level: 5, unlock: "hidden_routes", label: "Trailblazer", detail: "Hidden map routes become visible" },
