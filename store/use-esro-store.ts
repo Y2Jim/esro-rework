@@ -325,6 +325,7 @@ export interface EsroState {
   // Social - Party
   party: PartyMember[]
   invitePartyMember: () => { success: boolean; message: string }
+  inviteFriendToParty: (friend: Friend) => { success: boolean; message: string }
   removePartyMember: (slot: number) => void
   setPartyMemberRole: (slot: number, role: string) => void
   readyUpParty: () => void
@@ -1956,6 +1957,38 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }),
     }))
     return { success: true, message: `${handle} joined the party` }
+  },
+  inviteFriendToParty: (friend) => {
+    const { party } = get()
+    const maxSlots = 4
+    if (party.length >= maxSlots)
+      return { success: false, message: "Party is full — remove a member before inviting more" }
+    if (party.some((m) => m.handle === friend.handle))
+      return { success: false, message: `${friend.handle} is already in your party` }
+    const usedSlots = new Set(party.map((m) => m.slot))
+    let slot = 1
+    while (usedSlots.has(slot)) slot += 1
+    const member: PartyMember = {
+      slot,
+      handle: friend.handle,
+      title: friend.title,
+      titleRarity: friend.titleRarity,
+      role: randItem(PARTY_ROLES),
+      status: "idle",
+      avatar: friend.avatar || generateAvatarFromSeed(friend.handle),
+      joinedAt: Date.now(),
+      contribution: 0,
+      expeditionsCompleted: 0,
+    }
+    set((s) => ({
+      party: [...s.party, member].sort((a, b) => a.slot - b.slot),
+      factionActivity: pushActivity(s.factionActivity, {
+        kind: "join",
+        handle: friend.handle,
+        text: "joined your party",
+      }),
+    }))
+    return { success: true, message: `${friend.handle} joined the party` }
   },
   removePartyMember: (slot) =>
     set((s) => ({

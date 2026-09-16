@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { TitleDisplay } from "@/components/ui/title-display"
@@ -38,6 +38,8 @@ export function PlayerProfileModal() {
   const close = useEsroStore((s) => s.closePlayerProfile)
   const removeFriend = useEsroStore((s) => s.removeFriend)
   const openProfilePage = useEsroStore((s) => s.openPlayerProfilePage)
+  const inviteFriendToParty = useEsroStore((s) => s.inviteFriendToParty)
+  const [inviteFlash, setInviteFlash] = useState<{ ok: boolean; message: string } | null>(null)
 
   // Close on Escape while the modal is open.
   useEffect(() => {
@@ -197,6 +199,17 @@ export function PlayerProfileModal() {
             {player.source === "friend" ? (
               <button
                 type="button"
+                onClick={() => {
+                  const res = inviteFriendToParty({
+                    handle: player.handle,
+                    title: player.title,
+                    titleRarity: player.titleRarity,
+                    avatar,
+                    status: "online",
+                  })
+                  setInviteFlash({ ok: res.success, message: res.message })
+                  window.setTimeout(() => setInviteFlash(null), 2600)
+                }}
                 className="flex items-center justify-center gap-1.5 rounded-lg border border-[color:var(--color-border)] px-3 py-2 text-[13px] font-medium text-[color:var(--color-text)] transition-colors hover:bg-[color:var(--color-accent)]/10"
               >
                 <Users className="h-4 w-4" />
@@ -212,6 +225,19 @@ export function PlayerProfileModal() {
               </button>
             )}
           </div>
+
+          {inviteFlash && (
+            <div
+              className={cn(
+                "rounded-lg border px-3 py-2 text-[13px]",
+                inviteFlash.ok
+                  ? "border-[color:var(--color-cyan)]/40 bg-[color:var(--color-cyan)]/5 text-[color:var(--color-cyan)]"
+                  : "border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/5 text-[color:var(--color-danger)]",
+              )}
+            >
+              {inviteFlash.message}
+            </div>
+          )}
 
           {player.source === "friend" && (
             <button

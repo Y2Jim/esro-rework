@@ -1397,10 +1397,18 @@ function FriendsTab({ friends }: { friends: EsroState["friends"] }) {
 
 function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
   const [showUnfriendConfirm, setShowUnfriendConfirm] = useState(false)
+  const [flash, setFlash] = useState<{ ok: boolean; message: string } | null>(null)
   const removeFriend = useEsroStore((s) => s.removeFriend)
   const viewPlayer = useEsroStore((s) => s.viewPlayer)
-  
+  const inviteFriendToParty = useEsroStore((s) => s.inviteFriendToParty)
+
   const friendAvatar = friend.avatar || generateAvatarFromSeed(friend.handle)
+
+  const handleInvite = () => {
+    const res = inviteFriendToParty(friend)
+    setFlash({ ok: res.success, message: res.message })
+    window.setTimeout(() => setFlash(null), 2600)
+  }
 
   const openProfile = () =>
     viewPlayer({
@@ -1454,6 +1462,14 @@ function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
           </button>
           <button
             type="button"
+            onClick={handleInvite}
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-cyan)]/50 hover:bg-[color:var(--color-cyan)]/10 hover:text-[color:var(--color-cyan)]"
+            title="Invite to Party"
+          >
+            ⋈
+          </button>
+          <button
+            type="button"
             className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
             title="Message"
           >
@@ -1469,6 +1485,20 @@ function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
           </button>
         </div>
       </div>
+
+      {/* Invite result — surfaces the party-full / already-in-party message */}
+      {flash && (
+        <div
+          className={cn(
+            "border-t px-3 py-2 text-[13px]",
+            flash.ok
+              ? "border-[color:var(--color-border)] text-[color:var(--color-cyan)]"
+              : "border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/5 text-[color:var(--color-danger)]",
+          )}
+        >
+          {flash.message}
+        </div>
+      )}
       
       {/* Unfriend confirmation */}
       {showUnfriendConfirm && (
