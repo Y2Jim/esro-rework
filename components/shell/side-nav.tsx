@@ -55,7 +55,8 @@ export function SideNav() {
           aria-label={it.label}
           aria-current={active ? "page" : undefined}
           className={cn(
-            "group relative flex h-10 w-full items-center gap-3 rounded-md px-[15px] transition-all",
+            "group relative flex h-10 w-full items-center rounded-md transition-all",
+            expanded ? "gap-3 px-[15px]" : "justify-center px-0",
             it.hoverClass,
             active
               ? cn(it.accentClass, it.activeBgClass)
@@ -105,7 +106,10 @@ export function SideNav() {
         title={expanded ? "collapse menu" : "expand menu"}
         aria-label={expanded ? "collapse menu" : "expand menu"}
         aria-expanded={expanded}
-        className="mx-2 flex h-9 items-center gap-3 rounded-md px-[15px] text-[color:var(--color-violet-bright)] transition-all hover:bg-[color:var(--color-violet-bright)]/10"
+        className={cn(
+          "mx-2 flex h-9 items-center rounded-md text-[color:var(--color-violet-bright)] transition-all hover:bg-[color:var(--color-violet-bright)]/10",
+          expanded ? "gap-3 px-[15px]" : "justify-center px-0",
+        )}
       >
         <span className="icon-stroke flex w-6 shrink-0 justify-center text-[16px] leading-none">{expanded ? "‹" : "≡"}</span>
         <span
