@@ -591,7 +591,6 @@ if (briefingIndex > 0) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-[15px] text-[color:var(--color-text-primary)]">{race.name}</h3>
-                        <span className="text-[14px] text-[color:var(--color-text-muted)]">/ {race.role}</span>
                       </div>
                       <p className="mt-0.5 text-[15px] text-[color:var(--color-text-secondary)]">
                         {race.summary}
