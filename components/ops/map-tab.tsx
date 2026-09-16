@@ -253,7 +253,10 @@ export function MapTab() {
               onClick={() => setSelectedId(isSelected ? null : node.id)}
               aria-label={`${node.label} — ${meta.label}`}
               aria-pressed={isSelected}
-              className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5"
+              className={cn(
+                "group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 hover:z-20 focus-visible:z-20",
+                isSelected && "z-20"
+              )}
               style={{ left: `${node.x}%`, top: `${node.y}%` }}
             >
               <span className="relative flex items-center justify-center">
@@ -282,12 +285,12 @@ export function MapTab() {
               </span>
               <span
                 className={cn(
-                  "w-[74px] rounded px-1 text-center text-[12px] leading-tight text-balance",
+                  "pointer-events-none absolute top-full left-1/2 mt-1 w-[80px] -translate-x-1/2 rounded px-1 text-center text-[12px] leading-tight text-balance transition-opacity",
                   isSelected
-                    ? "text-[color:var(--color-text)]"
-                    : "text-[color:var(--color-muted)]"
+                    ? "text-[color:var(--color-text)] opacity-100"
+                    : "text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
                 )}
-                style={{ backgroundColor: "rgba(10,11,15,0.82)" }}
+                style={{ backgroundColor: "rgba(10,11,15,0.9)" }}
               >
                 {node.label}
               </span>
