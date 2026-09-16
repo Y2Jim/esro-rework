@@ -29,7 +29,6 @@ interface Thread {
 }
 
 export function MessagesScreen() {
-  console.log("[v0] MessagesScreen render start")
   const directMessages = useEsroStore((s) => s.directMessages)
   const friends = useEsroStore((s) => s.friends)
   const active = useEsroStore((s) => s.activeConversation)
