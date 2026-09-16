@@ -48,7 +48,12 @@ export function AppShell() {
                 }}
               >
                 {screen === "terminal" && <ChatScreen />}
-                {screen === "messages" && <MessagesScreen />}
+                {screen === "messages" && (
+                  <>
+                    <div data-msg-marker className="p-4 text-[color:var(--color-text)]">MESSAGES_BRANCH_MARKER</div>
+                    <MessagesScreen />
+                  </>
+                )}
                 {screen === "ops" && <OpsScreen />}
                 {screen === "contracts" && <ContractsScreen />}
                 {screen === "social" && <SocialScreen />}
