@@ -17,14 +17,71 @@ function seededRandom(seed: string) {
 }
 
 // Color palettes
+// Skin depth ramp, ordered lightest -> darkest. #A6684D reads as a warm
+// reddish-brown, #8E5845 as a deeper reddish-brown.
 export const SKIN_COLORS = [
-  "#f4d4b8", // light warm
-  "#e8c4a0", // medium warm
-  "#d4a574", // tan
-  "#c49468", // medium
-  "#8b6f5c", // dark warm
-  "#6b5548", // dark
+  "#F7D8CF",
+  "#F1C6A8",
+  "#E4B089",
+  "#D29A72",
+  "#BC815C",
+  "#A6684D",
+  "#8E5845",
+  "#74473A",
+  "#5C382F",
+  "#442A24",
+  "#32201D",
+  "#241818",
 ]
+
+// Undertone definitions. Stored on the skin layer's `color` field as an index.
+// `accent` is only a UI indicator; the actual skin color comes from applying
+// the subtle `shift` multipliers to the selected base skin tone. Tweak the
+// multipliers here to rebalance how strong each undertone reads.
+export interface Undertone {
+  id: "cool" | "neutral" | "warm"
+  name: string
+  accent: string
+  // Per-channel multipliers applied to the base skin RGB. Kept close to 1 so
+  // the skin stays clearly in the same depth category.
+  shift: { r: number; g: number; b: number }
+}
+
+export const UNDERTONES: Undertone[] = [
+  // cool: slightly rosier / ash-toned (lift red + blue a touch, drop green)
+  { id: "cool", name: "Cool", accent: "#D9A6B0", shift: { r: 1.03, g: 0.98, b: 1.03 } },
+  // neutral: closest to the base color, minimal adjustment
+  { id: "neutral", name: "Neutral", accent: "#B89A84", shift: { r: 1, g: 1, b: 1 } },
+  // warm: slightly more golden / copper (lift red, hold green, drop blue)
+  { id: "warm", name: "Warm", accent: "#D39A63", shift: { r: 1.04, g: 1.0, b: 0.94 } },
+]
+
+// Neutral is the default undertone; characters saved before undertones existed
+// have no skin `color` value and fall back to this index.
+export const DEFAULT_UNDERTONE_INDEX = 1
+
+export function getUndertoneIndex(index?: number): number {
+  if (index === undefined || index < 0 || index >= UNDERTONES.length) {
+    return DEFAULT_UNDERTONE_INDEX
+  }
+  return index
+}
+
+// Derive the displayed skin color from a base skin tone + an undertone.
+// Hard pixel colors only — a single hex is returned per skin pixel so pixel
+// edges stay crisp with no smoothing or gradients.
+export function deriveSkinColor(skinVariant: number, undertoneIndex?: number): string {
+  const base = SKIN_COLORS[skinVariant] ?? SKIN_COLORS[0]
+  const { shift } = UNDERTONES[getUndertoneIndex(undertoneIndex)]
+  const r = parseInt(base.slice(1, 3), 16)
+  const g = parseInt(base.slice(3, 5), 16)
+  const b = parseInt(base.slice(5, 7), 16)
+  const clamp = (n: number) => Math.max(0, Math.min(255, Math.round(n)))
+  const nr = clamp(r * shift.r)
+  const ng = clamp(g * shift.g)
+  const nb = clamp(b * shift.b)
+  return `#${nr.toString(16).padStart(2, "0")}${ng.toString(16).padStart(2, "0")}${nb.toString(16).padStart(2, "0")}`
+}
 
 export const HAIR_COLORS = [
   "#1a1a1a", // black
@@ -109,7 +166,7 @@ export function generateAvatarFromSeed(seed: string): AvatarConfig {
   
   const layers: AvatarLayer[] = [
     { type: "base", variant: Math.floor(rand() * LAYER_VARIANTS.base) },
-    { type: "skin", variant: Math.floor(rand() * LAYER_VARIANTS.skin) },
+    { type: "skin", variant: Math.floor(rand() * LAYER_VARIANTS.skin), color: Math.floor(rand() * UNDERTONES.length) },
     { type: "eyes", variant: Math.floor(rand() * LAYER_VARIANTS.eyes), color: Math.floor(rand() * EYE_COLORS.length) },
     { type: "hair", variant: Math.floor(rand() * LAYER_VARIANTS.hair), color: Math.floor(rand() * HAIR_COLORS.length) },
     { type: "mouth", variant: 0 },
@@ -153,7 +210,7 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
   const accessoryLayer = getLayer(config, "accessory")
   const hatLayer = getLayer(config, "hat")
   
-  const skinColor = SKIN_COLORS[skinLayer?.variant ?? 0]
+  const skinColor = deriveSkinColor(skinLayer?.variant ?? 0, skinLayer?.color)
   const skinShadow = darkenColor(skinColor, 0.15)
   const hairColor = HAIR_COLORS[hairLayer?.color ?? 0]
   const eyeColor = EYE_COLORS[eyesLayer?.color ?? 0]

@@ -137,7 +137,7 @@ function generateHandle(): string {
   return base
 }
 import { RACES, COURIERS, ONBOARDING_PANELS, SKILL_DEFINITIONS, STARTER_SKILL_COUNT, calculateCombinedStats, type SkillDefinition } from "@/lib/game-data"
-import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, HAIR_COLORS, EYE_COLORS, HEAD_SHAPE_NAMES, HAIR_STYLE_NAMES } from "@/lib/avatar-generator"
+import { generateAvatarFromSeed, LAYER_VARIANTS, SKIN_COLORS, UNDERTONES, DEFAULT_UNDERTONE_INDEX, HAIR_COLORS, EYE_COLORS, HEAD_SHAPE_NAMES, HAIR_STYLE_NAMES } from "@/lib/avatar-generator"
 import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { SkillDetail } from "@/components/ops/skill-detail"
 import { createInitialSkills } from "@/lib/skill-effects"
@@ -736,20 +736,62 @@ if (briefingIndex > 0) {
                   <div className="mb-1.5 text-[14px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
                     Skin Tone
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
+                  {/* Horizontally scrollable row keeps all 12 swatches tappable on phone widths */}
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 -mb-1">
                     {SKIN_COLORS.map((color, i) => {
-                      const currentSkin = avatar.layers.find(l => l.type === "skin")?.variant ?? 0
+                      const skinLayer = avatar.layers.find(l => l.type === "skin")
+                      const currentSkin = skinLayer?.variant ?? 0
+                      const currentUndertone = skinLayer?.color ?? DEFAULT_UNDERTONE_INDEX
+                      const selected = currentSkin === i
                       return (
                         <button
                           key={i}
-                          onClick={() => updateAvatarLayer("skin", i)}
-                          className={`h-6 w-6 rounded-full border-2 transition-all ${
-                            currentSkin === i
-                              ? "border-[color:var(--color-accent)] scale-110"
+                          type="button"
+                          onClick={() => updateAvatarLayer("skin", i, currentUndertone)}
+                          aria-label={`Skin tone ${i + 1} of ${SKIN_COLORS.length}`}
+                          aria-pressed={selected}
+                          className={`h-7 w-7 shrink-0 rounded-full border-2 transition-all ${
+                            selected
+                              ? "border-[color:var(--color-accent)] scale-110 shadow-[0_0_8px_rgba(168,123,255,0.6)]"
                               : "border-transparent hover:border-[rgba(255,255,255,0.3)]"
                           }`}
                           style={{ backgroundColor: color }}
                         />
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Undertone */}
+                <div className="rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(15,16,22,0.8)] p-2.5">
+                  <div className="mb-1.5 text-[14px] text-[color:var(--color-text-muted)] font-mono uppercase tracking-wider">
+                    Undertone
+                  </div>
+                  <div className="flex gap-1.5">
+                    {UNDERTONES.map((undertone, i) => {
+                      const skinLayer = avatar.layers.find(l => l.type === "skin")
+                      const currentSkin = skinLayer?.variant ?? 0
+                      const currentUndertone = skinLayer?.color ?? DEFAULT_UNDERTONE_INDEX
+                      const selected = currentUndertone === i
+                      return (
+                        <button
+                          key={undertone.id}
+                          type="button"
+                          onClick={() => updateAvatarLayer("skin", currentSkin, i)}
+                          aria-label={`${undertone.name} undertone`}
+                          aria-pressed={selected}
+                          className={`flex flex-1 items-center justify-center gap-1.5 rounded border px-2 py-1.5 text-[13px] font-mono uppercase tracking-wider transition-all ${
+                            selected
+                              ? "border-[color:var(--color-accent)] bg-[rgba(168,123,255,0.2)] text-[color:var(--color-accent)]"
+                              : "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[color:var(--color-text-secondary)] hover:border-[rgba(255,255,255,0.3)]"
+                          }`}
+                        >
+                          <span
+                            className="h-3 w-3 shrink-0 rounded-full border border-[rgba(255,255,255,0.2)]"
+                            style={{ backgroundColor: undertone.accent }}
+                          />
+                          {undertone.name}
+                        </button>
                       )
                     })}
                   </div>
