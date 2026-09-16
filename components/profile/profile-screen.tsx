@@ -983,6 +983,20 @@ function SettingsTab() {
         )}
       </div>
 
+      {/* About */}
+      <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+        <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          About
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[15px] text-[color:var(--color-text)]">ESRO · Enchanted Star Realms Online</span>
+          <span className="text-[13px] text-[color:var(--color-muted)]">v0.1</span>
+        </div>
+        <div className="mt-1 text-[13px] uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
+          a gumware studios production
+        </div>
+      </div>
+
       {/* Current Faction */}
       {characterFaction && (
         <div className="rounded-lg border border-[color:var(--color-border)] p-3">
