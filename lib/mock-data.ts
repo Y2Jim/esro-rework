@@ -450,6 +450,81 @@ export const messages: ChatMessage[] = [
 ]
 
 export const expeditions: Expedition[] = [
+  // --- Contested frontier skirmishes (one per faction quadrant) ---
+  // Balanced identically so no quadrant's contest is richer than another; each
+  // grants standing with the faction whose border it sits on.
+  {
+    id: "contest_terrace",
+    label: "Hold the Broken Terrace",
+    description:
+      "Push a rival crew off the collapsed causeway and hold the high ground long enough to matter.",
+    duration: 1080,
+    risk: "Medium",
+    tags: ["control", "skirmish"],
+    suggestedParty: 2,
+    minLevel: 6,
+    factionAttunement: "crownborn",
+    rewards: {
+      xp: 55,
+      tokens: 2,
+      materials: ["salvage_plate x2", "relay_scrap x2"],
+      factionStanding: 20,
+    },
+  },
+  {
+    id: "contest_basin",
+    label: "Hold the Drowned Span",
+    description:
+      "Contest the flooded bridge before the Circle can go dark on it again.",
+    duration: 1080,
+    risk: "Medium",
+    tags: ["control", "skirmish"],
+    suggestedParty: 2,
+    minLevel: 6,
+    factionAttunement: "gloamwhisper",
+    rewards: {
+      xp: 55,
+      tokens: 2,
+      materials: ["salvage_plate x2", "relay_scrap x2"],
+      factionStanding: 20,
+    },
+  },
+  {
+    id: "contest_vale",
+    label: "Hold the Cold Forge",
+    description:
+      "Secure the abandoned forge and strip its salvage before a rival crew does.",
+    duration: 1080,
+    risk: "Medium",
+    tags: ["control", "skirmish"],
+    suggestedParty: 2,
+    minLevel: 6,
+    factionAttunement: "hearthkin",
+    rewards: {
+      xp: 55,
+      tokens: 2,
+      materials: ["salvage_plate x2", "relay_scrap x2"],
+      factionStanding: 20,
+    },
+  },
+  {
+    id: "contest_crossroads",
+    label: "Hold the Split Track",
+    description:
+      "Take the crossroads nobody can keep mapped and keep a caravan lane open through it.",
+    duration: 1080,
+    risk: "Medium",
+    tags: ["control", "skirmish"],
+    suggestedParty: 2,
+    minLevel: 6,
+    factionAttunement: "roadsinger",
+    rewards: {
+      xp: 55,
+      tokens: 2,
+      materials: ["salvage_plate x2", "relay_scrap x2"],
+      factionStanding: 20,
+    },
+  },
   {
     id: "signal_trace",
     label: "Signal Trace",

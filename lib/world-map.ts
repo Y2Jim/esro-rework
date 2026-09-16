@@ -17,6 +17,7 @@ export type MapNodeKind =
   | "wilds"
   | "relay"
   | "settlement"
+  | "contested"
 
 export type MapPathKind = "road" | "relay" | "hidden"
 
@@ -130,14 +131,16 @@ export const MAP_REGIONS: MapRegion[] = [
 // ============ NODES ============
 
 /**
- * Every faction homeland holds exactly three sites — one seat of power plus
- * two deployable locations — laid out in mirrored positions around the hub, so
- * no faction has more ground or more work available than any other.
+ * Every faction homeland holds exactly four sites — one seat of power, two
+ * deployable locations, and one contested frontier site — laid out in mirrored
+ * positions around the hub, so no faction has more ground, more work, or more
+ * to fight over than any other.
  *
  * Slot template, mirrored into each quadrant:
  *   outer-crest  (32 / 68  ·  11 / 81)   a ruin or wilds
  *   outer-flank  (16 / 84  ·  20 / 72)   a relay or settlement
  *   inner-seat   (26 / 74  ·  30 / 62)   the faction HQ, facing the hub
+ *   frontier     (38 / 62  ·  38 / 54)   a contested site on the hub border
  */
 export const MAP_NODES: MapNode[] = [
   // --- The Relay Reach (neutral hub, shared by all factions) ---
@@ -199,6 +202,17 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     factionId: "crownborn",
   },
+  {
+    id: "contested_terrace",
+    label: "The Broken Terrace",
+    regionId: "gilded_terraces",
+    x: 38,
+    y: 38,
+    kind: "contested",
+    blurb:
+      "A collapsed causeway on the Reach border. Whoever holds it can watch every road into the Terraces — so nobody holds it for long.",
+    expeditionIds: ["contest_terrace"],
+  },
 
   // --- The Gloaming (Veiled Circle) ---
   {
@@ -234,6 +248,17 @@ export const MAP_NODES: MapNode[] = [
       "No sign, no lamp, no listed address. The Circle finds you when it wants to be found.",
     expeditionIds: [],
     factionId: "gloamwhisper",
+  },
+  {
+    id: "contested_basin",
+    label: "The Drowned Span",
+    regionId: "the_gloaming",
+    x: 62,
+    y: 38,
+    kind: "contested",
+    blurb:
+      "A flooded bridge where the Gloaming meets the Reach. The Circle wants it dark; everyone else wants it watched.",
+    expeditionIds: ["contest_basin"],
   },
 
   // --- Emberhold Vale (Hearth Wardens) ---
@@ -271,6 +296,17 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     factionId: "hearthkin",
   },
+  {
+    id: "contested_vale",
+    label: "The Cold Forge",
+    regionId: "emberhold_vale",
+    x: 38,
+    y: 54,
+    kind: "contested",
+    blurb:
+      "An abandoned forge on the vale's edge, its salvage still rich. The Wardens claim it by right; the roads claim it by need.",
+    expeditionIds: ["contest_vale"],
+  },
 
   // --- The Wandering Flats (Open Roads Chorus) ---
   {
@@ -307,6 +343,17 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     factionId: "roadsinger",
   },
+  {
+    id: "contested_crossroads",
+    label: "The Split Track",
+    regionId: "wandering_flats",
+    x: 62,
+    y: 54,
+    kind: "contested",
+    blurb:
+      "The one crossroads the Flats can't keep mapped. Every faction has run a caravan through it, and every faction has lost one here.",
+    expeditionIds: ["contest_crossroads"],
+  },
 ]
 
 // ============ PATHS ============
@@ -314,7 +361,8 @@ export const MAP_NODES: MapNode[] = [
 /**
  * Each faction is reachable by the same shape of journey: one spoke from the
  * neutral hub to its outer flank, a leg on to its outer crest, then a final
- * leg to its seat — plus one lateral link to the neighbouring homeland. Four
+ * leg to its seat — plus one lateral link to the neighbouring homeland. Each
+ * homeland also has a direct hub spoke to its contested frontier site. Five
  * edges per faction, so no homeland is better connected than another.
  */
 export const MAP_PATHS: MapPath[] = [
@@ -324,6 +372,12 @@ export const MAP_PATHS: MapPath[] = [
   { from: "waystation_prime", to: "sunken_vault", kind: "relay" },
   { from: "waystation_prime", to: "relay_array", kind: "relay" },
   { from: "waystation_prime", to: "courier_road", kind: "road" },
+
+  // Contested frontier spokes — the hub's disputed approaches, one per homeland
+  { from: "waystation_prime", to: "contested_terrace", kind: "road" },
+  { from: "waystation_prime", to: "contested_basin", kind: "relay" },
+  { from: "waystation_prime", to: "contested_vale", kind: "road" },
+  { from: "waystation_prime", to: "contested_crossroads", kind: "road" },
 
   // Gilded Terraces
   { from: "signal_spire", to: "the_archive", kind: "road" },
@@ -359,6 +413,7 @@ export const NODE_KIND_META: Record<
   wilds: { icon: "◇", label: "Wilds" },
   relay: { icon: "↑", label: "Relay" },
   settlement: { icon: "⌂", label: "Settlement" },
+  contested: { icon: "✦", label: "Contested Site" },
 }
 
 export const PATH_KIND_META: Record<
