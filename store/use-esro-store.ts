@@ -347,6 +347,10 @@ export interface EsroState {
   viewedPlayer: PlayerView | null
   viewPlayer: (player: PlayerView) => void
   closePlayerProfile: () => void
+  // Full-page read-only view of another player, opened from the modal.
+  viewedProfile: PlayerView | null
+  openPlayerProfilePage: (player: PlayerView) => void
+  clearViewedProfile: () => void
   
   // Social - Trade
   tradeOffers: TradeOffer[]
@@ -1230,7 +1234,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Navigation
   screen: "terminal",
-  setScreen: (s) => set({ screen: s }),
+  // Any explicit navigation resets the other-player profile page back to your own.
+  setScreen: (s) => set({ screen: s, viewedProfile: null }),
   opsTab: "expeditions",
   setOpsTab: (t) => set({ opsTab: t }),
   mapFocusNodeId: null,
@@ -2211,6 +2216,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   viewedPlayer: null,
   viewPlayer: (player) => set({ viewedPlayer: player }),
   closePlayerProfile: () => set({ viewedPlayer: null }),
+  // Open the full profile page: switch to the Profile screen showing this player
+  // (read-only) and dismiss the quick-look modal in the same update.
+  viewedProfile: null,
+  openPlayerProfilePage: (player) =>
+    set({ viewedProfile: player, viewedPlayer: null, screen: "profile" }),
+  clearViewedProfile: () => set({ viewedProfile: null }),
   
   // Trade
   tradeOffers: [

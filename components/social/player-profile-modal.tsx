@@ -6,7 +6,7 @@ import { PixelAvatar } from "@/components/avatar/pixel-avatar"
 import { TitleDisplay } from "@/components/ui/title-display"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import { cn } from "@/lib/cn"
-import { X, MessageSquare, UserPlus, UserMinus, Users } from "lucide-react"
+import { X, MessageSquare, UserPlus, UserMinus, Users, UserRound } from "lucide-react"
 
 const STATUS_META: Record<
   string,
@@ -37,6 +37,7 @@ export function PlayerProfileModal() {
   const player = useEsroStore((s) => s.viewedPlayer)
   const close = useEsroStore((s) => s.closePlayerProfile)
   const removeFriend = useEsroStore((s) => s.removeFriend)
+  const openProfilePage = useEsroStore((s) => s.openPlayerProfilePage)
 
   // Close on Escape while the modal is open.
   useEffect(() => {
@@ -173,6 +174,16 @@ export function PlayerProfileModal() {
               Last seen {formatDate(player.lastSeen)}
             </div>
           )}
+
+          {/* Primary CTA — open the full read-only profile page for this player. */}
+          <button
+            type="button"
+            onClick={() => openProfilePage(player)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/15 px-3 py-2 text-[13px] font-semibold uppercase tracking-wider text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/25"
+          >
+            <UserRound className="h-4 w-4" />
+            View Profile
+          </button>
 
           {/* Actions */}
           <div className="grid grid-cols-2 gap-2 pt-1">

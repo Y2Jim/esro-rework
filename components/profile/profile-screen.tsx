@@ -11,6 +11,7 @@ import { StatAllocation } from "@/components/profile/stat-allocation"
 import { KnownRituals } from "@/components/profile/known-rituals"
 import { BestiaryTab } from "@/components/profile/bestiary-tab"
 import { TrophyCase } from "@/components/profile/trophy-case"
+import { PlayerProfilePage } from "@/components/social/player-profile-page"
 
 import { FACTIONS, STAT_LABELS, STAT_COLORS } from "@/lib/game-data"
 import { getCreature, packContribution, creatureSprite } from "@/lib/bestiary"
@@ -63,9 +64,12 @@ export function ProfileScreen() {
   const setTab = useEsroStore((s) => s.setProfileTab)
   const profile = useEsroStore((s) => s.profile)
   const identity = useEsroStore((s) => s.identity)
+  // When set, the screen shows another player's read-only profile instead of yours.
+  const viewedProfile = useEsroStore((s) => s.viewedProfile)
   // The Bestiary is the taming payoff, so it stays hidden until "Pack Beasts".
   const canTame = useEsroStore((s) => s.hasSkillUnlock("pack_beasts"))
 
+  if (viewedProfile) return <PlayerProfilePage />
   if (!profile) return null
 
   const unreadCount = profile.notifications?.filter(n => n.state === "unread").length || 0
