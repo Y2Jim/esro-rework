@@ -1141,6 +1141,12 @@
     linear-gradient(180deg, rgba(13, 8, 21, 0.96), rgba(5, 3, 10, 0.98));
 }
 
+/* Icon stroke — subtle outline so nav glyphs read crisper against the rail */
+.icon-stroke {
+  -webkit-text-stroke: 0.4px currentColor;
+  text-shadow: 0 0 1px currentColor;
+}
+
 /* Glow effects */
 .text-glow {
   text-shadow: 0 0 8px rgba(164, 93, 255, 0.5);

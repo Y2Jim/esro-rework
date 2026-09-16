@@ -69,7 +69,7 @@ export function SideNav() {
               style={{ background: it.accentBar }}
             />
           )}
-          <span className={cn("relative shrink-0 text-[16px] leading-none", active && it.glowClass)}>
+          <span className={cn("icon-stroke relative flex w-6 shrink-0 justify-center text-[16px] leading-none", active && it.glowClass)}>
             {it.icon}
             {badge > 0 && (
               <span className="absolute -right-2 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)] px-0.5 text-[10px] font-semibold text-[color:var(--color-bg)]">
@@ -105,9 +105,9 @@ export function SideNav() {
         title={expanded ? "collapse menu" : "expand menu"}
         aria-label={expanded ? "collapse menu" : "expand menu"}
         aria-expanded={expanded}
-        className="mx-2 flex h-9 items-center gap-3 rounded-md border border-[color:var(--color-violet-bright)]/40 px-[13px] text-[color:var(--color-violet-bright)] transition-all hover:border-[color:var(--color-violet-bright)]/70 hover:bg-[color:var(--color-violet-bright)]/10"
+        className="mx-2 flex h-9 items-center gap-3 rounded-md px-[15px] text-[color:var(--color-violet-bright)] transition-all hover:bg-[color:var(--color-violet-bright)]/10"
       >
-        <span className="shrink-0 text-[16px] leading-none">{expanded ? "‹" : "≡"}</span>
+        <span className="icon-stroke flex w-6 shrink-0 justify-center text-[16px] leading-none">{expanded ? "‹" : "≡"}</span>
         <span
           className={cn(
             "overflow-hidden whitespace-nowrap text-[12px] font-medium uppercase tracking-[0.15em] transition-all duration-200",
