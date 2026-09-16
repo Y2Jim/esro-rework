@@ -1582,8 +1582,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
     const buildingBonuses = craftingBonusesFrom(get().factionBuildings)
-    // Skills stack on top: Ritualism (Inscription) trims cost, Bladecraft
-    // (Maintenance) and Gathering (Harvesting) speed the work up.
+    // Skills stack on top: Lorekeeping (Efficiency) trims material cost,
+    // Lorekeeping (Technique) speeds the work up, and Ritualism (Sigils)
+    // raises yield.
     const skillFx = get().getSkillBonuses()
     const bonuses = {
       cost: buildingBonuses.cost + skillFx.craftCost,
@@ -2693,7 +2694,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
 
     // XP is awarded after the loot commit so a level-up notification lands last.
-    // This also revives Lorekeeping's xpBonus hook, which had nothing to scale.
+    // xpBonus is fed by ritual effects (e.g. Scholar's Rite).
     const baseXp = expDef?.rewards.xp ?? 0
     if (baseXp > 0) {
       get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult))

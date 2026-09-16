@@ -62,8 +62,8 @@ export type SkillBonusKey =
   | "fishingYield"
   | "fishingSuccess"
   // --- Crafting ---
-  | "craftCost" // negative = cheaper
-  | "craftSpeed"
+  | "craftCost" // positive = cheaper (consumed as `1 - cost`)
+  | "craftSpeed" // positive = faster (consumed as `1 - speed`)
   | "craftQuality"
   // --- Economy & meta ---
   | "xpBonus"
@@ -557,14 +557,14 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Lorekeeping",
     linkedStat: "focus",
-    summary: "Turns archives into experience, and knows what a find is really worth.",
+    summary: "Turns studied blueprints into cheaper, faster crafting, and still appraises what a find is worth.",
     hooks: [
-      { id: "recall", effect: "xpBonus", perLevel: 0.02, detail: "Experience gained" },
-      { id: "translation", effect: "discoveryScore", perLevel: 0.02, detail: "Higher discovery check scores" },
-      { id: "analysis", effect: "rollLuck", perLevel: 0.015, detail: "Better rarity odds when rolling" },
+      { id: "efficiency", effect: "craftCost", perLevel: 0.015, detail: "Cheaper material cost per craft" },
+      { id: "technique", effect: "craftSpeed", perLevel: 0.02, detail: "Faster crafting" },
+      { id: "appraisal", effect: "rollLuck", perLevel: 0.015, detail: "Better rarity odds when rolling" },
     ],
     breakpoints: [
-      { level: 5, unlock: "archive_translation", label: "Translator", detail: "Read sealed archive fragments" },
+      { level: 5, unlock: "archive_translation", label: "Translator", detail: "Read sealed archive fragments for lost recipes" },
       { level: 10, unlock: "master_recipes", label: "Lost Techniques", detail: "Craft master-tier gear" },
     ],
   },
