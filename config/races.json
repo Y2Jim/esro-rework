@@ -11,7 +11,7 @@
       "color": "#f1d38a",
       "glow": "rgba(241, 211, 138, 0.30)",
       "lore": "Crownborn lineages were raised around old courts and radiant halls where posture mattered as much as steel. They still move like every decision is being witnessed.",
-      "stats": { "hp": 0, "atk": 0, "def": 1, "focus": 2, "luck": 1 }
+      "stats": { "hp": 0, "atk": 2, "def": 1, "focus": 1, "luck": 0 }
     },
     {
       "id": "hearthkin",
