@@ -1341,6 +1341,9 @@ export const vanityItems: VanityItem[] = [
   { id: "eyes_tired", label: "Tired", layerType: "eyes", variant: 4, rarity: "common", unlocked: true, equipped: false },
   { id: "eyes_big", label: "Big", layerType: "eyes", variant: 5, rarity: "common", unlocked: true, equipped: false },
 
+  // Makeup - unlocked by default
+  { id: "mouth_lipstick", label: "Lipstick", layerType: "mouth", variant: 1, rarity: "common", unlocked: true, equipped: false },
+
   // Accessories - Common
   { id: "v1", label: "Signal Glasses", layerType: "accessory", variant: 1, rarity: "common", unlocked: true, equipped: true },
   { id: "v11", label: "Basic Shades", layerType: "accessory", variant: 5, rarity: "common", unlocked: true, equipped: false },

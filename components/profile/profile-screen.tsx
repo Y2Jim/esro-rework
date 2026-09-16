@@ -432,7 +432,7 @@ function CosmeticsTab() {
     return acc
   }, {} as Record<string, typeof unlocked>)
 
-  const layerOrder = ["hair", "eyes", "accessory", "hat", "flair"]
+  const layerOrder = ["hair", "eyes", "mouth", "accessory", "hat", "flair"]
 
   // Get current avatar layer variants for hair/eyes
   const currentHairVariant = identity.avatar.layers.find(l => l.type === "hair")?.variant ?? 0

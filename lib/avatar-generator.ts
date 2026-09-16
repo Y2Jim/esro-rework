@@ -101,6 +101,7 @@ export function generateAvatarFromSeed(seed: string): AvatarConfig {
     { type: "skin", variant: Math.floor(rand() * LAYER_VARIANTS.skin) },
     { type: "eyes", variant: Math.floor(rand() * LAYER_VARIANTS.eyes), color: Math.floor(rand() * EYE_COLORS.length) },
     { type: "hair", variant: Math.floor(rand() * LAYER_VARIANTS.hair), color: Math.floor(rand() * HAIR_COLORS.length) },
+    { type: "mouth", variant: 0 },
     { type: "accessory", variant: 0 },
     { type: "hat", variant: 0 },
     { type: "flair", variant: 0 },
@@ -247,12 +248,26 @@ export function renderAvatarPixels(config: AvatarConfig): string[][] {
     setPixel(grid, rightEyeX + 1, eyeY, eyeWhite)
   }
   
-  // Draw mouth - simple neutral line (no longer customizable)
+  // Draw mouth. Variant 0 = neutral line (default face). Variant 1 = lipstick,
+  // a fuller colored lip cosmetic that ships unlocked for everyone.
+  const mouthLayer = getLayer(config, "mouth")
+  const mouthVariant = mouthLayer?.variant ?? 0
   const mouthY = 8
-  setPixel(grid, 5, mouthY, mouthColor)
-  setPixel(grid, 6, mouthY, mouthColor)
-  setPixel(grid, 7, mouthY, mouthColor)
-  setPixel(grid, 8, mouthY, mouthColor)
+  if (mouthVariant === 1) {
+    const lipColor = "#c0395b" // rose lipstick
+    const lipHighlight = "#e06a86"
+    setPixel(grid, 5, mouthY, lipColor)
+    setPixel(grid, 6, mouthY, lipHighlight)
+    setPixel(grid, 7, mouthY, lipHighlight)
+    setPixel(grid, 8, mouthY, lipColor)
+    setPixel(grid, 6, mouthY + 1, lipColor)
+    setPixel(grid, 7, mouthY + 1, lipColor)
+  } else {
+    setPixel(grid, 5, mouthY, mouthColor)
+    setPixel(grid, 6, mouthY, mouthColor)
+    setPixel(grid, 7, mouthY, mouthColor)
+    setPixel(grid, 8, mouthY, mouthColor)
+  }
   
   // Draw hair
   // Hair variants: 0=bald, 1=buzz cut, 2=spiky, 3=side part, 4=long, 5=mohawk, 6=bangs, 7=curly, 8=slicked back, 9=undercut
