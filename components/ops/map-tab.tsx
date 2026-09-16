@@ -286,9 +286,7 @@ export function MapTab() {
               <span
                 className={cn(
                   "pointer-events-none absolute top-full left-1/2 mt-1 w-[80px] -translate-x-1/2 rounded px-1 text-center text-[12px] leading-tight text-balance transition-opacity",
-                  isSelected
-                    ? "text-[color:var(--color-text)] opacity-100"
-                    : "text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                  "text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
                 )}
                 style={{ backgroundColor: "rgba(10,11,15,0.9)" }}
               >
