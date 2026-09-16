@@ -166,13 +166,6 @@ export function PlayerProfileModal() {
             </div>
           )}
 
-          {player.note && (
-            <div className="rounded-lg border border-[color:var(--color-border)] p-3">
-              <div className="mb-1 text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">Note</div>
-              <div className="text-[13px] text-[color:var(--color-text)]">{player.note}</div>
-            </div>
-          )}
-
           {player.lastSeen && player.status === "offline" && (
             <div className="text-[12px] text-[color:var(--color-muted)]">
               Last seen {formatDate(player.lastSeen)}
