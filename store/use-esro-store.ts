@@ -141,6 +141,12 @@ import {
 import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
+import {
+  SHINY_BEAST_TITLE,
+  fishTitlesForCatch,
+  toOwnedTitle,
+  type CollectionTitleDef,
+} from "@/config/collection-titles"
 import { dayKey, rotateContracts } from "@/lib/contract-rotation"
 
 /** Archive reconstruction passes, cheapest first. */
@@ -369,6 +375,8 @@ export interface EsroState {
    * titles are skipped. Fires a notification per newly unlocked title.
    */
   syncFactionTitles: () => void
+  /** Grant one-shot collection titles (shiny beasts, rare catches) if unowned. */
+  grantCollectionTitles: (defs: CollectionTitleDef[]) => void
   
   // Social - Friends
   friends: Friend[]
@@ -1096,6 +1104,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         priority: "high",
         deeplink: { screen: "profile" },
       })
+      // The first shiny ever logged also earns a permanent collection title.
+      get().grantCollectionTitles([SHINY_BEAST_TITLE])
       return
     }
     // Otherwise only announce the first sighting; repeats would spam the feed.
@@ -1890,6 +1900,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
+    // Landing a legendary or mythic fish earns a permanent collection title.
+    if (!isJunk) {
+      get().grantCollectionTitles(fishTitlesForCatch(fish.rarity))
+    }
   },
 
   reelIn: () =>
@@ -2083,6 +2097,30 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         title: "Faction Title Unlocked",
         body: `You earned the "${t.label}" title — ${t.requirement}.`,
         priority: "normal",
+        deeplink: { screen: "profile", tab: "titles" },
+      })
+    }
+  },
+
+  grantCollectionTitles: (defs) => {
+    if (defs.length === 0) return
+    const { profile } = get()
+    const owned = new Set(profile.ownedTitles.map((t) => t.id))
+    const fresh = defs.filter((d) => !owned.has(d.id))
+    if (fresh.length === 0) return
+
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        ownedTitles: [...s.profile.ownedTitles, ...fresh.map(toOwnedTitle)],
+      },
+    }))
+
+    for (const d of fresh) {
+      get().addNotification({
+        title: "Title Unlocked",
+        body: `You earned the "${d.label}" title — ${d.blurb}`,
+        priority: "high",
         deeplink: { screen: "profile", tab: "titles" },
       })
     }
