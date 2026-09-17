@@ -735,13 +735,19 @@ export function getLandmarkForFaction(factionId: RaceId): MapNode | undefined {
   return MAP_NODES.find((n) => isLandmarkNode(n) && n.factionId === factionId)
 }
 
-/** Landmark boon a faction currently benefits from, based on live control. */
+/**
+ * Landmark boon a faction currently benefits from, based on live control.
+ * A boon only empowers its HOME faction, and only while that faction still
+ * holds its own landmark. Capturing a rival's landmark denies them the boon
+ * but grants the captor nothing — it is a denial mechanic, not a transfer.
+ */
 export function getActiveLandmarkBoon(
   control: Record<string, RaceId | null>,
   factionId: RaceId,
   ): LandmarkBoon | undefined {
   for (const node of MAP_NODES) {
     if (!isLandmarkNode(node) || !node.boon) continue
+    if (node.factionId !== factionId) continue
     if (control[node.id] === factionId) return node.boon
   }
   return undefined

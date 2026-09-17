@@ -444,6 +444,7 @@ function NodeDetail({
   const claimable = isClaimableNode(node)
   const isBase = isBaseNode(node)
   const controlledByMe = Boolean(controller && controller.id === myFactionId)
+  const isHomeLandmark = Boolean(isLandmarkNode(node) && node.factionId === myFactionId)
 
   return (
     <div className="absolute inset-x-0 bottom-0 max-h-[76%] overflow-y-auto border-t border-[color:var(--color-border)] bg-[color:var(--color-panel)]/97 p-3 backdrop-blur-sm">
@@ -521,11 +522,11 @@ function NodeDetail({
             {node.boon.description}
           </p>
           <p className="mt-1.5 text-[11px] text-[color:var(--color-muted)]">
-            {controlledByMe
-              ? "Your faction holds this boon — every expedition your squads run is amplified."
-              : controller
-                ? `Held by ${controller.name}. Seize this territory to transfer the boon to your faction.`
-                : "Unclaimed — capture it to grant the boon to your faction."}
+            {isHomeLandmark
+              ? controlledByMe
+                ? "Your faction's landmark — hold it to keep this boon active. Lose it and the boon goes dark."
+                : `${owner?.name ?? "Its founding faction"}'s landmark. Seize it to deny them the boon — it empowers only them, so you gain nothing but their loss.`
+              : "This boon only empowers its founding faction."}
           </p>
         </div>
       )}
