@@ -143,6 +143,7 @@ import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fis
 import { recipeUnlockFor } from "@/config/crafting-recipes"
 import {
   SHINY_BEAST_TITLE,
+  FISH_TITLES,
   fishTitlesForCatch,
   toOwnedTitle,
   type CollectionTitleDef,
@@ -2740,6 +2741,22 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { id: "ashen_sovereign", label: "Ashen Sovereign", rarity: "mythic", equipped: false, source: "Admin unlock" },
       // Admin exclusive
       { id: "system_overseer", label: "System Overseer", rarity: "admin", equipped: false, source: "Admin exclusive" },
+      // Faction titles (rank / territory / construction / destruction) — see config/faction.ts
+      ...FACTION_TITLES.map((t) => ({
+        id: t.id,
+        label: t.label,
+        rarity: t.rarity,
+        equipped: false,
+        source: "Admin unlock",
+      })),
+      // Collection titles (shiny beasts, ultra-rare fish) — see config/collection-titles.ts
+      ...[SHINY_BEAST_TITLE, ...FISH_TITLES.map((f) => f.title)].map((t) => ({
+        id: t.id,
+        label: t.label,
+        rarity: t.rarity,
+        equipped: false,
+        source: "Admin unlock",
+      })),
     ]
     
     // Merge with existing titles (don't duplicate)
