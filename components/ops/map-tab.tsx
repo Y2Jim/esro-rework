@@ -21,6 +21,7 @@ import {
 } from "@/lib/world-map"
 import { unlockRequirementLabel } from "@/lib/skill-effects"
 import type { NodeControl, RaceId } from "@/lib/types"
+import { RitualPrep } from "@/components/ops/ritual-prep"
 
 const riskColor = (risk: string) => {
   switch (risk) {
@@ -55,6 +56,10 @@ export function MapTab() {
   const canAssaultBase = useEsroStore((s) => s.canAssaultBase)
   const startTerritoryClaim = useEsroStore((s) => s.startTerritoryClaim)
   const startBaseAssault = useEsroStore((s) => s.startBaseAssault)
+  // Ritual prep is the Ritualism payoff. Mirror the expeditions tab so a deploy
+  // launched from the map runs through the same prep step and carries the same
+  // prepared rituals, rather than launching bare.
+  const hasRitualism = useEsroStore((s) => s.hasRitualism())
 
   const playerLevel = profile?.level ?? 1
   // `characterFaction` is the canonical selection; profile.faction.id can still
@@ -65,6 +70,11 @@ export function MapTab() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showLegend, setShowLegend] = useState(false)
+  // Site chosen from the map but not yet launched: the ritual prep step sits in
+  // between, exactly as in the expeditions tab.
+  const [pendingExpedition, setPendingExpedition] = useState<{ id: string; name: string } | null>(
+    null,
+  )
 
   // Consume a deep-link focus request (e.g. "View on Map" from faction buildings).
   useEffect(() => {
@@ -314,9 +324,18 @@ export function MapTab() {
             claimStatus={canClaimNode(selected.id)}
             assaultStatus={canAssaultBase(selected.id)}
             onClose={() => setSelectedId(null)}
-            onDeploy={(id) => {
-              startExpedition(id)
-              setOpsTab("expeditions")
+            onDeploy={(id, name) => {
+              // Close the node sheet so the launch reads cleanly. Without
+              // Ritualism there is nothing to prepare, so launch straight away;
+              // otherwise open the same prep step the expeditions tab uses so the
+              // player's prepared rituals are carried into the run.
+              setSelectedId(null)
+              if (!hasRitualism) {
+                startExpedition(id, [])
+                setOpsTab("expeditions")
+                return
+              }
+              setPendingExpedition({ id, name })
             }}
             onManageBase={() => {
               requestFactionView("buildings")
@@ -357,6 +376,18 @@ export function MapTab() {
           </span>
         </button>
       )}
+
+      {pendingExpedition && (
+        <RitualPrep
+          expeditionName={pendingExpedition.name}
+          onClose={() => setPendingExpedition(null)}
+          onLaunch={(ritualIds) => {
+            startExpedition(pendingExpedition.id, ritualIds)
+            setPendingExpedition(null)
+            setOpsTab("expeditions")
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -385,7 +416,7 @@ function NodeDetail({
   claimStatus: { ok: boolean; reason?: string }
   assaultStatus: { ok: boolean; reason?: string }
   onClose: () => void
-  onDeploy: (expeditionId: string) => void
+  onDeploy: (expeditionId: string, expeditionName: string) => void
   onManageBase: () => void
   onClaim: () => void
   onAssault: () => void
@@ -623,7 +654,7 @@ function NodeDetail({
                   <button
                     type="button"
                     disabled={locked}
-                    onClick={() => onDeploy(exp.id)}
+                    onClick={() => onDeploy(exp.id, exp.label)}
                     className={cn(
                       "mt-2 w-full rounded px-3 py-1.5 text-[13px] uppercase tracking-wider transition-colors",
                       locked
