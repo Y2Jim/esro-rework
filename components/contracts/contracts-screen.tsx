@@ -39,6 +39,10 @@ export function ContractsScreen() {
   const cancelContract = useEsroStore((s) => s.cancelContract)
   const rotateContractsIfStale = useEsroStore((s) => s.rotateContractsIfStale)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+  // A player only sees faction contracts issued by their own faction. Factionless
+  // players see none. Matches on the faction's human-readable name, which is what
+  // a faction contract stores in `issuer`.
+  const playerFactionName = useEsroStore((s) => s.characterFaction?.name ?? s.profile.faction?.label ?? null)
 
   const [resetIn, setResetIn] = useState(() => msUntilNextDay())
 
@@ -56,6 +60,8 @@ export function ContractsScreen() {
   }, [rotateContractsIfStale])
 
   const filteredContracts = contracts.filter((c) => {
+    // Faction contracts are restricted to members of the issuing faction.
+    if (c.type === "faction" && c.issuer !== playerFactionName) return false
     if (filter === "all") return true
     return c.type === filter
   })
