@@ -2978,17 +2978,15 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   canClaimNode: (nodeId) => {
     const factionId = get().getPlayerFactionId()
     if (!factionId) return { ok: false, reason: "Join a faction to contest territory." }
-    if (!get().factionUnlocked)
-      return { ok: false, reason: `Reach level ${FACTION_UNLOCK_LEVEL} to unlock faction warfare.` }
     const node = getNodeById(nodeId)
     if (!node || !isClaimableNode(node)) return { ok: false, reason: "This site can't be claimed." }
     if (get().nodeControl[nodeId] === factionId)
       return { ok: false, reason: "Your faction already holds this site." }
+    const required = Math.max(nodeRequiredLevel(node), ENDGAME_NODE_LEVEL)
+    if (!get().factionUnlocked || get().profile.level < required)
+      return { ok: false, reason: `Requires level ${required} to contest this territory.` }
     if (!isNodeClaimableBy(get().nodeControl, factionId, nodeId))
       return { ok: false, reason: "Not connected to your territory — claim an adjacent site first." }
-    const required = Math.max(nodeRequiredLevel(node), ENDGAME_NODE_LEVEL)
-    if (get().profile.level < required)
-      return { ok: false, reason: `Requires level ${required} — come prepared.` }
     return { ok: true }
   },
 
