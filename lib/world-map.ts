@@ -638,6 +638,11 @@ export function isBaseNode(node: MapNode): boolean {
   return node.kind === "faction_hq"
 }
 
+/** Signature landmark territories — each faction's founding prize, capturable. */
+export function isLandmarkNode(node: MapNode): boolean {
+  return node.kind === "landmark"
+}
+
 /**
  * A node factions can actually own. Everything except the faction HQs and the
  * neutral home waystation is claimable ground.
@@ -708,4 +713,26 @@ export function isNodeClaimableBy(
 /** Rival HQ nodes a faction could assault (any faction base but its own). */
 export function getAssaultableBaseNodes(factionId: RaceId): MapNode[] {
   return MAP_NODES.filter((n) => isBaseNode(n) && n.factionId && n.factionId !== factionId)
+}
+
+/** All signature landmark nodes (one per faction). */
+export function getLandmarkNodes(): MapNode[] {
+  return MAP_NODES.filter((n) => isLandmarkNode(n))
+}
+
+/** The landmark node a faction was founded around, if any. */
+export function getLandmarkForFaction(factionId: RaceId): MapNode | undefined {
+  return MAP_NODES.find((n) => isLandmarkNode(n) && n.factionId === factionId)
+}
+
+/** Landmark boon a faction currently benefits from, based on live control. */
+export function getActiveLandmarkBoon(
+  control: Record<string, RaceId | null>,
+  factionId: RaceId,
+  ): LandmarkBoon | undefined {
+  for (const node of MAP_NODES) {
+    if (!isLandmarkNode(node) || !node.boon) continue
+    if (control[node.id] === factionId) return node.boon
+  }
+  return undefined
 }

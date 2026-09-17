@@ -16,6 +16,7 @@ import {
   getRegionById,
   isBaseNode,
   isClaimableNode,
+  isLandmarkNode,
   nodeRequiredLevel,
   type MapNode,
 } from "@/lib/world-map"
@@ -495,6 +496,39 @@ function NodeDetail({
       <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--color-muted)]">
         {node.blurb}
       </p>
+
+      {/* Signature landmark boon */}
+      {isLandmarkNode(node) && node.boon && (
+        <div
+          className="mt-3 rounded border p-2.5"
+          style={{
+            borderColor: `${(controller?.color ?? owner?.color) ?? "var(--color-accent)"}55`,
+            backgroundColor: `${(controller?.color ?? owner?.color) ?? "var(--color-accent)"}12`,
+          }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Signature Boon
+            </span>
+            <span
+              className="text-[12px] font-medium"
+              style={{ color: (controller?.color ?? owner?.color) ?? "var(--color-accent)" }}
+            >
+              {node.boon.label} +{Math.round(node.boon.value * 100)}%
+            </span>
+          </div>
+          <p className="mt-1 text-[12px] leading-relaxed text-[color:var(--color-muted)]">
+            {node.boon.description}
+          </p>
+          <p className="mt-1.5 text-[11px] text-[color:var(--color-muted)]">
+            {controlledByMe
+              ? "Your faction holds this boon — every expedition your squads run is amplified."
+              : controller
+                ? `Held by ${controller.name}. Seize this territory to transfer the boon to your faction.`
+                : "Unclaimed — capture it to grant the boon to your faction."}
+          </p>
+        </div>
+      )}
 
       {/* Faction HQ content */}
       {nodeFaction && (

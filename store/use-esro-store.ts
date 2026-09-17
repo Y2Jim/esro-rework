@@ -76,7 +76,9 @@ import {
   isClaimableNode,
   getNodeForExpedition,
   isContestedNode,
+  getActiveLandmarkBoon,
 } from "@/lib/world-map"
+import type { LandmarkBoonType } from "@/lib/world-map"
 import {
   buildMonsterGarrison,
   buildFactionGarrison,
@@ -2841,6 +2843,16 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     // biases the rarity roll, materialYield/salvageYield grow the stack sizes.
     const fx = get().getSkillBonuses()
 
+    // Signature-landmark boon: whichever faction currently holds the site amplifies
+    // one reward stream for every expedition its members run. Seizing a rival's
+    // homeland transfers this perk — the core incentive to invade.
+    const playerFactionId = get().getPlayerFactionId()
+    const landmarkBoon = playerFactionId
+      ? getActiveLandmarkBoon(get().nodeControl, playerFactionId)
+      : undefined
+    const boonMult = (type: LandmarkBoonType) =>
+      landmarkBoon && landmarkBoon.type === type ? 1 + landmarkBoon.value : 1
+
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
     const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
     // The Beast Tending unlocks keep their flat carry, and an active mount adds
@@ -2852,7 +2864,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
     const packSlots = unlockCarry + (mount ? packContribution(mount).carry : 0)
     // Extra loot slots are whole items, so they scale with what made it back.
-    const numRewards = baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)
+    const numRewards = Math.round(
+      (baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)) * boonMult("loot"),
+    )
 
     const newItems: InventoryItem[] = []
     for (let i = 0; i < numRewards; i++) {
@@ -2871,7 +2885,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         label: lootLabel,
         aspect: "material",
         rarity,
-        qty: Math.max(1, Math.round(baseQty * (1 + fx.materialYield + fx.salvageYield))),
+        qty: Math.max(1, Math.round(baseQty * (1 + fx.materialYield + fx.salvageYield) * boonMult("materials"))),
         identified: true,
         description: `Salvaged ${lootLabel.toLowerCase()} recovered during the expedition.`,
         type: "material",
@@ -2879,7 +2893,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
     
     // Add token reward, scaled by the loot that made it back.
-    const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult)
+    const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult * boonMult("tokens"))
 
     // Ritual book drops. Hidden/deep routes are the main source; ordinary
     // routes have a small chance at the minor books only.
@@ -2925,7 +2939,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     // xpBonus is fed by the Scholar's Wake ritual and by Pathfinding's Fieldcraft sub-stat.
     const baseXp = expDef?.rewards.xp ?? 0
     if (baseXp > 0) {
-      get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult))
+      get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult * boonMult("xp")))
     }
 
     if (learnedBook) get().learnRitual(learnedBook)
