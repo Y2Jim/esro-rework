@@ -272,9 +272,9 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     boon: {
       type: "xp",
-      value: 0.2,
+      value: 0.05,
       label: "Rites of Precedent",
-      description: "+20% expedition EXP while your faction holds the Vault.",
+      description: "+5% expedition EXP while your faction holds the Vault.",
     },
   },
 
@@ -338,9 +338,9 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     boon: {
       type: "loot",
-      value: 0.2,
+      value: 0.05,
       label: "Drowned Fortune",
-      description: "+20% expedition loot while your faction holds the Hoard.",
+      description: "+5% expedition loot while your faction holds the Hoard.",
     },
   },
   {
@@ -415,9 +415,9 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     boon: {
       type: "materials",
-      value: 0.25,
+      value: 0.05,
       label: "Forge Bounty",
-      description: "+25% crafting materials from expeditions while your faction holds the Forge.",
+      description: "+5% crafting materials from expeditions while your faction holds the Forge.",
     },
   },
   {
@@ -492,9 +492,9 @@ export const MAP_NODES: MapNode[] = [
     expeditionIds: [],
     boon: {
       type: "tokens",
-      value: 0.25,
+      value: 0.05,
       label: "Crossroads Tithe",
-      description: "+25% expedition token income while your faction holds the Nexus.",
+      description: "+5% expedition token income while your faction holds the Nexus.",
     },
   },
   {
