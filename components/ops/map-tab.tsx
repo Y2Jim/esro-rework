@@ -255,6 +255,8 @@ export function MapTab() {
           const isSelected = selectedId === node.id
           const isMine = Boolean(faction && faction.id === myFactionId)
           const accent = faction?.color ?? "var(--color-accent)"
+          // Any faction-held node reads in that faction's color; mine is emphasized.
+          const controlled = Boolean(faction) && !locked
 
           return (
             <button
@@ -283,9 +285,17 @@ export function MapTab() {
                   )}
                   style={{
                     backgroundColor: "rgba(10,11,15,0.85)",
-                    border: `1px solid ${isSelected || isMine ? accent : "var(--color-border)"}`,
+                    border: `${isMine ? "1.5px" : "1px"} solid ${
+                      controlled || isSelected ? accent : "var(--color-border)"
+                    }`,
                     color: locked ? "var(--color-muted)" : accent,
-                    boxShadow: isSelected || isMine ? `0 0 8px ${accent}66` : undefined,
+                    boxShadow: locked
+                      ? undefined
+                      : isMine
+                        ? `0 0 10px ${accent}99`
+                        : controlled || isSelected
+                          ? `0 0 7px ${accent}55`
+                          : undefined,
                     opacity: locked ? 0.55 : 1,
                   }}
                 >
