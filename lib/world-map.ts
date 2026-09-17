@@ -77,6 +77,12 @@ export interface MapNode {
   homeFactionId?: RaceId
   /** Set for `landmark` nodes: the perk granted to the controlling faction. */
   boon?: LandmarkBoon
+  /**
+   * Optional per-node glyph that overrides the kind icon. Used by `landmark`
+   * nodes so each signature territory reads as a distinct prize rather than
+   * sharing its controller's faction emblem.
+   */
+  icon?: string
 }
 
 export interface MapPath {
@@ -260,6 +266,7 @@ export const MAP_NODES: MapNode[] = [
     y: 22,
     kind: "landmark",
     homeFactionId: "crownborn",
+    icon: "❖",
     blurb:
       "The Courts' deepest archive, where pre-collapse rites and audience laws are kept under standing lamps. The knowledge here is worth a war — and every rival covets the key.",
     expeditionIds: [],
@@ -325,6 +332,7 @@ export const MAP_NODES: MapNode[] = [
     y: 36,
     kind: "landmark",
     homeFactionId: "gloamwhisper",
+    icon: "☾",
     blurb:
       "Beneath the black mere the Circle sinks everything worth hiding — salvage, secrets, and the pick of every haul. Drain it and the loot is yours.",
     expeditionIds: [],
@@ -401,6 +409,7 @@ export const MAP_NODES: MapNode[] = [
     y: 56,
     kind: "landmark",
     homeFactionId: "hearthkin",
+    icon: "⚱",
     blurb:
       "The vale's great forge never goes cold. Its yield refits every Warden road-camp — and would arm any host that could seize the bellows.",
     expeditionIds: [],
@@ -477,6 +486,7 @@ export const MAP_NODES: MapNode[] = [
     y: 56,
     kind: "landmark",
     homeFactionId: "roadsinger",
+    icon: "♪",
     blurb:
       "Where every road the Chorus ever sang crosses at once. Tolls, trade, and traffic all flow through it — hold it and the coin follows.",
     expeditionIds: [],

@@ -300,7 +300,7 @@ export function MapTab() {
                     opacity: locked ? 0.55 : 1,
                   }}
                 >
-                  {faction ? faction.emblem : meta.icon}
+                  {node.icon ? node.icon : faction ? faction.emblem : meta.icon}
                 </span>
               </span>
               <span
