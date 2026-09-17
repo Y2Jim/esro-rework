@@ -47,9 +47,11 @@ import type {
 import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById, DEFAULT_BASE_STATS, SKILL_DEFINITIONS } from "@/lib/game-data"
 import {
   FACTION_BUILDINGS,
+  FACTION_TITLES,
   RANK_TIERS,
   buildingUpgradeCost,
   craftingBonusesFrom,
+  unlockedFactionTitles,
   seedFactionActivity,
   seedFactionRallies,
 } from "@/config/faction"
@@ -353,6 +355,20 @@ export interface EsroState {
   upgradeBuilding: (buildingId: string) => { success: boolean; message: string }
   joinRally: (rallyId: string) => void
   contributeToRally: (rallyId: string, amount: number) => { success: boolean; message: string }
+
+  // Social - Faction titles (earned through faction gameplay)
+  /** Lifetime territory nodes captured. */
+  factionNodesCaptured: number
+  /** Lifetime faction building upgrades performed. */
+  factionBuildingsUpgraded: number
+  /** Lifetime enemy structures knocked offline in base assaults. */
+  factionStructuresDestroyed: number
+  /**
+   * Grant any faction titles whose thresholds the player now meets, based on
+   * current rank and the lifetime counters above. Idempotent — already-owned
+   * titles are skipped. Fires a notification per newly unlocked title.
+   */
+  syncFactionTitles: () => void
   
   // Social - Friends
   friends: Friend[]
@@ -798,6 +814,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       uiTheme: factionId,
       characterRace: race || get().characterRace,
     })
+    // Joining a faction unlocks any starter rank titles the player already meets.
+    get().syncFactionTitles()
   },
   setUiTheme: (theme) => set({ uiTheme: theme }),
   unlockTheme: (themeId) => {
@@ -2021,6 +2039,54 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   factionBuildings: FACTION_BUILDINGS,
   factionRallies: seedFactionRallies,
   factionActivity: seedFactionActivity,
+  factionNodesCaptured: 0,
+  factionBuildingsUpgraded: 0,
+  factionStructuresDestroyed: 0,
+
+  syncFactionTitles: () => {
+    const {
+      profile,
+      factionNodesCaptured,
+      factionBuildingsUpgraded,
+      factionStructuresDestroyed,
+    } = get()
+    // Rank titles only make sense once the player actually belongs to a faction.
+    const rank = profile.faction ? profile.faction.rank : 0
+    const qualifying = unlockedFactionTitles({
+      rank,
+      nodesCaptured: factionNodesCaptured,
+      buildingsUpgraded: factionBuildingsUpgraded,
+      structuresDestroyed: factionStructuresDestroyed,
+    })
+    const owned = new Set(profile.ownedTitles.map((t) => t.label))
+    const newlyUnlocked = qualifying.filter((t) => !owned.has(t.label))
+    if (newlyUnlocked.length === 0) return
+
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        ownedTitles: [
+          ...s.profile.ownedTitles,
+          ...newlyUnlocked.map((t) => ({
+            id: t.id,
+            label: t.label,
+            rarity: t.rarity,
+            equipped: false,
+            source: "faction" as const,
+          })),
+        ],
+      },
+    }))
+
+    for (const t of newlyUnlocked) {
+      get().addNotification({
+        title: "Faction Title Unlocked",
+        body: `You earned the "${t.label}" title — ${t.requirement}.`,
+        priority: "normal",
+        deeplink: { screen: "profile", tab: "titles" },
+      })
+    }
+  },
 
   contributeToProject: (projectId, amount) => {
     const { factionProjects, profile } = get()
@@ -2082,6 +2148,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
+    if (rankedUp) get().syncFactionTitles()
+
     return {
       success: true,
       message: willComplete
@@ -2126,12 +2194,14 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       factionBuildings: s.factionBuildings.map((b) =>
         b.id === buildingId ? { ...b, level: newLevel } : b,
       ),
+      factionBuildingsUpgraded: s.factionBuildingsUpgraded + 1,
       factionActivity: pushActivity(s.factionActivity, {
         kind: "building",
         handle: s.identity.handle,
         text: `upgraded the ${building.label} to Lv.${newLevel}`,
       }),
     }))
+    get().syncFactionTitles()
     return { success: true, message: `${building.label} upgraded to Lv.${newLevel}` }
   },
 
@@ -2214,6 +2284,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         factionActivity: activity,
       }
     })
+
+    if (rankedUp) get().syncFactionTitles()
 
     return {
       success: true,
@@ -2963,9 +3035,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
           nodeControl: { ...s.nodeControl, [battle.nodeId]: battle.attacker.factionId },
           // Store the victors as the site's new garrison — buffs already stripped.
           nodeGarrisons: { ...s.nodeGarrisons, [battle.nodeId]: battle.attacker.group },
+          factionNodesCaptured: s.factionNodesCaptured + 1,
         }))
+        get().syncFactionTitles()
       } else if (battle.kind === "base_assault" && battle.defender.factionId) {
         const now = Date.now()
+        const destroyed = (battle.buildingsHit ?? []).length
         set((s) => {
           const base = s.factionBases[battle.defender.factionId as RaceId]
           if (!base) return {}
@@ -2979,8 +3054,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
               ...s.factionBases,
               [base.factionId]: { ...base, integrity, buildings, lastRecoveredAt: now },
             },
+            factionStructuresDestroyed: s.factionStructuresDestroyed + destroyed,
           }
         })
+        if (destroyed > 0) get().syncFactionTitles()
       }
     }
 

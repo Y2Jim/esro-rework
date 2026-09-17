@@ -11,6 +11,11 @@ import { FactionSelection } from "@/components/onboarding/faction-selection"
 import {
   RANK_TIERS,
   FACTION_PERKS,
+  FACTION_TITLES,
+  FACTION_TITLE_CATEGORY_META,
+  factionTitleMetric,
+  type FactionTitleCategory,
+  type FactionTitleProgress,
   buildingUpgradeCost,
   buildingEffectDescription,
   formatRelativeTime,
@@ -257,6 +262,9 @@ function FactionTab({
   const setFaction = useEsroStore((s) => s.setFaction)
   const factionViewRequest = useEsroStore((s) => s.factionViewRequest)
   const requestFactionView = useEsroStore((s) => s.requestFactionView)
+  const factionNodesCaptured = useEsroStore((s) => s.factionNodesCaptured)
+  const factionBuildingsUpgraded = useEsroStore((s) => s.factionBuildingsUpgraded)
+  const factionStructuresDestroyed = useEsroStore((s) => s.factionStructuresDestroyed)
 
   // Consume a deep-link request (e.g. "Manage Base" from the world map).
   useEffect(() => {
@@ -450,7 +458,17 @@ function FactionTab({
       {subTab === "projects" && <FactionProjects projects={projects} accent={characterFaction.color} />}
       {subTab === "buildings" && <FactionBuildings accent={characterFaction.color} rank={faction?.rank || 0} />}
       {subTab === "rallies" && <FactionRallies accent={characterFaction.color} />}
-      {subTab === "ranks" && <FactionRanks currentRank={faction?.rank || 0} />}
+      {subTab === "ranks" && (
+        <FactionRanks
+          currentRank={faction?.rank || 0}
+          titleProgress={{
+            rank: faction?.rank || 0,
+            nodesCaptured: factionNodesCaptured,
+            buildingsUpgraded: factionBuildingsUpgraded,
+            structuresDestroyed: factionStructuresDestroyed,
+          }}
+        />
+      )}
       {subTab === "activity" && <FactionActivityFeed accent={characterFaction.color} />}
     </div>
   )
@@ -1201,7 +1219,13 @@ function FactionActivityFeed({ accent }: { accent: string }) {
   )
 }
 
-function FactionRanks({ currentRank }: { currentRank: number }) {
+function FactionRanks({
+  currentRank,
+  titleProgress,
+}: {
+  currentRank: number
+  titleProgress: FactionTitleProgress
+}) {
   const ranks = RANK_TIERS
 
   const tierColors: Record<string, { border: string; bg: string; text: string }> = {
@@ -1323,6 +1347,9 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
         })}
       </div>
 
+      {/* Faction Titles */}
+      <FactionTitlesSection progress={titleProgress} />
+
       {/* Faction Wars info */}
       <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
         <div className="text-[14px] font-medium text-[color:var(--color-danger)]">Faction Wars</div>
@@ -1330,6 +1357,78 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
           Reach Vanguard rank to participate in faction v faction conflicts. Higher ranks unlock leadership roles in coordinating war efforts, defending territories, and declaring wars against rival factions.
         </div>
       </div>
+    </div>
+  )
+}
+
+const titleRarityColor: Record<string, string> = {
+  common: "var(--color-muted)",
+  uncommon: "var(--color-green)",
+  rare: "var(--color-cyan)",
+  epic: "var(--color-violet-bright)",
+  legendary: "var(--color-amber)",
+  mythic: "var(--color-danger)",
+}
+
+function FactionTitlesSection({ progress }: { progress: FactionTitleProgress }) {
+  const categories = Object.keys(FACTION_TITLE_CATEGORY_META) as FactionTitleCategory[]
+  const unlockedCount = FACTION_TITLES.filter(
+    (t) => factionTitleMetric(t.category, progress) >= t.threshold,
+  ).length
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[13px] uppercase tracking-wider text-[color:var(--color-violet-bright)]">
+          Faction Titles
+        </div>
+        <span className="text-[12px] text-[color:var(--color-muted)]">
+          {unlockedCount}/{FACTION_TITLES.length} earned
+        </span>
+      </div>
+
+      {categories.map((category) => {
+        const meta = FACTION_TITLE_CATEGORY_META[category]
+        const metric = factionTitleMetric(category, progress)
+        const tiers = FACTION_TITLES.filter((t) => t.category === category)
+        return (
+          <div key={category} className="rounded-lg border border-[color:var(--color-border)] p-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] text-[color:var(--color-violet-bright)]">{meta.icon}</span>
+              <span className="text-[14px] font-medium text-[color:var(--color-text)]">{meta.label}</span>
+              <span className="ml-auto text-[12px] text-[color:var(--color-muted)]">
+                {meta.blurb}
+              </span>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {tiers.map((t) => {
+                const earned = metric >= t.threshold
+                const color = titleRarityColor[t.rarity] ?? "var(--color-muted)"
+                return (
+                  <span
+                    key={t.id}
+                    title={t.requirement}
+                    className={cn(
+                      "rounded border px-2 py-1 text-[12px] transition-colors",
+                      earned ? "font-medium" : "opacity-45",
+                    )}
+                    style={{
+                      borderColor: earned ? color : "var(--color-border-soft)",
+                      backgroundColor: earned ? `color-mix(in srgb, ${color} 12%, transparent)` : "transparent",
+                      color: earned ? color : "var(--color-muted)",
+                    }}
+                  >
+                    {t.label}
+                    <span className="ml-1 text-[11px] opacity-70">
+                      {earned ? "✓" : `${metric}/${t.threshold}`}
+                    </span>
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
