@@ -18,6 +18,7 @@ export type MapNodeKind =
   | "relay"
   | "settlement"
   | "contested"
+  | "landmark"
 
 export type MapPathKind = "road" | "relay" | "hidden"
 
@@ -40,6 +41,22 @@ export interface MapRegion {
   labelY?: number
 }
 
+/** What an expedition reward stream a controlled landmark amplifies. */
+export type LandmarkBoonType = "xp" | "loot" | "materials" | "tokens"
+
+/**
+ * A transferable perk a signature landmark grants to whichever faction holds
+ * it. Because the boon follows control, a rival can seize it — that is the
+ * whole reason to invade someone else's homeland.
+ */
+export interface LandmarkBoon {
+  type: LandmarkBoonType
+  /** Fractional bonus, e.g. 0.2 = +20%. */
+  value: number
+  label: string
+  description: string
+}
+
 export interface MapNode {
   id: string
   label: string
@@ -52,6 +69,14 @@ export interface MapNode {
   expeditionIds: string[]
   /** Set for faction_hq nodes. */
   factionId?: RaceId
+  /**
+   * Set for `landmark` nodes: the faction that starts in control and whose
+   * identity the site carries. Unlike `factionId`, this does not trigger the
+   * base-management UI, so a landmark reads as a capturable prize, not an HQ.
+   */
+  homeFactionId?: RaceId
+  /** Set for `landmark` nodes: the perk granted to the controlling faction. */
+  boon?: LandmarkBoon
 }
 
 export interface MapPath {
@@ -229,14 +254,21 @@ export const MAP_NODES: MapNode[] = [
   },
   {
     id: "gt_gallery",
-    label: "The Sealed Gallery",
+    label: "The Gilded Vault",
     regionId: "gilded_terraces",
     x: 44,
     y: 22,
-    kind: "ruin",
+    kind: "landmark",
+    homeFactionId: "crownborn",
     blurb:
-      "A gallery of pre-collapse portraits the Courts walled shut. The seal is old, and the door behind it is older.",
+      "The Courts' deepest archive, where pre-collapse rites and audience laws are kept under standing lamps. The knowledge here is worth a war — and every rival covets the key.",
     expeditionIds: [],
+    boon: {
+      type: "xp",
+      value: 0.2,
+      label: "Rites of Precedent",
+      description: "+20% expedition EXP while your faction holds the Vault.",
+    },
   },
 
   // --- The Gloaming (Veiled Circle) ---
@@ -287,14 +319,21 @@ export const MAP_NODES: MapNode[] = [
   },
   {
     id: "gl_stillwater",
-    label: "The Still Water",
+    label: "The Sunless Hoard",
     regionId: "the_gloaming",
     x: 86,
     y: 36,
-    kind: "wilds",
+    kind: "landmark",
+    homeFactionId: "gloamwhisper",
     blurb:
-      "A black mere the Circle uses to lose things in. Nothing that goes under comes up, which is how they like it.",
+      "Beneath the black mere the Circle sinks everything worth hiding — salvage, secrets, and the pick of every haul. Drain it and the loot is yours.",
     expeditionIds: [],
+    boon: {
+      type: "loot",
+      value: 0.2,
+      label: "Drowned Fortune",
+      description: "+20% expedition loot while your faction holds the Hoard.",
+    },
   },
   {
     id: "gl_landing",
@@ -356,14 +395,21 @@ export const MAP_NODES: MapNode[] = [
   },
   {
     id: "ev_ashyard",
-    label: "The Ashen Yard",
+    label: "The Everburning Forge",
     regionId: "emberhold_vale",
     x: 14,
     y: 56,
-    kind: "wilds",
+    kind: "landmark",
+    homeFactionId: "hearthkin",
     blurb:
-      "A cooling-field of spent forge-slag and half-burnt salvage. The Wardens let it rest, then work it again.",
+      "The vale's great forge never goes cold. Its yield refits every Warden road-camp — and would arm any host that could seize the bellows.",
     expeditionIds: [],
+    boon: {
+      type: "materials",
+      value: 0.25,
+      label: "Forge Bounty",
+      description: "+25% crafting materials from expeditions while your faction holds the Forge.",
+    },
   },
   {
     id: "ev_kettle",
@@ -425,14 +471,21 @@ export const MAP_NODES: MapNode[] = [
   },
   {
     id: "wf_camp",
-    label: "The Wayfarer's Camp",
+    label: "The Songlines Nexus",
     regionId: "wandering_flats",
     x: 86,
     y: 56,
-    kind: "settlement",
+    kind: "landmark",
+    homeFactionId: "roadsinger",
     blurb:
-      "A rolling camp that is never in quite the same place twice. The Chorus swears it is, and the maps disagree.",
+      "Where every road the Chorus ever sang crosses at once. Tolls, trade, and traffic all flow through it — hold it and the coin follows.",
     expeditionIds: [],
+    boon: {
+      type: "tokens",
+      value: 0.25,
+      label: "Crossroads Tithe",
+      description: "+25% expedition token income while your faction holds the Nexus.",
+    },
   },
   {
     id: "wf_detour",
@@ -514,6 +567,7 @@ export const NODE_KIND_META: Record<
   relay: { icon: "↑", label: "Relay" },
   settlement: { icon: "⌂", label: "Settlement" },
   contested: { icon: "✦", label: "Contested Site" },
+  landmark: { icon: "✪", label: "Signature Territory" },
 }
 
 export const PATH_KIND_META: Record<
@@ -610,7 +664,15 @@ export function getAdjacentNodeIds(nodeId: string): string[] {
 export function buildInitialNodeControl(): NodeControl {
   const control: NodeControl = {}
   for (const node of MAP_NODES) {
-    control[node.id] = isBaseNode(node) && node.factionId ? node.factionId : null
+    if (isBaseNode(node) && node.factionId) {
+      control[node.id] = node.factionId
+    } else if (node.kind === "landmark" && node.homeFactionId) {
+      // Signature landmarks begin under their own faction's control — they are
+      // held ground a rival must invade to take, not neutral land to grab.
+      control[node.id] = node.homeFactionId
+    } else {
+      control[node.id] = null
+    }
   }
   return control
 }
