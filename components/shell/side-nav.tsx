@@ -98,7 +98,7 @@ export function SideNav() {
           <span className={cn("icon-stroke relative flex w-6 shrink-0 justify-center text-[16px] leading-none", active && it.glowClass)}>
             {it.icon}
             {badge > 0 && (
-              <span className="absolute -right-2 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)] px-0.5 text-[10px] font-semibold text-[color:var(--color-bg)]">
+                    <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)]/20 px-1 text-[10px] font-semibold leading-none text-[color:var(--color-violet-bright)] ring-1 ring-inset ring-[color:var(--color-violet-bright)]/40">
                 {badge > 9 ? "9+" : badge}
               </span>
             )}

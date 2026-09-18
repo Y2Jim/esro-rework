@@ -52,12 +52,12 @@ export function BottomNav() {
                 >
                   {it.icon}
                   {it.id === "profile" && unreadNotifications > 0 && (
-                    <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)] px-0.5 text-[13px] font-semibold text-[color:var(--color-bg)]">
+                    <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[color:var(--color-violet-bright)]/20 px-1 text-[10px] font-semibold leading-none text-[color:var(--color-violet-bright)] ring-1 ring-inset ring-[color:var(--color-violet-bright)]/40">
                       {unreadNotifications > 9 ? "9+" : unreadNotifications}
                     </span>
                   )}
                   {it.id === "messages" && dmUnread > 0 && (
-                    <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[color:var(--color-cyan)] px-0.5 text-[13px] font-semibold text-[color:var(--color-bg)]">
+                    <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[color:var(--color-cyan)]/20 px-1 text-[10px] font-semibold leading-none text-[color:var(--color-cyan)] ring-1 ring-inset ring-[color:var(--color-cyan)]/40">
                       {dmUnread > 9 ? "9+" : dmUnread}
                     </span>
                   )}
