@@ -91,6 +91,8 @@ export function AdminDevTools() {
   const toggleDebugUnlock = useEsroStore((s) => s.toggleDebugUnlock)
   const clearDebugUnlocks = useEsroStore((s) => s.clearDebugUnlocks)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+  const devSetLevelXp = useEsroStore((s) => s.devSetLevelXp)
+  const profile = useEsroStore((s) => s.profile)
   
   const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean; mounts: boolean }>({
     cosmetics: false,
@@ -102,6 +104,9 @@ export function AdminDevTools() {
   })
   
   const [newHandle, setNewHandle] = useState(identity.handle.replace("@", ""))
+
+  const [levelInput, setLevelInput] = useState(String(profile.level))
+  const [xpInput, setXpInput] = useState(String(profile.xp))
   
   const [previewFlair, setPreviewFlair] = useState(0)
   const flairNames = [
@@ -214,6 +219,60 @@ export function AdminDevTools() {
         </div>
         <p className="text-[12px] text-[color:var(--color-muted)]">
           Admin override - no restrictions on username changes
+        </p>
+      </div>
+
+      {/* Level & EXP */}
+      <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Level &amp; EXP
+          </span>
+          <span className="text-[13px] text-[color:var(--color-muted)]">
+            {"Now: Lv."}{profile.level} · {profile.xp}/{profile.xpToNext} XP
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <label className="flex-1">
+            <span className="mb-1 block text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Level
+            </span>
+            <input
+              type="number"
+              min={1}
+              value={levelInput}
+              onChange={(e) => setLevelInput(e.target.value.replace(/[^0-9]/g, ""))}
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1.5 text-[15px] text-[color:var(--color-text)] outline-none focus:border-[#5dd0ff]/50"
+              placeholder="1"
+            />
+          </label>
+          <label className="flex-1">
+            <span className="mb-1 block text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              EXP into level
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={xpInput}
+              onChange={(e) => setXpInput(e.target.value.replace(/[^0-9]/g, ""))}
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1.5 text-[15px] text-[color:var(--color-text)] outline-none focus:border-[#5dd0ff]/50"
+              placeholder="0"
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const lvl = Math.max(1, parseInt(levelInput || "1", 10))
+            const xp = Math.max(0, parseInt(xpInput || "0", 10))
+            devSetLevelXp(lvl, xp)
+          }}
+          className="w-full rounded border border-[#5dd0ff]/50 bg-[#5dd0ff]/10 px-3 py-2 text-[14px] text-[#5dd0ff] transition-colors hover:bg-[#5dd0ff]/20"
+        >
+          Apply Level &amp; EXP
+        </button>
+        <p className="text-[12px] text-[color:var(--color-muted)]">
+          Sets your exact level and XP into that level. Grants the matching unspent stat-point pool and re-checks level-gated unlocks.
         </p>
       </div>
 

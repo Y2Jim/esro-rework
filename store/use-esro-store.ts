@@ -96,6 +96,7 @@ import {
   emptyAllocation,
   POINTS_PER_LEVEL,
   spentPoints,
+  xpForLevel,
   type AllocatableStat,
 } from "@/lib/leveling"
 import {
@@ -189,6 +190,12 @@ export interface EsroState {
   // Leveling & stat allocation
   /** Award XP and resolve any level-ups it triggers. */
   awardXp: (amount: number) => void
+  /**
+   * Admin/debug: force the profile to an exact level and XP-into-level, without
+   * awarding through the curve. Recomputes xpToNext and the unspent stat-point
+   * pool for the target level, then re-runs faction/skill unlock gates.
+   */
+  devSetLevelXp: (level: number, xp?: number) => void
   /** Spend one unspent point on a core stat. */
   allocateStat: (stat: AllocatableStat, amount?: number) => void
   /** Refund every spent point back into the pool. */
@@ -971,6 +978,28 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       get().checkFactionUnlock()
       get().syncUnlocks()
     }
+  },
+
+  devSetLevelXp: (level, xp = 0) => {
+    const { profile } = get()
+    const targetLevel = Math.max(1, Math.floor(level))
+    const xpToNext = xpForLevel(targetLevel)
+    // Keep the carried XP inside the current level so the bar never overflows
+    // into a phantom level-up the setter didn't intend.
+    const carriedXp = Math.max(0, Math.min(Math.floor(xp), xpToNext - 1))
+    // Grant the pool this level should have (3 per level past 1), minus points
+    // already spent, so allocation stays consistent after the jump.
+    const earnedPoints = (targetLevel - 1) * POINTS_PER_LEVEL
+    const statPoints = Math.max(0, earnedPoints - spentPoints(profile.allocated))
+
+    set({
+      profile: { ...profile, level: targetLevel, xp: carriedXp, xpToNext, statPoints },
+    })
+
+    // A forced level can cross the faction gate and open level-tier content.
+    get().checkFactionUnlock()
+    get().syncUnlocks()
+    get().logAdminAction("edit_player", get().identity.handle, `Set level to ${targetLevel} (${carriedXp} XP)`)
   },
 
   allocateStat: (stat, amount = 1) => {
