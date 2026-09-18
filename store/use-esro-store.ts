@@ -143,6 +143,12 @@ import {
 } from "@/lib/bestiary"
 import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
+import {
+  rollVariant,
+  rollMaterial,
+  variantToItem,
+  materialToItem,
+} from "@/config/fishing-content"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
 import {
   SHINY_BEAST_TITLE,
@@ -1783,6 +1789,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     windowMs: 0,
     lastQty: 0,
     streak: 0,
+    lastMaterialId: null,
   },
   fishingLog: [],
 
@@ -1903,25 +1910,46 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return
     }
 
-    const fish = getFish(fishing.fishId)
-    if (!fish) return
+    const baseFish = getFish(fishing.fishId)
+    if (!baseFish) return
+
+    const isJunk = baseFish.id === JUNK.id
 
     // Casting (Casting) raises how many land per successful catch.
     const yieldBonus = get().getSkillBonuses().fishingYield
     const qty = Math.max(1, Math.round((1 + yieldBonus) * (1 + Math.random() * 0.5)))
-    const item = fishToItem(fish, qty)
-    const isJunk = fish.id === JUNK.id
+
+    // Luck feeds both the rare-variant roll and the bonus-material roll.
+    const luck = get().getSkillBonuses().rollLuck ?? 0
+
+    // A landed fish may turn out to be its rare visual variant. Junk never does.
+    const variant = isJunk ? null : rollVariant(baseFish.id, Math.random, luck)
+    const fish = variant ? getFish(variant.id) ?? baseFish : baseFish
+    const item = variant ? variantToItem(variant, qty) : fishToItem(fish, qty)
+
+    // A successful (non-junk) catch may also yield a bonus fishing material.
+    const material = isJunk ? null : rollMaterial(Math.random, luck)
+    const materialItem = material ? materialToItem(material, 1) : null
 
     set((s) => {
-      const existing = s.inventory.find((i) => i.id === item.id)
+      // Merge helper: stack onto an existing stack or append.
+      const addStack = (inv: typeof s.inventory, next: typeof item, addQty: number) => {
+        const existing = inv.find((i) => i.id === next.id)
+        return existing
+          ? inv.map((i) => (i.id === next.id ? { ...i, qty: i.qty + addQty } : i))
+          : [...inv, next]
+      }
+
+      let inventory = addStack(s.inventory, item, qty)
+      if (materialItem) inventory = addStack(inventory, materialItem, 1)
+
       return {
-        inventory: existing
-          ? s.inventory.map((i) => (i.id === item.id ? { ...i, qty: i.qty + qty } : i))
-          : [...s.inventory, item],
+        inventory,
         fishing: {
           ...s.fishing,
           phase: "landed",
           lastQty: qty,
+          lastMaterialId: material ? material.id : null,
           // Junk breaks the streak; a real fish extends it.
           streak: isJunk ? 0 : s.fishing.streak + 1,
         },
@@ -1932,7 +1960,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
-    // Landing a legendary or mythic fish earns a permanent collection title.
+    // Landing a legendary or mythic fish (or any rare variant) earns titles.
     if (!isJunk) {
       get().grantCollectionTitles(fishTitlesForCatch(fish.rarity))
     }

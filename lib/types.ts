@@ -398,9 +398,33 @@ export interface InventoryItem {
   qty: number
   identified: boolean
   description: string
-  type?: "material" | "consumable" | "equipment" | "quest" | "misc"
+  type?: "material" | "consumable" | "equipment" | "quest" | "misc" | "fish" | "crafting_material"
   effects?: string[]
   duration?: number // in seconds for buffs
+  /**
+   * Optional fields added for the fishing content pack. All optional so existing
+   * items, seeds and saves stay valid; only fishing rewards populate them.
+   */
+  /** Finer-grained kind within `type`, e.g. "fishing" for fishing-only materials. */
+  subtype?: string
+  /** Transparent pixel-art sprite path. When set, inventory renders it instead of the rarity pip. */
+  image?: string
+  /** Modest reference value for future vendor/trade tooling. Not wired to a sell action yet. */
+  sellValue?: number
+  /** Whether the item may be offered in trades. Absent is treated as tradeable. */
+  tradeable?: boolean
+  /** For fish: the base species id, so variants group under their parent. */
+  fishCategory?: string
+  /** Marks a rare visual variant of a base fish. */
+  isVariant?: boolean
+  /** The base fish id this is a variant of. */
+  variantOf?: string
+  /** How the item is obtained, e.g. "fishing_only". */
+  obtainMethod?: string
+  /** Free-form tags for filtering and future crafting lookups. */
+  tags?: string[]
+  /** Short crafting-use hint shown in the detail panel. */
+  craftingUse?: string
 }
 
 /** Where the line currently is in the cast -> bite -> hook loop. */
@@ -421,6 +445,8 @@ export interface FishingState {
   lastQty: number
   /** Consecutive successful catches — drives the streak readout. */
   streak: number
+  /** Bonus fishing material dropped on the last catch, if any. Drives the landed-panel bonus line. */
+  lastMaterialId?: string | null
 }
 
 export interface FishingCatch {

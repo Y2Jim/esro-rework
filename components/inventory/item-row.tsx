@@ -41,19 +41,35 @@ export function ItemRow({
           : "border-[color:var(--color-border-soft)] bg-[color:var(--color-panel)]/50 hover:border-[color:var(--color-border)]",
       )}
     >
-      {/* rarity pip */}
-      <div
-        aria-hidden
-        className={cn(
-          "h-7 w-7 shrink-0 rounded-sm border text-center text-[15px] leading-[26px]",
-          isUnknown
-            ? "border-[color:var(--color-danger)]/50 text-[color:var(--color-danger)]"
-            : "border-[color:var(--color-border)]",
-          rarityColor[item.rarity],
-        )}
-      >
-        {isUnknown ? "?" : "◆"}
-      </div>
+      {/* sprite thumbnail, or rarity pip when there's no art */}
+      {!isUnknown && item.image ? (
+        <div
+          className={cn(
+            "h-7 w-7 shrink-0 rounded-sm border bg-[color:var(--color-bg)]/40 p-0.5",
+            "border-[color:var(--color-border)]",
+          )}
+        >
+          <img
+            src={item.image || "/placeholder.svg"}
+            alt=""
+            aria-hidden
+            className="h-full w-full object-contain [image-rendering:pixelated]"
+          />
+        </div>
+      ) : (
+        <div
+          aria-hidden
+          className={cn(
+            "h-7 w-7 shrink-0 rounded-sm border text-center text-[15px] leading-[26px]",
+            isUnknown
+              ? "border-[color:var(--color-danger)]/50 text-[color:var(--color-danger)]"
+              : "border-[color:var(--color-border)]",
+            rarityColor[item.rarity],
+          )}
+        >
+          {isUnknown ? "?" : "◆"}
+        </div>
+      )}
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">

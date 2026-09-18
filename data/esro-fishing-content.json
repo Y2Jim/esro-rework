@@ -1,0 +1,414 @@
+{
+  "fish": [
+    {
+      "id": "fish-echo-eel",
+      "name": "Echo Eel",
+      "filename": "/images/esro/fishing/fish/fish-echo-eel.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-echo-eel-starcoil",
+      "name": "Starcoil Echo Eel",
+      "filename": "/images/esro/fishing/fish/fish-echo-eel-starcoil.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-echo-eel"
+    },
+    {
+      "id": "fish-glasscarp",
+      "name": "Glasscarp",
+      "filename": "/images/esro/fishing/fish/fish-glasscarp.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-glasscarp-frostglass",
+      "name": "Frostglass Carp",
+      "filename": "/images/esro/fishing/fish/fish-glasscarp-frostglass.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-glasscarp"
+    },
+    {
+      "id": "fish-goldrelay",
+      "name": "Goldrelay",
+      "filename": "/images/esro/fishing/fish/fish-goldrelay.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-goldrelay-crownflare",
+      "name": "Crownflare Goldrelay",
+      "filename": "/images/esro/fishing/fish/fish-goldrelay-crownflare.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-goldrelay"
+    },
+    {
+      "id": "fish-prism-leviathan",
+      "name": "Prism Leviathan",
+      "filename": "/images/esro/fishing/fish/fish-prism-leviathan.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-prism-leviathan-aurora",
+      "name": "Aurora Prism Leviathan",
+      "filename": "/images/esro/fishing/fish/fish-prism-leviathan-aurora.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-prism-leviathan"
+    },
+    {
+      "id": "fish-silverfin",
+      "name": "Silverfin",
+      "filename": "/images/esro/fishing/fish/fish-silverfin.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-silverfin-moonlit",
+      "name": "Moonlit Silverfin",
+      "filename": "/images/esro/fishing/fish/fish-silverfin-moonlit.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-silverfin"
+    },
+    {
+      "id": "fish-voltray",
+      "name": "Voltray",
+      "filename": "/images/esro/fishing/fish/fish-voltray.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-voltray-stormwake",
+      "name": "Stormwake Voltray",
+      "filename": "/images/esro/fishing/fish/fish-voltray-stormwake.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-voltray"
+    },
+    {
+      "id": "fish-relay-mackerel",
+      "name": "Relay Mackerel",
+      "filename": "/images/esro/fishing/fish/fish-relay-mackerel.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-relay-mackerel-stormline",
+      "name": "Stormline Mackerel",
+      "filename": "/images/esro/fishing/fish/fish-relay-mackerel-stormline.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-relay-mackerel"
+    },
+    {
+      "id": "fish-bluefin",
+      "name": "Bluefin",
+      "filename": "/images/esro/fishing/fish/fish-bluefin.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-bluefin-suncrest",
+      "name": "Suncrest Bluefin",
+      "filename": "/images/esro/fishing/fish/fish-bluefin-suncrest.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-bluefin"
+    },
+    {
+      "id": "fish-sporepuff",
+      "name": "Sporepuff",
+      "filename": "/images/esro/fishing/fish/fish-sporepuff.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-sporepuff-voidspore",
+      "name": "Voidspore Puffer",
+      "filename": "/images/esro/fishing/fish/fish-sporepuff-voidspore.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-sporepuff"
+    },
+    {
+      "id": "fish-needle-marlin",
+      "name": "Needle Marlin",
+      "filename": "/images/esro/fishing/fish/fish-needle-marlin.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-needle-marlin-starpiercer",
+      "name": "Starpiercer Marlin",
+      "filename": "/images/esro/fishing/fish/fish-needle-marlin-starpiercer.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-needle-marlin"
+    },
+    {
+      "id": "fish-gloom-angler",
+      "name": "Gloom Angler",
+      "filename": "/images/esro/fishing/fish/fish-gloom-angler.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-gloom-angler-abyssal-beacon",
+      "name": "Abyssal Beacon Angler",
+      "filename": "/images/esro/fishing/fish/fish-gloom-angler-abyssal-beacon.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-gloom-angler"
+    },
+    {
+      "id": "fish-ember-seahorse",
+      "name": "Ember Seahorse",
+      "filename": "/images/esro/fishing/fish/fish-ember-seahorse.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-ember-seahorse-nebula",
+      "name": "Nebula Seahorse",
+      "filename": "/images/esro/fishing/fish/fish-ember-seahorse-nebula.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-ember-seahorse"
+    },
+    {
+      "id": "fish-slate-ray",
+      "name": "Slate Ray",
+      "filename": "/images/esro/fishing/fish/fish-slate-ray.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-slate-ray-crystalwing",
+      "name": "Crystalwing Ray",
+      "filename": "/images/esro/fishing/fish/fish-slate-ray-crystalwing.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-slate-ray"
+    },
+    {
+      "id": "fish-ember-jelly",
+      "name": "Ember Jelly",
+      "filename": "/images/esro/fishing/fish/fish-ember-jelly.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-ember-jelly-starveil",
+      "name": "Starveil Jelly",
+      "filename": "/images/esro/fishing/fish/fish-ember-jelly-starveil.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-ember-jelly"
+    },
+    {
+      "id": "fish-copper-squid",
+      "name": "Copper Squid",
+      "filename": "/images/esro/fishing/fish/fish-copper-squid.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-copper-squid-voidstar",
+      "name": "Voidstar Squid",
+      "filename": "/images/esro/fishing/fish/fish-copper-squid-voidstar.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-copper-squid"
+    },
+    {
+      "id": "fish-bonejaw",
+      "name": "Bonejaw",
+      "filename": "/images/esro/fishing/fish/fish-bonejaw.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-bonejaw-astral",
+      "name": "Astral Bonejaw",
+      "filename": "/images/esro/fishing/fish/fish-bonejaw-astral.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-bonejaw"
+    },
+    {
+      "id": "fish-reed-perch",
+      "name": "Reed Perch",
+      "filename": "/images/esro/fishing/fish/fish-reed-perch.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-reed-perch-embercrest",
+      "name": "Embercrest Perch",
+      "filename": "/images/esro/fishing/fish/fish-reed-perch-embercrest.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-reed-perch"
+    },
+    {
+      "id": "fish-brook-trout",
+      "name": "Brook Trout",
+      "filename": "/images/esro/fishing/fish/fish-brook-trout.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-brook-trout-starlit",
+      "name": "Starlit Trout",
+      "filename": "/images/esro/fishing/fish/fish-brook-trout-starlit.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-brook-trout"
+    },
+    {
+      "id": "fish-mossback-bass",
+      "name": "Mossback Bass",
+      "filename": "/images/esro/fishing/fish/fish-mossback-bass.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-mossback-bass-voidcurrent",
+      "name": "Voidcurrent Bass",
+      "filename": "/images/esro/fishing/fish/fish-mossback-bass-voidcurrent.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-mossback-bass"
+    },
+    {
+      "id": "fish-mudwhisker-catfish",
+      "name": "Mudwhisker Catfish",
+      "filename": "/images/esro/fishing/fish/fish-mudwhisker-catfish.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-mudwhisker-catfish-gilded",
+      "name": "Gilded Mudwhisker",
+      "filename": "/images/esro/fishing/fish/fish-mudwhisker-catfish-gilded.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-mudwhisker-catfish"
+    },
+    {
+      "id": "fish-marsh-pike",
+      "name": "Marsh Pike",
+      "filename": "/images/esro/fishing/fish/fish-marsh-pike.png",
+      "type": "fish",
+      "rarity": "common",
+      "variantOf": null
+    },
+    {
+      "id": "fish-marsh-pike-frostspine",
+      "name": "Frostspine Pike",
+      "filename": "/images/esro/fishing/fish/fish-marsh-pike-frostspine.png",
+      "type": "fish",
+      "rarity": "rare",
+      "variantOf": "fish-marsh-pike"
+    }
+  ],
+  "materials": [
+    {
+      "id": "material-opalescent-driftglass",
+      "name": "Opalescent Driftglass",
+      "filename": "/images/esro/fishing/materials/material-opalescent-driftglass.png",
+      "type": "crafting_material",
+      "rarity": "uncommon",
+      "suggestedUse": "Light crafting catalyst for trinkets, lures, and relay-themed decorations.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-pearlescent-shell-fragment",
+      "name": "Pearlescent Shell Fragment",
+      "filename": "/images/esro/fishing/materials/material-pearlescent-shell-fragment.png",
+      "type": "crafting_material",
+      "rarity": "common",
+      "suggestedUse": "Basic shellcraft ingredient used in minor recipes and polish kits.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-kelpweave-bundle",
+      "name": "Kelpweave Bundle",
+      "filename": "/images/esro/fishing/materials/material-kelpweave-bundle.png",
+      "type": "crafting_material",
+      "rarity": "common",
+      "suggestedUse": "Binding fibre used for wraps, bait satchels, and low-tier utility crafts.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-amber-barnacle-resin",
+      "name": "Amber Barnacle Resin",
+      "filename": "/images/esro/fishing/materials/material-amber-barnacle-resin.png",
+      "type": "crafting_material",
+      "rarity": "uncommon",
+      "suggestedUse": "Sticky marine resin for reinforcement, polish, and modest upgrade recipes.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-luminous-roe-cluster",
+      "name": "Luminous Roe Cluster",
+      "filename": "/images/esro/fishing/materials/material-luminous-roe-cluster.png",
+      "type": "crafting_material",
+      "rarity": "rare",
+      "suggestedUse": "Small luminous ingredient for bait, tonics, and minor alchemical blends.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-iridescent-tide-thread",
+      "name": "Iridescent Tide Thread",
+      "filename": "/images/esro/fishing/materials/material-iridescent-tide-thread.png",
+      "type": "crafting_material",
+      "rarity": "uncommon",
+      "suggestedUse": "Fine marine fibre used in clothwork, lure assembly, and decorative crafting.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-blush-coral-sprig",
+      "name": "Blush Coral Sprig",
+      "filename": "/images/esro/fishing/materials/material-blush-coral-sprig.png",
+      "type": "crafting_material",
+      "rarity": "rare",
+      "suggestedUse": "Delicate coral piece for ornaments, dyes, and refined accessory crafts.",
+      "obtainMethod": "fishing_only"
+    },
+    {
+      "id": "material-abyssal-pearl",
+      "name": "Abyssal Pearl",
+      "filename": "/images/esro/fishing/materials/material-abyssal-pearl.png",
+      "type": "crafting_material",
+      "rarity": "rare",
+      "suggestedUse": "Valuable catch-only pearl used in prestige recipes and trade.",
+      "obtainMethod": "fishing_only"
+    }
+  ]
+}

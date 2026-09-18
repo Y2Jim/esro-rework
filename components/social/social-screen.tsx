@@ -1745,6 +1745,7 @@ function TradeTab({ offers }: { offers: EsroState["tradeOffers"] }) {
 }
 
 function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty: number; rarity?: string } }) {
+  const image = useEsroStore((s) => s.inventory.find((i) => i.id === item.itemId)?.image)
   const rarityColors: Record<string, string> = {
     common: "var(--color-muted)",
     uncommon: "var(--color-cyan)",
@@ -1754,9 +1755,17 @@ function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty
     mythic: "#ff6090",
   }
   const color = rarityColors[item.rarity || "common"] || "var(--color-text)"
-  
+
   return (
     <div className="flex items-center gap-1 text-[13px]">
+      {image ? (
+        <img
+          src={image || "/placeholder.svg"}
+          alt=""
+          aria-hidden
+          className="h-4 w-4 shrink-0 object-contain [image-rendering:pixelated]"
+        />
+      ) : null}
       <span className="text-[color:var(--color-muted)]">x{item.qty}</span>
       <span style={{ color }}>{item.label}</span>
     </div>

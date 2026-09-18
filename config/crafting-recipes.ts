@@ -1,5 +1,6 @@
 import type { SkillUnlockId } from "@/lib/skill-effects"
 import type { CraftingRecipe, InventoryItem, Rarity } from "@/lib/types"
+import { FISHING_MATERIALS, materialToItem } from "@/config/fishing-content"
 
 /**
  * Tier gate for a recipe, derived from what it produces rather than tagged on
@@ -42,6 +43,11 @@ export const CRAFTING_MATERIALS: InventoryItem[] = [
   { id: "cave_fish", label: "Cave Fish", aspect: "supply", rarity: "uncommon", qty: 0, identified: true, description: "Pale fish from underground streams. Nutritious." },
   { id: "spice_blend", label: "Spice Blend", aspect: "supply", rarity: "uncommon", qty: 0, identified: true, description: "A mix of warming spices. Improves any dish." },
   { id: "fungal_flour", label: "Fungal Flour", aspect: "supply", rarity: "common", qty: 0, identified: true, description: "Ground mushroom base. Slightly nutty flavor." },
+
+  // Fishing-only materials (from the fishing content pack). Derived from the
+  // single source of truth in config/fishing-content.ts so ids, sprites, rarity
+  // and crafting-use hints never drift. Rendered as gatherable ingredients.
+  ...FISHING_MATERIALS.map((m) => ({ ...materialToItem(m, 0) })),
 ]
 
 // Crafting recipes
@@ -577,6 +583,74 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
       effects: ["Fishing bait", "Draws Gold Relay and Prism Leviathan", "Severe rarity pull"],
     },
     craftTime: 240,
+    unlocked: true,
+  },
+
+  // ===== FISHING MATERIAL RECIPES =====
+  // Light, fair uses for the fishing-pack materials so a haul of shells and
+  // roe has somewhere to go. Kept modest per the pack brief (no economy-breakers).
+  {
+    id: "pearl_polish_kit",
+    label: "Pearl Polish Kit",
+    category: "component",
+    description: "A shellcraft kit that buffs gear to a soft luster.",
+    ingredients: [
+      { itemId: "material-pearlescent-shell-fragment", label: "Pearlescent Shell Fragment", qty: 3 },
+      { itemId: "material-kelpweave-bundle", label: "Kelpweave Bundle", qty: 2 },
+    ],
+    output: {
+      itemId: "pearl_polish_kit",
+      label: "Pearl Polish Kit",
+      aspect: "material",
+      rarity: "uncommon",
+      qty: 1,
+      description: "A shellcraft kit that buffs gear to a soft luster.",
+    },
+    craftTime: 45,
+    unlocked: true,
+  },
+  {
+    id: "luminous_lure_oil",
+    label: "Luminous Lure Oil",
+    category: "bait",
+    description: "Roe-light suspended in resin. Fish rise to the glow.",
+    ingredients: [
+      { itemId: "material-luminous-roe-cluster", label: "Luminous Roe Cluster", qty: 1 },
+      { itemId: "material-opalescent-driftglass", label: "Opalescent Driftglass", qty: 1 },
+      { itemId: "material-iridescent-tide-thread", label: "Iridescent Tide Thread", qty: 1 },
+    ],
+    output: {
+      itemId: "luminous_lure_oil",
+      label: "Luminous Lure Oil",
+      aspect: "consumable",
+      rarity: "rare",
+      qty: 2,
+      description: "Roe-light suspended in resin. Fish rise to the glow.",
+      effects: ["Fishing bait", "Pulls rarer fish", "Boosts variant chance"],
+    },
+    craftTime: 90,
+    unlocked: true,
+  },
+  {
+    id: "tidecrown_charm",
+    label: "Tidecrown Charm",
+    category: "special",
+    description: "A prestige trinket set with a dark abyssal pearl.",
+    ingredients: [
+      { itemId: "material-abyssal-pearl", label: "Abyssal Pearl", qty: 1 },
+      { itemId: "material-blush-coral-sprig", label: "Blush Coral Sprig", qty: 2 },
+      { itemId: "material-amber-barnacle-resin", label: "Amber Barnacle Resin", qty: 2 },
+    ],
+    output: {
+      itemId: "tidecrown_charm",
+      label: "Tidecrown Charm",
+      aspect: "relay",
+      rarity: "epic",
+      qty: 1,
+      description: "A prestige trinket set with a dark abyssal pearl.",
+      effects: ["+5% Fishing Luck", "Trophy piece"],
+    },
+    craftTime: 180,
     unlocked: true,
   },
 ]
