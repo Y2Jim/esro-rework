@@ -17,6 +17,13 @@
   --color-accent: #a45dff;
   --color-accent-strong: #bb81ff;
   --color-accent-glow: rgba(125, 52, 234, 0.24);
+
+  /* Named accents used by nav, badges, and status color-coding */
+  --color-violet-bright: #bb81ff;
+  --color-lilac: #c9b8e0;
+  --color-cyan: #5dd0ff;
+  --color-green: #5dff9a;
+  --color-amber: #ffb347;
   
   /* Text Colors - brightened significantly for in-game readability */
   --color-text: #ffffff;
