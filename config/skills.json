@@ -129,7 +129,7 @@
       "stats": [
         { "id": "surveying", "name": "Surveying" },
         { "id": "routing", "name": "Routing" },
-        { "id": "survival", "name": "Survival" }
+        { "id": "fieldcraft", "name": "Fieldcraft" }
       ]
     },
     {
@@ -143,13 +143,13 @@
       ]
     },
     {
-      "name": "Lorekeeping",
+      "name": "Artisanry",
       "linkedStat": "focus",
-      "summary": "+3% archive quality. Improves fragment analysis.",
+      "summary": "Cheaper, faster crafting from studied blueprints, plus sharper appraisal.",
       "stats": [
-        { "id": "recall", "name": "Recall" },
-        { "id": "translation", "name": "Translation" },
-        { "id": "analysis", "name": "Analysis" }
+        { "id": "efficiency", "name": "Efficiency" },
+        { "id": "technique", "name": "Technique" },
+        { "id": "appraisal", "name": "Appraisal" }
       ]
     }
   ]

@@ -359,6 +359,10 @@ export function ActiveExpeditionView() {
   // decide what is delivered: survivors carry the full haul, a total wipe loses it.
   const lootUnitsRef = useRef(0)
   const hiddenRoutesRef = useRef(0)
+  // Total damage the squad dealt to enemies and took from all sources, for the
+  // end-of-run summary.
+  const damageDealtRef = useRef(0)
+  const damageTakenRef = useRef(0)
   const woundedRef = useRef(false)
   // Whether the entire squad was defeated (all hp 0) before reaching the end.
   const wipedRef = useRef(false)
@@ -385,6 +389,8 @@ export function ActiveExpeditionView() {
     lootFoundRef.current = 0
     lootUnitsRef.current = 0
     hiddenRoutesRef.current = 0
+    damageDealtRef.current = 0
+    damageTakenRef.current = 0
     woundedRef.current = false
     wipedRef.current = false
     fieldSurgeryUsedRef.current = false
@@ -466,6 +472,8 @@ export function ActiveExpeditionView() {
         "success",
       )
     }
+    // Count the HP actually lost after saves, so the summary reflects real wounds.
+    damageTakenRef.current += before - next
     target.hp = next
     target.flashUntil = Date.now() + 600
     woundedRef.current = true
@@ -634,6 +642,9 @@ export function ActiveExpeditionView() {
       const nearlyDown = b.hp <= Math.max(1, Math.ceil(b.plan.enemyHp / 3))
       const finisher = nearlyDown ? b.plan.finishBonus : 0
       const dealt = 1 + b.plan.bonusDamage + finisher
+      // Count damage actually applied, not the raw roll, so overkill on the
+      // finishing hit doesn't inflate the summary.
+      damageDealtRef.current += Math.min(dealt, b.hp)
       b.hp = Math.max(0, b.hp - dealt)
       if (nearlyDown && finisher > 0) {
         pushFeed("battle", `Opening found — ${b.enemy} staggered.`, "success")
@@ -645,6 +656,7 @@ export function ActiveExpeditionView() {
     if (Math.random() < b.plan.squadTakeChance) {
       if (Math.random() < b.plan.counterChance) {
         const counterDamage = 1 + b.plan.bonusDamage
+        damageDealtRef.current += Math.min(counterDamage, b.hp)
         b.hp = Math.max(0, b.hp - counterDamage)
         pushFeed("battle", `Riposte — ${b.enemy} takes ${counterDamage} counter-damage.`, "success")
       }
@@ -1125,6 +1137,14 @@ export function ActiveExpeditionView() {
             <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
               <span className="text-[color:var(--color-violet-bright)]">{lootFoundRef.current}</span>
               <span className="text-[color:var(--color-muted)]"> caches found</span>
+            </span>
+            <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+              <span className="text-[color:var(--color-success)]">{damageDealtRef.current}</span>
+              <span className="text-[color:var(--color-muted)]"> damage dealt</span>
+            </span>
+            <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">
+              <span className="text-[color:var(--color-danger)]">{damageTakenRef.current}</span>
+              <span className="text-[color:var(--color-muted)]"> damage taken</span>
             </span>
             {hiddenRoutesRef.current > 0 && (
               <span className="rounded bg-[color:var(--color-panel)]/50 px-2 py-1">

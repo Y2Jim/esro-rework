@@ -14,11 +14,15 @@ import {
   getFactionHqNode,
   getNodeById,
   getRegionById,
+  isBaseNode,
+  isClaimableNode,
+  isLandmarkNode,
   nodeRequiredLevel,
   type MapNode,
 } from "@/lib/world-map"
 import { unlockRequirementLabel } from "@/lib/skill-effects"
-import type { RaceId } from "@/lib/types"
+import type { NodeControl, RaceId } from "@/lib/types"
+import { RitualPrep } from "@/components/ops/ritual-prep"
 
 const riskColor = (risk: string) => {
   switch (risk) {
@@ -48,6 +52,15 @@ export function MapTab() {
   const mapFocusNodeId = useEsroStore((s) => s.mapFocusNodeId)
   const setMapFocus = useEsroStore((s) => s.setMapFocus)
   const characterFaction = useEsroStore((s) => s.characterFaction)
+  const nodeControl = useEsroStore((s) => s.nodeControl)
+  const canClaimNode = useEsroStore((s) => s.canClaimNode)
+  const canAssaultBase = useEsroStore((s) => s.canAssaultBase)
+  const startTerritoryClaim = useEsroStore((s) => s.startTerritoryClaim)
+  const startBaseAssault = useEsroStore((s) => s.startBaseAssault)
+  // Ritual prep is the Ritualism payoff. Mirror the expeditions tab so a deploy
+  // launched from the map runs through the same prep step and carries the same
+  // prepared rituals, rather than launching bare.
+  const hasRitualism = useEsroStore((s) => s.hasRitualism())
 
   const playerLevel = profile?.level ?? 1
   // `characterFaction` is the canonical selection; profile.faction.id can still
@@ -58,6 +71,11 @@ export function MapTab() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showLegend, setShowLegend] = useState(false)
+  // Site chosen from the map but not yet launched: the ritual prep step sits in
+  // between, exactly as in the expeditions tab.
+  const [pendingExpedition, setPendingExpedition] = useState<{ id: string; name: string } | null>(
+    null,
+  )
 
   // Consume a deep-link focus request (e.g. "View on Map" from faction buildings).
   useEffect(() => {
@@ -79,7 +97,7 @@ export function MapTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[15px] uppercase tracking-wider text-[color:var(--color-text)]">
-            World Map
+            The Astral Marches
           </h2>
           <p className="text-[12px] text-[color:var(--color-muted)]">
             {MAP_REGIONS.length} regions · {MAP_NODES.length} locations
@@ -229,12 +247,17 @@ export function MapTab() {
         {/* Nodes */}
         {MAP_NODES.map((node) => {
           const meta = NODE_KIND_META[node.kind]
-          const faction = getFactionById(node.factionId)
+          // Live control wins for coloring; base nodes fall back to their
+          // inherent faction identity so an HQ always reads as its owner.
+          const controllerId = nodeControl[node.id] ?? null
+          const faction = getFactionById(controllerId) ?? getFactionById(node.factionId)
           const reqLevel = nodeRequiredLevel(node)
           const locked = playerLevel < reqLevel
           const isSelected = selectedId === node.id
           const isMine = Boolean(faction && faction.id === myFactionId)
           const accent = faction?.color ?? "var(--color-accent)"
+          // Any faction-held node reads in that faction's color; mine is emphasized.
+          const controlled = Boolean(faction) && !locked
 
           return (
             <button
@@ -243,7 +266,9 @@ export function MapTab() {
               onClick={() => setSelectedId(isSelected ? null : node.id)}
               aria-label={`${node.label} — ${meta.label}`}
               aria-pressed={isSelected}
-              className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5"
+              className={cn(
+                "group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-0.5 hover:z-20 focus-visible:z-20"
+              )}
               style={{ left: `${node.x}%`, top: `${node.y}%` }}
             >
               <span className="relative flex items-center justify-center">
@@ -261,23 +286,32 @@ export function MapTab() {
                   )}
                   style={{
                     backgroundColor: "rgba(10,11,15,0.85)",
-                    border: `1px solid ${isSelected || isMine ? accent : "var(--color-border)"}`,
+                    border: `${isMine ? "1.5px" : "1px"} solid ${
+                      controlled || isSelected ? accent : "var(--color-border)"
+                    }`,
                     color: locked ? "var(--color-muted)" : accent,
-                    boxShadow: isSelected || isMine ? `0 0 8px ${accent}66` : undefined,
+                    boxShadow: locked
+                      ? undefined
+                      : isMine
+                        ? `0 0 10px ${accent}99`
+                        : controlled || isSelected
+                          ? `0 0 7px ${accent}55`
+                          : undefined,
                     opacity: locked ? 0.55 : 1,
                   }}
                 >
-                  {faction ? faction.emblem : meta.icon}
+                  {node.icon ? node.icon : faction ? faction.emblem : meta.icon}
                 </span>
               </span>
               <span
                 className={cn(
-                  "w-[74px] rounded px-1 text-center text-[12px] leading-tight text-balance",
+                  "pointer-events-none absolute top-full left-1/2 mt-1 w-[80px] -translate-x-1/2 rounded px-1 text-center text-[12px] leading-tight text-balance transition-opacity",
+                  "text-[color:var(--color-muted)]",
                   isSelected
-                    ? "text-[color:var(--color-text)]"
-                    : "text-[color:var(--color-muted)]"
+                    ? "opacity-0"
+                    : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
                 )}
-                style={{ backgroundColor: "rgba(10,11,15,0.82)" }}
+                style={{ backgroundColor: "rgba(10,11,15,0.9)" }}
               >
                 {node.label}
               </span>
@@ -297,15 +331,29 @@ export function MapTab() {
             playerLevel={playerLevel}
             myFactionId={myFactionId}
             buildings={factionBuildings}
+            nodeControl={nodeControl}
+            claimStatus={canClaimNode(selected.id)}
+            assaultStatus={canAssaultBase(selected.id)}
             onClose={() => setSelectedId(null)}
-            onDeploy={(id) => {
-              startExpedition(id)
-              setOpsTab("expeditions")
+            onDeploy={(id, name) => {
+              // Close the node sheet so the launch reads cleanly. Without
+              // Ritualism there is nothing to prepare, so launch straight away;
+              // otherwise open the same prep step the expeditions tab uses so the
+              // player's prepared rituals are carried into the run.
+              setSelectedId(null)
+              if (!hasRitualism) {
+                startExpedition(id, [])
+                setOpsTab("expeditions")
+                return
+              }
+              setPendingExpedition({ id, name })
             }}
             onManageBase={() => {
               requestFactionView("buildings")
               setScreen("social")
             }}
+            onClaim={() => startTerritoryClaim(selected.id)}
+            onAssault={() => startBaseAssault(selected.id)}
           />
         )}
       </div>
@@ -339,6 +387,18 @@ export function MapTab() {
           </span>
         </button>
       )}
+
+      {pendingExpedition && (
+        <RitualPrep
+          expeditionName={pendingExpedition.name}
+          onClose={() => setPendingExpedition(null)}
+          onLaunch={(ritualIds) => {
+            startExpedition(pendingExpedition.id, ritualIds)
+            setPendingExpedition(null)
+            setOpsTab("expeditions")
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -350,17 +410,27 @@ function NodeDetail({
   playerLevel,
   myFactionId,
   buildings,
+  nodeControl,
+  claimStatus,
+  assaultStatus,
   onClose,
   onDeploy,
   onManageBase,
+  onClaim,
+  onAssault,
 }: {
   node: MapNode
   playerLevel: number
   myFactionId: string | null
   buildings: { id: string; label: string; icon: string; level: number; maxLevel: number }[]
+  nodeControl: NodeControl
+  claimStatus: { ok: boolean; reason?: string }
+  assaultStatus: { ok: boolean; reason?: string }
   onClose: () => void
-  onDeploy: (expeditionId: string) => void
+  onDeploy: (expeditionId: string, expeditionName: string) => void
   onManageBase: () => void
+  onClaim: () => void
+  onAssault: () => void
 }) {
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
   const region = getRegionById(node.regionId)
@@ -369,6 +439,12 @@ function NodeDetail({
   const kindMeta = NODE_KIND_META[node.kind]
   const missions = getExpeditionsForNode(node)
   const isMyHq = Boolean(nodeFaction && nodeFaction.id === myFactionId)
+  // Live controller of this node (may differ from its inherent faction).
+  const controller = getFactionById(nodeControl[node.id] ?? null)
+  const claimable = isClaimableNode(node)
+  const isBase = isBaseNode(node)
+  const controlledByMe = Boolean(controller && controller.id === myFactionId)
+  const isHomeLandmark = Boolean(isLandmarkNode(node) && node.factionId === myFactionId)
 
   return (
     <div className="absolute inset-x-0 bottom-0 max-h-[76%] overflow-y-auto border-t border-[color:var(--color-border)] bg-[color:var(--color-panel)]/97 p-3 backdrop-blur-sm">
@@ -421,6 +497,39 @@ function NodeDetail({
       <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--color-muted)]">
         {node.blurb}
       </p>
+
+      {/* Signature landmark boon */}
+      {isLandmarkNode(node) && node.boon && (
+        <div
+          className="mt-3 rounded border p-2.5"
+          style={{
+            borderColor: `${(controller?.color ?? owner?.color) ?? "var(--color-accent)"}55`,
+            backgroundColor: `${(controller?.color ?? owner?.color) ?? "var(--color-accent)"}12`,
+          }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Signature Boon
+            </span>
+            <span
+              className="text-[12px] font-medium"
+              style={{ color: (controller?.color ?? owner?.color) ?? "var(--color-accent)" }}
+            >
+              {node.boon.label} +{Math.round(node.boon.value * 100)}%
+            </span>
+          </div>
+          <p className="mt-1 text-[12px] leading-relaxed text-[color:var(--color-muted)]">
+            {node.boon.description}
+          </p>
+          <p className="mt-1.5 text-[11px] text-[color:var(--color-muted)]">
+            {isHomeLandmark
+              ? controlledByMe
+                ? "Your faction's landmark — hold it to keep this boon active. Lose it and the boon goes dark."
+                : `${owner?.name ?? "Its founding faction"}'s landmark. Seize it to deny them the boon — it empowers only them, so you gain nothing but their loss.`
+              : "This boon only empowers its founding faction."}
+          </p>
+        </div>
+      )}
 
       {/* Faction HQ content */}
       {nodeFaction && (
@@ -479,6 +588,68 @@ function NodeDetail({
         </div>
       )}
 
+      {/* Territory control */}
+      {claimable && (
+        <div className="mt-3 rounded border border-[color:var(--color-border)] p-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Control
+            </span>
+            {controller ? (
+              <span
+                className="inline-flex items-center gap-1 text-[12px]"
+                style={{ color: controller.color }}
+              >
+                <span aria-hidden="true">{controller.emblem}</span>
+                {controlledByMe ? "Held by you" : controller.name}
+              </span>
+            ) : (
+              <span className="text-[12px] text-[color:var(--color-danger)]">Uncontested (feral)</span>
+            )}
+          </div>
+          {!controlledByMe && (
+            <button
+              type="button"
+              disabled={!claimStatus.ok}
+              onClick={onClaim}
+              className={cn(
+                "mt-2 w-full rounded px-3 py-2 text-[13px] uppercase tracking-wider transition-colors",
+                claimStatus.ok
+                  ? "border border-[color:var(--color-danger)]/60 bg-[color:var(--color-danger)]/15 text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/25"
+                  : "cursor-not-allowed border border-[color:var(--color-border)] text-[color:var(--color-muted)]"
+              )}
+            >
+              {claimStatus.ok ? (controller ? "Attack & Claim" : "Claim Territory") : claimStatus.reason}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Base assault (rival HQ) */}
+      {isBase && !isMyHq && (
+        <div className="mt-3 rounded border border-[color:var(--color-border)] p-2">
+          <div className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Base Assault
+          </div>
+          <p className="mt-1 text-[12px] leading-relaxed text-[color:var(--color-muted)]">
+            Raid this base to disable its structures and strip supplies. Bases cannot be captured.
+          </p>
+          <button
+            type="button"
+            disabled={!assaultStatus.ok}
+            onClick={onAssault}
+            className={cn(
+              "mt-2 w-full rounded px-3 py-2 text-[13px] uppercase tracking-wider transition-colors",
+              assaultStatus.ok
+                ? "border border-[color:var(--color-danger)]/60 bg-[color:var(--color-danger)]/15 text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)]/25"
+                : "cursor-not-allowed border border-[color:var(--color-border)] text-[color:var(--color-muted)]"
+            )}
+          >
+            {assaultStatus.ok ? "Launch Assault" : assaultStatus.reason}
+          </button>
+        </div>
+      )}
+
       {/* Expeditions */}
       {missions.length > 0 && (
         <div className="mt-3">
@@ -491,7 +662,11 @@ function NodeDetail({
               // Level gate plus the run's skill tier breakpoint, so the button
               // never offers a deploy the store will refuse.
               const tierLocked = !!exp.requiresUnlock && !hasSkillUnlock(exp.requiresUnlock)
-              const locked = playerLevel < req || tierLocked
+              // Contested frontier sites are faction-warfare ground: a
+              // factionless courier can never deploy there. Mirrors the store's
+              // startExpedition gate so the button reflects the real rule.
+              const factionLocked = claimable && node.kind === "contested" && !myFactionId
+              const locked = playerLevel < req || tierLocked || factionLocked
               return (
                 <div
                   key={exp.id}
@@ -524,7 +699,7 @@ function NodeDetail({
                   <button
                     type="button"
                     disabled={locked}
-                    onClick={() => onDeploy(exp.id)}
+                    onClick={() => onDeploy(exp.id, exp.label)}
                     className={cn(
                       "mt-2 w-full rounded px-3 py-1.5 text-[13px] uppercase tracking-wider transition-colors",
                       locked
@@ -532,11 +707,13 @@ function NodeDetail({
                         : "border border-[color:var(--color-cyan)]/60 bg-[color:var(--color-cyan)]/15 text-[color:var(--color-cyan)] hover:bg-[color:var(--color-cyan)]/25"
                     )}
                   >
-                    {tierLocked && exp.requiresUnlock
-                      ? unlockRequirementLabel(exp.requiresUnlock)
-                      : locked
-                        ? `Requires Lv.${req}`
-                        : "Deploy"}
+                    {factionLocked
+                      ? "Join a faction to deploy"
+                      : tierLocked && exp.requiresUnlock
+                        ? unlockRequirementLabel(exp.requiresUnlock)
+                        : playerLevel < req
+                          ? `Requires Lv.${req}`
+                          : "Deploy"}
                   </button>
                 </div>
               )

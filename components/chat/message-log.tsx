@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
+import { generateAvatarFromSeed } from "@/lib/avatar-generator"
+import type { ChatMessage } from "@/lib/types"
 import { MessageRow } from "./message-row"
 
 const PAGE_SIZE = 20
@@ -10,8 +12,38 @@ export function MessageLog() {
   const channel = useEsroStore((s) => s.channel)
   const all = useEsroStore((s) => s.messages)
   const pageOffset = useEsroStore((s) => s.pageOffset) ?? 0
+  const friends = useEsroStore((s) => s.friends)
+  const viewPlayer = useEsroStore((s) => s.viewPlayer)
   const logRef = useRef<HTMLDivElement>(null)
   const isLogChannel = channel === "LOG"
+
+  // Open the shared player-profile modal from a chat handle. If the speaker is a
+  // known friend, enrich with their full record; otherwise show a lightweight
+  // stranger view (Message / Add Friend).
+  const onSelectHandle = (msg: ChatMessage) => {
+    const friend = friends.find((f) => f.handle === msg.handle)
+    if (friend) {
+      viewPlayer({
+        handle: friend.handle,
+        title: friend.title,
+        titleRarity: friend.titleRarity,
+        avatar: friend.avatar || generateAvatarFromSeed(friend.handle),
+        faction: friend.faction,
+        status: friend.status,
+        note: friend.note,
+        lastSeen: friend.lastSeen,
+        source: "friend",
+      })
+      return
+    }
+    viewPlayer({
+      handle: msg.handle,
+      title: msg.title,
+      titleRarity: msg.titleRarity,
+      avatar: generateAvatarFromSeed(msg.handle),
+      source: "party",
+    })
+  }
 
   const list = useMemo(() => {
     const filtered = all
@@ -45,7 +77,12 @@ export function MessageLog() {
       ) : (
         <div className="divide-y divide-[color:var(--color-border-soft)]/50 py-1.5">
           {list.map((m) => (
-            <MessageRow key={m.id} msg={m} isLogChannel={isLogChannel} />
+            <MessageRow
+              key={m.id}
+              msg={m}
+              isLogChannel={isLogChannel}
+              onSelectHandle={onSelectHandle}
+            />
           ))}
         </div>
       )}

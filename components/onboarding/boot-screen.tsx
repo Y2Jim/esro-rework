@@ -123,6 +123,11 @@ export function BootScreen({ onComplete }: BootScreenProps) {
             />
           ))}
         </div>
+
+        {/* Studio credit */}
+        <p className="mt-6 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-text-muted)]">
+          a gumware studios production
+        </p>
       </div>
     </div>
   )

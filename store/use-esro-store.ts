@@ -8,6 +8,7 @@ import type {
   Channel,
   ChatMessage,
   Contract,
+  DirectMessage,
   Expedition,
   ActiveExpedition,
   FactionProject,
@@ -21,6 +22,7 @@ import type {
   FishingState,
   OpsTab,
   PartyMember,
+  PlayerView,
   Profile,
   ProfileNotification,
   ProfileTitle,
@@ -45,20 +47,56 @@ import type {
 import { FACTIONS, FACTION_UNLOCK_LEVEL, getRaceById, DEFAULT_BASE_STATS, SKILL_DEFINITIONS } from "@/lib/game-data"
 import {
   FACTION_BUILDINGS,
+  FACTION_TITLES,
   RANK_TIERS,
   buildingUpgradeCost,
   craftingBonusesFrom,
+  unlockedFactionTitles,
   seedFactionActivity,
   seedFactionRallies,
 } from "@/config/faction"
 import { generateAvatarFromSeed } from "@/lib/avatar-generator"
 import type { BaseStats } from "@/lib/types"
-import { derivedStatScore } from "@/lib/expedition-sim"
+import type {
+  NodeControl,
+  StoredGroup,
+  FactionBaseState,
+  TerritoryBattle,
+  TerritoryBattleKind,
+} from "@/lib/types"
+import { derivedStatScore, deriveMemberStats } from "@/lib/expedition-sim"
+import {
+  MAP_NODES,
+  buildInitialNodeControl,
+  isNodeClaimableBy,
+  getAdjacentNodeIds,
+  getControlledNodeIds,
+  getNodeById,
+  nodeRequiredLevel,
+  isClaimableNode,
+  getNodeForExpedition,
+  isContestedNode,
+  getActiveLandmarkBoon,
+} from "@/lib/world-map"
+import type { LandmarkBoonType } from "@/lib/world-map"
+import {
+  buildMonsterGarrison,
+  buildFactionGarrison,
+  buildInitialFactionBases,
+  snapshotGroup,
+  simulateTerritoryBattle,
+  planBaseAssaultDamage,
+  recoverBaseState,
+  ENDGAME_NODE_LEVEL,
+  BASE_DEFENSE_LEVEL,
+  BUILDING_DISABLE_MS,
+} from "@/lib/territory-sim"
 import {
   applyXp,
   emptyAllocation,
   POINTS_PER_LEVEL,
   spentPoints,
+  xpForLevel,
   type AllocatableStat,
 } from "@/lib/leveling"
 import {
@@ -89,6 +127,8 @@ import {
   getSkillMechanic,
   getSkillUnlocks,
   skillIdFromName,
+  UNLOCK_LABELS,
+  UNLOCK_KIND,
   type SkillBonuses,
   type SkillUnlockId,
 } from "@/lib/skill-effects"
@@ -96,13 +136,27 @@ import {
   CLASS_LABEL,
   TAME_MASTER_UNLOCK,
   TAME_UNLOCK,
+  TAMEABLE,
   getCreature,
   packContribution,
   rollShiny,
 } from "@/lib/bestiary"
 import { DIG_BAIT_ID, DIG_COOLDOWN_MS, DIG_MAX, DIG_MIN, getBait } from "@/config/bait"
 import { FISHING_SPOTS, JUNK, fishToItem, getFish, pickFish } from "@/config/fishing"
+import {
+  rollVariant,
+  rollMaterial,
+  variantToItem,
+  materialToItem,
+} from "@/config/fishing-content"
 import { recipeUnlockFor } from "@/config/crafting-recipes"
+import {
+  SHINY_BEAST_TITLE,
+  FISH_TITLES,
+  fishTitlesForCatch,
+  toOwnedTitle,
+  type CollectionTitleDef,
+} from "@/config/collection-titles"
 import { dayKey, rotateContracts } from "@/lib/contract-rotation"
 
 /** Archive reconstruction passes, cheapest first. */
@@ -126,6 +180,14 @@ export interface EsroState {
   setUiTheme: (theme: string) => void
   unlockTheme: (themeId: string) => void
   checkFactionUnlock: () => void
+  /** Unlock ids already announced to the player, so each fires exactly once. */
+  seenUnlocks: string[]
+  /**
+   * Diff current skill/stat unlocks against what has been announced and push a
+   * "new route"/"new feature" notification for each newcomer. Pass silent to
+   * re-baseline without notifying (used at character creation).
+   */
+  syncUnlocks: (opts?: { silent?: boolean }) => void
   
   // Player Stats
   getPlayerStats: () => BaseStats
@@ -134,6 +196,12 @@ export interface EsroState {
   // Leveling & stat allocation
   /** Award XP and resolve any level-ups it triggers. */
   awardXp: (amount: number) => void
+  /**
+   * Admin/debug: force the profile to an exact level and XP-into-level, without
+   * awarding through the curve. Recomputes xpToNext and the unspent stat-point
+   * pool for the target level, then re-runs faction/skill unlock gates.
+   */
+  devSetLevelXp: (level: number, xp?: number) => void
   /** Spend one unspent point on a core stat. */
   allocateStat: (stat: AllocatableStat, amount?: number) => void
   /** Refund every spent point back into the pool. */
@@ -189,6 +257,19 @@ export interface EsroState {
   nudgePage: (delta: number) => void
   resetPage: () => void
 
+  // Direct messages (private one-to-one)
+  directMessages: DirectMessage[]
+  /** Handle of the conversation currently open in the Messages screen, or null for the inbox list. */
+  activeConversation: string | null
+  /** Open a conversation with a player, switching to the Messages screen and marking it read. */
+  openConversation: (handle: string) => void
+  /** Select a conversation within the Messages screen (null returns to the inbox list). */
+  setActiveConversation: (handle: string | null) => void
+  /** Send a private message to another player. */
+  sendDirectMessage: (toHandle: string, body: string) => void
+  /** Mark every incoming message from a handle as read. */
+  markConversationRead: (handle: string) => void
+
   // Quick Actions
   quickActions: QuickAction[]
 
@@ -201,6 +282,13 @@ export interface EsroState {
    */
   startExpedition: (id: string, ritualIds?: string[]) => void
   cancelExpedition: () => void
+  /**
+   * Epoch ms until which new expeditions are locked after a failed run, or null
+   * when no cooldown is active. A "failed" run is a total wipe (no cargo home).
+   */
+  expeditionCooldownUntil: number | null
+  /** Seconds left on the failure cooldown, clamped to 0. */
+  getExpeditionCooldownRemaining: () => number
 
   // Ops - Skills
   skills: Skill[]
@@ -225,7 +313,7 @@ export interface EsroState {
   recovery: RecoveryResult[]
   lastRecovered: RecoveryResult | null
   /**
-   * "translation" is the Lorekeeping payoff: it reads the sealed packets the
+   * "translation" is the Artisanry payoff: it reads the sealed packets the
    * other two passes cannot, and is gated on the `archive_translation` unlock.
    */
   runRecovery: (mode: RecoveryMode) => void
@@ -275,6 +363,7 @@ export interface EsroState {
   // Social - Party
   party: PartyMember[]
   invitePartyMember: () => { success: boolean; message: string }
+  inviteFriendToParty: (friend: Friend) => { success: boolean; message: string }
   removePartyMember: (slot: number) => void
   setPartyMemberRole: (slot: number, role: string) => void
   readyUpParty: () => void
@@ -288,10 +377,35 @@ export interface EsroState {
   upgradeBuilding: (buildingId: string) => { success: boolean; message: string }
   joinRally: (rallyId: string) => void
   contributeToRally: (rallyId: string, amount: number) => { success: boolean; message: string }
+
+  // Social - Faction titles (earned through faction gameplay)
+  /** Lifetime territory nodes captured. */
+  factionNodesCaptured: number
+  /** Lifetime faction building upgrades performed. */
+  factionBuildingsUpgraded: number
+  /** Lifetime enemy structures knocked offline in base assaults. */
+  factionStructuresDestroyed: number
+  /**
+   * Grant any faction titles whose thresholds the player now meets, based on
+   * current rank and the lifetime counters above. Idempotent — already-owned
+   * titles are skipped. Fires a notification per newly unlocked title.
+   */
+  syncFactionTitles: () => void
+  /** Grant one-shot collection titles (shiny beasts, rare catches) if unowned. */
+  grantCollectionTitles: (defs: CollectionTitleDef[]) => void
   
   // Social - Friends
   friends: Friend[]
   removeFriend: (handle: string) => void
+
+  // Social - Player profile viewer
+  viewedPlayer: PlayerView | null
+  viewPlayer: (player: PlayerView) => void
+  closePlayerProfile: () => void
+  // Full-page read-only view of another player, opened from the modal.
+  viewedProfile: PlayerView | null
+  openPlayerProfilePage: (player: PlayerView) => void
+  clearViewedProfile: () => void
   
   // Social - Trade
   tradeOffers: TradeOffer[]
@@ -299,8 +413,8 @@ export interface EsroState {
   // Profile
   identity: typeof seedIdentity
   profile: Profile
-  profileTab: "summary" | "notifications"
-  setProfileTab: (tab: "summary" | "notifications") => void
+  profileTab: "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications"
+  setProfileTab: (tab: "summary" | "titles" | "bestiary" | "cosmetics" | "settings" | "notifications") => void
   setActiveTitle: (titleId: string) => void
   /** Push a new unread notification; id and timestamp are assigned here. */
   addNotification: (
@@ -314,14 +428,53 @@ export interface EsroState {
   // Avatar & Vanity
   equipVanity: (vanityId: string) => void
   unequipVanity: (layerType: AvatarLayerType) => void
+  /**
+   * Spend one Appearance Reset Token to overwrite the base look (head, skin,
+   * eyes, hair) with the supplied config and clear every equipped cosmetic.
+   * Owned cosmetics are kept (still unlocked), only unequipped. Returns false
+   * without changing anything when no token is held.
+   */
+  resetBaseAppearance: (nextAvatar: AvatarConfig) => boolean
   
   // Admin/Debug
   setHandle: (newHandle: string) => void
   unlockAllCosmetics: () => void
   unlockAllTitles: () => void
+  /** Dev-only: tame every pack beast, bypassing encounter and skill gates. */
+  devUnlockAllMounts: () => void
   simulateExpedition: (expeditionId?: string) => void
   completeActiveExpedition: (lootMultiplier?: number) => void
   injectTestChatMessages: () => void
+
+  // ============ TERRITORY WAR ============
+  /** Controlling faction per node id; null/absent = neutral. */
+  nodeControl: NodeControl
+  /** Stored defender garrison per claimed node. */
+  nodeGarrisons: Record<string, StoredGroup>
+  /** Per-faction home base integrity + buildings. */
+  factionBases: Record<string, FactionBaseState>
+  /** The battle currently being watched, or null. */
+  activeBattle: TerritoryBattle | null
+  /** A claim/assault awaiting its expedition to finish before the battle. */
+  pendingTerritory: { nodeId: string; kind: TerritoryBattleKind } | null
+  /** The player's faction id, or null if factionless. */
+  getPlayerFactionId: () => RaceId | null
+  /** Whether the player may claim a node right now, with a reason when not. */
+  canClaimNode: (nodeId: string) => { ok: boolean; reason?: string }
+  /** Whether the player may assault a rival base right now. */
+  canAssaultBase: (nodeId: string) => { ok: boolean; reason?: string }
+  /** Launch a claim: runs the node's expedition, then a battle on arrival. */
+  startTerritoryClaim: (nodeId: string) => void
+  /** Launch a base raid on a rival HQ (immediate battle, no expedition). */
+  startBaseAssault: (nodeId: string) => void
+  /** Build + simulate the pending battle so the view can play it back. */
+  beginTerritoryBattle: (nodeId: string, kind: TerritoryBattleKind, attacker: StoredGroup) => void
+  /** Apply the watched battle's outcome, then run the rival expansion tick. */
+  resolveTerritoryBattle: () => void
+  /** Each rival faction makes one adjacency-limited expansion attempt. */
+  runRivalExpansionTick: () => void
+  /** Elapsed-time integrity + building recovery across all bases. */
+  recoverBases: () => void
   
   // Admin Panel
   isAdmin: boolean
@@ -349,7 +502,7 @@ export interface EsroState {
 }
 
 /**
- * @param luck Rollcraft / Lorekeeping bonus. Shrinks the random draw so it
+ * @param luck Rollcraft / Artisanry bonus. Shrinks the random draw so it
  *   lands in the rarer bands more often — luck of 0.2 makes a roll behave as
  *   if it came in 20% lower.
  */
@@ -399,6 +552,10 @@ const POOL: Record<Rarity, PoolItem[]> = {
     // Flair
     { label: "Soft Glow", type: "cosmetic", vanityData: { layerType: "flair", variant: 4 } },
     { label: "Dust Motes", type: "cosmetic", vanityData: { layerType: "flair", variant: 5 } },
+    // Lipstick colors (Rose ships unlocked; these are the low-tier gacha shades)
+    { label: "Crimson Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 2 } },
+    { label: "Coral Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 3 } },
+    { label: "Berry Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 4 } },
   ],
   uncommon: [
     // Non-cosmetics
@@ -425,6 +582,9 @@ const POOL: Record<Rarity, PoolItem[]> = {
     // Flair
     { label: "Signal Flicker", type: "cosmetic", vanityData: { layerType: "flair", variant: 6 } },
     { label: "Route Trails", type: "cosmetic", vanityData: { layerType: "flair", variant: 7 } },
+    // Lipstick colors (deeper shades)
+    { label: "Plum Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 5 } },
+    { label: "Nude Lipstick", type: "cosmetic", vanityData: { layerType: "mouth", variant: 6 } },
   ],
   rare: [
     // Non-cosmetics
@@ -453,6 +613,8 @@ const POOL: Record<Rarity, PoolItem[]> = {
   ],
   epic: [
     // Non-cosmetics
+    // Consumable: re-opens the base appearance editor without discarding cosmetics.
+    { label: "Appearance Reset Token", type: "appearance_token" },
     { label: "Relay Warden", type: "title" },
     { label: "Depth Touched", type: "title" },
     { label: "Void Speaker", type: "title" },
@@ -495,6 +657,21 @@ const POOL: Record<Rarity, PoolItem[]> = {
     { label: "Genesis Aura", type: "cosmetic", vanityData: { layerType: "flair", variant: 13 } },
     { label: "Tidecaller's Visage", type: "cosmetic", vanityData: { layerType: "accessory", variant: 27 } },
     { label: "Abyssal Diadem", type: "cosmetic", vanityData: { layerType: "hat", variant: 29 } },
+    // Mythic accessories that previously had no in-game unlock path.
+    { label: "Voidtouched Gaze", type: "cosmetic", vanityData: { layerType: "accessory", variant: 17 } },
+    { label: "Relay Sea Mask", type: "cosmetic", vanityData: { layerType: "accessory", variant: 18 } },
+    { label: "Shardheart Visor", type: "cosmetic", vanityData: { layerType: "accessory", variant: 19 } },
+    { label: "Eternal Courier's Mark", type: "cosmetic", vanityData: { layerType: "accessory", variant: 20 } },
+    { label: "Primordial Echo", type: "cosmetic", vanityData: { layerType: "accessory", variant: 21 } },
+    // Mythic hats that previously had no in-game unlock path.
+    { label: "Eternal Courier's Crest", type: "cosmetic", vanityData: { layerType: "hat", variant: 21 } },
+    { label: "Voidtouched Halo", type: "cosmetic", vanityData: { layerType: "hat", variant: 22 } },
+    { label: "Primordial Echo Crown", type: "cosmetic", vanityData: { layerType: "hat", variant: 23 } },
+    // Mythic flair that previously had no in-game unlock path.
+    { label: "Shardheart Radiance", type: "cosmetic", vanityData: { layerType: "flair", variant: 14 } },
+    { label: "Eternal Courier's Light", type: "cosmetic", vanityData: { layerType: "flair", variant: 15 } },
+    { label: "Voidtouched Presence", type: "cosmetic", vanityData: { layerType: "flair", variant: 16 } },
+    { label: "Primordial Resonance", type: "cosmetic", vanityData: { layerType: "flair", variant: 17 } },
   ],
   admin: [
     { label: "Architect's Seal", type: "title" },
@@ -556,6 +733,9 @@ function applyStanding(
   }
 }
 
+/** Recovery lockout after a failed (fully wiped) expedition. */
+const EXPEDITION_FAIL_COOLDOWN_MS = 2 * 60 * 1000
+
 const PARTY_ROLES = ["Logistics", "Surveying", "Analysis", "Security", "Relay Tuning", "Scavenging"]
 const PARTY_TITLES: { label: string; rarity: Rarity }[] = [
   { label: "Route Tender", rarity: "common" },
@@ -563,6 +743,43 @@ const PARTY_TITLES: { label: string; rarity: Rarity }[] = [
   { label: "Archive Listener", rarity: "rare" },
   { label: "Waystone Keeper", rarity: "epic" },
 ]
+
+/**
+ * Freeze a squad of handles into a stored group for a territory battle. The
+ * player uses their live derived stats (no run buffs — those never enter
+ * getPlayerStats), party members use their deterministic derived stats.
+ */
+function groupFromHandles(
+  handles: string[],
+  factionId: RaceId,
+  identity: { handle: string; avatar?: AvatarConfig },
+  party: PartyMember[],
+  playerStats: BaseStats,
+): StoredGroup {
+  const members = handles.map((h) => {
+    if (h === identity.handle) {
+      return { handle: h, role: "Courier", avatar: identity.avatar, stats: playerStats }
+    }
+    const pm = party.find((m) => m.handle === h)
+    const role = pm?.role ?? "Crew"
+    return { handle: h, role, avatar: pm?.avatar, stats: deriveMemberStats(h, role) }
+  })
+  return snapshotGroup(members, factionId)
+}
+
+/** Assemble the deployable squad (leader first), capped at `maxSquad`. */
+function assembleSquadHandles(
+  party: PartyMember[],
+  playerHandle: string,
+  maxSquad: number,
+): string[] {
+  const available = [...party]
+    .filter((m) => m.avatar && (m.status === "ready" || m.status === "idle" || m.leader))
+    .sort((a, b) => (b.leader ? 1 : 0) - (a.leader ? 1 : 0))
+  const handles = available.slice(0, maxSquad).map((m) => m.handle)
+  if (!handles.includes(playerHandle)) handles.unshift(playerHandle)
+  return handles
+}
 
 export const useEsroStore = create<EsroState>((set, get) => ({
   booted: false,
@@ -575,6 +792,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   characterCourier: null,
   characterFaction: null,
   factionUnlocked: false,
+  // Baseline of unlocks a default character already has, so the first sync only
+  // ever announces things earned during play — never the starting kit on load.
+  seenUnlocks: Array.from(getSkillUnlocks(createInitialSkills(), DEFAULT_BASE_STATS)),
   uiTheme: "default",
   unlockedThemes: [], // Start with no rollable themes unlocked
   setCharacterData: (race, courier, handle, starterSkills, avatar) => {
@@ -605,6 +825,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         createdAt: Date.now(),
       },
     })
+    // The chosen race/courier/starter skills define the real starting kit, so
+    // re-baseline against them silently — anything earned later then announces.
+    get().syncUnlocks({ silent: true })
   },
   setFaction: (factionId) => {
     const faction = FACTIONS.find(f => f.id === factionId)
@@ -615,6 +838,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       uiTheme: factionId,
       characterRace: race || get().characterRace,
     })
+    // Joining a faction unlocks any starter rank titles the player already meets.
+    get().syncFactionTitles()
   },
   setUiTheme: (theme) => set({ uiTheme: theme }),
   unlockTheme: (themeId) => {
@@ -627,6 +852,34 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const { profile, factionUnlocked } = get()
     if (!factionUnlocked && profile.level >= FACTION_UNLOCK_LEVEL) {
       set({ factionUnlocked: true })
+    }
+  },
+
+  syncUnlocks: (opts) => {
+    const current = get().getSkillUnlocks()
+    const seen = new Set(get().seenUnlocks)
+    const newly = [...current].filter((id) => !seen.has(id)) as SkillUnlockId[]
+    if (newly.length === 0) return
+    // Re-baseline first so a notification's own re-render can never double-fire.
+    set({ seenUnlocks: [...current] })
+    if (opts?.silent) return
+    // Escort work lives on the contracts board and faction rites on the faction
+    // page; everything else is reached from the ops hub (map, crafting, archive).
+    const deeplinkFor: Partial<Record<SkillUnlockId, ScreenId>> = {
+      escort_contracts: "contracts",
+      faction_rites: "social",
+    }
+    for (const id of newly) {
+      const label = UNLOCK_LABELS[id] ?? id
+      const isRoute = UNLOCK_KIND[id] === "route"
+      get().addNotification({
+        title: isRoute ? "New route unlocked" : "New feature unlocked",
+        body: isRoute
+          ? `${label} — a new destination is open on the expedition map.`
+          : `${label} is now available.`,
+        priority: "high",
+        deeplink: { screen: deeplinkFor[id] ?? "ops" },
+      })
     }
   },
   
@@ -725,8 +978,34 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       })
     }
 
-    // Reaching a level can satisfy the faction gate.
-    if (result.levelsGained.length) get().checkFactionUnlock()
+    // Reaching a level can satisfy the faction gate and open level-tier routes
+    // and features (deep ruins, escort contracts, anomaly zones…).
+    if (result.levelsGained.length) {
+      get().checkFactionUnlock()
+      get().syncUnlocks()
+    }
+  },
+
+  devSetLevelXp: (level, xp = 0) => {
+    const { profile } = get()
+    const targetLevel = Math.max(1, Math.floor(level))
+    const xpToNext = xpForLevel(targetLevel)
+    // Keep the carried XP inside the current level so the bar never overflows
+    // into a phantom level-up the setter didn't intend.
+    const carriedXp = Math.max(0, Math.min(Math.floor(xp), xpToNext - 1))
+    // Grant the pool this level should have (3 per level past 1), minus points
+    // already spent, so allocation stays consistent after the jump.
+    const earnedPoints = (targetLevel - 1) * POINTS_PER_LEVEL
+    const statPoints = Math.max(0, earnedPoints - spentPoints(profile.allocated))
+
+    set({
+      profile: { ...profile, level: targetLevel, xp: carriedXp, xpToNext, statPoints },
+    })
+
+    // A forced level can cross the faction gate and open level-tier content.
+    get().checkFactionUnlock()
+    get().syncUnlocks()
+    get().logAdminAction("edit_player", get().identity.handle, `Set level to ${targetLevel} (${carriedXp} XP)`)
   },
 
   allocateStat: (stat, amount = 1) => {
@@ -742,6 +1021,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({
       profile: { ...profile, allocated, statPoints: points - spend },
     })
+    // Spending points can cross a stat gate (e.g. Luck 15 opens fishing).
+    get().syncUnlocks()
   },
 
   respecStats: () => {
@@ -861,6 +1142,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         priority: "high",
         deeplink: { screen: "profile" },
       })
+      // The first shiny ever logged also earns a permanent collection title.
+      get().grantCollectionTitles([SHINY_BEAST_TITLE])
       return
     }
     // Otherwise only announce the first sighting; repeats would spam the feed.
@@ -954,6 +1237,32 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     set({ profile: { ...profile, activeMount: creatureId } })
   },
 
+  devUnlockAllMounts: () => {
+    const { profile } = get()
+    const bestiary = { ...(profile.bestiary ?? {}) }
+    // Tame every pack beast and mark it discovered, ignoring the usual
+    // encounter/skill prerequisites so mounts can be tested from a fresh save.
+    for (const creature of TAMEABLE) {
+      const prev = bestiary[creature.id]
+      bestiary[creature.id] = {
+        encounters: prev?.encounters ?? 1,
+        defeats: prev?.defeats ?? 0,
+        firstSeen: prev?.firstSeen ?? Date.now(),
+        tamed: true,
+      }
+    }
+    const tamed = TAMEABLE.map((c) => c.id)
+    set({
+      profile: {
+        ...profile,
+        tamedBeasts: tamed,
+        bestiary,
+        // Equip one so the profile card has something to show immediately.
+        activeMount: profile.activeMount ?? tamed[0] ?? null,
+      },
+    })
+  },
+
   /** Aggregated sub-stat effects across every unlocked skill. */
   getSkillBonuses: () => aggregateSkillBonuses(get().skills),
 
@@ -979,6 +1288,13 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         ? get().debugUnlocks.filter((u) => u !== id)
         : [...get().debugUnlocks, id],
     })
+    // Forcing an unlock on announces it like any other; forcing it off just
+    // drops it from the seen set so it can announce again if re-earned.
+    if (active) {
+      set({ seenUnlocks: get().seenUnlocks.filter((u) => u !== id) })
+    } else {
+      get().syncUnlocks()
+    }
     get().logAdminAction(
       "debug_unlock",
       id,
@@ -999,7 +1315,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
   // Navigation
   screen: "terminal",
-  setScreen: (s) => set({ screen: s }),
+  // Any explicit navigation resets the other-player profile page back to your own.
+  setScreen: (s) => set({ screen: s, viewedProfile: null }),
   opsTab: "expeditions",
   setOpsTab: (t) => set({ opsTab: t }),
   mapFocusNodeId: null,
@@ -1057,11 +1374,28 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Expeditions
   expeditions: seedExpeditions,
   activeExpedition: null,
+  expeditionCooldownUntil: null,
+  getExpeditionCooldownRemaining: () => {
+    const until = get().expeditionCooldownUntil
+    if (!until) return 0
+    return Math.max(0, Math.ceil((until - Date.now()) / 1000))
+  },
   startExpedition: (id, ritualIds) => {
     const exp = get().expeditions.find((e) => e.id === id)
     if (!exp || get().activeExpedition) return
+    // A failed run locks out new launches until the recovery cooldown elapses.
+    if (get().getExpeditionCooldownRemaining() > 0) return
     // Tier gate: some sites only open once the matching skill breakpoint is hit.
     if (exp.requiresUnlock && !get().hasSkillUnlock(exp.requiresUnlock)) return
+    // Faction-warfare gate: contested frontier sites are endgame faction ground.
+    // Only warfare-unlocked faction members may deploy there — this blocks the
+    // expedition DEPLOY button too, not just the Claim/Assault actions, so a
+    // factionless courier can never slip into contested territory.
+    const originNode = getNodeForExpedition(id)
+    if (originNode && isContestedNode(originNode)) {
+      if (!get().getPlayerFactionId()) return
+      if (!get().factionUnlocked) return
+    }
 
     // Callers may pass an explicit ritual set; otherwise use whatever the prep
     // dialog left staged. Filter to known rituals and re-check capacity so a
@@ -1126,7 +1460,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   // Skills — the canonical 15 from config/skills.json, so every skill resolves
   // to a real mechanic in lib/skill-effects.ts.
   skills: createInitialSkills(),
-  loadout: ["scavenging", "gathering", "pathfinding", "lorekeeping"],
+    loadout: ["scavenging", "gathering", "pathfinding", "artisanry"],
   toggleLoadout: (id) =>
     set((s) => {
       if (s.loadout.includes(id)) {
@@ -1149,7 +1483,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   recovery: seedRecovery,
   lastRecovered: null,
   runRecovery: (mode) => {
-    // Translation reads sealed packets, so it needs the Lorekeeping unlock and
+    // Translation reads sealed packets, so it needs the Artisanry unlock and
     // spends salvage rather than relay or resonance.
     if (mode === "translation" && !get().hasSkillUnlock("archive_translation")) return
     const COSTS = {
@@ -1282,6 +1616,12 @@ export const useEsroStore = create<EsroState>((set, get) => ({
           ),
         }
       }
+    } else if (pick.type === "appearance_token") {
+      // Consumable — stack it onto the player's held count.
+      updatedProfile = {
+        ...profile,
+        appearanceResetTokens: (profile.appearanceResetTokens ?? 0) + 1,
+      }
     }
     
     set({
@@ -1316,15 +1656,16 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         success: false,
         message:
           needed === "master_recipes"
-            ? "Requires Ritualism 10 (Marked Work) or Lorekeeping 10 (Lost Techniques)"
+                ? "Requires Ritualism 10 (Marked Work) or Artisanry 15 (Lost Techniques)"
             : "Requires Bladecraft 10 (Blade Smithing) or Marksmanship 10 (Munitions)",
       }
     }
 
     // Faction building upgrades: Apothecary trims material cost, Workshop cuts craft time.
     const buildingBonuses = craftingBonusesFrom(get().factionBuildings)
-    // Skills stack on top: Ritualism (Inscription) trims cost, Bladecraft
-    // (Maintenance) and Gathering (Harvesting) speed the work up.
+    // Skills stack on top: Artisanry (Efficiency) trims material cost,
+    // Artisanry (Technique) speeds the work up, and Ritualism (Sigils)
+    // raises yield.
     const skillFx = get().getSkillBonuses()
     const bonuses = {
       cost: buildingBonuses.cost + skillFx.craftCost,
@@ -1448,6 +1789,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     windowMs: 0,
     lastQty: 0,
     streak: 0,
+    lastMaterialId: null,
   },
   fishingLog: [],
 
@@ -1530,7 +1872,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     // Pick what bit here in the store, not in the view: the component only
     // reports "a bite happened", so it can never nominate its own rare fish.
-    // Rollcraft/Lorekeeping luck also biases the fishing table toward rarity.
+    // Rollcraft/Artisanry luck also biases the fishing table toward rarity.
     const luck = get().getSkillBonuses().rollLuck
     const bait = fishing.baitId ? getBait(fishing.baitId) : undefined
 
@@ -1568,25 +1910,46 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       return
     }
 
-    const fish = getFish(fishing.fishId)
-    if (!fish) return
+    const baseFish = getFish(fishing.fishId)
+    if (!baseFish) return
+
+    const isJunk = baseFish.id === JUNK.id
 
     // Casting (Casting) raises how many land per successful catch.
     const yieldBonus = get().getSkillBonuses().fishingYield
     const qty = Math.max(1, Math.round((1 + yieldBonus) * (1 + Math.random() * 0.5)))
-    const item = fishToItem(fish, qty)
-    const isJunk = fish.id === JUNK.id
+
+    // Luck feeds both the rare-variant roll and the bonus-material roll.
+    const luck = get().getSkillBonuses().rollLuck ?? 0
+
+    // A landed fish may turn out to be its rare visual variant. Junk never does.
+    const variant = isJunk ? null : rollVariant(baseFish.id, Math.random, luck)
+    const fish = variant ? getFish(variant.id) ?? baseFish : baseFish
+    const item = variant ? variantToItem(variant, qty) : fishToItem(fish, qty)
+
+    // A successful (non-junk) catch may also yield a bonus fishing material.
+    const material = isJunk ? null : rollMaterial(Math.random, luck)
+    const materialItem = material ? materialToItem(material, 1) : null
 
     set((s) => {
-      const existing = s.inventory.find((i) => i.id === item.id)
+      // Merge helper: stack onto an existing stack or append.
+      const addStack = (inv: typeof s.inventory, next: typeof item, addQty: number) => {
+        const existing = inv.find((i) => i.id === next.id)
+        return existing
+          ? inv.map((i) => (i.id === next.id ? { ...i, qty: i.qty + addQty } : i))
+          : [...inv, next]
+      }
+
+      let inventory = addStack(s.inventory, item, qty)
+      if (materialItem) inventory = addStack(inventory, materialItem, 1)
+
       return {
-        inventory: existing
-          ? s.inventory.map((i) => (i.id === item.id ? { ...i, qty: i.qty + qty } : i))
-          : [...s.inventory, item],
+        inventory,
         fishing: {
           ...s.fishing,
           phase: "landed",
           lastQty: qty,
+          lastMaterialId: material ? material.id : null,
           // Junk breaks the streak; a real fish extends it.
           streak: isJunk ? 0 : s.fishing.streak + 1,
         },
@@ -1597,6 +1960,10 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
+    // Landing a legendary or mythic fish (or any rare variant) earns titles.
+    if (!isJunk) {
+      get().grantCollectionTitles(fishTitlesForCatch(fish.rarity))
+    }
   },
 
   reelIn: () =>
@@ -1632,7 +1999,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     const target = get().contracts.find((c) => c.id === id)
     if (target?.requiresUnlock && !get().hasSkillUnlock(target.requiresUnlock)) return
 
-    // Negotiation (Lorekeeping) and Appraisal raise the agreed payout at the
+    // Negotiation (Artisanry) and Appraisal raise the agreed payout at the
     // moment the contract is signed, so the bonus is locked into the terms.
     const rewardBonus = get().getSkillBonuses().contractReward
     set((s) => ({
@@ -1697,6 +2064,38 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }))
     return { success: true, message: `${handle} joined the party` }
   },
+  inviteFriendToParty: (friend) => {
+    const { party } = get()
+    const maxSlots = 4
+    if (party.length >= maxSlots)
+      return { success: false, message: "Party is full — remove a member before inviting more" }
+    if (party.some((m) => m.handle === friend.handle))
+      return { success: false, message: `${friend.handle} is already in your party` }
+    const usedSlots = new Set(party.map((m) => m.slot))
+    let slot = 1
+    while (usedSlots.has(slot)) slot += 1
+    const member: PartyMember = {
+      slot,
+      handle: friend.handle,
+      title: friend.title,
+      titleRarity: friend.titleRarity,
+      role: randItem(PARTY_ROLES),
+      status: "idle",
+      avatar: friend.avatar || generateAvatarFromSeed(friend.handle),
+      joinedAt: Date.now(),
+      contribution: 0,
+      expeditionsCompleted: 0,
+    }
+    set((s) => ({
+      party: [...s.party, member].sort((a, b) => a.slot - b.slot),
+      factionActivity: pushActivity(s.factionActivity, {
+        kind: "join",
+        handle: friend.handle,
+        text: "joined your party",
+      }),
+    }))
+    return { success: true, message: `${friend.handle} joined the party` }
+  },
   removePartyMember: (slot) =>
     set((s) => ({
       party: s.party.filter((m) => m.slot !== slot || m.leader),
@@ -1714,6 +2113,78 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   factionBuildings: FACTION_BUILDINGS,
   factionRallies: seedFactionRallies,
   factionActivity: seedFactionActivity,
+  factionNodesCaptured: 0,
+  factionBuildingsUpgraded: 0,
+  factionStructuresDestroyed: 0,
+
+  syncFactionTitles: () => {
+    const {
+      profile,
+      factionNodesCaptured,
+      factionBuildingsUpgraded,
+      factionStructuresDestroyed,
+    } = get()
+    // Rank titles only make sense once the player actually belongs to a faction.
+    const rank = profile.faction ? profile.faction.rank : 0
+    const qualifying = unlockedFactionTitles({
+      rank,
+      nodesCaptured: factionNodesCaptured,
+      buildingsUpgraded: factionBuildingsUpgraded,
+      structuresDestroyed: factionStructuresDestroyed,
+    })
+    const owned = new Set(profile.ownedTitles.map((t) => t.label))
+    const newlyUnlocked = qualifying.filter((t) => !owned.has(t.label))
+    if (newlyUnlocked.length === 0) return
+
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        ownedTitles: [
+          ...s.profile.ownedTitles,
+          ...newlyUnlocked.map((t) => ({
+            id: t.id,
+            label: t.label,
+            rarity: t.rarity,
+            equipped: false,
+            source: "faction" as const,
+          })),
+        ],
+      },
+    }))
+
+    for (const t of newlyUnlocked) {
+      get().addNotification({
+        title: "Faction Title Unlocked",
+        body: `You earned the "${t.label}" title — ${t.requirement}.`,
+        priority: "normal",
+        deeplink: { screen: "profile", tab: "titles" },
+      })
+    }
+  },
+
+  grantCollectionTitles: (defs) => {
+    if (defs.length === 0) return
+    const { profile } = get()
+    const owned = new Set(profile.ownedTitles.map((t) => t.id))
+    const fresh = defs.filter((d) => !owned.has(d.id))
+    if (fresh.length === 0) return
+
+    set((s) => ({
+      profile: {
+        ...s.profile,
+        ownedTitles: [...s.profile.ownedTitles, ...fresh.map(toOwnedTitle)],
+      },
+    }))
+
+    for (const d of fresh) {
+      get().addNotification({
+        title: "Title Unlocked",
+        body: `You earned the "${d.label}" title — ${d.blurb}`,
+        priority: "high",
+        deeplink: { screen: "profile", tab: "titles" },
+      })
+    }
+  },
 
   contributeToProject: (projectId, amount) => {
     const { factionProjects, profile } = get()
@@ -1775,6 +2246,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
+    if (rankedUp) get().syncFactionTitles()
+
     return {
       success: true,
       message: willComplete
@@ -1819,12 +2292,14 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       factionBuildings: s.factionBuildings.map((b) =>
         b.id === buildingId ? { ...b, level: newLevel } : b,
       ),
+      factionBuildingsUpgraded: s.factionBuildingsUpgraded + 1,
       factionActivity: pushActivity(s.factionActivity, {
         kind: "building",
         handle: s.identity.handle,
         text: `upgraded the ${building.label} to Lv.${newLevel}`,
       }),
     }))
+    get().syncFactionTitles()
     return { success: true, message: `${building.label} upgraded to Lv.${newLevel}` }
   },
 
@@ -1908,6 +2383,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       }
     })
 
+    if (rankedUp) get().syncFactionTitles()
+
     return {
       success: true,
       message: willComplete
@@ -1948,8 +2425,75 @@ export const useEsroStore = create<EsroState>((set, get) => ({
   removeFriend: (handle) => {
     set((state) => ({
       friends: state.friends.filter((f) => f.handle !== handle),
+      // If the removed player is currently open in the viewer, close it.
+      viewedPlayer: state.viewedPlayer?.handle === handle ? null : state.viewedPlayer,
     }))
   },
+
+  // Player profile viewer — shared modal opened from friends or party lists.
+  viewedPlayer: null,
+  viewPlayer: (player) => set({ viewedPlayer: player }),
+  closePlayerProfile: () => set({ viewedPlayer: null }),
+
+  // Direct messages (private one-to-one) — seeded fresh each session.
+  directMessages: [
+    { id: "dm-1", withHandle: "@Relay3e8f2", direction: "in", body: "Hey — you running the deep ruins circuit tonight?", at: Date.now() - 1000 * 60 * 62, read: true },
+    { id: "dm-2", withHandle: "@Relay3e8f2", direction: "out", body: "Planning to. Need a fourth for the escort leg?", at: Date.now() - 1000 * 60 * 60, read: true },
+    { id: "dm-3", withHandle: "@Relay3e8f2", direction: "in", body: "Yeah, ping me when your party opens up.", at: Date.now() - 1000 * 60 * 12, read: false },
+    { id: "dm-4", withHandle: "@Relay9d2e7", direction: "in", body: "Got that archive fragment translated. Sending coords.", at: Date.now() - 1000 * 60 * 60 * 5, read: false },
+    { id: "dm-5", withHandle: "@Relay6c4d3", direction: "out", body: "Thanks for the route tip, saved me a whole leg.", at: Date.now() - 1000 * 60 * 60 * 26, read: true },
+    { id: "dm-6", withHandle: "@Relay6c4d3", direction: "in", body: "Anytime. Safe roads.", at: Date.now() - 1000 * 60 * 60 * 25, read: true },
+  ] as DirectMessage[],
+  activeConversation: null,
+  openConversation: (handle) => {
+    set((state) => ({
+      screen: "messages",
+      activeConversation: handle,
+      directMessages: state.directMessages.map((m) =>
+        m.withHandle === handle && m.direction === "in" ? { ...m, read: true } : m,
+      ),
+    }))
+  },
+  setActiveConversation: (handle) => {
+    set((state) => ({
+      activeConversation: handle,
+      directMessages: handle
+        ? state.directMessages.map((m) =>
+            m.withHandle === handle && m.direction === "in" ? { ...m, read: true } : m,
+          )
+        : state.directMessages,
+    }))
+  },
+  sendDirectMessage: (toHandle, body) => {
+    const trimmed = body.trim()
+    if (!trimmed) return
+    set((state) => ({
+      directMessages: [
+        ...state.directMessages,
+        {
+          id: `dm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          withHandle: toHandle,
+          direction: "out",
+          body: trimmed,
+          at: Date.now(),
+          read: true,
+        },
+      ],
+    }))
+  },
+  markConversationRead: (handle) => {
+    set((state) => ({
+      directMessages: state.directMessages.map((m) =>
+        m.withHandle === handle && m.direction === "in" ? { ...m, read: true } : m,
+      ),
+    }))
+  },
+  // Open the full profile page: switch to the Profile screen showing this player
+  // (read-only) and dismiss the quick-look modal in the same update.
+  viewedProfile: null,
+  openPlayerProfilePage: (player) =>
+    set({ viewedProfile: player, viewedPlayer: null, screen: "profile" }),
+  clearViewedProfile: () => set({ viewedProfile: null }),
   
   // Trade
   tradeOffers: [
@@ -2128,6 +2672,32 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       identity: { ...identity, avatar: updatedAvatar },
     })
   },
+
+  resetBaseAppearance: (nextAvatar) => {
+    const { profile, identity } = get()
+    if ((profile.appearanceResetTokens ?? 0) < 1) return false
+
+    // The editor only owns the base look. Force every cosmetic layer back to
+    // "none" so a reset gives a clean face; owned cosmetics stay unlocked and
+    // can simply be re-equipped from the wardrobe afterwards.
+    const COSMETIC_LAYERS: AvatarLayerType[] = ["mouth", "accessory", "hat", "flair"]
+    const layers = nextAvatar.layers.map((l) =>
+      COSMETIC_LAYERS.includes(l.type) ? { ...l, variant: 0 } : l
+    )
+
+    set({
+      identity: {
+        ...identity,
+        avatar: { ...identity.avatar, seed: nextAvatar.seed, layers },
+      },
+      profile: {
+        ...profile,
+        appearanceResetTokens: (profile.appearanceResetTokens ?? 0) - 1,
+        vanityItems: profile.vanityItems.map((v) => ({ ...v, equipped: false })),
+      },
+    })
+    return true
+  },
   
   // Admin/Debug - set handle (admin only)
   setHandle: (newHandle) => {
@@ -2156,9 +2726,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       24: "common", 25: "uncommon", 26: "rare", 27: "epic", 28: "legendary", 29: "mythic",
     }
     const layers: { type: AvatarLayerType; maxVariants: number; labels: string[]; mythicStart?: number; rarityByVariant?: Record<number, Rarity> }[] = [
-      { type: "hair", maxVariants: 8, labels: ["Short Cut", "Long Flow", "Spiky", "Slicked", "Braided", "Mohawk", "Curly", "Bald Fade"] },
+      { type: "hair", maxVariants: 10, labels: ["Short Cut", "Long Flow", "Spiky", "Slicked", "Braided", "Mohawk", "Curly", "Bald Fade", "Slicked Back", "Undercut"] },
       { type: "eyes", maxVariants: 6, labels: ["Standard", "Narrow", "Wide", "Glowing", "Cyber", "Ancient"] },
-      { type: "mouth", maxVariants: 5, labels: ["Neutral", "Smirk", "Frown", "Open", "Masked"] },
+      { type: "mouth", maxVariants: 7, rarityByVariant: { 1: "common", 2: "common", 3: "common", 4: "common", 5: "uncommon", 6: "uncommon" }, labels: ["Neutral", "Rose Lipstick", "Crimson Lipstick", "Coral Lipstick", "Berry Lipstick", "Plum Lipstick", "Nude Lipstick"] },
       { type: "accessory", maxVariants: 28, mythicStart: 17, rarityByVariant: TIDAL_ACCESSORY_RARITY, labels: ["None", "Glasses", "Eyepatch", "Scar", "Visor", "Shades", "Face Mask", "Worn Bandana", "Relay Earpiece", "Signal Monocle", "Route Mask", "Deep Scanner", "Rift Lens", "Echo Mask", "Void Visor", "Prismatic Lens", "All-Seeing Eye", "Voidtouched Gaze", "Relay Sea Mask", "Shardheart Visor", "Eternal Courier's Mark", "Primordial Echo", "Tide Goggles", "Ashfall Veil", "Currentweave Mask", "Stormglass Lens", "Leviathan's Regard", "Tidecaller's Visage"] },
       { type: "hat", maxVariants: 30, mythicStart: 19, rarityByVariant: TIDAL_HAT_RARITY, labels: ["None", "Cap", "Hood", "Antenna", "Horns", "Halo", "Crown", "Dust Hood", "Signal Beanie", "Worn Helmet", "Relay Headset", "Archive Hood", "Scout Helm", "Drift Crown", "Echo Circlet", "Signal Crest", "Void Helm", "Rift Diadem", "Primordial Antlers", "Crown of the Relay Sea", "Shardheart Coronet", "Eternal Courier's Crest", "Voidtouched Halo", "Primordial Echo Crown", "Reed Hat", "Lantern Rig", "Deepline Coil", "Stormglass Crown", "Kelpwarden Wreath", "Abyssal Diadem"] },
       { type: "flair", maxVariants: 18, mythicStart: 13, labels: ["None", "Pulse Glow", "Static Aura", "Sparkle", "Soft Glow", "Dust Motes", "Signal Flicker", "Route Trails", "Echo Ripples", "Data Stream", "Void Shimmer", "Prismatic Aura", "Celestial Flame", "Relay Sea Aura", "Shardheart Radiance", "Eternal Courier's Light", "Voidtouched Presence", "Primordial Resonance"] },
@@ -2230,6 +2800,22 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       { id: "ashen_sovereign", label: "Ashen Sovereign", rarity: "mythic", equipped: false, source: "Admin unlock" },
       // Admin exclusive
       { id: "system_overseer", label: "System Overseer", rarity: "admin", equipped: false, source: "Admin exclusive" },
+      // Faction titles (rank / territory / construction / destruction) — see config/faction.ts
+      ...FACTION_TITLES.map((t) => ({
+        id: t.id,
+        label: t.label,
+        rarity: t.rarity,
+        equipped: false,
+        source: "Admin unlock",
+      })),
+      // Collection titles (shiny beasts, ultra-rare fish) — see config/collection-titles.ts
+      ...[SHINY_BEAST_TITLE, ...FISH_TITLES.map((f) => f.title)].map((t) => ({
+        id: t.id,
+        label: t.label,
+        rarity: t.rarity,
+        equipped: false,
+        source: "Admin unlock",
+      })),
     ]
     
     // Merge with existing titles (don't duplicate)
@@ -2289,15 +2875,40 @@ export const useEsroStore = create<EsroState>((set, get) => ({
 
     const mult = Math.max(0, Math.min(1, lootMultiplier))
 
-    // Total wipe: all cargo is lost, no rewards granted.
+    // A territory claim run travels via the normal sim, then fights a battle on
+    // arrival. Capture the squad + pending target before activeExpedition clears.
+    const pending = get().pendingTerritory
+    const pendingNode = pending ? getNodeById(pending.nodeId) : null
+    const isTerritoryRun = Boolean(
+      pending && pendingNode && pendingNode.expeditionIds.includes(activeExpedition.id),
+    )
+    const claimSquad = isTerritoryRun ? [...(activeExpedition.partyMembers ?? [])] : []
+
+    // Total wipe: all cargo is lost, no rewards granted, and a recovery
+    // cooldown blocks new launches so failure carries a real cost. A wiped claim
+    // run never reaches the battle.
     if (mult <= 0) {
-      set({ activeExpedition: null })
+      set({
+        activeExpedition: null,
+        expeditionCooldownUntil: Date.now() + EXPEDITION_FAIL_COOLDOWN_MS,
+        ...(isTerritoryRun ? { pendingTerritory: null } : {}),
+      })
       return
     }
 
     // Gathering skill shapes the haul: carryCapacity adds slots, rareChance
     // biases the rarity roll, materialYield/salvageYield grow the stack sizes.
     const fx = get().getSkillBonuses()
+
+    // Signature-landmark boon: whichever faction currently holds the site amplifies
+    // one reward stream for every expedition its members run. Seizing a rival's
+    // homeland transfers this perk — the core incentive to invade.
+    const playerFactionId = get().getPlayerFactionId()
+    const landmarkBoon = playerFactionId
+      ? getActiveLandmarkBoon(get().nodeControl, playerFactionId)
+      : undefined
+    const boonMult = (type: LandmarkBoonType) =>
+      landmarkBoon && landmarkBoon.type === type ? 1 + landmarkBoon.value : 1
 
     const lootTypes = ["Archive Fragment", "Signal Shard", "Relay Component", "Ancient Glyph", "Void Essence"]
     const baseRewards = Math.max(1, Math.round((2 + Math.floor(Math.random() * 3)) * mult)) // up to 2-4 items
@@ -2310,7 +2921,9 @@ export const useEsroStore = create<EsroState>((set, get) => ({
       (get().hasSkillUnlock("pack_beasts") ? 1 : 0) + (get().hasSkillUnlock("pack_train") ? 2 : 0)
     const packSlots = unlockCarry + (mount ? packContribution(mount).carry : 0)
     // Extra loot slots are whole items, so they scale with what made it back.
-    const numRewards = baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)
+    const numRewards = Math.round(
+      (baseRewards + Math.round((fx.carryCapacity + packSlots) * mult)) * boonMult("loot"),
+    )
 
     const newItems: InventoryItem[] = []
     for (let i = 0; i < numRewards; i++) {
@@ -2329,7 +2942,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         label: lootLabel,
         aspect: "material",
         rarity,
-        qty: Math.max(1, Math.round(baseQty * (1 + fx.materialYield + fx.salvageYield))),
+        qty: Math.max(1, Math.round(baseQty * (1 + fx.materialYield + fx.salvageYield) * boonMult("materials"))),
         identified: true,
         description: `Salvaged ${lootLabel.toLowerCase()} recovered during the expedition.`,
         type: "material",
@@ -2337,7 +2950,7 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     }
     
     // Add token reward, scaled by the loot that made it back.
-    const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult)
+    const tokenReward = Math.round((50 + Math.floor(Math.random() * 150)) * mult * boonMult("tokens"))
 
     // Ritual book drops. Hidden/deep routes are the main source; ordinary
     // routes have a small chance at the minor books only.
@@ -2380,15 +2993,269 @@ export const useEsroStore = create<EsroState>((set, get) => ({
     })
 
     // XP is awarded after the loot commit so a level-up notification lands last.
-    // This also revives Lorekeeping's xpBonus hook, which had nothing to scale.
+    // xpBonus is fed by the Scholar's Wake ritual and by Pathfinding's Fieldcraft sub-stat.
     const baseXp = expDef?.rewards.xp ?? 0
     if (baseXp > 0) {
-      get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult))
+      get().awardXp(Math.round(baseXp * (1 + fx.xpBonus) * mult * boonMult("xp")))
     }
 
     if (learnedBook) get().learnRitual(learnedBook)
+
+    // Squad reached the contested site �� trigger the invaders-vs-defenders battle.
+    if (isTerritoryRun && pending) {
+      const factionId = get().getPlayerFactionId()
+      if (factionId) {
+        const { party, identity } = get()
+        const attacker = groupFromHandles(
+          claimSquad,
+          factionId,
+          identity,
+          party,
+          get().getPlayerStats(),
+        )
+        get().beginTerritoryBattle(pending.nodeId, pending.kind, attacker)
+      } else {
+        set({ pendingTerritory: null })
+      }
+    }
   },
-  
+
+  // ============ TERRITORY WAR ============
+  nodeControl: buildInitialNodeControl(),
+  nodeGarrisons: {},
+  factionBases: buildInitialFactionBases(FACTIONS.map((f) => f.id), null),
+  activeBattle: null,
+  pendingTerritory: null,
+
+  getPlayerFactionId: () => {
+    const { characterFaction, profile } = get()
+    return (characterFaction?.id ?? profile.faction?.id ?? null) as RaceId | null
+  },
+
+  canClaimNode: (nodeId) => {
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return { ok: false, reason: "Join a faction to contest territory." }
+    const node = getNodeById(nodeId)
+    if (!node || !isClaimableNode(node)) return { ok: false, reason: "This site can't be claimed." }
+    if (get().nodeControl[nodeId] === factionId)
+      return { ok: false, reason: "Your faction already holds this site." }
+    const required = Math.max(nodeRequiredLevel(node), ENDGAME_NODE_LEVEL)
+    if (!get().factionUnlocked || get().profile.level < required)
+      return { ok: false, reason: `Requires level ${required} to contest this territory.` }
+    if (!isNodeClaimableBy(get().nodeControl, factionId, nodeId))
+      return { ok: false, reason: "Not connected to your territory — claim an adjacent site first." }
+    return { ok: true }
+  },
+
+  canAssaultBase: (nodeId) => {
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return { ok: false, reason: "Join a faction to raid rival bases." }
+    if (!get().factionUnlocked)
+      return { ok: false, reason: `Reach level ${FACTION_UNLOCK_LEVEL} to unlock faction warfare.` }
+    const node = getNodeById(nodeId)
+    if (!node || node.kind !== "faction_hq" || !node.factionId)
+      return { ok: false, reason: "This isn't a faction base." }
+    if (node.factionId === factionId) return { ok: false, reason: "This is your own base." }
+    const frontier = new Set(getControlledNodeIds(get().nodeControl, factionId))
+    const adjacent = getAdjacentNodeIds(nodeId).some((a) => frontier.has(a))
+    if (!adjacent)
+      return { ok: false, reason: "Push your territory adjacent to this base first." }
+    return { ok: true }
+  },
+
+  startTerritoryClaim: (nodeId) => {
+    if (!get().canClaimNode(nodeId).ok) return
+    if (get().activeExpedition || get().activeBattle) return
+    const node = getNodeById(nodeId)
+    if (!node) return
+    const expId = node.expeditionIds[0]
+    if (expId) {
+      // Travel to the site via the normal expedition sim; the battle fires on
+      // arrival (see completeActiveExpedition).
+      set({ pendingTerritory: { nodeId, kind: "claim" } })
+      get().startExpedition(expId)
+    } else {
+      const factionId = get().getPlayerFactionId()
+      if (!factionId) return
+      const { party, identity } = get()
+      const handles = assembleSquadHandles(party, identity.handle, 4)
+      const attacker = groupFromHandles(handles, factionId, identity, party, get().getPlayerStats())
+      get().beginTerritoryBattle(nodeId, "claim", attacker)
+    }
+  },
+
+  startBaseAssault: (nodeId) => {
+    if (!get().canAssaultBase(nodeId).ok) return
+    if (get().activeExpedition || get().activeBattle) return
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return
+    const { party, identity } = get()
+    const handles = assembleSquadHandles(party, identity.handle, 4)
+    const attacker = groupFromHandles(handles, factionId, identity, party, get().getPlayerStats())
+    get().beginTerritoryBattle(nodeId, "base_assault", attacker)
+  },
+
+  beginTerritoryBattle: (nodeId, kind, attacker) => {
+    const factionId = get().getPlayerFactionId()
+    if (!factionId) return
+    const node = getNodeById(nodeId)
+    if (!node) return
+
+    let defenderGroup: StoredGroup
+    let defenderFaction: RaceId | null
+    let monster = false
+    if (kind === "claim") {
+      const stored = get().nodeGarrisons[nodeId]
+      if (stored) {
+        defenderGroup = stored
+        defenderFaction = stored.factionId
+      } else {
+        defenderGroup = buildMonsterGarrison(Math.max(nodeRequiredLevel(node), ENDGAME_NODE_LEVEL))
+        defenderFaction = null
+        monster = true
+      }
+    } else {
+      defenderFaction = node.factionId ?? null
+      defenderGroup = buildFactionGarrison(defenderFaction ?? factionId, BASE_DEFENSE_LEVEL)
+    }
+
+    const { log, result, margin } = simulateTerritoryBattle(attacker, defenderGroup)
+
+    let buildingsHit: string[] | undefined
+    let integrityLost: number | undefined
+    if (kind === "base_assault" && result === "win" && defenderFaction) {
+      const base = get().factionBases[defenderFaction]
+      if (base) {
+        const dmg = planBaseAssaultDamage(margin, base)
+        buildingsHit = dmg.buildingsHit
+        integrityLost = dmg.integrityLost
+      }
+    }
+
+    set({
+      activeBattle: {
+        nodeId,
+        nodeLabel: node.label,
+        kind,
+        attacker: { factionId, group: attacker },
+        defender: { factionId: defenderFaction, group: defenderGroup, monster },
+        log,
+        result,
+        margin,
+        buildingsHit,
+        integrityLost,
+      },
+      pendingTerritory: null,
+    })
+  },
+
+  resolveTerritoryBattle: () => {
+    const battle = get().activeBattle
+    if (!battle) return
+
+    if (battle.result === "win") {
+      if (battle.kind === "claim") {
+        set((s) => ({
+          nodeControl: { ...s.nodeControl, [battle.nodeId]: battle.attacker.factionId },
+          // Store the victors as the site's new garrison — buffs already stripped.
+          nodeGarrisons: { ...s.nodeGarrisons, [battle.nodeId]: battle.attacker.group },
+          factionNodesCaptured: s.factionNodesCaptured + 1,
+        }))
+        get().syncFactionTitles()
+      } else if (battle.kind === "base_assault" && battle.defender.factionId) {
+        const now = Date.now()
+        const destroyed = (battle.buildingsHit ?? []).length
+        set((s) => {
+          const base = s.factionBases[battle.defender.factionId as RaceId]
+          if (!base) return {}
+          const hit = new Set(battle.buildingsHit ?? [])
+          const buildings = base.buildings.map((b) =>
+            hit.has(b.id) ? { ...b, disabledUntil: now + BUILDING_DISABLE_MS } : b,
+          )
+          const integrity = Math.max(0, base.integrity - (battle.integrityLost ?? 0))
+          return {
+            factionBases: {
+              ...s.factionBases,
+              [base.factionId]: { ...base, integrity, buildings, lastRecoveredAt: now },
+            },
+            factionStructuresDestroyed: s.factionStructuresDestroyed + destroyed,
+          }
+        })
+        if (destroyed > 0) get().syncFactionTitles()
+      }
+    }
+
+    set({ activeBattle: null })
+    // A siege just happened — rivals answer with their own expansion.
+    get().runRivalExpansionTick()
+  },
+
+  runRivalExpansionTick: () => {
+    const playerFaction = get().getPlayerFactionId()
+    const rivals = FACTIONS.map((f) => f.id).filter((id) => id !== playerFaction)
+    const control: NodeControl = { ...get().nodeControl }
+    const garrisons: Record<string, StoredGroup> = { ...get().nodeGarrisons }
+    const lostNodes: string[] = []
+
+    for (const rival of rivals) {
+      const candidates = MAP_NODES.filter((n) => isNodeClaimableBy(control, rival, n.id))
+      if (candidates.length === 0) continue
+      // Prefer soft neutral ground; fall back to biting into a held node.
+      const neutral = candidates.filter((n) => !control[n.id])
+      const pool = neutral.length ? neutral : candidates
+      const target = pool[Math.floor(Math.random() * pool.length)]
+
+      const rivalGroup = buildFactionGarrison(rival, ENDGAME_NODE_LEVEL)
+      const defender =
+        garrisons[target.id] ??
+        buildMonsterGarrison(Math.max(nodeRequiredLevel(target), ENDGAME_NODE_LEVEL))
+      const { result } = simulateTerritoryBattle(rivalGroup, defender)
+      if (result === "win") {
+        if (control[target.id] === playerFaction) lostNodes.push(target.label)
+        control[target.id] = rival
+        garrisons[target.id] = rivalGroup
+      }
+    }
+
+    set({ nodeControl: control, nodeGarrisons: garrisons })
+
+    if (lostNodes.length > 0) {
+      const now = Date.now()
+      set((s) => ({
+        profile: {
+          ...s.profile,
+          notifications: [
+            {
+              id: now,
+              title: "Territory lost",
+              body: `Rival factions seized ${lostNodes.join(", ")}.`,
+              priority: "high" as const,
+              state: "unread" as const,
+              createdAt: now,
+            },
+            ...s.profile.notifications,
+          ],
+        },
+      }))
+    }
+  },
+
+  recoverBases: () => {
+    const now = Date.now()
+    set((s) => {
+      let changed = false
+      const bases: Record<string, FactionBaseState> = { ...s.factionBases }
+      for (const key of Object.keys(bases)) {
+        const next = recoverBaseState(bases[key], now)
+        if (next !== bases[key]) {
+          bases[key] = next
+          changed = true
+        }
+      }
+      return changed ? { factionBases: bases } : {}
+    })
+  },
+
   // Admin/Debug - inject test chat messages with all title rarities to PUBLIC channel
   injectTestChatMessages: () => {
     const { messages } = get()

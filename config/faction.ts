@@ -4,6 +4,7 @@ import type {
   FactionBuildingEffect,
   FactionPerk,
   FactionRally,
+  Rarity,
 } from "@/lib/types"
 
 // ============ RANK TIERS ============
@@ -266,3 +267,100 @@ export const seedFactionActivity: FactionActivity[] = [
   { id: "fa5", kind: "rally", handle: "@palesignal", text: "joined Signal Storm Response", at: now - 1000 * 60 * 120 },
   { id: "fa6", kind: "join", handle: "@Relay1c4a9", text: "joined the Waykeepers", at: now - 1000 * 60 * 240 },
 ]
+
+// ============ FACTION TITLES (earned through faction gameplay) ============
+
+/** The axis of faction play a title is earned along. */
+export type FactionTitleCategory = "rank" | "territory" | "construction" | "destruction"
+
+export interface FactionTitleDef {
+  id: string
+  label: string
+  rarity: Rarity
+  category: FactionTitleCategory
+  /** Minimum value of the category's tracked metric required to unlock. */
+  threshold: number
+  /** Short human-readable unlock requirement. */
+  requirement: string
+}
+
+/** Lifetime faction progress used to evaluate which titles are unlocked. */
+export interface FactionTitleProgress {
+  /** Current faction rank. */
+  rank: number
+  /** Lifetime territory nodes captured (control claimed). */
+  nodesCaptured: number
+  /** Lifetime faction building upgrades performed. */
+  buildingsUpgraded: number
+  /** Lifetime enemy structures knocked offline in base assaults. */
+  structuresDestroyed: number
+}
+
+export const EMPTY_FACTION_PROGRESS: FactionTitleProgress = {
+  rank: 0,
+  nodesCaptured: 0,
+  buildingsUpgraded: 0,
+  structuresDestroyed: 0,
+}
+
+export const FACTION_TITLE_CATEGORY_META: Record<
+  FactionTitleCategory,
+  { label: string; icon: string; blurb: string }
+> = {
+  rank: { label: "Rank", icon: "▲", blurb: "Rise through the faction hierarchy" },
+  territory: { label: "Territory", icon: "◈", blurb: "Capture and hold contested nodes" },
+  construction: { label: "Construction", icon: "⚒", blurb: "Upgrade your faction's structures" },
+  destruction: { label: "Destruction", icon: "✦", blurb: "Break enemy structures in assaults" },
+}
+
+export const FACTION_TITLES: FactionTitleDef[] = [
+  // Rank — climbing the hierarchy.
+  { id: "ft-rank-1", label: "Route Tender", rarity: "common", category: "rank", threshold: 1, requirement: "Reach Rank 1" },
+  { id: "ft-rank-2", label: "Signal Keeper", rarity: "uncommon", category: "rank", threshold: 3, requirement: "Reach Rank 3" },
+  { id: "ft-rank-3", label: "Waystone Keeper", rarity: "rare", category: "rank", threshold: 5, requirement: "Reach Rank 5" },
+  { id: "ft-rank-4", label: "Captain of the Line", rarity: "epic", category: "rank", threshold: 8, requirement: "Reach Rank 8" },
+  { id: "ft-rank-5", label: "Warlord Ascendant", rarity: "legendary", category: "rank", threshold: 10, requirement: "Reach Rank 10" },
+  { id: "ft-rank-6", label: "Archon Eternal", rarity: "mythic", category: "rank", threshold: 11, requirement: "Reach Rank 11" },
+
+  // Territory — controlling contested ground.
+  { id: "ft-terr-1", label: "Ground Claimer", rarity: "common", category: "territory", threshold: 1, requirement: "Capture 1 node" },
+  { id: "ft-terr-2", label: "Holdfast", rarity: "uncommon", category: "territory", threshold: 3, requirement: "Capture 3 nodes" },
+  { id: "ft-terr-3", label: "Territory Warden", rarity: "rare", category: "territory", threshold: 6, requirement: "Capture 6 nodes" },
+  { id: "ft-terr-4", label: "Marchlord", rarity: "epic", category: "territory", threshold: 10, requirement: "Capture 10 nodes" },
+  { id: "ft-terr-5", label: "Dominion Keeper", rarity: "legendary", category: "territory", threshold: 16, requirement: "Capture 16 nodes" },
+
+  // Construction — building the faction up.
+  { id: "ft-build-1", label: "Foundation Layer", rarity: "common", category: "construction", threshold: 1, requirement: "Upgrade 1 structure" },
+  { id: "ft-build-2", label: "Master Builder", rarity: "uncommon", category: "construction", threshold: 3, requirement: "Upgrade 3 structures" },
+  { id: "ft-build-3", label: "Architect of the Cause", rarity: "rare", category: "construction", threshold: 6, requirement: "Upgrade 6 structures" },
+  { id: "ft-build-4", label: "Grand Architect", rarity: "epic", category: "construction", threshold: 10, requirement: "Upgrade 10 structures" },
+
+  // Destruction — tearing enemy holdings down.
+  { id: "ft-dest-1", label: "Wrecker", rarity: "common", category: "destruction", threshold: 1, requirement: "Destroy 1 structure" },
+  { id: "ft-dest-2", label: "Siegebreaker", rarity: "uncommon", category: "destruction", threshold: 3, requirement: "Destroy 3 structures" },
+  { id: "ft-dest-3", label: "Ruin-Bringer", rarity: "rare", category: "destruction", threshold: 6, requirement: "Destroy 6 structures" },
+  { id: "ft-dest-4", label: "Bastion Breaker", rarity: "epic", category: "destruction", threshold: 10, requirement: "Destroy 10 structures" },
+  { id: "ft-dest-5", label: "Worldrender", rarity: "legendary", category: "destruction", threshold: 16, requirement: "Destroy 16 structures" },
+]
+
+/** The tracked metric for a given category out of a progress snapshot. */
+export function factionTitleMetric(
+  category: FactionTitleCategory,
+  p: FactionTitleProgress,
+): number {
+  switch (category) {
+    case "rank":
+      return p.rank
+    case "territory":
+      return p.nodesCaptured
+    case "construction":
+      return p.buildingsUpgraded
+    case "destruction":
+      return p.structuresDestroyed
+  }
+}
+
+/** All faction titles the given progress currently satisfies. */
+export function unlockedFactionTitles(p: FactionTitleProgress): FactionTitleDef[] {
+  return FACTION_TITLES.filter((t) => factionTitleMetric(t.category, p) >= t.threshold)
+}

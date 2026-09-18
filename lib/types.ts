@@ -14,6 +14,7 @@ export type ChannelId =
 
 export type ScreenId =
   | "terminal"
+  | "messages"
   | "ops"
   | "contracts"
   | "social"
@@ -126,6 +127,12 @@ export interface FactionBuilding {
   baseTokenCost: number
   /** Materials consumed for the first level; scales up per level. */
   baseMaterials: { itemId: string; label: string; qty: number }[]
+  /**
+   * Transient: epoch ms until which a base-assault has knocked this building
+   * offline. While set and in the future, the building's bonus is suppressed
+   * and it shows a "damaged — recovering" state. Absent on undamaged buildings.
+   */
+  disabledUntil?: number
 }
 
 export interface FactionPerk {
@@ -171,10 +178,16 @@ export interface ChatMessage {
   reactions?: { emoji: string; count: number }[]
 }
 
+/**
+ * A single private message in a one-to-one conversation. Conversation-centric:
+ * every message records the *other* participant (`withHandle`) and whether it
+ * was sent or received (`direction`), so grouping never depends on knowing the
+ * player's own handle. `read` is only meaningful for incoming messages.
+ */
 export interface DirectMessage {
   id: string
-  fromHandle: string
-  toHandle: string
+  withHandle: string
+  direction: "in" | "out"
   body: string
   at: number
   read: boolean
@@ -385,9 +398,33 @@ export interface InventoryItem {
   qty: number
   identified: boolean
   description: string
-  type?: "material" | "consumable" | "equipment" | "quest" | "misc"
+  type?: "material" | "consumable" | "equipment" | "quest" | "misc" | "fish" | "crafting_material"
   effects?: string[]
   duration?: number // in seconds for buffs
+  /**
+   * Optional fields added for the fishing content pack. All optional so existing
+   * items, seeds and saves stay valid; only fishing rewards populate them.
+   */
+  /** Finer-grained kind within `type`, e.g. "fishing" for fishing-only materials. */
+  subtype?: string
+  /** Transparent pixel-art sprite path. When set, inventory renders it instead of the rarity pip. */
+  image?: string
+  /** Modest reference value for future vendor/trade tooling. Not wired to a sell action yet. */
+  sellValue?: number
+  /** Whether the item may be offered in trades. Absent is treated as tradeable. */
+  tradeable?: boolean
+  /** For fish: the base species id, so variants group under their parent. */
+  fishCategory?: string
+  /** Marks a rare visual variant of a base fish. */
+  isVariant?: boolean
+  /** The base fish id this is a variant of. */
+  variantOf?: string
+  /** How the item is obtained, e.g. "fishing_only". */
+  obtainMethod?: string
+  /** Free-form tags for filtering and future crafting lookups. */
+  tags?: string[]
+  /** Short crafting-use hint shown in the detail panel. */
+  craftingUse?: string
 }
 
 /** Where the line currently is in the cast -> bite -> hook loop. */
@@ -408,6 +445,8 @@ export interface FishingState {
   lastQty: number
   /** Consecutive successful catches — drives the streak readout. */
   streak: number
+  /** Bonus fishing material dropped on the last catch, if any. Drives the landed-panel bonus line. */
+  lastMaterialId?: string | null
 }
 
 export interface FishingCatch {
@@ -488,6 +527,28 @@ export interface Friend {
   note?: string
 }
 
+/**
+ * Normalized view of another player, assembled from a Friend or PartyMember so
+ * the shared player-profile modal can render either source consistently.
+ */
+export interface PlayerView {
+  handle: string
+  title?: string
+  titleRarity?: Rarity
+  avatar?: AvatarConfig
+  faction?: string
+  /** Presence label, normalized across Friend and PartyMember status sets. */
+  status?: "online" | "away" | "offline" | "ready" | "idle" | "deployed"
+  role?: string
+  contribution?: number
+  expeditionsCompleted?: number
+  note?: string
+  lastSeen?: number
+  leader?: boolean
+  /** Where this player was opened from, so the modal shows the right actions. */
+  source: "friend" | "party"
+}
+
 export interface FriendRequest {
   id: string
   fromHandle: string
@@ -531,7 +592,7 @@ export interface TradeHistoryEntry {
 export interface RecoveryResult {
   id: string
   label: string
-  type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair" | "salvage"
+  type: "title" | "schematic" | "modifier" | "cosmetic" | "badge" | "blueprint" | "chat_flair" | "salvage" | "appearance_token"
   rarity: Rarity
   recoveredAt: number
   vanityData?: {
@@ -674,6 +735,13 @@ export interface Profile {
   createdAt: number | null
   /** Currency balance earned from expeditions and contracts */
   tokens: number
+  /**
+   * Appearance Reset Tokens held. Each one lets the player re-open the base
+   * appearance editor and re-pick their look without discarding owned cosmetics.
+   * Optional so saves/seeds created before the feature stay valid; every read
+   * goes through a `?? 0` fallback.
+   */
+  appearanceResetTokens?: number
   ownedTitles: OwnedTitle[]
   badges: ProfileBadge[]
   notifications: ProfileNotification[]
@@ -791,6 +859,76 @@ export type FactionSelectionStep =
   | "confirm"
   | "pledged"
   | "complete"
+
+// ============ TERRITORY WAR ============
+
+/** A single line in a cinematic battle feed. */
+export interface BattleLine {
+  /** Who acted / whose beat this is. */
+  side: "attacker" | "defender" | "system"
+  text: string
+  /** Attacker HP fraction after this beat, 0..1. */
+  attackerHp: number
+  /** Defender HP fraction after this beat, 0..1. */
+  defenderHp: number
+}
+
+/**
+ * A defender garrison stored on a claimed node, or an attacking group about to
+ * siege one. Run buffs are intentionally stripped — only base + equipment
+ * derived stats survive into the snapshot.
+ */
+export interface StoredGroup {
+  /** Owning faction, or null for a monster/neutral garrison. */
+  factionId: RaceId | null
+  members: {
+    handle: string
+    role: string
+    avatar?: AvatarConfig
+    stats: BaseStats
+  }[]
+  /** Aggregate combat power, precomputed at snapshot time. */
+  power: number
+  /** True for the hard AI monster garrison that holds unclaimed nodes. */
+  monster?: boolean
+  /** epoch ms the snapshot was taken. */
+  capturedAt: number
+}
+
+/** Controlling faction per node id; null (or absent) = neutral. */
+export type NodeControl = Record<string, RaceId | null>
+
+/**
+ * A faction's home base. Bases are never captured — an assault reduces
+ * integrity and knocks specific buildings offline instead.
+ */
+export interface FactionBaseState {
+  factionId: RaceId
+  integrity: number
+  maxIntegrity: number
+  buildings: FactionBuilding[]
+  /** epoch ms of the last recovery tick applied. */
+  lastRecoveredAt: number
+}
+
+export type TerritoryBattleKind = "claim" | "base_assault"
+
+export interface TerritoryBattle {
+  nodeId: string
+  kind: TerritoryBattleKind
+  attacker: { factionId: RaceId; group: StoredGroup }
+  defender: { factionId: RaceId | null; group: StoredGroup; monster: boolean }
+  log: BattleLine[]
+  result: "win" | "loss"
+  /** 0..1 victory margin; drives base-assault damage. */
+  margin: number
+  /** Building ids knocked offline (base_assault wins only). */
+  buildingsHit?: string[]
+  /** Integrity removed from the target base (base_assault wins only). */
+  integrityLost?: number
+  /** Node label, cached for the result panel. */
+  nodeLabel: string
+}
 
 // ============ ADMIN SYSTEM ============
 

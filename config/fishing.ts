@@ -1,5 +1,10 @@
 import type { BaitDef } from "@/config/bait"
 import type { InventoryItem, Rarity } from "@/lib/types"
+import {
+  NEW_BASE_FISH,
+  FISH_VARIANTS,
+  SELL_VALUE_BY_RARITY,
+} from "@/config/fishing-content"
 
 /**
  * Fishing catch table.
@@ -80,6 +85,9 @@ export const FISH: FishDef[] = [
     biteWindow: 0.55,
     description: "Small enough to hold. Old enough to have watched the drift form.",
   },
+  // Pack roster: the new species live in config/fishing-content.ts and are merged
+  // in here so the catch mechanic (pickFish/getFish) treats them like any other.
+  ...NEW_BASE_FISH,
 ]
 
 /** The consolation prize. Never counts as a catch streak. */
@@ -105,19 +113,24 @@ export interface FishingSpot {
   junkChance: number
 }
 
+/** Pack species that list this spot in their `spots` field, as raw fish ids. */
+function packPoolFor(spotId: string): string[] {
+  return NEW_BASE_FISH.filter((f) => f.spots.includes(spotId)).map((f) => f.id)
+}
+
 export const FISHING_SPOTS: FishingSpot[] = [
   {
     id: "relay_shallows",
     label: "Relay Shallows",
     blurb: "Warm, slow water under the cable pylons. Forgiving to beginners.",
-    pool: ["fish_silverfin", "fish_glasscarp", "fish_voltray"],
+    pool: ["fish_silverfin", "fish_glasscarp", "fish_voltray", ...packPoolFor("relay_shallows")],
     junkChance: 0.22,
   },
   {
     id: "drift_channel",
     label: "Drift Channel",
     blurb: "Fast current pulling toward open water. Bigger fish, shorter tempers.",
-    pool: ["fish_glasscarp", "fish_voltray", "fish_echo_eel", "fish_goldrelay"],
+    pool: ["fish_glasscarp", "fish_voltray", "fish_echo_eel", "fish_goldrelay", ...packPoolFor("drift_channel")],
     junkChance: 0.12,
   },
   {
@@ -125,13 +138,32 @@ export const FISHING_SPOTS: FishingSpot[] = [
     label: "Sunken Wreck",
     blurb: "Something old rests on the bottom here, and something older feeds on it.",
     requires: "fishing_wrecks",
-    pool: ["fish_voltray", "fish_echo_eel", "fish_goldrelay", "fish_prism_leviathan"],
+    pool: ["fish_voltray", "fish_echo_eel", "fish_goldrelay", "fish_prism_leviathan", ...packPoolFor("sunken_wreck")],
     junkChance: 0.08,
   },
 ]
 
+/**
+ * FishDef view of every rare variant, so getFish (and thus the fishing tab's
+ * landed panel + recent-catches log) can render a landed variant by id. Variants
+ * are never in a spot pool — they're rolled post-catch — so weight is 0.
+ */
+const VARIANT_DEFS: FishDef[] = FISH_VARIANTS.map((v) => ({
+  id: v.id,
+  label: v.label,
+  rarity: v.rarity,
+  sprite: v.sprite,
+  weight: 0,
+  // Look up the base fish directly from FISH (not getFish) to avoid a temporal
+  // dead zone: getFish references VARIANT_DEFS, so calling it here — during
+  // VARIANT_DEFS' own initialization — would access the const before it exists.
+  biteWindow: FISH.find((f) => f.id === v.baseId)?.biteWindow ?? 1,
+  description: v.description,
+}))
+
 export function getFish(id: string): FishDef | undefined {
-  return id === JUNK.id ? JUNK : FISH.find((f) => f.id === id)
+  if (id === JUNK.id) return JUNK
+  return FISH.find((f) => f.id === id) ?? VARIANT_DEFS.find((v) => v.id === id)
 }
 
 /**
@@ -171,14 +203,25 @@ export function pickFish(
 
 /** Convert a landed catch into an inventory item. */
 export function fishToItem(fish: FishDef, qty: number): InventoryItem {
+  const isJunk = fish.id === JUNK.id
   return {
     id: fish.id,
     label: fish.label,
-    aspect: fish.id === JUNK.id ? "salvage" : "food",
+    aspect: isJunk ? "salvage" : "food",
     rarity: fish.rarity,
     qty,
     identified: true,
     description: fish.description,
-    type: fish.id === JUNK.id ? "misc" : "material",
+    type: isJunk ? "misc" : "fish",
+    image: fish.sprite,
+    ...(isJunk
+      ? {}
+      : {
+          fishCategory: fish.id,
+          tradeable: true,
+          obtainMethod: "fishing_only",
+          sellValue: SELL_VALUE_BY_RARITY[fish.rarity] ?? 0,
+          tags: ["fishing", "fish"],
+        }),
   }
 }

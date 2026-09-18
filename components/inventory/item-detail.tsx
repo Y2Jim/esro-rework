@@ -34,11 +34,50 @@ export function ItemDetail({ item }: { item: InventoryItem }) {
 
       <div className="my-2 hr-dashed" />
 
+      {!isUnknown && item.image ? (
+        <div className="mb-2 flex justify-center rounded-md border border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/40 p-3">
+          <img
+            src={item.image || "/placeholder.svg"}
+            alt={item.label}
+            className="h-24 w-24 object-contain [image-rendering:pixelated]"
+          />
+        </div>
+      ) : null}
+
       <p className="text-[15px] leading-relaxed text-[color:var(--color-foreground)]/85">
         {isUnknown
           ? "aspect unresolved · signal irregular · reconstruct at archive to stabilize"
           : item.description}
       </p>
+
+      {!isUnknown && (item.isVariant || item.craftingUse || item.obtainMethod === "fishing_only") ? (
+        <dl className="mt-2 space-y-1 text-[13px] leading-relaxed">
+          {item.isVariant ? (
+            <div className="flex items-center gap-2">
+              <dt className="uppercase tracking-[0.22em] text-[color:var(--color-muted)]">variant</dt>
+              <dd className="text-[color:var(--color-cyan)]">rare catch</dd>
+            </div>
+          ) : null}
+          {item.craftingUse ? (
+            <div className="flex gap-2">
+              <dt className="shrink-0 uppercase tracking-[0.22em] text-[color:var(--color-muted)]">use</dt>
+              <dd className="text-[color:var(--color-foreground)]/75">{item.craftingUse}</dd>
+            </div>
+          ) : null}
+          {item.obtainMethod === "fishing_only" ? (
+            <div className="flex items-center gap-2">
+              <dt className="uppercase tracking-[0.22em] text-[color:var(--color-muted)]">source</dt>
+              <dd className="text-[color:var(--color-foreground)]/75">fishing only</dd>
+            </div>
+          ) : null}
+          {typeof item.sellValue === "number" && item.sellValue > 0 ? (
+            <div className="flex items-center gap-2">
+              <dt className="uppercase tracking-[0.22em] text-[color:var(--color-muted)]">value</dt>
+              <dd className="text-[color:var(--color-amber)]">{item.sellValue}</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : null}
 
       <div className="mt-2 flex gap-1.5">
         <button

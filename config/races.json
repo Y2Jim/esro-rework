@@ -11,7 +11,7 @@
       "color": "#f1d38a",
       "glow": "rgba(241, 211, 138, 0.30)",
       "lore": "Crownborn lineages were raised around old courts and radiant halls where posture mattered as much as steel. They still move like every decision is being witnessed.",
-      "stats": { "hp": 0, "atk": 0, "def": 1, "focus": 2, "luck": 1 }
+      "stats": { "hp": 0, "atk": 2, "def": 1, "focus": 1, "luck": 0 }
     },
     {
       "id": "hearthkin",
@@ -28,7 +28,7 @@
     {
       "id": "gloamwhisper",
       "name": "Gloamwhisper",
-      "summary": "Balanced and subtle, Gloamwhispers excel at adaptable play, quiet reads, and sharp turns in uncertain terrain.",
+      "summary": "Quiet and perceptive, Gloamwhispers turn Focus into magical control and precise shifts through uncertain times.",
       "affinity": "Best for shadowed routes, flexible skirmishing, and subtle reads.",
       "role": "Veil Circles",
       "icon": "GLM",

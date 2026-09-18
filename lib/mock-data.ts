@@ -450,6 +450,81 @@ export const messages: ChatMessage[] = [
 ]
 
 export const expeditions: Expedition[] = [
+  // --- Contested frontier skirmishes (one per faction quadrant) ---
+  // Balanced identically so no quadrant's contest is richer than another; each
+  // grants standing with the faction whose border it sits on.
+  {
+    id: "contest_terrace",
+    label: "Hold the Broken Terrace",
+    description:
+      "An endgame push against an entrenched garrison. Bring a full, well-equipped crew — the defenders hit hard and there is no easing in.",
+    duration: 1080,
+    risk: "High",
+    tags: ["control", "skirmish", "endgame"],
+    suggestedParty: 4,
+    minLevel: 12,
+    factionAttunement: "crownborn",
+    rewards: {
+      xp: 140,
+      tokens: 6,
+      materials: ["salvage_plate x4", "relay_scrap x4"],
+      factionStanding: 45,
+    },
+  },
+  {
+    id: "contest_basin",
+    label: "Hold the Drowned Span",
+    description:
+      "An endgame assault on the flooded bridge. The holding force is dug in and unforgiving — a prepared four-person crew is the minimum.",
+    duration: 1080,
+    risk: "High",
+    tags: ["control", "skirmish", "endgame"],
+    suggestedParty: 4,
+    minLevel: 12,
+    factionAttunement: "gloamwhisper",
+    rewards: {
+      xp: 140,
+      tokens: 6,
+      materials: ["salvage_plate x4", "relay_scrap x4"],
+      factionStanding: 45,
+    },
+  },
+  {
+    id: "contest_vale",
+    label: "Hold the Cold Forge",
+    description:
+      "An endgame strike on a garrisoned forge. Expect a brutal fight — only a full, geared crew should attempt the hold.",
+    duration: 1080,
+    risk: "High",
+    tags: ["control", "skirmish", "endgame"],
+    suggestedParty: 4,
+    minLevel: 12,
+    factionAttunement: "hearthkin",
+    rewards: {
+      xp: 140,
+      tokens: 6,
+      materials: ["salvage_plate x4", "relay_scrap x4"],
+      factionStanding: 45,
+    },
+  },
+  {
+    id: "contest_crossroads",
+    label: "Hold the Split Track",
+    description:
+      "An endgame battle for the shifting crossroads. The garrison is fierce and well-positioned — come prepared with a full crew or be routed.",
+    duration: 1080,
+    risk: "High",
+    tags: ["control", "skirmish", "endgame"],
+    suggestedParty: 4,
+    minLevel: 12,
+    factionAttunement: "roadsinger",
+    rewards: {
+      xp: 140,
+      tokens: 6,
+      materials: ["salvage_plate x4", "relay_scrap x4"],
+      factionStanding: 45,
+    },
+  },
   {
     id: "signal_trace",
     label: "Signal Trace",
@@ -471,7 +546,7 @@ export const expeditions: Expedition[] = [
     duration: 1200,
     risk: "Medium",
     tags: ["archive", "analysis"],
-    requiredSkill: "lorekeeping",
+    requiredSkill: "artisanry",
     suggestedParty: 2,
     rewards: {
       xp: 45,
@@ -598,13 +673,13 @@ export const expeditions: Expedition[] = [
     duration: 2400,
     risk: "High",
     tags: ["archive", "rare"],
-    requiredSkill: "lorekeeping",
+    requiredSkill: "artisanry",
     suggestedParty: 4,
     minLevel: 12,
     requiresUnlock: "deep_ruins",
     stages: [
       { id: "s1", label: "Descent", description: "Navigate the outer layers", duration: 600, risk: "Low" },
-      { id: "s2", label: "Search", description: "Locate archive signatures", duration: 900, skillCheck: "lorekeeping", risk: "Medium" },
+      { id: "s2", label: "Search", description: "Locate archive signatures", duration: 900, skillCheck: "artisanry", risk: "Medium" },
       { id: "s3", label: "Recovery", description: "Extract and stabilize finds", duration: 600, skillCheck: "scavenging", risk: "High" },
       { id: "s4", label: "Ascent", description: "Return through shifting paths", duration: 300, risk: "Medium" },
     ],
@@ -1341,6 +1416,9 @@ export const vanityItems: VanityItem[] = [
   { id: "eyes_tired", label: "Tired", layerType: "eyes", variant: 4, rarity: "common", unlocked: true, equipped: false },
   { id: "eyes_big", label: "Big", layerType: "eyes", variant: 5, rarity: "common", unlocked: true, equipped: false },
 
+  // Makeup - unlocked by default
+  { id: "mouth_lipstick", label: "Lipstick", layerType: "mouth", variant: 1, rarity: "common", unlocked: true, equipped: false },
+
   // Accessories - Common
   { id: "v1", label: "Signal Glasses", layerType: "accessory", variant: 1, rarity: "common", unlocked: true, equipped: true },
   { id: "v11", label: "Basic Shades", layerType: "accessory", variant: 5, rarity: "common", unlocked: true, equipped: false },
@@ -1476,6 +1554,7 @@ export const profile: Profile = {
   // date line, instead of slipping a day for anyone west or far east of UTC.
   createdAt: Date.UTC(2026, 2, 9, 12),
   tokens: 320,
+  appearanceResetTokens: 1,
   vanityItems: vanityItems,
   ownedTitles: [
     {

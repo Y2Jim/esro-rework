@@ -62,8 +62,8 @@ export type SkillBonusKey =
   | "fishingYield"
   | "fishingSuccess"
   // --- Crafting ---
-  | "craftCost" // negative = cheaper
-  | "craftSpeed"
+  | "craftCost" // positive = cheaper (consumed as `1 - cost`)
+  | "craftSpeed" // positive = faster (consumed as `1 - speed`)
   | "craftQuality"
   // --- Economy & meta ---
   | "xpBonus"
@@ -243,6 +243,31 @@ export const UNLOCK_LABELS: Record<SkillUnlockId, string> = {
 /** "Requires Deep Ruins" — the standard lock caption for a gated action. */
 export function unlockRequirementLabel(id: SkillUnlockId): string {
   return `Requires ${UNLOCK_LABELS[id]}`
+}
+
+/**
+ * Whether an unlock opens a new place to travel (a route/zone on the map and
+ * expedition board) or a new system to use (fishing, crafting, contracts…).
+ * Drives the "New route" vs "New feature" split in unlock notifications.
+ *
+ * Exhaustive by type: a new SkillUnlockId without a kind here is a compile error.
+ */
+export const UNLOCK_KIND: Record<SkillUnlockId, "route" | "feature"> = {
+  hidden_routes: "route",
+  deep_ruins: "route",
+  rare_nodes: "route",
+  anomaly_zones: "route",
+  quality_harvest: "feature",
+  fishing_basic: "feature",
+  fishing_wrecks: "feature",
+  pack_beasts: "feature",
+  pack_train: "feature",
+  field_surgery: "feature",
+  advanced_recipes: "feature",
+  master_recipes: "feature",
+  escort_contracts: "feature",
+  faction_rites: "feature",
+  archive_translation: "feature",
 }
 
 export interface SkillBreakpoint {
@@ -428,11 +453,11 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Guardwork",
     linkedStat: "def",
-    summary: "Avoids the fight entirely, and shields whoever falls when it can't.",
+    summary: "Avoids the fight entirely, and drags a failing ally clear before they drop when it can't.",
     hooks: [
       { id: "formation", effect: "battleFrequency", perLevel: -0.02, detail: "Fewer hostile encounters" },
       { id: "watchkeeping", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
-      { id: "escorting", effect: "partyProtection", perLevel: 0.02, detail: "Chance to shield a downed ally" },
+      { id: "escorting", effect: "partyProtection", perLevel: 0.02, detail: "Chance to keep a falling ally on their feet" },
     ],
     breakpoints: [{ level: 5, unlock: "escort_contracts", label: "Escort Duty", detail: "Accept escort contracts" }],
   },
@@ -504,11 +529,16 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
   {
     name: "Pathfinding",
     linkedStat: "focus",
-    summary: "Reads the ground, finds routes nobody charted, and shortens the trip.",
+    summary: "Reads the ground, finds routes nobody charted, and turns hard roads into hard-won experience.",
     hooks: [
       { id: "surveying", effect: "travelScore", perLevel: 0.02, detail: "Higher travel check scores" },
       { id: "routing", effect: "hiddenRoute", perLevel: 0.025, detail: "Chance to reveal a hidden route" },
-      { id: "survival", effect: "runDuration", perLevel: -0.005, detail: "Shorter expedition legs" },
+      // Was runDuration, the game's most duplicated lever (Conditioning, Beast
+      // Tending, and the Long Marches rite all already shorten runs). Repointed
+      // to xpBonus so a seasoned trailblazer learns more from every journey —
+      // and so xpBonus finally has a steady skill source, not just the
+      // Scholar's Wake ritual.
+      { id: "fieldcraft", effect: "xpBonus", perLevel: 0.02, detail: "Bonus expedition XP" },
     ],
     breakpoints: [
       { level: 5, unlock: "hidden_routes", label: "Trailblazer", detail: "Hidden map routes become visible" },
@@ -530,17 +560,17 @@ export const SKILL_MECHANICS: SkillMechanic[] = [
     ],
   },
   {
-    name: "Lorekeeping",
+    name: "Artisanry",
     linkedStat: "focus",
-    summary: "Turns archives into experience, and knows what a find is really worth.",
+    summary: "Turns studied blueprints into cheaper, faster crafting, and still appraises what a find is worth.",
     hooks: [
-      { id: "recall", effect: "xpBonus", perLevel: 0.02, detail: "Experience gained" },
-      { id: "translation", effect: "discoveryScore", perLevel: 0.02, detail: "Higher discovery check scores" },
-      { id: "analysis", effect: "rollLuck", perLevel: 0.015, detail: "Better rarity odds when rolling" },
+      { id: "efficiency", effect: "craftCost", perLevel: 0.015, detail: "Cheaper material cost per craft" },
+      { id: "technique", effect: "craftSpeed", perLevel: 0.02, detail: "Faster crafting" },
+      { id: "appraisal", effect: "rollLuck", perLevel: 0.015, detail: "Better rarity odds when rolling" },
     ],
     breakpoints: [
-      { level: 5, unlock: "archive_translation", label: "Translator", detail: "Read sealed archive fragments" },
-      { level: 10, unlock: "master_recipes", label: "Lost Techniques", detail: "Craft master-tier gear" },
+      { level: 5, unlock: "archive_translation", label: "Translator", detail: "Read sealed archive fragments for lost recipes" },
+      { level: 15, unlock: "master_recipes", label: "Lost Techniques", detail: "Craft master-tier gear" },
     ],
   },
 ]
@@ -582,7 +612,7 @@ const DEMO_SKILL_LEVELS: Record<string, number> = {
   Scavenging: 6,
   Gathering: 5,
   Pathfinding: 4,
-  Lorekeeping: 3,
+  Artisanry: 3,
   Conditioning: 2,
   Bladecraft: 2,
 }

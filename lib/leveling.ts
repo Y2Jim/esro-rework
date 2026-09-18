@@ -4,7 +4,7 @@ import type { BaseStats, Profile } from "./types"
  * Character progression: the XP curve and the stat points level-ups grant.
  *
  * Before this module nothing ever incremented `profile.xp` or `profile.level` —
- * `rewards.xp` on every expedition was dead data and Lorekeeping's `xpBonus`
+ * `rewards.xp` on every expedition was dead data and Artisanry's `xpBonus`
  * hook had nothing to scale. All XP now flows through `applyXp`.
  */
 

@@ -17,29 +17,31 @@ export function ChatScreen() {
     <div className="relative flex h-full w-full flex-col">
       <ChannelTabs />
 
-      {/* channel header strip */}
-      <div className="relative z-10 flex items-center justify-between gap-2 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/70 px-3 py-1.5">
-        <div className="flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">
-          <span
-            className={
-              restricted
-                ? "text-[color:var(--color-violet-bright)] text-glow"
-                : "text-[color:var(--color-muted)]"
-            }
-          >
-            {restricted ? "hidden" : readOnly ? "system" : "live"}
-          </span>
-          <span className="text-[color:var(--color-muted-2)]">·</span>
-          <span className="text-[color:var(--color-lilac)]">
-            {current?.description}
-          </span>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {/* channel header strip */}
+        <div className="relative z-10 flex items-center justify-between gap-2 border-b border-[color:var(--color-border-soft)] bg-[color:var(--color-bg)]/70 px-3 py-1.5">
+          <div className="flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">
+            <span
+              className={
+                restricted
+                  ? "text-[color:var(--color-violet-bright)] text-glow"
+                  : "text-[color:var(--color-muted)]"
+              }
+            >
+              {restricted ? "hidden" : readOnly ? "system" : "live"}
+            </span>
+            <span className="text-[color:var(--color-muted-2)]">·</span>
+            <span className="text-[color:var(--color-lilac)]">
+              {current?.description}
+            </span>
+          </div>
+          <PageControls />
         </div>
-        <PageControls />
+
+        <MessageLog />
+
+        <ChatInput />
       </div>
-
-      <MessageLog />
-
-      <ChatInput />
     </div>
   )
 }

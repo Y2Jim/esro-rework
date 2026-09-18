@@ -88,6 +88,9 @@ export function BootSplash() {
           <div className="mt-1 text-[13px] uppercase tracking-[0.35em] text-[color:var(--color-muted)]">
             enchanted star realms online
           </div>
+          <div className="mt-3 text-[11px] uppercase tracking-[0.3em] text-[color:var(--color-muted)]/70">
+            a gumware studios production
+          </div>
         </motion.div>
       </div>
 

@@ -45,6 +45,7 @@ const typeLabels: Record<string, { label: string; color: string; bg: string }> =
   blueprint: { label: "Blueprint", color: "text-blue-300", bg: "bg-blue-500/20 border-blue-500/30" },
   chat_flair: { label: "Chat Flair", color: "text-pink-300", bg: "bg-pink-500/20 border-pink-500/30" },
   salvage: { label: "Salvage", color: "text-orange-300", bg: "bg-orange-500/20 border-orange-500/30" },
+  appearance_token: { label: "Reset Token", color: "text-teal-300", bg: "bg-teal-500/20 border-teal-500/30" },
 }
 
 /** Fake items to cycle through during animation */

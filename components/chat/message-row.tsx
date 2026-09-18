@@ -25,7 +25,15 @@ function parseLogType(body: string): { type: string; content: string } {
   return { type: "system", content: body }
 }
 
-export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChannel?: boolean }) {
+export function MessageRow({
+  msg,
+  isLogChannel,
+  onSelectHandle,
+}: {
+  msg: ChatMessage
+  isLogChannel?: boolean
+  onSelectHandle?: (msg: ChatMessage) => void
+}) {
   // Special LOG channel rendering
   if (isLogChannel && msg.kind === "system") {
     const { type, content } = parseLogType(msg.body)
@@ -64,7 +72,18 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
           <span className="shrink-0 text-[14px] tabular-nums text-[color:var(--color-muted)]">
             {formatClock(msg.at)}
           </span>
-          <span className="font-semibold text-[color:var(--color-danger)]">{msg.handle}</span>
+          {onSelectHandle ? (
+            <button
+              type="button"
+              onClick={() => onSelectHandle(msg)}
+              className="font-semibold text-[color:var(--color-danger)] transition-colors hover:underline"
+              title="View Profile"
+            >
+              {msg.handle}
+            </button>
+          ) : (
+            <span className="font-semibold text-[color:var(--color-danger)]">{msg.handle}</span>
+          )}
           <span className="rounded-sm border border-[color:var(--color-danger-muted)]/40 bg-[color:var(--color-danger)]/10 px-1.5 py-[1px] text-[13px] uppercase tracking-[0.15em] text-[color:var(--color-danger-muted)]">
             whisper
           </span>
@@ -95,9 +114,20 @@ export function MessageRow({ msg, isLogChannel }: { msg: ChatMessage; isLogChann
             pinned
           </span>
         )}
-        <span className="font-semibold text-[color:var(--color-violet-bright)]">
-          {msg.handle}
-        </span>
+        {onSelectHandle ? (
+          <button
+            type="button"
+            onClick={() => onSelectHandle(msg)}
+            className="font-semibold text-[color:var(--color-violet-bright)] transition-colors hover:underline"
+            title="View Profile"
+          >
+            {msg.handle}
+          </button>
+        ) : (
+          <span className="font-semibold text-[color:var(--color-violet-bright)]">
+            {msg.handle}
+          </span>
+        )}
         {msg.title && (
           <span
             className={cn(

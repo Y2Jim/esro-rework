@@ -11,18 +11,33 @@ import { FactionSelection } from "@/components/onboarding/faction-selection"
 import {
   RANK_TIERS,
   FACTION_PERKS,
+  FACTION_TITLES,
+  FACTION_TITLE_CATEGORY_META,
+  factionTitleMetric,
+  type FactionTitleCategory,
+  type FactionTitleProgress,
   buildingUpgradeCost,
   buildingEffectDescription,
   formatRelativeTime,
 } from "@/config/faction"
-import { getFactionHqNode } from "@/lib/world-map"
+import {
+  getFactionHqNode,
+  getFactionById,
+  getControlledNodeIds,
+  getNodeById,
+  getRegionById,
+  isContestedNode,
+  MAP_NODES,
+} from "@/lib/world-map"
 import type { SocialTab, RaceId } from "@/lib/types"
+import { SubTabBar, type SubTabItem } from "@/components/shell/sub-tab-bar"
+import { PlayerProfileModal } from "@/components/social/player-profile-modal"
 
-const socialTabs: { id: SocialTab; label: string; icon: string; color: string; bgColor: string; hover: string }[] = [
-  { id: "party", label: "Party", icon: "⋈", color: "text-[color:var(--color-cyan)]", bgColor: "bg-[color:var(--color-cyan)]/15", hover: "hover-cyan" },
-  { id: "faction", label: "Faction", icon: "⬡", color: "text-[color:var(--color-violet-bright)]", bgColor: "bg-[color:var(--color-violet-bright)]/15", hover: "hover-violet" },
-  { id: "friends", label: "Friends", icon: "◇", color: "text-[color:var(--color-green)]", bgColor: "bg-[color:var(--color-green)]/15", hover: "hover-green" },
-  { id: "trade", label: "Trade", icon: "⇄", color: "text-[color:var(--color-amber)]", bgColor: "bg-[color:var(--color-amber)]/15", hover: "hover-amber" },
+const socialTabs: (SubTabItem & { id: SocialTab })[] = [
+  { id: "party", label: "Party", icon: "⋈", accentClass: "text-[color:var(--color-cyan)]", activeBgClass: "bg-[color:var(--color-cyan)]/15", hoverClass: "hover-cyan", accentBar: "var(--color-cyan)" },
+  { id: "faction", label: "Faction", icon: "⬡", accentClass: "text-[color:var(--color-violet-bright)]", activeBgClass: "bg-[color:var(--color-violet-bright)]/15", hoverClass: "hover-violet", accentBar: "var(--color-violet-bright)" },
+  { id: "friends", label: "Friends", icon: "◇", accentClass: "text-[color:var(--color-green)]", activeBgClass: "bg-[color:var(--color-green)]/15", hoverClass: "hover-green", accentBar: "var(--color-green)" },
+  { id: "trade", label: "Trade", icon: "⇄", accentClass: "text-[color:var(--color-amber)]", activeBgClass: "bg-[color:var(--color-amber)]/15", hoverClass: "hover-amber", accentBar: "var(--color-amber)" },
 ]
 
 export function SocialScreen() {
@@ -43,37 +58,24 @@ export function SocialScreen() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Tab bar */}
-      <div 
-        className="flex gap-1 overflow-x-auto border-b border-[color:var(--color-border)] px-2 py-1.5"
-        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
-      >
-        {socialTabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={cn(
-              "flex shrink-0 items-center gap-1 rounded px-2 py-1 text-[14px] uppercase tracking-wider transition-colors",
-              t.hover,
-              tab === t.id
-                ? cn(t.bgColor, t.color)
-                : "text-[color:var(--color-muted)]"
-            )}
-          >
-            <span className="text-[14px]">{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {/* Social sub-tabs */}
+      <SubTabBar
+        ariaLabel="social sections"
+        items={socialTabs}
+        activeId={tab}
+        onSelect={(id) => setTab(id as SocialTab)}
+      />
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}>
         {tab === "party" && <PartyTab party={party} />}
         {tab === "faction" && <FactionTab faction={faction} projects={factionProjects} />}
         {tab === "friends" && <FriendsTab friends={friends} />}
         {tab === "trade" && <TradeTab offers={tradeOffers} />}
       </div>
+
+      {/* Shared player-profile viewer, opened from party or friends lists */}
+      <PlayerProfileModal />
     </div>
   )
 }
@@ -87,6 +89,7 @@ function PartyTab({ party }: { party: EsroState["party"] }) {
   const removePartyMember = useEsroStore((s) => s.removePartyMember)
   const setPartyMemberRole = useEsroStore((s) => s.setPartyMemberRole)
   const readyUpParty = useEsroStore((s) => s.readyUpParty)
+  const viewPlayer = useEsroStore((s) => s.viewPlayer)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [flash, setFlash] = useState<string | null>(null)
 
@@ -118,7 +121,27 @@ function PartyTab({ party }: { party: EsroState["party"] }) {
             <PartyAvatar config={m.avatar || generateAvatarFromSeed(m.handle)} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-[15px] text-[color:var(--color-text)]">{m.handle}</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    viewPlayer({
+                      handle: m.handle,
+                      title: m.title,
+                      titleRarity: m.titleRarity,
+                      avatar: m.avatar || generateAvatarFromSeed(m.handle),
+                      status: m.status,
+                      role: m.role,
+                      contribution: m.contribution,
+                      expeditionsCompleted: m.expeditionsCompleted,
+                      leader: m.leader,
+                      source: "party",
+                    })
+                  }
+                  className="truncate text-left text-[15px] text-[color:var(--color-text)] transition-colors hover:text-[color:var(--color-accent)]"
+                  title="View Profile"
+                >
+                  {m.handle}
+                </button>
                 {m.leader && (
                   <span className="rounded bg-[color:var(--color-accent)]/20 px-1.5 py-0.5 text-[12px] text-[color:var(--color-accent)]">
                     Leader
@@ -231,7 +254,7 @@ function FactionTab({
   projects: EsroState["factionProjects"] 
 }) {
   const [subTab, setSubTab] = useState<
-    "overview" | "projects" | "buildings" | "rallies" | "ranks" | "activity"
+    "overview" | "territories" | "projects" | "buildings" | "rallies" | "ranks" | "activity"
   >("overview")
   const [showFactionSelection, setShowFactionSelection] = useState(false)
   const characterFaction = useEsroStore((s) => s.characterFaction)
@@ -239,6 +262,9 @@ function FactionTab({
   const setFaction = useEsroStore((s) => s.setFaction)
   const factionViewRequest = useEsroStore((s) => s.factionViewRequest)
   const requestFactionView = useEsroStore((s) => s.requestFactionView)
+  const factionNodesCaptured = useEsroStore((s) => s.factionNodesCaptured)
+  const factionBuildingsUpgraded = useEsroStore((s) => s.factionBuildingsUpgraded)
+  const factionStructuresDestroyed = useEsroStore((s) => s.factionStructuresDestroyed)
 
   // Consume a deep-link request (e.g. "Manage Base" from the world map).
   useEffect(() => {
@@ -406,7 +432,7 @@ function FactionTab({
         className="flex gap-1 overflow-x-auto pb-1"
         style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(187, 129, 255, 0.4) transparent" }}
       >
-        {(["overview", "projects", "buildings", "rallies", "ranks", "activity"] as const).map((t) => (
+        {(["overview", "territories", "projects", "buildings", "rallies", "ranks", "activity"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -428,11 +454,186 @@ function FactionTab({
       </div>
 
       {subTab === "overview" && <FactionOverviewNew factionData={characterFaction} faction={faction} />}
+      {subTab === "territories" && <FactionTerritories accent={characterFaction.color} factionId={characterFaction.id} />}
       {subTab === "projects" && <FactionProjects projects={projects} accent={characterFaction.color} />}
       {subTab === "buildings" && <FactionBuildings accent={characterFaction.color} rank={faction?.rank || 0} />}
       {subTab === "rallies" && <FactionRallies accent={characterFaction.color} />}
-      {subTab === "ranks" && <FactionRanks currentRank={faction?.rank || 0} />}
+      {subTab === "ranks" && (
+        <FactionRanks
+          currentRank={faction?.rank || 0}
+          titleProgress={{
+            rank: faction?.rank || 0,
+            nodesCaptured: factionNodesCaptured,
+            buildingsUpgraded: factionBuildingsUpgraded,
+            structuresDestroyed: factionStructuresDestroyed,
+          }}
+        />
+      )}
       {subTab === "activity" && <FactionActivityFeed accent={characterFaction.color} />}
+    </div>
+  )
+}
+
+function FactionTerritories({ accent, factionId }: { accent: string; factionId: RaceId }) {
+  const nodeControl = useEsroStore((s) => s.nodeControl)
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const setOpsTab = useEsroStore((s) => s.setOpsTab)
+  const setMapFocus = useEsroStore((s) => s.setMapFocus)
+
+  // Every node this faction currently controls, split into the home base and
+  // frontline territory captured through warfare.
+  const controlledIds = getControlledNodeIds(nodeControl, factionId)
+  const controlled = controlledIds
+    .map((id) => getNodeById(id))
+    .filter((n): n is NonNullable<typeof n> => Boolean(n))
+
+  const hqNodes = controlled.filter((n) => n.kind === "faction_hq")
+  const frontline = controlled.filter((n) => n.kind !== "faction_hq")
+
+  // Contested nodes still up for grabs or held by a rival — shown as targets.
+  const contestedTotal = MAP_NODES.filter(isContestedNode)
+  const heldContested = contestedTotal.filter((n) => nodeControl[n.id] === factionId)
+  const openTargets = contestedTotal.filter((n) => nodeControl[n.id] !== factionId)
+
+  const viewOnMap = (id: string) => {
+    setMapFocus(id)
+    setOpsTab("map")
+    setScreen("ops")
+  }
+
+  const regionName = (regionId: string) => getRegionById(regionId)?.label ?? regionId
+
+  return (
+    <div className="space-y-3">
+      <div className="text-[13px] text-[color:var(--color-muted)]">
+        Every location your faction holds. Capture contested ground on the map to expand your border outward from the home base.
+      </div>
+
+      {/* Holdings summary */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="text-[24px] font-bold leading-none" style={{ color: accent }}>
+            {controlled.length}
+          </div>
+          <div className="mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Locations held
+          </div>
+        </div>
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="text-[24px] font-bold leading-none" style={{ color: accent }}>
+            {heldContested.length}
+            <span className="text-[14px] text-[color:var(--color-muted)]">/{contestedTotal.length}</span>
+          </div>
+          <div className="mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Frontlines won
+          </div>
+        </div>
+      </div>
+
+      {/* Home base */}
+      {hqNodes.map((n) => (
+        <button
+          key={n.id}
+          type="button"
+          onClick={() => viewOnMap(n.id)}
+          className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors"
+          style={{ borderColor: `${accent}55`, backgroundColor: `${accent}12` }}
+        >
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[16px]"
+            style={{ backgroundColor: `${accent}22`, color: accent }}
+          >
+            ⬡
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[14px] font-medium text-[color:var(--color-text)]">{n.label}</div>
+            <div className="text-[12px] text-[color:var(--color-muted)]">
+              {regionName(n.regionId)} · Home Base
+            </div>
+          </div>
+          <span className="shrink-0 text-[12px] uppercase tracking-wider" style={{ color: accent }}>
+            View
+          </span>
+        </button>
+      ))}
+
+      {/* Captured frontline territory */}
+      <div>
+        <div className="mb-1.5 mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Captured Territory
+        </div>
+        {frontline.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3 text-[13px] text-[color:var(--color-muted)]">
+            No frontline territory captured yet. Deploy to a contested site on the map to claim your first.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {frontline.map((n) => (
+              <button
+                key={n.id}
+                type="button"
+                onClick={() => viewOnMap(n.id)}
+                className="flex w-full items-center gap-3 rounded-lg border border-[color:var(--color-border)] p-3 text-left transition-colors hover:border-[color:var(--color-border-soft)]"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--color-panel)] text-[16px]">
+                  ⚑
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[14px] font-medium text-[color:var(--color-text)]">{n.label}</div>
+                  <div className="text-[12px] text-[color:var(--color-muted)]">
+                    {regionName(n.regionId)}
+                    {n.kind === "contested" ? " · Frontline" : ""}
+                  </div>
+                </div>
+                <span className="shrink-0 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                  View
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Open frontlines to conquer */}
+      {openTargets.length > 0 && (
+        <div>
+          <div className="mb-1.5 mt-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Open Frontlines
+          </div>
+          <div className="space-y-2">
+            {openTargets.map((n) => {
+              const holder = nodeControl[n.id]
+              const holderFaction = holder ? getFactionById(holder) : undefined
+              return (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => viewOnMap(n.id)}
+                  className="flex w-full items-center gap-3 rounded-lg border border-dashed border-[color:var(--color-border-soft)] p-3 text-left transition-colors hover:border-[color:var(--color-border)]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--color-panel)] text-[16px] text-[color:var(--color-muted)]">
+                    ⚔
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[14px] font-medium text-[color:var(--color-text)]">{n.label}</div>
+                    <div className="text-[12px] text-[color:var(--color-muted)]">
+                      {regionName(n.regionId)} ·{" "}
+                      {holderFaction ? (
+                        <span style={{ color: holderFaction.color }}>Held by {holderFaction.name}</span>
+                      ) : (
+                        "Uncontested (feral)"
+                      )}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                    Target
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -654,6 +855,8 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
   const upgradeBuilding = useEsroStore((s) => s.upgradeBuilding)
   const characterFaction = useEsroStore((s) => s.characterFaction)
   const profileFactionId = useEsroStore((s) => s.profile.faction?.id)
+  const factionBases = useEsroStore((s) => s.factionBases)
+  const recoverBases = useEsroStore((s) => s.recoverBases)
   const setScreen = useEsroStore((s) => s.setScreen)
   const setOpsTab = useEsroStore((s) => s.setOpsTab)
   const setMapFocus = useEsroStore((s) => s.setMapFocus)
@@ -663,6 +866,22 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
   const hqNode =
     getFactionHqNode(characterFaction?.id) ??
     getFactionHqNode(profileFactionId as RaceId | undefined)
+
+  // Surface the player's own base health so rival raids are visible here.
+  const playerFactionId = (characterFaction?.id ?? profileFactionId) as RaceId | undefined
+  const base = playerFactionId ? factionBases[playerFactionId] : undefined
+  const now = Date.now()
+  const disabledIds = new Set(
+    (base?.buildings ?? [])
+      .filter((b) => b.disabledUntil && b.disabledUntil > now)
+      .map((b) => b.id),
+  )
+  const integrityPct = base ? Math.round((base.integrity / base.maxIntegrity) * 100) : 100
+
+  // Tick recovery whenever this panel is opened.
+  useEffect(() => {
+    recoverBases()
+  }, [recoverBases])
 
   const handleViewOnMap = () => {
     if (hqNode) setMapFocus(hqNode.id)
@@ -700,6 +919,57 @@ function FactionBuildings({ accent, rank }: { accent: string; rank: number }) {
           </button>
         )}
       </div>
+
+      {/* Base integrity — reflects rival raids on your HQ */}
+      {base && (
+        <div className="rounded-lg border border-[color:var(--color-border)] p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Base Integrity
+            </span>
+            <span
+              className="text-[13px]"
+              style={{
+                color:
+                  integrityPct >= 66
+                    ? "var(--color-success)"
+                    : integrityPct >= 33
+                      ? "var(--color-amber)"
+                      : "var(--color-danger)",
+              }}
+            >
+              {integrityPct}%
+            </span>
+          </div>
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-[color:var(--color-panel)]">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${integrityPct}%`,
+                backgroundColor:
+                  integrityPct >= 66
+                    ? "var(--color-success)"
+                    : integrityPct >= 33
+                      ? "var(--color-amber)"
+                      : "var(--color-danger)",
+              }}
+            />
+          </div>
+          {disabledIds.size > 0 ? (
+            <div className="mt-2 text-[12px] text-[color:var(--color-danger)]">
+              {disabledIds.size} structure{disabledIds.size > 1 ? "s" : ""} knocked offline by raiders — recovering over time.
+            </div>
+          ) : integrityPct < 100 ? (
+            <div className="mt-2 text-[12px] text-[color:var(--color-muted)]">
+              Damaged by a recent raid. Integrity regenerates over time.
+            </div>
+          ) : (
+            <div className="mt-2 text-[12px] text-[color:var(--color-muted)]">
+              All structures operational.
+            </div>
+          )}
+        </div>
+      )}
       {buildings.map((b) => {
         const maxed = b.level >= b.maxLevel
         const rankLocked = rank < b.requiredRank
@@ -949,7 +1219,13 @@ function FactionActivityFeed({ accent }: { accent: string }) {
   )
 }
 
-function FactionRanks({ currentRank }: { currentRank: number }) {
+function FactionRanks({
+  currentRank,
+  titleProgress,
+}: {
+  currentRank: number
+  titleProgress: FactionTitleProgress
+}) {
   const ranks = RANK_TIERS
 
   const tierColors: Record<string, { border: string; bg: string; text: string }> = {
@@ -1071,6 +1347,9 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
         })}
       </div>
 
+      {/* Faction Titles */}
+      <FactionTitlesSection progress={titleProgress} />
+
       {/* Faction Wars info */}
       <div className="rounded-lg border border-[color:var(--color-danger)]/30 bg-[color:var(--color-danger)]/5 p-3">
         <div className="text-[14px] font-medium text-[color:var(--color-danger)]">Faction Wars</div>
@@ -1078,6 +1357,78 @@ function FactionRanks({ currentRank }: { currentRank: number }) {
           Reach Vanguard rank to participate in faction v faction conflicts. Higher ranks unlock leadership roles in coordinating war efforts, defending territories, and declaring wars against rival factions.
         </div>
       </div>
+    </div>
+  )
+}
+
+const titleRarityColor: Record<string, string> = {
+  common: "var(--color-muted)",
+  uncommon: "var(--color-green)",
+  rare: "var(--color-cyan)",
+  epic: "var(--color-violet-bright)",
+  legendary: "var(--color-amber)",
+  mythic: "var(--color-danger)",
+}
+
+function FactionTitlesSection({ progress }: { progress: FactionTitleProgress }) {
+  const categories = Object.keys(FACTION_TITLE_CATEGORY_META) as FactionTitleCategory[]
+  const unlockedCount = FACTION_TITLES.filter(
+    (t) => factionTitleMetric(t.category, progress) >= t.threshold,
+  ).length
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[13px] uppercase tracking-wider text-[color:var(--color-violet-bright)]">
+          Faction Titles
+        </div>
+        <span className="text-[12px] text-[color:var(--color-muted)]">
+          {unlockedCount}/{FACTION_TITLES.length} earned
+        </span>
+      </div>
+
+      {categories.map((category) => {
+        const meta = FACTION_TITLE_CATEGORY_META[category]
+        const metric = factionTitleMetric(category, progress)
+        const tiers = FACTION_TITLES.filter((t) => t.category === category)
+        return (
+          <div key={category} className="rounded-lg border border-[color:var(--color-border)] p-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] text-[color:var(--color-violet-bright)]">{meta.icon}</span>
+              <span className="text-[14px] font-medium text-[color:var(--color-text)]">{meta.label}</span>
+              <span className="ml-auto text-[12px] text-[color:var(--color-muted)]">
+                {meta.blurb}
+              </span>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {tiers.map((t) => {
+                const earned = metric >= t.threshold
+                const color = titleRarityColor[t.rarity] ?? "var(--color-muted)"
+                return (
+                  <span
+                    key={t.id}
+                    title={t.requirement}
+                    className={cn(
+                      "rounded border px-2 py-1 text-[12px] transition-colors",
+                      earned ? "font-medium" : "opacity-45",
+                    )}
+                    style={{
+                      borderColor: earned ? color : "var(--color-border-soft)",
+                      backgroundColor: earned ? `color-mix(in srgb, ${color} 12%, transparent)` : "transparent",
+                      color: earned ? color : "var(--color-muted)",
+                    }}
+                  >
+                    {t.label}
+                    <span className="ml-1 text-[11px] opacity-70">
+                      {earned ? "✓" : `${metric}/${t.threshold}`}
+                    </span>
+                  </span>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -1145,59 +1496,91 @@ function FriendsTab({ friends }: { friends: EsroState["friends"] }) {
 
 function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
   const [showUnfriendConfirm, setShowUnfriendConfirm] = useState(false)
-  const [showProfile, setShowProfile] = useState(false)
+  const [flash, setFlash] = useState<{ ok: boolean; message: string } | null>(null)
   const removeFriend = useEsroStore((s) => s.removeFriend)
-  
+  const viewPlayer = useEsroStore((s) => s.viewPlayer)
+  const inviteFriendToParty = useEsroStore((s) => s.inviteFriendToParty)
+  const setScreen = useEsroStore((s) => s.setScreen)
+  const openConversation = useEsroStore((s) => s.openConversation)
+
   const friendAvatar = friend.avatar || generateAvatarFromSeed(friend.handle)
+
+  const handleInvite = () => {
+    const res = inviteFriendToParty(friend)
+    setFlash({ ok: res.success, message: res.message })
+    window.setTimeout(() => setFlash(null), 2600)
+  }
+
+  const handleMessage = () => {
+    openConversation(friend.handle)
+    setScreen("messages")
+  }
+
+  const openProfile = () =>
+    viewPlayer({
+      handle: friend.handle,
+      title: friend.title,
+      titleRarity: friend.titleRarity,
+      avatar: friendAvatar,
+      faction: friend.faction,
+      status: friend.status,
+      note: friend.note,
+      lastSeen: friend.lastSeen,
+      source: "friend",
+    })
   
   return (
     <div className="rounded-lg border border-[color:var(--color-border)]">
       <div className="flex items-center gap-3 px-3 py-2">
-        <PartyAvatar config={friendAvatar} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-[15px] text-[color:var(--color-text)]">{friend.handle}</span>
-            <span className={cn(
-              "h-1.5 w-1.5 rounded-full",
-              friend.status === "online" && "bg-[color:var(--color-success)]",
-              friend.status === "away" && "bg-[color:var(--color-amber)]",
-              friend.status === "offline" && "bg-[color:var(--color-muted)]"
-            )} />
+        <button
+          type="button"
+          onClick={openProfile}
+          className="flex min-w-0 flex-1 items-center gap-3 rounded text-left transition-colors hover:opacity-80"
+          title="View Profile"
+        >
+          <PartyAvatar config={friendAvatar} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] text-[color:var(--color-text)]">{friend.handle}</span>
+              <span className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                friend.status === "online" && "bg-[color:var(--color-success)]",
+                friend.status === "away" && "bg-[color:var(--color-amber)]",
+                friend.status === "offline" && "bg-[color:var(--color-muted)]"
+              )} />
+            </div>
+            {friend.title && (
+              <TitleDisplay title={friend.title} rarity={friend.titleRarity || "common"} variant="inline" className="text-[13px]" />
+            )}
+            {friend.faction && (
+              <div className="text-[13px] text-[color:var(--color-muted)]">{friend.faction}</div>
+            )}
           </div>
-          {friend.title && (
-            <TitleDisplay title={friend.title} rarity={friend.titleRarity || "common"} variant="inline" className="text-[13px]" />
-          )}
-          {friend.faction && (
-            <div className="text-[13px] text-[color:var(--color-muted)]">{friend.faction}</div>
-          )}
-        </div>
+        </button>
         <div className="flex gap-1">
           <button
             type="button"
-            onClick={() => setShowProfile(!showProfile)}
-            className={cn(
-              "rounded border p-1.5 text-[14px] transition-colors",
-              showProfile
-                ? "border-[color:var(--color-accent)]/50 bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]"
-                : "border-[color:var(--color-border)] text-[color:var(--color-muted)] hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
-            )}
+            onClick={openProfile}
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
             title="View Profile"
           >
             ◎
           </button>
           <button
             type="button"
+            onClick={handleInvite}
+            className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-cyan)]/50 hover:bg-[color:var(--color-cyan)]/10 hover:text-[color:var(--color-cyan)]"
+            title="Invite to Party"
+          >
+            ⋈
+          </button>
+          <button
+            type="button"
+            onClick={handleMessage}
             className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
             title="Message"
           >
             ◇
-          </button>
-          <button
-            type="button"
-            className="rounded border border-[color:var(--color-border)] p-1.5 text-[14px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10 hover:text-[color:var(--color-text)]"
-            title="Invite to party"
-          >
-            ⋈
           </button>
           <button
             type="button"
@@ -1209,70 +1592,18 @@ function FriendRow({ friend }: { friend: EsroState["friends"][0] }) {
           </button>
         </div>
       </div>
-      
-      {/* Profile view */}
-      {showProfile && (
-        <div className="border-t border-[color:var(--color-border)] bg-[color:var(--color-panel)]/30 p-3">
-          <div className="flex gap-4">
-            {/* Avatar */}
-            <div className="flex flex-col items-center gap-2">
-              <PixelAvatar config={friendAvatar} size="lg" showFlair={true} />
-              <div className={cn(
-                "text-[12px] uppercase tracking-wider",
-                friend.status === "online" && "text-[color:var(--color-success)]",
-                friend.status === "away" && "text-[color:var(--color-amber)]",
-                friend.status === "offline" && "text-[color:var(--color-muted)]"
-              )}>
-                {friend.status}
-              </div>
-            </div>
-            
-            {/* Info */}
-            <div className="flex-1 space-y-2">
-              <div>
-                <div className="text-[14px] font-medium text-[color:var(--color-text)]">{friend.handle}</div>
-                {friend.title && (
-                  <TitleDisplay title={friend.title} rarity={friend.titleRarity || "common"} variant="inline" className="text-[14px]" />
-                )}
-              </div>
-              
-              {friend.faction && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] text-[color:var(--color-muted)]">Faction:</span>
-                  <span className="text-[13px] text-[color:var(--color-text)]">{friend.faction}</span>
-                </div>
-              )}
-              
-              {friend.lastSeen && friend.status === "offline" && (
-                <div className="text-[13px] text-[color:var(--color-muted)]">
-                  Last seen: {new Date(friend.lastSeen).toLocaleDateString()}
-                </div>
-              )}
-              
-              {friend.note && (
-                <div className="rounded bg-[color:var(--color-bg)]/50 p-2">
-                  <div className="mb-1 text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">Note</div>
-                  <div className="text-[13px] text-[color:var(--color-text)]">{friend.note}</div>
-                </div>
-              )}
-              
-              {/* Quick actions */}
-              <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  className="rounded border border-[color:var(--color-accent)]/30 bg-[color:var(--color-accent)]/10 px-2 py-1 text-[13px] text-[color:var(--color-accent)] transition-colors hover:bg-[color:var(--color-accent)]/20"
-                >
-                  Send Message
-                </button>
-                <button
-                  type="button"
-                  className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1 text-[13px] text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-accent)]/10"
-                >
-                  Invite to Party
-                </button>
-              </div>
-            </div>
-          </div>
+
+      {/* Invite result — surfaces the party-full / already-in-party message */}
+      {flash && (
+        <div
+          className={cn(
+            "border-t px-3 py-2 text-[13px]",
+            flash.ok
+              ? "border-[color:var(--color-border)] text-[color:var(--color-cyan)]"
+              : "border-[color:var(--color-danger)]/40 bg-[color:var(--color-danger)]/5 text-[color:var(--color-danger)]",
+          )}
+        >
+          {flash.message}
         </div>
       )}
       
@@ -1414,6 +1745,7 @@ function TradeTab({ offers }: { offers: EsroState["tradeOffers"] }) {
 }
 
 function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty: number; rarity?: string } }) {
+  const image = useEsroStore((s) => s.inventory.find((i) => i.id === item.itemId)?.image)
   const rarityColors: Record<string, string> = {
     common: "var(--color-muted)",
     uncommon: "var(--color-cyan)",
@@ -1423,9 +1755,17 @@ function TradeItemDisplay({ item }: { item: { itemId: string; label: string; qty
     mythic: "#ff6090",
   }
   const color = rarityColors[item.rarity || "common"] || "var(--color-text)"
-  
+
   return (
     <div className="flex items-center gap-1 text-[13px]">
+      {image ? (
+        <img
+          src={image || "/placeholder.svg"}
+          alt=""
+          aria-hidden
+          className="h-4 w-4 shrink-0 object-contain [image-rendering:pixelated]"
+        />
+      ) : null}
       <span className="text-[color:var(--color-muted)]">x{item.qty}</span>
       <span style={{ color }}>{item.label}</span>
     </div>

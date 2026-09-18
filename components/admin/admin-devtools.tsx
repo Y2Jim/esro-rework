@@ -74,11 +74,14 @@ const UNLOCK_OVERRIDES = (() => {
 export function AdminDevTools() {
   const unlockAllCosmetics = useEsroStore((s) => s.unlockAllCosmetics)
   const unlockAllTitles = useEsroStore((s) => s.unlockAllTitles)
+  const devUnlockAllMounts = useEsroStore((s) => s.devUnlockAllMounts)
   const simulateExpedition = useEsroStore((s) => s.simulateExpedition)
   const completeActiveExpedition = useEsroStore((s) => s.completeActiveExpedition)
   const activeExpedition = useEsroStore((s) => s.activeExpedition)
   const addMaterials = useEsroStore((s) => s.addMaterials)
   const injectTestChatMessages = useEsroStore((s) => s.injectTestChatMessages)
+  const addNotification = useEsroStore((s) => s.addNotification)
+  const setProfileTab = useEsroStore((s) => s.setProfileTab)
   const setScreen = useEsroStore((s) => s.setScreen)
   const unlockTheme = useEsroStore((s) => s.unlockTheme)
   const identity = useEsroStore((s) => s.identity)
@@ -88,16 +91,22 @@ export function AdminDevTools() {
   const toggleDebugUnlock = useEsroStore((s) => s.toggleDebugUnlock)
   const clearDebugUnlocks = useEsroStore((s) => s.clearDebugUnlocks)
   const hasSkillUnlock = useEsroStore((s) => s.hasSkillUnlock)
+  const devSetLevelXp = useEsroStore((s) => s.devSetLevelXp)
+  const profile = useEsroStore((s) => s.profile)
   
-  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean }>({
+  const [unlocked, setUnlocked] = useState<{ cosmetics: boolean; titles: boolean; materials: boolean; chat: boolean; themes: boolean; mounts: boolean }>({
     cosmetics: false,
     titles: false,
     materials: false,
     chat: false,
     themes: false,
+    mounts: false,
   })
   
   const [newHandle, setNewHandle] = useState(identity.handle.replace("@", ""))
+
+  const [levelInput, setLevelInput] = useState(String(profile.level))
+  const [xpInput, setXpInput] = useState(String(profile.xp))
   
   const [previewFlair, setPreviewFlair] = useState(0)
   const flairNames = [
@@ -132,6 +141,11 @@ export function AdminDevTools() {
     setUnlocked((prev) => ({ ...prev, themes: true }))
   }
 
+  const handleUnlockMounts = () => {
+    devUnlockAllMounts()
+    setUnlocked((prev) => ({ ...prev, mounts: true }))
+  }
+
   const handleAddMaterials = () => {
     addMaterials()
     setUnlocked((prev) => ({ ...prev, materials: true }))
@@ -142,6 +156,19 @@ export function AdminDevTools() {
     injectTestChatMessages()
     setUnlocked((prev) => ({ ...prev, chat: true }))
     setScreen("terminal")
+  }
+
+  const fireTestNotification = (priority: "low" | "normal" | "high") => {
+    const copy = {
+      low: { title: "Routine Sync", body: "Relay logs archived. No action needed." },
+      normal: { title: "Contract Available", body: "A new courier contract is open for bidding." },
+      high: { title: "Priority Alert", body: "Anomaly surge detected near your last route. Respond now." },
+    }[priority]
+    addNotification({ ...copy, priority })
+    // Send the tester to where the notification lands so it can be inspected.
+    setScreen("profile")
+    setProfileTab("notifications")
+    logAdminAction("broadcast", undefined, `Fired ${priority} test notification`)
   }
 
   return (
@@ -195,6 +222,60 @@ export function AdminDevTools() {
         </p>
       </div>
 
+      {/* Level & EXP */}
+      <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+            Level &amp; EXP
+          </span>
+          <span className="text-[13px] text-[color:var(--color-muted)]">
+            {"Now: Lv."}{profile.level} · {profile.xp}/{profile.xpToNext} XP
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <label className="flex-1">
+            <span className="mb-1 block text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              Level
+            </span>
+            <input
+              type="number"
+              min={1}
+              value={levelInput}
+              onChange={(e) => setLevelInput(e.target.value.replace(/[^0-9]/g, ""))}
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1.5 text-[15px] text-[color:var(--color-text)] outline-none focus:border-[#5dd0ff]/50"
+              placeholder="1"
+            />
+          </label>
+          <label className="flex-1">
+            <span className="mb-1 block text-[12px] uppercase tracking-wider text-[color:var(--color-muted)]">
+              EXP into level
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={xpInput}
+              onChange={(e) => setXpInput(e.target.value.replace(/[^0-9]/g, ""))}
+              className="w-full rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-2 py-1.5 text-[15px] text-[color:var(--color-text)] outline-none focus:border-[#5dd0ff]/50"
+              placeholder="0"
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            const lvl = Math.max(1, parseInt(levelInput || "1", 10))
+            const xp = Math.max(0, parseInt(xpInput || "0", 10))
+            devSetLevelXp(lvl, xp)
+          }}
+          className="w-full rounded border border-[#5dd0ff]/50 bg-[#5dd0ff]/10 px-3 py-2 text-[14px] text-[#5dd0ff] transition-colors hover:bg-[#5dd0ff]/20"
+        >
+          Apply Level &amp; EXP
+        </button>
+        <p className="text-[12px] text-[color:var(--color-muted)]">
+          Sets your exact level and XP into that level. Grants the matching unspent stat-point pool and re-checks level-gated unlocks.
+        </p>
+      </div>
+
       {/* Unlock Buttons */}
       <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
         <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
@@ -242,6 +323,20 @@ export function AdminDevTools() {
         >
           {unlocked.themes ? "All UI Themes Unlocked" : "Unlock All UI Themes"}
         </button>
+
+        <button
+          type="button"
+          onClick={handleUnlockMounts}
+          disabled={unlocked.mounts}
+          className={cn(
+            "w-full rounded border px-3 py-2 text-[14px] transition-colors",
+            unlocked.mounts
+              ? "border-[#60d060]/50 bg-[#60d060]/10 text-[#60d060]"
+              : "border-[#60d060]/50 bg-[#60d060]/10 text-[#60d060] hover:bg-[#60d060]/20"
+          )}
+        >
+          {unlocked.mounts ? "All Mounts Tamed" : "Tame All Mounts"}
+        </button>
       </div>
 
       {/* Chat Testing */}
@@ -263,6 +358,39 @@ export function AdminDevTools() {
         </button>
         <p className="text-[12px] text-[color:var(--color-muted)]">
           Adds messages with all rarity titles to PUBLIC channel
+        </p>
+      </div>
+
+      {/* Notification Testing */}
+      <div className="rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-panel)]/50 p-3 space-y-2">
+        <div className="mb-2 text-[14px] uppercase tracking-wider text-[color:var(--color-muted)]">
+          Notification Testing
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => fireTestNotification("low")}
+            className="rounded border border-[color:var(--color-border)] bg-[color:var(--color-panel)] px-3 py-2 text-[14px] text-[color:var(--color-muted)] transition-colors hover:border-[color:var(--color-text)]/40 hover:text-[color:var(--color-text)]"
+          >
+            Low
+          </button>
+          <button
+            type="button"
+            onClick={() => fireTestNotification("normal")}
+            className="rounded border border-[#5dd0ff]/50 bg-[#5dd0ff]/10 px-3 py-2 text-[14px] text-[#5dd0ff] transition-colors hover:bg-[#5dd0ff]/20"
+          >
+            Normal
+          </button>
+          <button
+            type="button"
+            onClick={() => fireTestNotification("high")}
+            className="rounded border border-[#ff6b4a]/50 bg-[#ff6b4a]/10 px-3 py-2 text-[14px] text-[#ff6b4a] transition-colors hover:bg-[#ff6b4a]/20"
+          >
+            High
+          </button>
+        </div>
+        <p className="text-[12px] text-[color:var(--color-muted)]">
+          Fires a test notification and jumps to the Notifications tab to inspect it.
         </p>
       </div>
 
