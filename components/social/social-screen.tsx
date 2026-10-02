@@ -1944,14 +1944,24 @@ function TradeOfferRow({ offer, type }: { offer: EsroState["tradeOffers"][0]; ty
               {inventory.length > 0 && (
                 <div className="pt-1 border-t border-[color:var(--color-border)]">
                   <div className="text-[12px] text-[color:var(--color-muted)] mb-1">Add from inventory:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {inventory.slice(0, 6).map((invItem) => (
+                  <div className="flex max-h-28 flex-wrap gap-1 overflow-y-auto">
+                    {inventory
+                      .filter((invItem) => invItem.identified && invItem.qty > 0 && invItem.tradeable !== false)
+                      .map((invItem) => (
                       <button
                         key={invItem.id}
                         type="button"
                         onClick={() => addItemToCounter(counterItemsOffered, setCounterItemsOffered, invItem)}
-                        className="rounded bg-[color:var(--color-panel)] px-1.5 py-0.5 text-[12px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
+                        className="flex items-center gap-1 rounded bg-[color:var(--color-panel)] px-1.5 py-0.5 text-[12px] text-[color:var(--color-text)] hover:bg-[color:var(--color-accent)]/20"
                       >
+                        {invItem.image && (
+                          <img
+                            src={invItem.image}
+                            alt=""
+                            aria-hidden
+                            className="h-4 w-4 object-contain [image-rendering:pixelated]"
+                          />
+                        )}
                         {invItem.label}
                       </button>
                     ))}

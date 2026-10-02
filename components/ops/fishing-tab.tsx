@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { useEsroStore } from "@/store/use-esro-store"
 import { BAIT, DIG_COOLDOWN_MS } from "@/config/bait"
 import { FISHING_SPOTS, getFish } from "@/config/fishing"
+import { FISHING_MATERIALS, FISH_VARIANTS } from "@/config/fishing-content"
 import { rarityBorder, rarityColor, rarityGlow, rarityLabel } from "@/lib/rarity"
 import { STAT_UNLOCKS } from "@/lib/skill-effects"
 import { cn } from "@/lib/cn"
@@ -55,6 +56,10 @@ export function FishingTab() {
     lastDigAt === null ? 0 : Math.max(0, Math.ceil((DIG_COOLDOWN_MS - (now - lastDigAt)) / 1000))
 
   const hooked = fishing.fishId ? getFish(fishing.fishId) : undefined
+  const hookedIsVariant = hooked ? FISH_VARIANTS.some((v) => v.id === hooked.id) : false
+  const landedMaterial = fishing.lastMaterialId
+    ? FISHING_MATERIALS.find((m) => m.id === fishing.lastMaterialId)
+    : undefined
 
   // The cast delay is deliberately random so the strike can't be pre-timed.
   const biteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -306,10 +311,30 @@ export function FishingTab() {
             </p>
             <p className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
               {rarityLabel[hooked.rarity]}
+              {hookedIsVariant && (
+                <span className={cn("ml-2", rarityColor[hooked.rarity])}>· Rare variant</span>
+              )}
             </p>
             <p className="text-center text-[13px] leading-relaxed text-[color:var(--color-muted)] text-pretty">
               {hooked.description}
             </p>
+            {landedMaterial && (
+              <div className="mt-1 flex items-center gap-2 rounded border border-[color:var(--color-border)] bg-[color:var(--color-bg)]/40 px-2 py-1">
+                <Image
+                  src={landedMaterial.sprite}
+                  alt=""
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 shrink-0 object-contain [image-rendering:pixelated]"
+                />
+                <span className="text-[13px] uppercase tracking-wider text-[color:var(--color-muted)]">
+                  Also found
+                </span>
+                <span className={cn("text-[13px]", rarityColor[landedMaterial.rarity])}>
+                  {landedMaterial.label}
+                </span>
+              </div>
+            )}
           </div>
         )}
 

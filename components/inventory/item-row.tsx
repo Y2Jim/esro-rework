@@ -20,6 +20,12 @@ const aspectLabel: Record<InventoryItem["aspect"], string> = {
   consumable: "consumable",
 }
 
+function typeLabel(item: InventoryItem): string {
+  if (item.type === "fish") return item.isVariant ? "variant" : "fish"
+  if (item.type === "crafting_material" && item.subtype === "fishing") return "fishing material"
+  return aspectLabel[item.aspect]
+}
+
 export function ItemRow({
   item,
   active,
@@ -89,7 +95,7 @@ export function ItemRow({
         </div>
         <div className="mt-0.5 flex items-center gap-2 text-[13px] uppercase tracking-[0.22em]">
           <span className="text-[color:var(--color-muted)]">
-            {aspectLabel[item.aspect]}
+            {typeLabel(item)}
           </span>
           <span className="text-[color:var(--color-muted-2)]">·</span>
           <span className={rarityColor[item.rarity]}>

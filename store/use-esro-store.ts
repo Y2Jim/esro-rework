@@ -1948,6 +1948,8 @@ export const useEsroStore = create<EsroState>((set, get) => ({
         fishing: {
           ...s.fishing,
           phase: "landed",
+          // Point the catch screen at what actually landed (the variant, if rolled).
+          fishId: fish.id,
           lastQty: qty,
           lastMaterialId: material ? material.id : null,
           // Junk breaks the streak; a real fish extends it.
